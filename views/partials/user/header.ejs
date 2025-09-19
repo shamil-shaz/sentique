@@ -1,0 +1,216 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+
+.top-bar {
+    background-color: black;
+    color: white;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px 5px;
+}
+.top-bar a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+    position: relative;
+    z-index: 500;
+}
+.nav-logo img {
+    width: 120px;
+    height: auto;
+}
+
+nav.nav-links {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+nav.nav-links a {
+    color: black;
+    text-decoration: none;
+    font-size: 14px;
+}
+nav.nav-links a.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+
+.nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.nav-icons a {
+    position: relative;
+    color: black;
+    font-size: 18px;
+    text-decoration: none;
+}
+.nav-icons a:hover {
+    transform: scale(1.2);
+    transition: transform 0.2s;
+}
+
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropdown .user-icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.dropdown-content a, .dropdown-content div {
+    display: block;
+    padding: 10px 16px;
+    color: black;
+    text-decoration: none;
+}
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+
+.hamburger {
+    display: none;
+    font-size: 22px;
+    cursor: pointer;
+}
+.mobile-nav {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    background: #fff;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    padding: 10px 20px;
+    border-top: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.mobile-nav a {
+    font-size: 14px;
+    color: black;
+}
+
+
+@media screen and (max-width: 768px) {
+    .navbar {
+        flex-wrap: wrap;
+        padding: 10px 15px;
+    }
+    nav.nav-links {
+        display: none;
+    }
+    .hamburger {
+        display: block;
+    }
+    .nav-icons {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 10px;
+        gap: 15px;
+    }
+}
+</style>
+
+
+<div class="top-bar">
+    Summer Sale on All Branded Perfumes – Up to 20% Off + Free Express Delivery <a href="/shopPage">Shop Now</a>
+</div>
+
+
+<header class="navbar">
+  
+    <div class="nav-logo">
+        <img src="photos/zodiac perfume/brand logo.png" alt="Sentique Logo">
+    </div>
+
+ 
+    <div class="hamburger" id="hamburger"><i class="fa fa-bars"></i></div>
+
+   
+    <nav class="nav-links" id="navLinks">
+        <a href="/home">Home</a>
+        <a href="/shopPage">Shop</a>
+        <a href="#">Contact</a>
+        <a href="/">About</a>
+    </nav>
+
+    
+    <div class="nav-icons">
+
+        <a href="/wishlist" title="Wishlist">
+            <i class="fa fa-heart"></i>
+        </a>
+
+        
+        <a href="/cart" title="Cart">
+            <i class="fa fa-shopping-cart"></i>
+        </a>
+
+      
+        <% if (user) { %>
+        <div class="dropdown">
+            <a href="#" class="user-icon">
+                <i class="fa fa-user-circle"></i>
+            </a>
+            <div class="dropdown-content">
+                <div><strong><%= user.name %></strong></div>
+                <a href="/userProfile">Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+        <% } else { %>
+            <a href="/login" class="active">Login</a>
+            <a href="/signup" class="active">Sign Up</a>
+        <% } %>
+    </div>
+
+  
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="/">Home</a>
+        <a href="/shopPage">Shop</a>
+        <a href="#">Contact</a>
+        <a href="#">About</a>
+        <% if (!user) { %>
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        <% } %>
+    </nav>
+</header>
+
+<script>
+ 
+    const hamburger = document.getElementById("hamburger");
+    const mobileNav = document.getElementById("mobileNav");
+
+    hamburger.addEventListener("click", () => {
+        mobileNav.style.display = mobileNav.style.display === "flex" ? "none" : "flex";
+    });
+</script>

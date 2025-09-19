@@ -1,0 +1,453 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Enter OTP</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .otp-box {
+      background: #fff;
+      padding: 30px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .otp-box h2 {
+      margin-bottom: 10px;
+    }
+
+    .otp-box p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .otp-box input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .countdown {
+      color: #d9534f;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn.verify {
+      background: #d9534f;
+      color: white;
+    }
+
+    .btn.resend {
+      background: #ccc;
+      color: #000;
+    }
+
+    .back-login {
+      display: block;
+      margin-top: 15px;
+      text-decoration: none;
+      color: #007bff;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .btn-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <form
+  id="otpForm"
+  action="/verify-otp"
+  method="post"
+  onsubmit="return validateOTPForm()">
+  <div class="otp-box">
+    <h2>Enter the OTP</h2>
+    <p>The OTP has been sent to your registered email</p>
+
+    <input type="text" id="otpInput" placeholder="Enter the OTP" />
+    <div class="error-message" id="errorMessage">Please enter a valid 4 or 6 digit OTP.</div>
+
+    <div class="countdown" id="countdown">0 : 57 seconds remaining</div>
+
+    <div class="btn-group">
+      <button class="btn resend" onclick="resendOTP()">Resend OTP</button>
+      <button class="btn verify" onclick="verifyOTP()">Verify</button>
+    </div>
+
+    <a href="/login" class="back-login">Back to Login</a>
+  </div>
+  </form>
+
+  <script>
+
+    // OTP Validation 
+
+    function startTimer(){
+        timerInterval=setInterval(()=>{
+            document.getElementById("timerValue").textContent="Expired";
+            document.getElementById("otp").disabled=true;
+        
+        },1000)
+    }
+    startTimer();
+   
+    function validateOTPForm(){
+        const otpInput=document.getElementById("otp").value;
+
+        $.ajax({
+
+        
+
+        type:"POST",
+        url :"verify-otp",
+        data:{otp:otpInput},
+        success:function(response){
+            if(response.success){
+                Swal.fire({
+                    icon:"success",
+                     title:"OTP varification successfully",
+                     showConfirmButton:false,
+                     timer:1500,
+                }).then(()=>{
+                    window.location.href=response.redirectUrl;
+                })
+            }else{
+                Swal.fire({
+                    icon:"error",
+                    title:Error,
+                    text:response.message,
+                })
+            }
+        },
+        error:function(){
+            Swal.fire({
+                icon:"error",
+                title:"Invalid OTP",
+                text:"Please try again"
+            })
+        }
+        })
+
+        return false
+
+    }
+
+
+
+
+
+    function resendOTP() {
+      seconds = 57;
+      clearInterval(timer);
+      countdownEl.textContent = `0 : ${seconds} seconds remaining`;
+
+      const newTimer = setInterval(() => {
+        countdownEl.textContent = `0 : ${seconds} seconds remaining`;
+        seconds--;
+        if (seconds < 0) {
+          clearInterval(newTimer);
+          countdownEl.textContent = "OTP expired. Please resend.";
+        }
+      }, 1000);
+
+      alert("OTP resent to your email.");
+    }
+  </script>
+
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OTP Verification</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #bcbcba, #c4bec0);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .otp-box {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .otp-box h2 {
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .otp-box p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .otp-box input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .error-message {
+      color: red;
+      display: none;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .countdown {
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .verify {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .resend {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .back-login {
+      display: block;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    @media (max-width: 480px) {
+      .otp-box {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <form id="otpForm" onsubmit="return validateOTPForm(event)">
+    <div class="otp-box">
+      <h2>Enter the OTP</h2>
+      <p>The OTP has been sent to your registered email</p>
+
+      <input type="text" id="otpInput" placeholder="Enter the OTP" name="otp" required />
+      <div class="error-message" id="errorMessage">Please enter a valid 4 or 6 digit OTP.</div>
+
+      <div class="countdown" id="countdown">0 : 57 seconds remaining</div>
+
+      <div class="btn-group">
+        <button type="button" class="btn resend" onclick="resendOTP()">Resend OTP</button>
+        <button type="submit" class="btn verify">Verify</button>
+      </div>
+
+      <a href="/login" class="back-login">Back to Login</a>
+    </div>
+  </form>
+
+  <script>
+    let seconds = 57;
+    const countdownEl = document.getElementById('countdown');
+    let timer;
+
+    function startTimer() {
+      timer = setInterval(() => {
+        countdownEl.textContent = `0 : ${seconds} seconds remaining`;
+        seconds--;
+        if (seconds < 0) {
+          clearInterval(timer);
+          countdownEl.textContent = "OTP expired. Please resend.";
+          document.getElementById("otpInput").disabled = true;
+        }
+      }, 1000);
+    }
+
+    startTimer();
+
+    function validateOTPForm(event) {
+      event.preventDefault();
+      const otp = document.getElementById('otpInput').value.trim();
+      const errorEl = document.getElementById('errorMessage');
+      const isValid = /^\d{4}$|^\d{6}$/.test(otp);
+
+      if (!isValid) {
+        errorEl.style.display = 'block';
+        return false;
+      } else {
+        errorEl.style.display = 'none';
+      }
+
+      fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp: otp })
+      })
+      .then(res => res.json())
+      .then(response => {
+
+        if (response.success) {
+         Swal.fire({
+           icon: 'success',
+           title: 'OTP Verified!',
+           showConfirmButton: false,
+           timer: 1500
+       }).then(() => {
+          window.location.href = response.redirectUrl || '/login';
+       } );
+
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid OTP',
+            text: response.message
+          });
+        }
+      })
+      .catch(() => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Server Error',
+          text: 'Please try again later.'
+        });
+      });
+
+      return false;
+    }
+
+
+function resendOTP() {
+  clearInterval(timer);
+  seconds = 57;
+  countdownEl.textContent = `0 : ${seconds} seconds remaining`;
+  document.getElementById("otpInput").disabled = false;
+  startTimer();
+
+
+  Swal.fire({
+  title: 'Sending OTP...',
+  allowOutsideClick: false,
+  didOpen: () => Swal.showLoading()
+});
+
+
+  // Resend OTP via backend
+  fetch('/resend-otp', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'OTP Resent',
+          text: 'A new OTP has been sent to your email.',
+         
+          showConfirmButton: false,
+           timer: 1000,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "An error occurred while resending OTP. Please try again."
+        });
+      }
+    });
+
+  return false;
+}
+
+  </script>
+
+</body>
+</html>

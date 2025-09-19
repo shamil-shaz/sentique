@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Category</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: #f9f9f9;
+      padding: 100px;
+    }
+
+    .edit-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .edit-container h2 {
+      font-size: 24px;
+      margin-bottom: 25px;
+      text-align: center;
+      color: #333;
+      text-decoration: underline;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: 10px 14px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: none;
+      background: #fefefe;
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .update-btn {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .update-btn:hover {
+      background-color: #218838;
+    }
+
+    .cancel-btn{
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: #bc5434;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+
+    }
+     .cancel-btn:hover {
+      background-color: #a9452e;
+    }
+
+    @media (max-width: 600px) {
+      .edit-container {
+        padding: 20px;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        font-size: 15px;
+      }
+
+      .update-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+  <%- include("../partials/admin/header.ejs") %>
+
+  <div class="edit-container">
+    <h2>Edit Category</h2>
+
+    <form id="editCategoryForm" action="/admin/editCategory/<%= category._id %>" method="POST">
+      <div class="form-group">
+        <label for="categoryName">Category Name</label>
+        <input type="text" id="categoryName" name="categoryName" value="<%= category.name %>" placeholder="Enter Category Name" required>
+        <span id="nameError" class="error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Category Description</label>
+        <textarea id="categoryDesc" name="description" class="form-control" placeholder="Enter Category Description" required><%= category.description %></textarea>
+        <span id="descError" class="error-message"></span>
+      </div>
+
+      <button type="submit" class="update-btn">Update Category</button>
+
+        <button type="button" class="cancel-btn" onclick="window.location.href='/admin/category'">Cancel</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("editCategoryForm");
+
+    form.addEventListener("submit", function (e) {
+      const nameInput = document.getElementById("categoryName");
+      const descInput = document.getElementById("categoryDesc");
+      const nameError = document.getElementById("nameError");
+      const descError = document.getElementById("descError");
+
+      let valid = true;
+
+      // Reset errors
+      nameError.textContent = "";
+      descError.textContent = "";
+
+      // Validate name
+      if (nameInput.value.trim() === "") {
+        nameError.textContent = "Category name is required";
+        valid = false;
+      } else if (nameInput.value.trim().length < 3) {
+        nameError.textContent = "Category name must be at least 3 characters";
+        valid = false;
+      }
+
+      // Validate description
+      if (descInput.value.trim() === "") {
+        descError.textContent = "Description is required";
+        valid = false;
+      } else if (descInput.value.trim().length < 5) {
+        descError.textContent = "Description must be at least 5 characters";
+        valid = false;
+      }
+
+      // Stop form if invalid
+      if (!valid) {
+        e.preventDefault();
+      }
+    });
+  </script>
+
+</body>
+</html>

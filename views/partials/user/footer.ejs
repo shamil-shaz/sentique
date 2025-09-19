@@ -1,0 +1,163 @@
+<style>
+
+    .footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        background-color: #000;
+        color: #fff;
+        padding: 40px 20px;
+        gap: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .footer-section {
+        flex: 1 1 200px;
+        margin: 10px;
+    }
+
+    .footer-section h3 {
+        margin-bottom: 15px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .footer-section p {
+        margin: 5px 0;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .footer-section input {
+        width: 100%;
+        padding: 8px 10px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .download-app {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .download-app img.qr-code {
+        width: 80px;
+        height: 60px;
+        border-radius: 8px;
+    }
+
+    .download-app img.store {
+        width: 80px;
+        height: 60px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .download-app img.store:hover {
+        transform: scale(1.05);
+    }
+
+    .footer .copyright {
+        width: 100%;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 12px;
+        color: #aaa;
+    }
+
+    @media screen and (max-width: 992px) {
+        .footer-section {
+            flex: 1 1 45%;
+            text-align: left;
+        }
+        .download-app {
+            align-items: flex-start;
+        }
+    }
+
+    @media screen and (max-width: 600px) {
+        .footer {
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 10px;
+        }
+
+        .footer-section {
+            flex: 1 1 100%;
+            text-align: center;
+        }
+
+        .footer-section input {
+            width: 90%;
+        }
+
+        .download-app {
+            align-items: center;
+        }
+
+        .download-app img.qr-code {
+            width: 80px;
+        }
+
+        .download-app img.store {
+            width: 100px;
+        }
+    }
+</style>
+
+<footer class="footer">
+    <div class="footer-section">
+        <h3>Exclusive</h3>
+        <p>Subscribe to our newsletter</p>
+        <p>Get 10% off your first order</p>
+        <input type="email" placeholder="Enter your email">
+    </div>
+
+    <div class="footer-section">
+        <h3>Support</h3>
+        <p>111 Bijoy Sarani, Kerala, India</p>
+        <p>Email: exclusive@gmail.com</p>
+        <p>Phone: +88015-88888-9999</p>
+    </div>
+
+    <div class="footer-section">
+        <h3>Account</h3>
+        <p>My Account</p>
+        <p>Login / Register</p>
+        <p>Cart</p>
+        <p>Wishlist</p>
+        <p>Shop</p>
+    </div>
+
+    <div class="footer-section">
+        <h3>Quick Links</h3>
+        <p>Privacy Policy</p>
+        <p>Terms Of Use</p>
+        <p>FAQ</p>
+        <p>Contact</p>
+    </div>
+<div class="footer-section">
+    <h3>Download App</h3>
+    <div class="download-app">
+       
+        <img src="/photos/1754301706720-dior sauvage parfum.jpg" 
+             alt="QR Code" class="qr-code">
+        
+        
+        <img src="/photos/1754301706616-channel coco.jpg" 
+             alt="Google Play Store" class="store">
+        
+       
+        <img src="/photos/1754301339224-blue de channel .jpg" 
+             alt="App Store" class="store">
+    </div>
+</div>
+
+    <p class="copyright">© Copyright Sentique 2025. All rights reserved.</p>
+</footer>

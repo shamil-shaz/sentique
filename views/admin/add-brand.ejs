@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Brand</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    .brand-form { background: #eded93; border-radius: 12px; padding: 20px; margin: 100px auto; max-width: 700px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .brand-form h3 { font-size: 22px; margin-bottom: 20px; font-weight: 600; color: #333; }
+    .form-group { margin-bottom: 16px; position: relative; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #444; }
+    .form-group input[type="text"], .form-group input[type="file"] { width: 550px; padding: 10px 12px; border: 1px solid #282727; border-radius: 8px; font-size: 14px; }
+    .error-message { color: #d9534f; font-size: 13px; margin-top: 5px; display: none; }
+    .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-cancel, .btn-add { padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    .btn-cancel { background-color: #e0e0e0; color: #333; }
+    .btn-add { background-color: #4f9df9; color: white; }
+  </style>
+</head>
+<body>
+  <div class="brand-form">
+    <h3>Add New Brand</h3>
+    <form id="brandForm" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="brandName">Brand Name</label>
+        <input type="text" id="brandName" name="brandName" placeholder="Enter brand name"/>
+        <div id="brandNameError" class="error-message">Brand name is required</div>
+      </div>
+
+      <div class="form-group">
+        <label for="brandLogo">Logo Upload</label>
+        <input type="file" id="brandLogo" name="brandImage"/>
+        <div id="brandLogoError" class="error-message">Logo is required</div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn-add">Add</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("brandForm");
+    const brandName = document.getElementById("brandName");
+    const brandLogo = document.getElementById("brandLogo");
+    const brandNameError = document.getElementById("brandNameError");
+    const brandLogoError = document.getElementById("brandLogoError");
+    const cancelBtn = document.getElementById("cancelBtn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Reset errors
+      brandNameError.style.display = "none";
+      brandLogoError.style.display = "none";
+
+      let valid = true;
+
+      if (!brandName.value.trim()) {
+        brandNameError.style.display = "block";
+        valid = false;
+      }
+
+      if (!brandLogo.files[0]) {
+        brandLogoError.style.display = "block";
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Collect form data
+      const formData = new FormData(form);
+
+      try {
+        const res = await fetch("/admin/addBrand", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          Swal.fire({
+            icon: "success",
+            title: data.message || "Brand added successfully",
+            showConfirmButton: false,
+            timer: 1000
+            
+          }).then(() => {
+            window.location.href = "/admin/brands";
+          });
+
+          // reset form after success
+          form.reset();
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: data.error || "Something went wrong",
+            showConfirmButton: true
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Server Error",
+          text: err.message
+        });
+      }
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      brandNameError.style.display = "none";
+      brandLogoError.style.display = "none";
+      window.location.href = "/admin/brands";
+    });
+  </script>
+</body>
+</html>

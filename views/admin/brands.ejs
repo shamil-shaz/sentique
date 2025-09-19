@@ -1,0 +1,254 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brand Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .main-content {
+      margin-left: 240px;
+      margin-top: 70px;
+      padding: 25px;
+      width: calc(100% - 240px);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .btn-primary {
+      background-color: #4f9df9;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .brand-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .brand-table th,
+    .brand-table td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .brand-table img {
+      max-height: 60px;
+    }
+
+    .status-badge {
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .alert-danger {
+      background-color: #ffd6d6;
+      color: red;
+    }
+
+    .alert-success {
+      background-color: #d6ffdd;
+      color: green;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .pagination a, 
+    .pagination span {
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #4f9df9;
+      background-color: #eef4ff;
+      font-weight: 500;
+    }
+
+    .pagination a:hover {
+      background-color: #d6eaff;
+    }
+
+    .action-buttons .btn-red {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .action-buttons .btn-green {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .action-buttons a {
+      display: inline-block;
+      padding: 6px 12px;
+      margin-right: 6px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .action-buttons a:hover {
+      opacity: 0.9;
+    }
+
+    .delete-buttons a {
+      display: inline-block;
+      padding: 6px 12px;
+      margin-right: 6px;
+      text-decoration: none;
+      background-color: #dc3545;
+      border-radius: 6px;
+      font-size: 13px;
+      color: white;
+    }
+
+    .error-message {
+      background: #ffe6e6;
+      padding: 10px;
+      color: red;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+  </style>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<% if (success) { %>
+<script>
+  Swal.fire({ icon: "success", title: "<%= success %>", showConfirmButton: false, timer: 2000 });
+</script>
+<% } %>
+
+<% if (error) { %>
+<script>
+  Swal.fire({ icon: "error", title: "<%= error %>", showConfirmButton: true });
+</script>
+<% } %>
+
+</head>
+<body>
+  <%- include("../partials/admin/header.ejs") %>
+
+  <div class="main-content">
+    <% if (typeof error !== 'undefined' && error === 'BrandAlreadyExists') { %>
+      <div class="error-message"> Brand already exists!</div>
+    <% } %>
+
+    <div class="top-bar">
+      <h2>Brand Management</h2>
+      <button class="btn-primary" onclick="window.location.href='/admin/addbrand'">Add New Brand</button>
+    </div>
+
+    <table class="brand-table">
+      <thead>
+        <tr>
+          <th>Brand Name</th>
+          <th>Logo</th>
+          <th>Status</th>
+          <th>Actions</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.forEach((brand) => { %>
+          <tr>
+            <td><%= brand.brandName %></td>
+            <td><img src="/photos/<%= brand.brandImage[0] %>" alt="<%= brand.brandName %>" /></td>
+            <td class="status-badge">
+              <% if (brand.isBlocked) { %>
+                <span class="badge alert-danger">Blocked</span>
+              <% } else { %>
+                <span class="badge alert-success">Active</span>
+              <% } %>
+            </td>
+            <td class="action-buttons">
+              <% if (!brand.isBlocked) { %>
+                <a href="/admin/blockBrand?id=<%= brand._id %>" class="btn-red">Block</a>
+              <% } else { %>
+                <a href="/admin/unblockBrand?id=<%= brand._id %>" class="btn-green">Unblock</a>
+              <% } %>
+            </td>
+            <td class="delete-buttons">
+              <a href="javascript:void(0);" onclick="deleteBrand('<%= brand._id %>')">Delete</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>">Previous</a>
+      <% } else { %>
+        <span style="color: #aaa;">Previous</span>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+          <span style="font-weight: bold; color: #4f9df9;"><%= i %></span>
+        <% } else { %>
+          <a href="?page=<%= i %>"><%= i %></a>
+        <% } %>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>">Next</a>
+      <% } else { %>
+        <span style="color: #aaa;">Next</span>
+      <% } %>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function deleteBrand(brandId) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This brand will be permanently deleted!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/admin/deleteBrand?id=" + brandId;
+        }
+      });
+    }
+  </script>
+</body>
+</html>

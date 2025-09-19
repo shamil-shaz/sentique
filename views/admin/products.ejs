@@ -1,0 +1,496 @@
+<!-- filepath: c:\desktop\website brttype\sentique\views\admin\products.ejs -->
+<%- include("../partials/admin/header.ejs") %>
+
+<!-- Meta viewport for responsiveness -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- External Styles -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<!-- Internal CSS -->
+<style>
+  .main-content {
+    padding: 20px;
+    width: 100%;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .filter-sort-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .filter-button, .dropdown, .add-product-btn {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .add-product-btn {
+    background-color: #459436;
+    color: white;
+    border: none;
+    font-weight: bold;
+  }
+
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    padding-top: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  }
+
+  .product-table th, .product-table td {
+    padding: 12px 16px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+  }
+
+  .product-table th {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 2;
+  }
+
+  .product-img {
+    width: 50px;
+    border-radius: 4px;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: inline-block;
+    font-weight: 500;
+  }
+
+  .edit-btn {
+    background-color: #386f39;
+    color: white;
+    border: none;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #35b2dc;
+    color: white;
+    border-color: #35b8dc;
+  }
+
+  .badge {
+    font-size: 13px;
+    padding: 4px 8px;
+  }
+
+  @media (max-width: 768px) {
+    .filter-sort-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filters {
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .add-product-btn {
+      width: 100%;
+      text-align: center;
+    }
+
+    .product-table th, .product-table td {
+      font-size: 13px;
+      padding: 10px;
+    }
+
+    .product-img {
+      width: 40px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .filters {
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-button, .dropdown, .btn, .add-product-btn {
+      width: 100%;
+      text-align: center;
+    }
+
+    .add-product-btn {
+      font-size: 14px;
+    }
+  }
+</style>
+
+<!-- Page Content -->
+<div class="main-content">
+  <h1 class="page-title">Products</h1>
+
+  <!-- Flash Messages -->
+  <% if (successMessage && successMessage.length > 0) { %>
+    <div class="alert alert-success"><%= successMessage %></div>
+  <% } %>
+  <% if (errorMessage && errorMessage.length > 0) { %>
+    <div class="alert alert-danger"><%= errorMessage %></div>
+  <% } %>
+
+  <!-- Filters -->
+<!-- FIXED Filter Form - This is where the CastError is likely coming from -->
+<form action="/admin/products" method="get" class="filter-sort-container">
+  <div class="filters">
+    <input type="text" name="search" placeholder="Search product..." class="dropdown" 
+           value="<%= typeof search !== 'undefined' ? search : '' %>" />
+    
+    <!-- FIXED Category Filter -->
+    <select name="category" class="dropdown">
+      <option value="">All Categories</option>
+      <% if (typeof cat !== 'undefined' && cat) { %>
+        <% cat.forEach(c => { %>
+          <option value="<%= c._id %>" 
+                  <%= (typeof selectedCategory !== 'undefined' && selectedCategory === c._id.toString()) ? 'selected' : '' %>>
+            <%= c.name %>
+          </option>
+        <% }) %>
+      <% } %>
+    </select>
+    
+    <!-- FIXED Brand Filter - This is likely causing your "armani" CastError -->
+    <select name="brand" class="dropdown">
+      <option value="">All Brands</option>
+      <% if (typeof brands !== 'undefined' && brands) { %>
+        <% brands.forEach(b => { %>
+          <option value="<%= b._id %>" 
+                  <%= (typeof selectedBrand !== 'undefined' && selectedBrand === b._id.toString()) ? 'selected' : '' %>>
+            <%= b.brandName || b.name || 'Unknown Brand' %>
+          </option>
+        <% }) %>
+      <% } else if (typeof brand !== 'undefined' && brand) { %>
+        <!-- Fallback if you're using 'brand' instead of 'brands' -->
+        <% brand.forEach(b => { %>
+          <option value="<%= b._id %>" 
+                  <%= (typeof selectedBrand !== 'undefined' && selectedBrand === b._id.toString()) ? 'selected' : '' %>>
+            <%= b.brandName || b.name || 'Unknown Brand' %>
+          </option>
+        <% }) %>
+      <% } %>
+    </select>
+    
+    <button type="submit" class="filter-button">Apply</button>
+  </div>
+</form>
+
+<!-- FIXED Product Table - Better null checking -->
+<div class="table-wrapper">
+  <table class="product-table">
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>Brand</th>
+        <th>Category</th>
+        <th>Sale Price</th>
+        <th>Offer Price</th>
+        <th>Action</th>
+        <th>Quantity</th>
+        <th>Variant</th>
+        <th>Status</th>
+        <th>Action</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+<tbody>
+  <% if (typeof products !== 'undefined' && products && products.length > 0) { %>
+    <% products.forEach(product => { %>
+      <tr>
+        <td><%= product.productName || 'N/A' %></td>
+        <td>
+          <% if (product.brand) { %>
+            <% if (typeof product.brand === 'object') { %>
+              <%= product.brand.brandName || product.brand.name || 'Unknown Brand' %>
+            <% } else { %>
+              <%= product.brand %>
+            <% } %>
+          <% } else { %>
+            N/A
+          <% } %>
+        </td>
+        <td>
+          <% if (product.category) { %>
+            <% if (typeof product.category === 'object') { %>
+              <%= product.category.name || 'Unknown Category' %>
+            <% } else { %>
+              <%= product.category %>
+            <% } %>
+          <% } else { %>
+            N/A
+          <% } %>
+        </td>
+
+        
+
+
+
+        <td>₹ <%= product.salePrice ? Number(product.salePrice).toFixed(2) : '0.00' %></td>
+        <td>
+          <%= (product.productOffer !== undefined && product.productOffer !== 0) ? product.productOffer + '%' : '0%' %>
+        </td>
+        <td>
+          <% if (!product.productOffer || product.productOffer === 0) { %>
+            <button class="btn btn-info text-white" onclick="addOffer('<%= product._id %>')" style="width: 100px;">
+              Add Offer
+            </button>
+          <% } else { %>
+            <button class="btn btn-danger text-white" onclick="removeOffer('<%= product._id %>')" style="width: 100px;">
+              Remove Offer
+            </button>
+          <% } %>
+        </td>
+        <td><%= product.quantity || product.stock || 0 %>
+        </td>
+
+        <td>
+  <% if (product.variant && product.variant.length > 0) { %>
+    <%= product.variant.join(' ml, ') %> ML
+  <% } else { %>
+    No Variants
+  <% } %>
+</td>
+
+
+
+        <td>
+
+          <% if (product.isBlocked) { %>
+            <span class="badge bg-danger" style="width:80px">Blocked</span>
+          <% } else { %>
+            <span class="badge bg-success">Active</span>
+          <% } %>
+        </td>
+        <td>
+          <% if (product.isBlocked) { %>
+            <form action="/admin/unblockProduct/<%= product._id %>" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-success btn-sm">Unblock</button>
+            </form>
+          <% } else { %>
+            <form action="/admin/blockProduct/<%= product._id %>" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-danger btn-sm">Block</button>
+            </form>
+          <% } %>
+        </td>
+        <td>
+          <form action="/admin/edit-product/<%= product._id %>" method="get" style="display:inline;">
+            <button type="submit" class="btn edit-btn">Edit</button>
+          </form>
+        </td>
+
+        <!-- ✅ Delete button -->
+       <td>
+  <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('<%= product._id %>')">
+    Delete
+  </button>
+</td>
+
+      </tr>
+    <% }) %>
+  <% } else { %>
+    <tr>
+      <td colspan="12" style="text-align: center; padding: 20px;">
+        No products found
+      </td>
+    </tr>
+  <% } %>
+</tbody>
+
+  </table>
+</div>
+
+<!-- FIXED Pagination - Better parameter handling -->
+<div class="container mt-3">
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center mb-4">
+      <% if (typeof totalPages !== 'undefined' && totalPages > 0) { %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= (typeof currentPage !== 'undefined' && parseInt(currentPage) === i) ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %>&search=<%= encodeURIComponent(search || '') %>&category=<%= encodeURIComponent(selectedCategory || '') %>&brand=<%= encodeURIComponent(selectedBrand || '') %>">
+              <%= i %>
+            </a>
+          </li>
+        <% } %>
+      <% } %>
+    </ul>
+  </nav>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      alert.style.display = 'none';
+    });
+  }, 3000);
+
+  async function addOffer(productId) {
+    const { value: amount } = await Swal.fire({
+      title: 'Add Offer in Percentage',
+      input: 'number',
+      inputLabel: 'Percentage',
+      inputPlaceholder: 'Enter offer %',
+      confirmButtonText: 'Apply Offer',
+      showCancelButton: true,
+      inputValidator: (value) => {
+        if (!value || value <= 0) {
+          return 'Please enter a valid percentage';
+        }
+      }
+    });
+
+    if (amount) {
+      try {
+        const response = await fetch("/admin/addProductOffer", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            percentage: amount,
+            productId: productId
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === true) {
+          Swal.fire('Offer Added!', 'The offer has been applied.', 'success').then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire('Failed', result.message || 'Could not apply offer', 'error');
+        }
+
+      } catch (error) {
+        console.error(error);
+        Swal.fire('Error', 'Something went wrong', 'error');
+      }
+    }
+  }
+
+  function removeOffer(productId) {
+    Swal.fire({
+      title: "Remove Offer?",
+      text: "Are you sure you want to remove this offer?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, remove it'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch("/admin/removeProductOffer", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId: productId })
+          });
+
+          const result = await response.json();
+
+          if (result.status === true) {
+            Swal.fire("Removed!", "The offer has been removed.", "success").then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire('Failed', result.message || 'Could not remove offer.', 'error');
+          }
+
+        } catch (error) {
+          console.error(error);
+          Swal.fire('Error', 'Something went wrong', 'error');
+        }
+      }
+    });
+  }
+
+  function confirmDelete(productId) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "This action will permanently delete the product!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/admin/deleteProduct/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(res => {
+          if (res.ok) {
+            Swal.fire(
+              'Deleted!',
+              'The product has been deleted.',
+              'success'
+            ).then(() => {
+              location.reload(); // Refresh table after delete
+            });
+          } else {
+            Swal.fire('Error!', 'Failed to delete product.', 'error');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire('Error!', 'Something went wrong.', 'error');
+        });
+      }
+    });
+  }
+
+
+
+</script>

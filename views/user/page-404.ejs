@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 Not Found - Sentique</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .header {
+      background: #000;
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .nav-links a {
+      color: #fff;
+      margin-left: 20px;
+      text-decoration: none;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+    }
+    .search-bar {
+      padding: 5px;
+      margin-right: 20px;
+    }
+    .icons a {
+      color: #fff;
+      margin-left: 10px;
+    }
+    .breadcrumb {
+      padding: 10px 20px;
+      color: #888;
+    }
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60vh;
+      text-align: center;
+    }
+    .content h1 {
+      font-size: 10rem;
+      margin: 0;
+    }
+    .content p {
+      font-size: 1.2rem;
+      color: #666;
+    }
+    .content button {
+      background: #ff0000;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .footer {
+      background: #000;
+      color: #fff;
+      padding: 20px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+    .footer div {
+      margin: 10px;
+    }
+    .footer h3 {
+      margin-bottom: 10px;
+    }
+    .footer a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      margin-bottom: 5px;
+    }
+    .app-download img {
+      margin: 5px 0;
+    }
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+      .nav-links, .nav-right {
+        margin-top: 10px;
+      }
+      .content h1 {
+        font-size: 6rem;
+      }
+      .footer {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">SENTIQUE</div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">Contact</a>
+      <a href="#">About</a>
+      <a href="/signup">Sign Up</a>
+    </div>
+    <div class="nav-right">
+      <input type="text" class="search-bar" placeholder="What are you looking for?">
+      <div class="icons">
+        <a href="#">❤️</a>
+        <a href="#">🛒</a>
+        <a href="#">👤</a>
+      </div>
+    </div>
+  </div>
+  <div class="breadcrumb">Home / 404 Error</div>
+  <div class="content">
+    <h1>404 Not Found</h1>
+    <p>Your visited page not found. Maybe go home page.</p>
+    <button>Back to home page</button>
+  </div>
+  <div class="footer">
+    <div class="exclusive">
+      <h3>Exclusive</h3>
+      <p>Subscribe</p>
+      <p>Get 10% off your first order</p>
+      <input type="email" placeholder="Enter your email">
+      <button>➤</button>
+    </div>
+    <div class="support">
+      <h3>Support</h3>
+      <p>111 Bioy sorani, Dhaka,</p>
+      <p>DH 115, Bangladesh.</p>
+      <p>exclusive@gmail.com</p>
+      <p>+88015-8888-9999</p>
+    </div>
+    <div class="account">
+      <h3>Account</h3>
+      <a href="#">My Account</a>
+      <a href="#">Login / Register</a>
+      <a href="#">Cart</a>
+      <a href="#">Wishlist</a>
+      <a href="#">Shop</a>
+    </div>
+    <div class="quick-link">
+      <h3>Quick Link</h3>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms Of Use</a>
+      <a href="#">FAQ</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="app-download">
+      <h3>Download App</h3>
+      <p>Save $3 with App New User Only</p>
+      <img src="https://via.placeholder.com/100x40?text=Google+Play" alt="Google Play">
+      <img src="https://via.placeholder.com/100x40?text=App+Store" alt="App Store">
+      <div>
+        <a href="#">f</a>
+        <a href="#">🐦</a>
+        <a href="#">in</a>
+      </div>
+    </div>
+  </div>
+  <p style="text-align: center; background: #000; color: #fff; padding: 10px 0;">© Copyright Sentique 2025. All right reserved</p>
+
+  <script>
+    document.querySelector('button').addEventListener('click', () => {
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>

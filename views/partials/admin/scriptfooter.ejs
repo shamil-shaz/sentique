@@ -1,0 +1,33 @@
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['5k','10k','15k','20k','25k','30k','35k','40k','45k','50k','55k','60k'],
+        datasets: [{
+          label: 'Sales',
+          data: [15, 28, 45, 35, 50, 48, 20, 45, 72, 64, 40, 55],
+          tension: 0.4,
+          pointBackgroundColor: '#fff',
+          borderWidth: 2,
+          fill: {
+            target: 'origin',
+            gradient: {
+              backgroundColor: {
+                axis: 'y',
+                colors: ['rgba(66,133,244,0.2)', 'rgba(66,133,244,0)']
+              }
+            }
+          }
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  </script>

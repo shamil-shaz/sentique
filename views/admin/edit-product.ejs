@@ -1,0 +1,265 @@
+<%- include("../partials/admin/header.ejs") %>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+
+<style>
+  body { font-family: 'Inter', sans-serif; background: #f9f9f9; }
+  .main-content { margin-left: 240px; margin-top: 60px; padding: 20px; min-height: 100vh; }
+  .container { max-width: 1100px; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin:auto; }
+  h2 { font-size:26px; font-weight:800; margin-bottom:20px; text-align:center; color:#333; }
+  .form-wrapper { display:flex; flex-wrap:wrap; gap:30px; }
+  .left, .right { flex:1; min-width:300px; }
+  .image-box img { width:100%; border-radius:10px; border:1px solid #ddd; margin-bottom:8px; max-height:250px; object-fit:cover; }
+  .image-buttons { display:flex; gap:10px; margin-bottom:10px; }
+  .save-btn, .cancel-btn { padding:6px 12px; font-size:13px; border-radius:6px; border:none; cursor:pointer; font-weight:bold; }
+  .save-btn { background:#007bff; color:white; }
+  .cancel-btn { background:#dc3545; color:white; }
+  label { font-weight:600; margin-top:10px; display:block; color:#444; }
+  input, select, textarea { width:100%; padding:10px; margin:5px 0; border:1px solid #ccc; border-radius:6px; font-size:14px; }
+  textarea { resize:vertical; }
+  .error-message { color:red; font-size:13px; margin-bottom:10px; }
+  .flex-row { display:flex; flex-wrap:wrap; gap:15px; }
+  .flex-row>div { flex:1; min-width:140px; }
+  .button-row { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; margin-top:20px; }
+  .btn-green, .btn-red { padding:12px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer; flex:1; min-width:48%; transition:0.3s; }
+  .btn-green { background:#28a745; color:white; }
+  .btn-red { background:#dc3545; color:white; }
+  #cropper-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; }
+  .modal-content { background:#fff; padding:20px; border-radius:10px; max-height:90vh; overflow-y:auto; text-align:center; }
+  .modal-content img { max-width:100%; margin-bottom:10px; }
+  @media (max-width:768px) { .main-content{margin-left:0;} .button-row{flex-direction:column;} .btn-green, .btn-red{width:100%;} }
+</style>
+
+<div class="main-content">
+  <div class="container">
+    <h2>Edit Product</h2>
+    <form id="editProductForm" action="/admin/edit-product/<%= product._id %>" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+      <div class="form-wrapper">
+
+        <!-- Left side (Images) -->
+        <div class="left">
+          <% for(let i=1;i<=4;i++){ %>
+            <div class="image-box">
+              <img id="preview-image<%= i %>" 
+                   src="<%= product.images && product.images[i-1] ? '/uploads/' + product.images[i-1] : '/photos/default.jpg' %>" 
+                   data-original="<%= product.images && product.images[i-1] ? '/uploads/' + product.images[i-1] : '/photos/default.jpg' %>" 
+                   alt="Image <%= i %> Preview"/>
+              <label for="productImage<%= i %>">Choose Product Image <%= i %></label>
+              <input type="file" accept="image/jpeg,image/jpg,image/png" class="product-image-input" name="productImage<%= i %>" id="productImage<%= i %>" data-index="<%= i %>" />
+              <input type="hidden" name="productImagesBase64" id="productImageBase64<%= i %>" />
+              <div class="image-buttons">
+                <button type="button" class="save-btn" data-index="<%= i %>">Save</button>
+                <button type="button" class="cancel-btn" onclick="resetImage('<%= i %>')">Cancel</button>
+                <% if(product.images && product.images[i-1]){ %>
+                  <button type="button" class="cancel-btn" onclick="deleteImage('<%= i-1 %>')">Delete</button>
+                <% } %>
+              </div>
+              <p class="error-message" id="productImage<%= i %>-error"></p>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Right side (Form Fields) -->
+        <div class="right">
+          <label>Product Name</label>
+          <input type="text" name="productName" value="<%= product.productName %>" required />
+          <p class="error-message" id="productName-error"></p>
+<!-- FIXED Brand Selection Section -->
+<label>Brand</label>
+<select name="brand" required>
+  <option value="">-- Select Brand --</option>
+  <% brands.forEach(b => { 
+    // Handle both populated and non-populated brand references
+    let productBrandId = '';
+    if (product.brand) {
+      if (typeof product.brand === 'object' && product.brand._id) {
+        // Brand is populated (object with _id)
+        productBrandId = product.brand._id.toString();
+      } else {
+        // Brand is just an ObjectId string
+        productBrandId = product.brand.toString();
+      }
+    }
+  %>
+    <option value="<%= b._id %>" 
+      <%= productBrandId === b._id.toString() ? "selected" : "" %>>
+      <%= b.brandName || b.name %>
+    </option>
+  <% }) %>
+</select>
+<p class="error-message" id="brand-error"></p>
+
+<!-- ALSO FIXED Category Selection for consistency -->
+<label>Category</label>
+<select name="category" required>
+  <option value="">-- Select Category --</option>
+  <% cat.forEach(c => { 
+    // Handle both populated and non-populated category references
+    let productCategoryId = '';
+    if (product.category) {
+      if (typeof product.category === 'object' && product.category._id) {
+        // Category is populated (object with _id)
+        productCategoryId = product.category._id.toString();
+      } else {
+        // Category is just an ObjectId string
+        productCategoryId = product.category.toString();
+      }
+    }
+  %>
+    <option value="<%= c._id %>" 
+      <%= productCategoryId === c._id.toString() ? "selected" : "" %>>
+      <%= c.name %>
+    </option>
+  <% }) %>
+</select>
+<p class="error-message" id="category-error"></p>
+
+          <label>Description</label>
+          <textarea name="description" rows="3" required><%= product.description %></textarea>
+          <p class="error-message" id="description-error"></p>
+
+          <div class="flex-row">
+            <div>
+              <label>Stock Quantity</label>
+              <input type="number" name="stock" value="<%= product.stock %>" required />
+              <p class="error-message" id="stock-error"></p>
+            </div>
+            <div>
+              <label>Variant (ml)</label>
+              <input type="number" name="variant" value="<%= product.variant %>" required />
+              <p class="error-message" id="variant-error"></p>
+            </div>
+          </div>
+
+          <div class="flex-row">
+            <div>
+              <label>Regular Price</label>
+              <input type="number" step="0.01" name="regularPrice" value="<%= product.regularPrice %>" required />
+              <p class="error-message" id="regularPrice-error"></p>
+            </div>
+            <div>
+              <label>Sale Price</label>
+              <input type="number" step="0.01" name="salePrice" value="<%= product.salePrice %>" required />
+              <p class="error-message" id="salePrice-error"></p>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button type="submit" class="btn-green">Update</button>
+            <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">Cancel</button>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Cropper Modal -->
+<div id="cropper-modal">
+  <div class="modal-content">
+    <img id="cropper-image" src="" alt="Crop Preview" />
+    <div class="image-buttons" style="justify-content:center;margin-top:10px;">
+      <button type="button" class="save-btn" onclick="cropImage()">Crop & Save</button>
+      <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+let cropper;
+let currentImageIndex = null;
+const modal = document.getElementById('cropper-modal');
+const cropperImage = document.getElementById('cropper-image');
+const allowedFormats = ['image/jpeg','image/png','image/jpg'];
+
+// Image input change & cropper
+document.querySelectorAll('.product-image-input').forEach(input=>{
+  input.addEventListener('change', function(e){
+    const file = e.target.files[0];
+    currentImageIndex = e.target.getAttribute('data-index');
+    if(!file) return;
+    if(!allowedFormats.includes(file.type)){
+      alert('Invalid file format. Upload JPG/PNG only.');
+      e.target.value='';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      cropperImage.src = ev.target.result;
+      modal.style.display='flex';
+      setTimeout(()=>{ cropper = new Cropper(cropperImage,{aspectRatio:1,viewMode:1,background:false,autoCropArea:1,zoomable:true}); },100);
+    }
+    reader.readAsDataURL(file);
+  });
+});
+
+// Crop & save
+function cropImage(){
+  const canvas = cropper.getCroppedCanvas({width:400,height:400});
+  const dataURL = canvas.toDataURL('image/jpeg');
+
+  document.getElementById(`preview-image${currentImageIndex}`).src = dataURL;
+  document.getElementById(`productImageBase64${currentImageIndex}`).value = dataURL;
+  closeModal();
+}
+
+function closeModal(){ 
+  modal.style.display='none'; 
+  if(cropper){ cropper.destroy(); cropper=null; } 
+}
+
+// Reset image
+function resetImage(index){
+  const preview = document.getElementById(`preview-image${index}`);
+  preview.src = preview.getAttribute("data-original") || "/photos/default.jpg";
+  const input = document.querySelector(`input[data-index="${index}"]`);
+  input.value=''; 
+  input.removeAttribute('data-saved');
+  document.getElementById(`productImageBase64${index}`).value='';
+}
+
+// Delete image
+function deleteImage(index){
+  let deletedImagesInput = document.getElementById("deletedImages");
+  if(!deletedImagesInput){
+    deletedImagesInput=document.createElement("input");
+    deletedImagesInput.type="hidden";
+    deletedImagesInput.name="deletedImages";
+    deletedImagesInput.id="deletedImages";
+    document.getElementById("editProductForm").appendChild(deletedImagesInput);
+  }
+  let deleted = deletedImagesInput.value ? deletedImagesInput.value.split(",") : [];
+  if(!deleted.includes(index)) deleted.push(index);
+  deletedImagesInput.value = deleted.join(",");
+  document.getElementById(`preview-image${parseInt(index)+1}`).src="/photos/default.jpg";
+}
+
+// Form validation
+function showError(id,message){ document.getElementById(id).textContent=message; }
+function clearErrors(){ document.querySelectorAll('.error-message').forEach(el=>el.textContent=''); }
+
+function validateForm(){
+  clearErrors(); let valid=true;
+  const name=document.getElementsByName('productName')[0];
+  if(name.value.trim().length<3){ showError('productName-error','Product name must be at least 3 characters.'); valid=false; }
+
+  const desc=document.getElementsByName('description')[0];
+  if(desc.value.trim().length<5){ showError('description-error','Description should be at least 5 characters.'); valid=false; }
+
+  const stock=document.getElementsByName('stock')[0];
+  if(!/^\d+$/.test(stock.value.trim()) || parseInt(stock.value)<0){ showError('stock-error','Stock must be positive or 0.'); valid=false; }
+
+  const variant=document.getElementsByName('variant')[0];
+  if(!variant.value.trim()){ showError('variant-error','Please enter a valid variant.'); valid=false; }
+
+  const regularPrice=document.getElementsByName('regularPrice')[0];
+  const salePrice=document.getElementsByName('salePrice')[0];
+  if(parseFloat(regularPrice.value)<=0){ showError('regularPrice-error','Regular price must be > 0.'); valid=false; }
+  if(parseFloat(salePrice.value)<0){ showError('salePrice-error','Sale price cannot be negative.'); valid=false; }
+  if(parseFloat(salePrice.value)>parseFloat(regularPrice.value)){ showError('salePrice-error','Sale price cannot be greater than regular price.'); valid=false; }
+
+  return valid;
+}
+</script>
