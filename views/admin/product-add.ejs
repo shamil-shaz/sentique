@@ -4,11 +4,10 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
 
 <style>
-  /* ...existing styles... */
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Inter', sans-serif; margin: 0; background-color: #f9f9f9; }
+  body { font-family: 'Inter', sans-serif; background-color: #f9f9f9; }
   .main-content { margin-left: 240px; margin-top: 60px; padding: 20px; min-height: 100vh; }
-  .container { max-width: 1100px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin: auto; }
+  .container { max-width: 1100px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: auto; }
   h2 { font-size: 26px; font-weight: 800; margin-bottom: 20px; text-align: center; }
   .form-wrapper { display: flex; flex-wrap: wrap; gap: 30px; }
   .left, .right { flex: 1; min-width: 300px; }
@@ -19,23 +18,20 @@
   .save-btn { background-color: #007bff; color: white; }
   .cancel-btn { background-color: #dc3545; color: white; }
   label { font-weight: bold; margin-top: 10px; display: block; }
-  input[type="text"], input[type="number"], input[type="file"], textarea, select { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+  input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
   .error-message { color: red; font-size: 13px; margin-bottom: 10px; }
-  textarea { resize: vertical; }
-  .flex-row { display: flex; flex-wrap: wrap; gap: 15px; }
+  .flex-row { display: flex; gap: 15px; flex-wrap: wrap; }
   .flex-row > div { flex: 1; min-width: 140px; }
-  .button-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-top: 20px; }
-  .btn-green, .btn-red { padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; min-width: 48%; }
+  .button-row { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-green, .btn-red { padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; }
   .btn-green { background-color: #28a745; color: white; }
   .btn-red { background-color: #dc3545; color: white; }
-  #cropper-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 9999; justify-content: center; align-items: center; }
-  .modal-content { background: #fff; padding: 20px; border-radius: 10px; max-height: 90vh; overflow-y: auto; text-align: center; }
-  .modal-content img { max-width: 100%; margin-bottom: 10px; }
-  @media (max-width: 768px) {
-    .main-content { margin-left: 0; }
-    .button-row { flex-direction: column; }
-    .btn-green, .btn-red { width: 100%; }
-  }
+  #cropper-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; }
+  .modal-content { background: #fff; padding: 20px; border-radius:10px; max-height:90vh; overflow-y:auto; text-align:center; }
+  .modal-content img { max-width:100%; margin-bottom:10px; }
+  .variant-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+  .variant-row input { flex: 1; }
+  @media (max-width:768px){.main-content{margin-left:0}.button-row{flex-direction:column}.btn-green,.btn-red{width:100%}.variant-row{flex-direction:column}.variant-row button{width:100%;}}
 </style>
 
 <div class="main-content">
@@ -43,24 +39,26 @@
     <h2>Add New Product</h2>
     <form id="addProductForm" action="/admin/addProducts" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
       <div class="form-wrapper">
+
+        <!-- Left: Images -->
         <div class="left">
-          <% for(let i = 1; i <= 4; i++) { %>
-            <div class="image-box">
-              <img id="preview-image<%= i %>" src="/photos/default.jpg" alt="Image <%= i %> Preview" />
-              <label for="productImage<%= i %>">Choose Product Image <%= i %></label>
-              <input type="file" accept="image/jpeg, image/jpg, image/png" class="product-image-input" name="productImage<%= i %>" id="productImage<%= i %>" data-index="<%= i %>" />
-              <div class="image-buttons">
-                <button type="button" class="save-btn" data-index="<%= i %>">Save</button>
-                <button type="button" class="cancel-btn" onclick="resetImage('<%= i %>')">Cancel</button>
-              </div>
-              <p class="error-message" id="productImage<%= i %>-error"></p>
+          <% for(let i=1;i<=4;i++){ %>
+          <div class="image-box">
+            <img id="preview-image<%=i%>" src="/photos/default.jpg" alt="Image <%=i%> Preview"/>
+            <label for="productImage<%=i%>">Choose Product Image <%=i%></label>
+            <input type="file" accept="image/jpeg, image/jpg, image/png" class="product-image-input" name="productImage<%=i%>" id="productImage<%=i%>" data-index="<%=i%>"/>
+            <div class="image-buttons">
+              <button type="button" class="save-btn" data-index="<%=i%>">Save</button>
+              <button type="button" class="cancel-btn" onclick="resetImage('<%=i%>')">Cancel</button>
             </div>
+            <p class="error-message" id="productImage<%=i%>-error"></p>
+          </div>
           <% } %>
 
           <div id="cropper-modal">
             <div class="modal-content">
               <h3>Crop Image</h3>
-              <img id="cropper-image" />
+              <img id="cropper-image"/>
               <div>
                 <button type="button" class="save-btn" onclick="cropImage()">Crop</button>
                 <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
@@ -69,16 +67,17 @@
           </div>
         </div>
 
+        <!-- Right: Product Details -->
         <div class="right">
           <label>Product Name</label>
-          <input type="text" name="productName" placeholder="Type name here" required />
+          <input type="text" name="productName" placeholder="Type name here" required/>
           <p class="error-message" id="productName-error"></p>
 
           <label>Brand</label>
           <select name="brand" required>
             <option value="">-- Select Brand --</option>
             <% brand.forEach(b => { %>
-              <option value="<%= b._id %>"><%= b.brandName %></option>
+              <option value="<%=b._id%>"><%=b.brandName%></option>
             <% }) %>
           </select>
           <p class="error-message" id="brand-error"></p>
@@ -87,82 +86,78 @@
           <select name="category" required>
             <option value="">-- Select Category --</option>
             <% category.forEach(c => { %>
-              <option value="<%= c._id %>"><%= c.name %></option>
+              <option value="<%=c._id%>"><%=c.name%></option>
             <% }) %>
           </select>
           <p class="error-message" id="category-error"></p>
 
-          <label>Description</label>
+          <label> Short Description</label>
           <textarea name="description" placeholder="Type Description here" rows="3" required></textarea>
           <p class="error-message" id="description-error"></p>
 
-          <div class="flex-row">
-            <div>
-              <label>Stock Quantity</label>
-              <input type="number" name="stock" placeholder="Enter stock quantity" min="0" required />
-              <p class="error-message" id="stock-error"></p>
-            </div>
-            <div>
-              <label>Variants (ml)</label>
-              <input type="text" name="variant" placeholder="Enter variants like: 50,100,200" required />
+           <label> Long Description</label>
+          <textarea name="Longdescription" placeholder="Type Description here" rows="3" required></textarea>
+          <p class="error-message" id="description-error"></p>
 
-              <p class="error-message" id="variant-error"></p>
-            </div>
-          </div>
+          <label>Variants</label>
+         <div id="variants-wrapper">
+  <div class="variant-row">
+    <input type="number" name="variantSize[]" placeholder="Size (ml)" required/>
+    <input type="number" name="variantStock[]" placeholder="Stock" min="0" required/>
+    <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" min="0" required/>
+    <input type="number" name="variantSalePrice[]" placeholder="Sale Price" min="0" required/>
+    <button type="button" onclick="removeVariantRow(this)">Remove</button>
+  </div>
+</div>
+<button type="button" onclick="addVariantRow()">Add Variant</button>
 
-          <div class="flex-row">
-            <div>
-              <label>Regular Price</label>
-              <input type="number" step="0.01" name="regularPrice" placeholder="Enter regular price" min="0" required />
-              <p class="error-message" id="regularPrice-error"></p>
-            </div>
-            <div>
-              <label>Sale Price</label>
-              <input type="number" step="0.01" name="salePrice" placeholder="Enter sale price" min="0" />
-              <p class="error-message" id="salePrice-error"></p>
-            </div>
-          </div>
+          <p class="error-message" id="variant-error"></p>
+
+         
 
           <div class="button-row">
             <button type="submit" class="btn-green">Add</button>
             <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">Cancel</button>
           </div>
         </div>
+
       </div>
     </form>
   </div>
 </div>
 
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-  let cropper;
-  let currentImageIndex = null;
+  let cropper, currentImageIndex = null;
   const modal = document.getElementById('cropper-modal');
   const cropperImage = document.getElementById('cropper-image');
   const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
 
+  // ---------- Image Upload + Cropper ----------
   document.querySelectorAll('.product-image-input').forEach(input => {
     input.addEventListener('change', function (e) {
       const file = e.target.files[0];
       currentImageIndex = e.target.getAttribute('data-index');
       if (!file) return;
+
       if (!allowedFormats.includes(file.type)) {
-        alert('Invalid file format. Please upload PNG, JPG, or JPEG images only.');
+        alert('Only PNG/JPG/JPEG allowed');
         e.target.value = '';
         return;
       }
+
       const reader = new FileReader();
-      reader.onload = function (event) {
-        cropperImage.src = event.target.result;
+      reader.onload = function (ev) {
+        cropperImage.src = ev.target.result;
         modal.style.display = 'flex';
         setTimeout(() => {
           cropper = new Cropper(cropperImage, {
             aspectRatio: 1,
             viewMode: 1,
-            guides:true,
-            background:false,
-            autoCropArea:1,
-            zoomable:true
+            autoCropArea: 1,
+            zoomable: true
           });
         }, 100);
       };
@@ -201,13 +196,31 @@
         alert("Please select an image first.");
         return;
       }
-      const event = new Event('change');
-      input.dispatchEvent(event);
+      input.dispatchEvent(new Event('change'));
     });
   });
 
-  function showError(id, message) {
-    document.getElementById(id).textContent = message;
+  // ---------- Variants ----------
+  function addVariantRow() {
+    const wrapper = document.getElementById('variants-wrapper');
+    const row = document.createElement('div');
+    row.className = 'variant-row';
+    row.innerHTML = `
+      <input type="number" name="variantSize[]" placeholder="Size (ml)" required/>
+      <input type="number" name="variantStock[]" placeholder="Stock" min="0" required/>
+      <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" min="0" required/>
+      <input type="number" name="variantSalePrice[]" placeholder="Sale Price" min="0" required/>
+      <button type="button" onclick="removeVariantRow(this)">Remove</button>`;
+    wrapper.appendChild(row);
+  }
+
+  function removeVariantRow(btn) {
+    btn.parentElement.remove();
+  }
+
+  // ---------- Validation ----------
+  function showError(id, msg) {
+    document.getElementById(id).textContent = msg;
   }
 
   function clearErrors() {
@@ -218,6 +231,7 @@
     clearErrors();
     let valid = true;
 
+    // Image validation
     for (let i = 1; i <= 4; i++) {
       const input = document.querySelector(`input[data-index="${i}"]`);
       if (!input.getAttribute('data-saved')) {
@@ -226,58 +240,54 @@
       }
     }
 
+    // Product name, description, brand, category
     const name = document.getElementsByName('productName')[0];
-    if (name.value.trim() === '' || !/^[a-zA-Z\s]+$/.test(name.value)) {
-      showError('productName-error', 'Product name should only contain letters and spaces.');
+    if (name.value.trim() === '') {
+      showError('productName-error', 'Product name required');
       valid = false;
     }
 
     const description = document.getElementsByName('description')[0];
-    if (description.value.trim() === '' || !/^[a-zA-Z0-9\s,.\-]+$/.test(description.value)) {
-      showError('description-error', 'Description may only contain letters, numbers, spaces, commas, and periods.');
+    if (description.value.trim() === '') {
+      showError('description-error', 'Description required');
       valid = false;
     }
 
-    const stock = document.getElementsByName('stock')[0];
-    if (stock.value.trim() === '' || parseInt(stock.value) < 0) {
-      showError('stock-error', 'Stock quantity must be 0 or a positive number.');
+    const Longdescription = document.getElementsByName('Longdescription')[0];
+    if (Longdescription.value.trim() === '') {
+      showError('description-error', 'Description required');
       valid = false;
-    }
-
-    const variant = document.getElementsByName('variant')[0];
-    if (!variant.value.trim()) {
-      showError('variant-error', 'Please enter a valid variant.');
-      valid = false;
-    }
-
-    const regularPrice = document.getElementsByName('regularPrice')[0];
-    const salePrice = document.getElementsByName('salePrice')[0];
-
-    if (regularPrice.value.trim() === '' || parseFloat(regularPrice.value) < 0) {
-      showError('regularPrice-error', 'Regular price must be 0 or a positive number.');
-      valid = false;
-    }
-
-    if (salePrice.value.trim() !== '') {
-      if (parseFloat(salePrice.value) < 0) {
-        showError('salePrice-error', 'Sale price must be 0 or a positive number.');
-        valid = false;
-      } else if (parseFloat(salePrice.value) >= parseFloat(regularPrice.value)) {
-        showError('salePrice-error', 'Sale price must be less than the regular price.');
-        valid = false;
-      }
     }
 
     const brand = document.getElementsByName('brand')[0];
     if (!brand.value) {
-      showError('brand-error', 'Please select a brand.');
+      showError('brand-error', 'Brand required');
       valid = false;
     }
 
     const category = document.getElementsByName('category')[0];
     if (!category.value) {
-      showError('category-error', 'Please select a category.');
+      showError('category-error', 'Category required');
       valid = false;
+    }
+
+    // Variant validation
+    const variantSizes = document.getElementsByName('variantSize[]');
+    const variantStocks = document.getElementsByName('variantStock[]');
+    const variantRegularPrices = document.getElementsByName('variantRegularPrice[]');
+    const variantSalePrices = document.getElementsByName('variantSalePrice[]');
+
+    for (let i = 0; i < variantSizes.length; i++) {
+      if (
+        variantSizes[i].value.trim() === '' ||
+        variantStocks[i].value.trim() === '' ||
+        variantRegularPrices[i].value.trim() === '' ||
+        variantSalePrices[i].value.trim() === ''
+      ) {
+        showError('variant-error', 'All variant fields are required');
+        valid = false;
+        break;
+      }
     }
 
     return valid;

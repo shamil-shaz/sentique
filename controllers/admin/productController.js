@@ -7,6 +7,7 @@ const fs=require("fs")
 const path=require("path");
 const sharp=require("sharp");
 const mongoose = require("mongoose");
+const {cloudinary} = require('../../config/cloudinary'); // your config
 
 
 const getProductAddPage =async(req,res)=>{
@@ -23,86 +24,451 @@ const getProductAddPage =async(req,res)=>{
     }
 }
 
+
+
+// const addProducts = async (req, res) => {
+//   try {
+//     const products = req.body;
+
+//     // Check if product already exists
+//     const productsExist = await Product.findOne({ productName: products.productName });
+//     if (productsExist) {
+//       return res.status(400).json("Product already exists, please try with another name");
+//     }
+
+//     // Save images
+//     const images = req.files.map(file => file.path);
+
+//     // Process variants as objects
+//     let variantsArray = [];
+//     if (
+//       products.variantSize &&
+//       products.variantStock &&
+//       products.variantRegularPrice &&
+//       products.variantSalePrice
+//     ) {
+//       const sizes = Array.isArray(products.variantSize) ? products.variantSize : [products.variantSize];
+//       const stocks = Array.isArray(products.variantStock) ? products.variantStock : [products.variantStock];
+//       const regularPrices = Array.isArray(products.variantRegularPrice) ? products.variantRegularPrice : [products.variantRegularPrice];
+//       const salePrices = Array.isArray(products.variantSalePrice) ? products.variantSalePrice : [products.variantSalePrice];
+
+//       variantsArray = sizes.map((size, index) => ({
+//         size: size,
+//         stock: Number(stocks[index]) || 0,
+//         regularPrice: Number(regularPrices[index]) || 0,
+//         salePrice: Number(salePrices[index]) || 0,
+//       }));
+//     }
+
+//     if (variantsArray.length === 0) {
+//       return res.status(400).json("At least one variant is required");
+//     }
+
+//     // Validate category
+//     let categoryObj;
+//     if (mongoose.Types.ObjectId.isValid(products.category)) {
+//       categoryObj = await Category.findById(products.category);
+//     } else {
+//       categoryObj = await Category.findOne({
+//         $or: [{ name: products.category }, { categoryName: products.category }],
+//         isListed: true,
+//       });
+//     }
+//     if (!categoryObj) return res.status(400).json("Invalid category selected");
+
+//     // Validate brand
+//     let brandObj;
+//     if (mongoose.Types.ObjectId.isValid(products.brand)) {
+//       brandObj = await Brand.findById(products.brand);
+//     } else {
+//       brandObj = await Brand.findOne({
+//         $or: [{ name: products.brand }, { brandName: products.brand }],
+//         isBlocked: false,
+//       });
+//     }
+//     if (!brandObj) return res.status(400).json("Invalid brand selected");
+
+//     // Create new product
+//     const newProduct = new Product({
+//       productName: products.productName,
+//       description: products.description,
+//       brand: brandObj._id,
+//       category: categoryObj._id,
+//       productOffer: Number(products.productOffer) || 0,
+//       images: images,
+//       variants: variantsArray,
+//       status: "Available",
+//     });
+
+//     await newProduct.save();
+//     console.log("✅ Product added successfully:", newProduct);
+//     return res.redirect('/admin/products');
+//   } catch (error) {
+//     console.error("❌ Error saving product:", error);
+//     if (error.name === 'CastError') {
+//       return res.status(400).json(`Invalid ${error.path}: ${error.value}`);
+//     }
+//     return res.redirect('/pageerror');
+//   }
+// };
+
+
+
+
+// const addProducts = async (req, res) => {
+//   try {
+//     const products = req.body;
+
+//     // -----------------------------
+//     // Validate product name
+//     // -----------------------------
+//     if (!products.productName || products.productName.trim() === "") {
+//       req.flash("error", "Product name is required");
+//       return res.redirect("/admin/addProducts");
+//     }
+
+//     const productsExist = await Product.findOne({ productName: products.productName.trim() });
+//     if (productsExist) {
+//       req.flash("error", "Product already exists, use a different name");
+//       return res.redirect("/admin/addProducts");
+//     }
+
+//     // -----------------------------
+//     // Handle Images
+//     // -----------------------------
+//     const images = req.files && req.files.length > 0 ? req.files.map(file => file.path) : [];
+//     if (images.length === 0) {
+//       req.flash("error", "At least one product image is required");
+//       return res.redirect("/admin/addProducts");
+//     }
+
+//     // -----------------------------
+//     // Validate Variants
+//     // -----------------------------
+//     let variantsArray = [];
+//     if (
+//       products.variantSize &&
+//       products.variantStock &&
+//       products.variantRegularPrice &&
+//       products.variantSalePrice
+//     ) {
+//       const sizes = Array.isArray(products.variantSize) ? products.variantSize : [products.variantSize];
+//       const stocks = Array.isArray(products.variantStock) ? products.variantStock : [products.variantStock];
+//       const regularPrices = Array.isArray(products.variantRegularPrice) ? products.variantRegularPrice : [products.variantRegularPrice];
+//       const salePrices = Array.isArray(products.variantSalePrice) ? products.variantSalePrice : [products.variantSalePrice];
+
+//       if (!(sizes.length === stocks.length && stocks.length === regularPrices.length && regularPrices.length === salePrices.length)) {
+//         req.flash("error", "Variant data mismatch. Please check all variant fields.");
+//         return res.redirect("/admin/addProducts");
+//       }
+
+//       variantsArray = sizes.map((size, index) => ({
+//         size: size,
+//         stock: Number(stocks[index]) || 0,
+//         regularPrice: Number(regularPrices[index]) || 0,
+//         salePrice: Number(salePrices[index]) || 0,
+//       }));
+//     }
+
+//     if (variantsArray.length === 0) {
+//       req.flash("error", "At least one variant is required");
+//       return res.redirect("/admin/addProducts");
+//     }
+
+//     // -----------------------------
+//     // Validate Category
+//     // -----------------------------
+//     let categoryObj = null;
+//     if (mongoose.Types.ObjectId.isValid(products.category)) {
+//       categoryObj = await Category.findById(products.category);
+//     } else {
+//       categoryObj = await Category.findOne({
+//         $or: [{ name: products.category?.trim() }, { name: products.category?.trim() }],
+//         isListed: true,
+//       });
+//     }
+
+//     if (!categoryObj) {
+//       req.flash("error", "Invalid category selected");
+//       return res.redirect("/admin/addProducts");
+//     }
+
+//     // -----------------------------
+//     // Validate Brand
+//     // -----------------------------
+//     let brandObj = null;
+//     if (mongoose.Types.ObjectId.isValid(products.brand)) {
+//       brandObj = await Brand.findById(products.brand);
+//     } else {
+//       brandObj = await Brand.findOne({
+//         $or: [{ brandName: products.brand?.trim() }, { brandName: products.brand?.trim() }],
+//         isBlocked: false,
+//       });
+//     }
+
+//     if (!brandObj) {
+//       req.flash("error", "Invalid brand selected");
+//       return res.redirect("/admin/addProducts");
+//     }
+
+//     // -----------------------------
+//     // Validate Offer
+//     // -----------------------------
+//     let productOffer = Number(products.productOffer) || 0;
+//     if (productOffer < 0 || productOffer > 100) productOffer = 0;
+
+//     // -----------------------------
+//     // Save Product
+//     // -----------------------------
+//     const newProduct = new Product({
+//       productName: products.productName.trim(),
+//       description: products.description?.trim(),
+//       brand: brandObj._id,
+//       category: categoryObj._id,
+//       productOffer,
+//       images,
+//       variants: variantsArray,
+//       status: "Available",
+//     });
+
+//     await newProduct.save();
+//     console.log("✅ Product added successfully:", newProduct.productName);
+
+//     req.flash("success", "Product added successfully!");
+//     return res.redirect("/admin/products");
+
+//   } catch (error) {
+//     console.error("❌ Error adding product:", error);
+//     req.flash("error", "Something went wrong while adding the product");
+//     return res.redirect("/admin/addProducts");
+//   }
+// };
+
+
+
 const addProducts = async (req, res) => {
   try {
     const products = req.body;
-    const productsExist = await Product.findOne({ productName: products.productName });
-    if (productsExist) {
-      return res.status(400).json("Product already exists, please try with another name");
+
+    // Validate basic fields
+    if (!products.productName?.trim()) {
+      req.flash("error", "Product name is required");
+      return res.redirect("/admin/addProducts");
+    }
+    if (!products.description?.trim()) {
+      req.flash("error", "Product description is required");
+      return res.redirect("/admin/addProducts");
+    }
+    if (!products.Longdescription?.trim()) {
+      req.flash("error", "Product Longdescription is required");
+      return res.redirect("/admin/addProducts");
     }
 
-     const images = req.files.map(file=>file.path);
-
-     let variantsArray = [];
-    if (products.variant) {
-      variantsArray = products.variant
-        .split(",")              // split by comma
-        .map(v => v.trim())      // remove spaces
-        .map(Number)             // convert to numbers
-        .filter(v => !isNaN(v)); // keep only valid numbers
+    // Validate category
+    if (!products.category) {
+      req.flash("error", "Category is required");
+      return res.redirect("/admin/addProducts");
     }
-    
-    let categoryObj;
-    if (mongoose.Types.ObjectId.isValid(products.category)) {
-      categoryObj = await Category.findById(products.category);
-    } else {
-      categoryObj = await Category.findOne({
-        $or: [
-          { name: products.category },
-          { categoryName: products.category }
-        ],
-        isListed: true
-      });
+    const categoryObj = await Category.findById(products.category);
+    if (!categoryObj || !categoryObj.isListed) {
+      req.flash("error", "Invalid or unavailable category selected");
+      return res.redirect("/admin/addProducts");
     }
 
-    if (!categoryObj) {
-      return res.status(400).json("Invalid category selected");
+    // Validate brand
+    if (!products.brand) {
+      req.flash("error", "Brand is required");
+      return res.redirect("/admin/addProducts");
+    }
+    const brandObj = await Brand.findById(products.brand);
+    if (!brandObj || brandObj.isBlocked) {
+      req.flash("error", "Invalid or blocked brand selected");
+      return res.redirect("/admin/addProducts");
     }
 
-    let brandObj;
-    if (mongoose.Types.ObjectId.isValid(products.brand)) {
-      brandObj = await Brand.findById(products.brand);
-    } else {
-      brandObj = await Brand.findOne({
-        $or: [
-          { name: products.brand },
-          { brandName: products.brand }
-        ],
-        isBlocked: false
-      });
+    // Handle variants
+    let variantsArray = [];
+    if (products.variantSize && products.variantStock && products.variantRegularPrice && products.variantSalePrice) {
+      const sizes = Array.isArray(products.variantSize) ? products.variantSize : [products.variantSize];
+      const stocks = Array.isArray(products.variantStock) ? products.variantStock : [products.variantStock];
+      const regularPrices = Array.isArray(products.variantRegularPrice) ? products.variantRegularPrice : [products.variantRegularPrice];
+      const salePrices = Array.isArray(products.variantSalePrice) ? products.variantSalePrice : [products.variantSalePrice];
+
+      if (!(sizes.length === stocks.length && stocks.length === regularPrices.length && regularPrices.length === salePrices.length)) {
+        req.flash("error", "Variant data mismatch. Check all variant fields.");
+        return res.redirect("/admin/addProducts");
+      }
+
+      variantsArray = sizes.map((size, i) => ({
+        size: Number(size),
+        stock: Number(stocks[i]),
+        regularPrice: Number(regularPrices[i]),
+        salePrice: Number(salePrices[i]),
+      }));
     }
 
-    if (!brandObj) {
-      return res.status(400).json("Invalid brand selected");
+    if (variantsArray.length === 0) {
+      req.flash("error", "At least one valid variant is required");
+      return res.redirect("/admin/addProducts");
     }
 
+    // Handle images (Cloudinary)
+    let images = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const uploaded = await cloudinary.uploader.upload(file.path, { folder: "products" });
+        images.push(uploaded.secure_url);
+      }
+    }
+
+    if (images.length === 0) {
+      req.flash("error", "At least one product image is required");
+      return res.redirect("/admin/addProducts");
+    }
+
+    // Product offer
+    let productOffer = Number(products.productOffer) || 0;
+    if (productOffer < 0 || productOffer > 100) productOffer = 0;
+
+    // Create product
     const newProduct = new Product({
-      productName: products.productName,
-      description: products.description,
+      productName: products.productName.trim(),
+      description: products.description.trim(),
+      Longdescription: products.Longdescription.trim(),
       brand: brandObj._id,
       category: categoryObj._id,
-      regularPrice: Number(products.regularPrice),
-      salePrice: Number(products.salePrice),
-      quantity: Number(products.stock),
-      variant: variantsArray, 
-      images: images,
-      status: "Available",
+      variants: variantsArray,
+      images,
+      productOffer,
+      status: variantsArray.some(v => v.stock > 0) ? "Available" : "Out of stock",
+      slug: products.productName.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, ''),
     });
 
     await newProduct.save();
-    console.log("Product added successfully:", newProduct);
-    return res.redirect('/admin/products');
+    req.flash("success", "Product added successfully!");
+    return res.redirect("/admin/products");
 
   } catch (error) {
-    console.error("Error saving product:", error);
-
-    if (error.name === 'CastError') {
-      return res.status(400).json(`Invalid ${error.path}: ${error.value}`);
-    }
-
-    return res.redirect('/pageerror');
+    console.error("❌ Error adding product:", error);
+    req.flash("error", error.message || "Something went wrong while adding product");
+    return res.redirect("/admin/addProducts");
   }
 };
+
+
+
+
+
+
+
+
+// const getAllProducts = async (req, res) => {
+//   try {
+//     const search = req.query.search?.trim() || "";
+//     const selectedCategory = req.query.category || "";
+//     const selectedBrand = req.query.brand || "";
+//     const selectedVariant = req.query.variant || "";
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = 4;
+
+//      const query = {};
+
+//     if (search) {
+//       query.$or = [
+//         { productName: { $regex: search, $options: "i" } },
+//         { description: { $regex: search, $options: "i" } }
+//       ];
+//     }
+
+//     if (selectedCategory) {
+//       if (mongoose.Types.ObjectId.isValid(selectedCategory)) {
+//         query.category = mongoose.Types.ObjectId(selectedCategory);
+//       } else {
+//         const categoryByName = await Category.findOne({
+//           name: new RegExp(`^${selectedCategory}$`, "i"),
+//           isListed: true
+//         });
+//         if (categoryByName) {
+//           query.category = categoryByName._id;
+//         }
+//       }
+//     }
+
+//     // Brand filter
+//     if (selectedBrand) {
+//       if (mongoose.Types.ObjectId.isValid(selectedBrand)) {
+//         query.brand = mongoose.Types.ObjectId(selectedBrand);
+//       } else {
+//         const brandByName = await Brand.findOne({
+//           $or: [
+//             { brandName: new RegExp(`^${selectedBrand}$`, "i") },
+//             { name: new RegExp(`^${selectedBrand}$`, "i") }
+//           ],
+//           isBlocked: false
+//         });
+//         if (brandByName) {
+//           query.brand = brandByName._id;
+//         }
+//       }
+//     }
+//  if (selectedVariant) {
+//       const variantSize = parseInt(selectedVariant);
+//       if (!isNaN(variantSize)) {
+//         query["variants.size"] = variantSize; // search inside variant objects
+//       }
+//     }
+
+//     console.log("Final Query:", JSON.stringify(query, null, 2));
+
+
+//     const productData = await Product.find(query)
+//       .populate("category", "name")
+//       .populate("brand", "brandName")
+//       .sort({ createdAt: -1 })
+//       .skip((page - 1) * limit)
+//       .limit(limit)
+//       .lean();
+
+//     const count = await Product.countDocuments(query);
+    
+//     const categories = await Category.find({ isListed: true }).lean();
+//     const brands = await Brand.find({ isBlocked: false }).lean();
+
+//     res.render("products", {
+//       products: productData,
+//       currentPage: page,
+//       totalPages: Math.ceil(count / limit),
+//       search,
+//       selectedCategory,
+//       selectedBrand,
+//       selectedVariant,
+//       cat: categories,
+//       brands,
+//       successMessage: req.flash("success"),
+//       errorMessage: req.flash("error"),
+//       totalProducts: count,
+//       hasProducts: productData.length > 0
+//     });
+
+//   } catch (error) {
+//     console.error("Error in getAllProducts:", error);
+    
+//     if (error.name === 'CastError') {
+//       console.error("CastError details:", {
+//         path: error.path,
+//         value: error.value,
+//         kind: error.kind
+//       });
+//       req.flash("error", "Invalid filter parameters");
+//     } else {
+//       req.flash("error", "Something went wrong while fetching products!");
+//     }
+    
+//     res.redirect("/admin/products");
+//   }
+// };
+
+
 
 
 const getAllProducts = async (req, res) => {
@@ -111,11 +477,14 @@ const getAllProducts = async (req, res) => {
     const selectedCategory = req.query.category || "";
     const selectedBrand = req.query.brand || "";
     const selectedVariant = req.query.variant || "";
-    const page = parseInt(req.query.page) || 1;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = 4;
 
-     const query = {};
+    const query = {};
 
+    // -----------------------------
+    // Search
+    // -----------------------------
     if (search) {
       query.$or = [
         { productName: { $regex: search, $options: "i" } },
@@ -123,57 +492,66 @@ const getAllProducts = async (req, res) => {
       ];
     }
 
+    // -----------------------------
+    // Filter Category
+    // -----------------------------
     if (selectedCategory) {
       if (mongoose.Types.ObjectId.isValid(selectedCategory)) {
         query.category = mongoose.Types.ObjectId(selectedCategory);
       } else {
         const categoryByName = await Category.findOne({
-          name: new RegExp(`^${selectedCategory}$`, "i"),
+          name: new RegExp(`^${selectedCategory.trim()}$`, "i"),
           isListed: true
         });
-        if (categoryByName) {
-          query.category = categoryByName._id;
-        }
+        if (categoryByName) query.category = categoryByName._id;
       }
     }
 
-    // Brand filter
+    // -----------------------------
+    // Filter Brand
+    // -----------------------------
     if (selectedBrand) {
       if (mongoose.Types.ObjectId.isValid(selectedBrand)) {
         query.brand = mongoose.Types.ObjectId(selectedBrand);
       } else {
         const brandByName = await Brand.findOne({
           $or: [
-            { brandName: new RegExp(`^${selectedBrand}$`, "i") },
-            { name: new RegExp(`^${selectedBrand}$`, "i") }
+            { brandName: new RegExp(`^${selectedBrand.trim()}$`, "i") },
+            { name: new RegExp(`^${selectedBrand.trim()}$`, "i") }
           ],
           isBlocked: false
         });
-        if (brandByName) {
-          query.brand = brandByName._id;
-        }
+        if (brandByName) query.brand = brandByName._id;
       }
     }
 
-     if (selectedVariant) {
-      query.variant = { $in: [parseInt(selectedVariant)] };
+    // -----------------------------
+    // Filter Variant
+    // -----------------------------
+    if (selectedVariant) {
+      const variantSize = parseInt(selectedVariant);
+      if (!isNaN(variantSize)) query["variants.size"] = variantSize;
     }
 
     console.log("Final Query:", JSON.stringify(query, null, 2));
 
+    // -----------------------------
+    // Fetch Products
+    // -----------------------------
+    const [productData, count, categories, brands] = await Promise.all([
+      Product.find(query)
+        .populate("category", "name")
+        .populate("brand", "brandName")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
 
-    const productData = await Product.find(query)
-      .populate("category", "name")
-      .populate("brand", "brandName")
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
+      Product.countDocuments(query),
 
-    const count = await Product.countDocuments(query);
-    
-    const categories = await Category.find({ isListed: true }).lean();
-    const brands = await Brand.find({ isBlocked: false }).lean();
+      Category.find({ isListed: true }).lean(),
+      Brand.find({ isBlocked: false }).lean()
+    ]);
 
     res.render("products", {
       products: productData,
@@ -192,22 +570,12 @@ const getAllProducts = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error in getAllProducts:", error);
-    
-    if (error.name === 'CastError') {
-      console.error("CastError details:", {
-        path: error.path,
-        value: error.value,
-        kind: error.kind
-      });
-      req.flash("error", "Invalid filter parameters");
-    } else {
-      req.flash("error", "Something went wrong while fetching products!");
-    }
-    
-    res.redirect("/admin/products");
+    console.error("❌ Error fetching products:", error);
+    req.flash("error", "Something went wrong while fetching products!");
+    return res.redirect("/admin/products");
   }
 };
+
 
 
 const addProductOffer = async (req, res) => {
@@ -277,6 +645,83 @@ const unblockProduct = async (req, res) => {
 };
 
 
+// const getEditProductPage = async (req, res) => {
+//   try {
+//     const productId = req.params.id;
+
+//     if (!mongoose.Types.ObjectId.isValid(productId)) {
+//       req.flash("error", "Invalid product ID");
+//       return res.redirect("/admin/products");
+//     }
+
+//     const product = await Product.findById(productId)
+//       .populate('brand', 'brandName name _id')
+//       .populate('category', 'name _id')
+//       .lean();
+
+//     if (!product) {
+//       req.flash("error", "Product not found");
+//       return res.redirect("/admin/products");
+//     }
+
+//     console.log("Product data:", {
+//       id: product._id,
+//       name: product.productName,
+//       brandId: product.brand ? product.brand._id : 'No brand',
+//       brandName: product.brand ? (product.brand.brandName || product.brand.name) : 'No brand name',
+//       categoryId: product.category ? product.category._id : 'No category',
+//       categoryName: product.category ? product.category.name : 'No category name'
+//     });
+
+//     const categories = await Category.find({ isListed: true }).lean();
+//     const brands = await Brand.find({ isBlocked: false }).lean();
+
+//     console.log("Available brands:", brands.map(b => ({
+//       id: b._id.toString(),
+//       name: b.brandName || b.name
+//     })));
+
+//     const productBrandId = product.brand ? product.brand._id.toString() : null;
+//     const brandExists = brands.find(b => b._id.toString() === productBrandId);
+    
+//     if (productBrandId && !brandExists) {
+//       console.warn(`Product's brand (${productBrandId}) not found in active brands list`);
+//       const blockedBrand = await Brand.findById(productBrandId).lean();
+//       if (blockedBrand) {
+//         brands.push(blockedBrand);
+//         console.log(`Added blocked brand: ${blockedBrand.brandName || blockedBrand.name}`);
+//       }
+//     }
+
+//     res.render("edit-product", {
+//       product,
+//       cat: categories,
+//       brands,
+//       variants: product.variants || [] 
+//     });
+
+//   } catch (error) {
+//     console.error("Error fetching product for edit:", error);
+    
+//     if (error.name === 'CastError') {
+//       console.error("CastError details:", {
+//         path: error.path,
+//         value: error.value,
+//         kind: error.kind
+//       });
+//       req.flash("error", "Invalid product data");
+//     } else {
+//       req.flash("error", "Something went wrong while fetching product details");
+//     }
+    
+//     res.redirect("/admin/products");
+//   }
+// };
+
+// controllers/admin/productController.js (excerpt)
+
+
+
 const getEditProductPage = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -296,58 +741,32 @@ const getEditProductPage = async (req, res) => {
       return res.redirect("/admin/products");
     }
 
-    console.log("Product data:", {
-      id: product._id,
-      name: product.productName,
-      brandId: product.brand ? product.brand._id : 'No brand',
-      brandName: product.brand ? (product.brand.brandName || product.brand.name) : 'No brand name',
-      categoryId: product.category ? product.category._id : 'No category',
-      categoryName: product.category ? product.category.name : 'No category name'
-    });
+    // ensure variants exists and is an array
+    product.variants = Array.isArray(product.variants) ? product.variants : [];
 
     const categories = await Category.find({ isListed: true }).lean();
     const brands = await Brand.find({ isBlocked: false }).lean();
 
-    console.log("Available brands:", brands.map(b => ({
-      id: b._id.toString(),
-      name: b.brandName || b.name
-    })));
-
+    // If product uses a brand that is not in active brands (blocked/archived), add it
     const productBrandId = product.brand ? product.brand._id.toString() : null;
-    const brandExists = brands.find(b => b._id.toString() === productBrandId);
-    
-    if (productBrandId && !brandExists) {
-      console.warn(`Product's brand (${productBrandId}) not found in active brands list`);
+    if (productBrandId && !brands.find(b => b._id.toString() === productBrandId)) {
       const blockedBrand = await Brand.findById(productBrandId).lean();
-      if (blockedBrand) {
-        brands.push(blockedBrand);
-        console.log(`Added blocked brand: ${blockedBrand.brandName || blockedBrand.name}`);
-      }
+      if (blockedBrand) brands.push(blockedBrand);
     }
 
     res.render("edit-product", {
       product,
       cat: categories,
-      brands
+      brands,
+      variants: product.variants || []
     });
-
   } catch (error) {
     console.error("Error fetching product for edit:", error);
-    
-    if (error.name === 'CastError') {
-      console.error("CastError details:", {
-        path: error.path,
-        value: error.value,
-        kind: error.kind
-      });
-      req.flash("error", "Invalid product data");
-    } else {
-      req.flash("error", "Something went wrong while fetching product details");
-    }
-    
-    res.redirect("/admin/products");
+    req.flash("error", "Something went wrong while fetching product details");
+    return res.redirect("/admin/products");
   }
 };
+
 
 
 const updateProduct = async (req, res) => {
@@ -355,207 +774,168 @@ const updateProduct = async (req, res) => {
     const {
       productName,
       description,
+      Longdescription,
       brand,
       category,
-      stock,
-      variant,
-      regularPrice,
-      salePrice,
-      deletedImages,
-      productImagesBase64
+      deletedImages,       // comma-separated indexes from frontend
+      variantSize,
+      variantStock,
+      variantRegularPrice,
+      variantSalePrice,
+      productOffer,
+      productImagesBase64  // new images from cropper
     } = req.body;
 
-    console.log("Update request data:", req.body);
-
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      req.flash('error', 'Invalid Product ID');
-      return res.redirect('/admin/products');
+    const productId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      req.flash("error", "Invalid Product ID");
+      return res.redirect("/admin/products");
     }
 
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(productId);
     if (!product) {
-      req.flash('error', 'Product not found');
-      return res.redirect('/admin/products');
+      req.flash("error", "Product not found");
+      return res.redirect("/admin/products");
     }
 
-    let brandId;
-    if (brand) {
-      if (mongoose.Types.ObjectId.isValid(brand)) {
-        const brandExists = await Brand.findById(brand);
-        if (!brandExists) {
-          req.flash('error', 'Selected brand does not exist');
-          return res.redirect(`/admin/editProduct/${req.params.id}`);
-        }
-        brandId = brand;
-      } else {
-        const brandByName = await Brand.findOne({ 
-          $or: [
-            { brandName: new RegExp(`^${brand}$`, "i") },
-            { name: new RegExp(`^${brand}$`, "i") }
-          ],
-          isBlocked: false 
-        });
-        
-        if (!brandByName) {
-          req.flash('error', 'Invalid Brand selected');
-          return res.redirect(`/admin/editProduct/${req.params.id}`);
-        }
-        brandId = brandByName._id;
+    // --- Basic fields ---
+    if (!productName || !description || !brand || !category || !Longdescription) {
+      req.flash("error", "All fields are required!");
+      return res.redirect(`/admin/edit-product/${productId}`);
+    }
+
+    product.productName = productName.trim();
+    product.description = description.trim();
+     product.Longdescription = Longdescription.trim();
+
+    // --- Brand ---
+    if (mongoose.Types.ObjectId.isValid(brand)) {
+      const brandExists = await Brand.findById(brand);
+      if (!brandExists) {
+        req.flash("error", "Invalid Brand");
+        return res.redirect(`/admin/edit-product/${productId}`);
       }
+      product.brand = brand;
     }
 
-    let categoryId;
-    if (category) {
-      if (mongoose.Types.ObjectId.isValid(category)) {
-        const categoryExists = await Category.findById(category);
-        if (!categoryExists) {
-          req.flash('error', 'Selected category does not exist');
-          return res.redirect(`/admin/editProduct/${req.params.id}`);
-        }
-        categoryId = category;
-      } else {
-        const categoryByName = await Category.findOne({ 
-          name: new RegExp(`^${category}$`, "i"),
-          isListed: true 
-        });
-        
-        if (!categoryByName) {
-          req.flash('error', 'Invalid Category selected');
-          return res.redirect(`/admin/editProduct/${req.params.id}`);
-        }
-        categoryId = categoryByName._id;
+    // --- Category ---
+    if (mongoose.Types.ObjectId.isValid(category)) {
+      const categoryExists = await Category.findById(category);
+      if (!categoryExists) {
+        req.flash("error", "Invalid Category");
+        return res.redirect(`/admin/edit-product/${productId}`);
       }
+      product.category = category;
     }
 
-    const stockNum = stock !== undefined ? Number(stock) : product.stock;
-    const regularPriceNum = regularPrice !== undefined ? Number(regularPrice) : product.regularPrice;
-    const salePriceNum = salePrice !== undefined ? Number(salePrice) : product.salePrice;
+    // --- Variants ---
+    const sizeArr = Array.isArray(variantSize) ? variantSize : [variantSize];
+    const stockArr = Array.isArray(variantStock) ? variantStock : [variantStock];
+    const rPriceArr = Array.isArray(variantRegularPrice) ? variantRegularPrice : [variantRegularPrice];
+    const sPriceArr = Array.isArray(variantSalePrice) ? variantSalePrice : [variantSalePrice];
 
-    if (stockNum < 0 || isNaN(stockNum)) {
-      req.flash('error', 'Invalid stock quantity');
-      return res.redirect(`/admin/editProduct/${req.params.id}`);
-    }
+    const newVariants = [];
+    for (let i = 0; i < sizeArr.length; i++) {
+      const sizeVal = Number(sizeArr[i]);
+      const stockVal = Number(stockArr[i]) || 0;
+      const rPriceVal = Number(rPriceArr[i]) || 1;
+      const sPriceVal = Number(sPriceArr[i]) || 0;
 
-    if (regularPriceNum <= 0 || isNaN(regularPriceNum)) {
-      req.flash('error', 'Invalid regular price');
-      return res.redirect(`/admin/editProduct/${req.params.id}`);
-    }
+      if (sizeVal <= 0) continue;
 
-    if (salePriceNum < 0 || isNaN(salePriceNum)) {
-      req.flash('error', 'Invalid sale price');
-      return res.redirect(`/admin/editProduct/${req.params.id}`);
-    }
-
-    product.productName = productName || product.productName;
-    product.description = description || product.description;
-    product.brand = brandId || product.brand;
-    product.category = categoryId || product.category;
-    product.stock = stockNum;
-    product.variant = variant !== undefined ? variant : product.variant;
-    product.regularPrice = regularPriceNum;
-    product.salePrice = salePriceNum;
-
-    product.images = product.images || [];
-
-    if (deletedImages && deletedImages.trim() !== '') {
-      try {
-        const deletedIndexes = deletedImages.split(',')
-          .map(i => parseInt(i.trim()))
-          .filter(i => !isNaN(i));
-        
-        deletedIndexes.sort((a, b) => b - a);
-        
-        deletedIndexes.forEach(index => {
-          if (index >= 0 && index < product.images.length) {
-            const fileName = product.images[index];
-            if (fileName) {
-              const filePath = path.join(__dirname, '../../public/uploads/', fileName);
-              if (fs.existsSync(filePath)) {
-                try {
-                  fs.unlinkSync(filePath);
-                  console.log(`Deleted image: ${fileName}`);
-                } catch (err) {
-                  console.error(`Error deleting image ${fileName}:`, err);
-                }
-              }
-              product.images.splice(index, 1);
-            }
-          }
-        });
-      } catch (err) {
-        console.error("Error processing deleted images:", err);
-      }
-    }
-
-    if (productImagesBase64) {
-      try {
-        const base64Images = Array.isArray(productImagesBase64) 
-          ? productImagesBase64 
-          : [productImagesBase64];
-        
-        const uploadsDir = path.join(__dirname, '../../public/uploads/');
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-        
-        for (const b64 of base64Images) {
-          if (b64 && b64.trim() !== '') {
-            try {
-              if (!b64.startsWith('data:image/')) {
-                console.warn("Invalid base64 image format");
-                continue;
-              }
-              
-              const data = b64.replace(/^data:image\/\w+;base64,/, "");
-              const buffer = Buffer.from(data, 'base64');
-              const fileName = `product_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
-              const filePath = path.join(uploadsDir, fileName);
-              
-              fs.writeFileSync(filePath, buffer);
-              product.images.push(fileName);
-              console.log(`Added new image: ${fileName}`);
-            } catch (err) {
-              console.error("Error processing base64 image:", err);
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error handling base64 images:", err);
-      }
-    }
-
-    if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        if (file.filename) {
-          product.images.push(file.filename);
-        }
+      newVariants.push({
+        size: sizeVal,
+        stock: stockVal < 0 ? 0 : stockVal,
+        regularPrice: rPriceVal,
+        salePrice: sPriceVal > rPriceVal ? rPriceVal : sPriceVal
       });
     }
 
-    if (product.images.length === 0) {
-      req.flash('error', 'Product must have at least one image');
-      return res.redirect(`/admin/editProduct/${req.params.id}`);
+    if (newVariants.length === 0) {
+      req.flash("error", "At least one valid variant is required.");
+      return res.redirect(`/admin/edit-product/${productId}`);
+    }
+    product.variants = newVariants;
+
+    // --- Handle deleted images ---
+    let deletedIndexesArr = [];
+    if (deletedImages) {
+      deletedIndexesArr = deletedImages.split(",").map(i => Number(i));
     }
 
+    if (product.images && product.images.length > 0 && deletedIndexesArr.length > 0) {
+      const imagesToDelete = product.images.filter((img, idx) => deletedIndexesArr.includes(idx));
+      for (const url of imagesToDelete) {
+        try {
+          const parts = url.split("/");
+          const filename = parts[parts.length - 1];
+          const publicId = `products/${filename.split(".")[0]}`;
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error("Failed to delete image from Cloudinary:", err);
+        }
+      }
+      // Remove deleted images from DB array
+      product.images = product.images.filter((img, idx) => !deletedIndexesArr.includes(idx));
+    }
+
+    // --- Upload new images (base64) ---
+    if (productImagesBase64) {
+      const imagesArr = Array.isArray(productImagesBase64) ? productImagesBase64 : [productImagesBase64];
+      for (const base64 of imagesArr) {
+        try {
+          const result = await cloudinary.uploader.upload(base64, { folder: "products" });
+          product.images.push(result.secure_url);
+        } catch (err) {
+          console.error("Failed to upload image to Cloudinary:", err);
+          req.flash("error", "Failed to upload one or more images.");
+          return res.redirect(`/admin/edit-product/${productId}`);
+        }
+      }
+    }
+
+    // --- Image validations ---
+    if (product.images.length < 1) {
+      req.flash("error", "At least one product image is required.");
+      return res.redirect(`/admin/edit-product/${productId}`);
+    }
+    if (product.images.length > 4) {
+      req.flash("error", "Maximum 4 images allowed.");
+      return res.redirect(`/admin/edit-product/${productId}`);
+    }
+
+    // --- Product Offer ---
+    let offer = Number(productOffer) || 0;
+    if (offer < 0 || offer > 100) offer = 0;
+    product.productOffer = offer;
+
+    // --- Slug ---
+    product.slug = productName.trim()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    // --- Status & UpdatedAt ---
+    product.updatedAt = new Date();
+    product.status = product.variants.some(v => v.stock > 0) ? "Available" : "Out of stock";
+
+    // --- Save Product ---
     await product.save();
-    req.flash('success', 'Product updated successfully!');
-    res.redirect('/admin/products');
+
+    req.flash("success", "Product updated successfully!");
+    return res.redirect("/admin/products");
 
   } catch (error) {
-    console.error('Update Product Error:', error);
-    
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(err => err.message);
-      req.flash('error', `Validation Error: ${errors.join(', ')}`);
-    } else if (error.name === 'CastError') {
-      req.flash('error', `Invalid ${error.path}: ${error.value}`);
-    } else {
-      req.flash('error', 'Something went wrong while updating the product!');
-    }
-    
-    res.redirect('/admin/products');
+    console.error("Update Product Error:", error);
+    req.flash("error", "Something went wrong while updating the product!");
+    return res.redirect(`/admin/edit-product/${req.params.id}`);
   }
 };
+
+
+
+
 
 const deleteProduct = async (req, res) => {
   try {

@@ -154,12 +154,13 @@
             transform: translateY(-8px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
+     
 
         .brand img,
         .category img {
             width: 120px;
             height: 120px;
-            object-fit: cover;
+            object-fit: contain;
             border-radius: 50%;
             margin-bottom: 15px;
             border: 3px solid #f0f0f0;
@@ -301,10 +302,15 @@
       <div class="brand-grid" id="brandGrid">
         <% if (brands && brands.length > 0) { %>
           <% brands.forEach(brand => { %>
-            <div class="brand">
-              <img src="/photos/<%= brand.brandImage[0] %>" alt="<%= brand.brandName %> Logo">
-              <p><%= brand.brandName %></p>
-            </div>
+           <a href="/shopPage?brands=<%= brand._id %>" class="brand">
+  <div class="brand-imgbox">
+    <img src="<%= brand.brandImage[0] %>" alt="<%= brand.brandName %> Logo"
+         onerror="this.src='/photos/default.png'">
+  </div>
+  <p><%= brand.brandName %></p>
+</a>
+
+
           <% }) %>
         <% } else { %>
           <p>No brands available</p>
@@ -322,14 +328,20 @@
     <button class="slider-btn left" onclick="slideLeft('categoryGrid')" id="categoryLeftBtn">‹</button>
     <div class="slider-wrapper">
       <div class="category-grid" id="categoryGrid">
-        <% if (categories && categories.length > 0) { %>
-          <% categories.forEach(cat => { %>
-            <div class="category">
-              <img src="<%= cat.image %>" alt="<%= cat.name %>">
-              <p><%= cat.name %></p>
-            </div>
-          <% }) %>
-        <% } %>
+       <% if (categories && categories.length > 0) { %>    
+  <% categories.forEach(cat => { %>
+    <a href="/shopPage?categorys=<%= cat._id %>" class="category">
+      <div class="category-imgbox">
+        <img src="<%= cat.categoryImage && cat.categoryImage[0] ? cat.categoryImage[0] : '/photos/default.png' %>" 
+             alt="<%= cat.categoryName %>"
+             onerror="this.src='/photos/default.png'">
+      </div>
+      <p><%= cat.name %></p>
+
+    </a>
+  <% }) %>
+<% } %>
+
       </div>
     </div>
     <button class="slider-btn right" onclick="slideRight('categoryGrid')" id="categoryRightBtn">›</button>

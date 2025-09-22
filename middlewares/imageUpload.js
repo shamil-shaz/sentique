@@ -13,7 +13,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "sentique/products",   // Folder in Cloudinary
-    allowed_formats: ["jpg", "png", "jpeg"], // Allowed formats
+    allowed_formats: ["jpg", "jpeg", "png", "webp"], // Allowed formats
     transformation: [{ width: 500, height: 500, crop: "limit" }], // Optional resizing
   },
 });
@@ -23,7 +23,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({
     storage,
-    limits : {fileSize : 5 * 1024 * 1024},
+    limits : {fileSize : 20 * 1024 * 1024},
     fileFilter : (req,file,cb)=>{
         const filetypes = /jpeg|jpg|png|webp/;
         const extname = filetypes.test(path.extname(file.originalname).toLowerCase());

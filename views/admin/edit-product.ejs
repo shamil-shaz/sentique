@@ -3,150 +3,124 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
 
 <style>
-  body { font-family: 'Inter', sans-serif; background: #f9f9f9; }
-  .main-content { margin-left: 240px; margin-top: 60px; padding: 20px; min-height: 100vh; }
-  .container { max-width: 1100px; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin:auto; }
-  h2 { font-size:26px; font-weight:800; margin-bottom:20px; text-align:center; color:#333; }
-  .form-wrapper { display:flex; flex-wrap:wrap; gap:30px; }
-  .left, .right { flex:1; min-width:300px; }
-  .image-box img { width:100%; border-radius:10px; border:1px solid #ddd; margin-bottom:8px; max-height:250px; object-fit:cover; }
-  .image-buttons { display:flex; gap:10px; margin-bottom:10px; }
-  .save-btn, .cancel-btn { padding:6px 12px; font-size:13px; border-radius:6px; border:none; cursor:pointer; font-weight:bold; }
-  .save-btn { background:#007bff; color:white; }
-  .cancel-btn { background:#dc3545; color:white; }
-  label { font-weight:600; margin-top:10px; display:block; color:#444; }
-  input, select, textarea { width:100%; padding:10px; margin:5px 0; border:1px solid #ccc; border-radius:6px; font-size:14px; }
-  textarea { resize:vertical; }
-  .error-message { color:red; font-size:13px; margin-bottom:10px; }
-  .flex-row { display:flex; flex-wrap:wrap; gap:15px; }
-  .flex-row>div { flex:1; min-width:140px; }
-  .button-row { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; margin-top:20px; }
-  .btn-green, .btn-red { padding:12px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer; flex:1; min-width:48%; transition:0.3s; }
-  .btn-green { background:#28a745; color:white; }
-  .btn-red { background:#dc3545; color:white; }
-  #cropper-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; }
-  .modal-content { background:#fff; padding:20px; border-radius:10px; max-height:90vh; overflow-y:auto; text-align:center; }
-  .modal-content img { max-width:100%; margin-bottom:10px; }
-  @media (max-width:768px) { .main-content{margin-left:0;} .button-row{flex-direction:column;} .btn-green, .btn-red{width:100%;} }
+* { box-sizing: border-box; }
+body { font-family: Inter, sans-serif; background: #f9f9f9; }
+.main-content { margin-left: 240px; margin-top: 60px; padding: 20px; min-height: 100vh; }
+.container { max-width: 1100px; background: #fff; padding: 25px; border-radius: 12px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.08); }
+h2 { text-align: center; margin-bottom: 20px; }
+.form-wrapper { display: flex; flex-wrap: wrap; gap: 30px; }
+.left, .right { flex: 1; min-width: 300px; }
+.image-box img { width: 100%; border-radius: 10px; max-height: 250px; object-fit: cover; border: 1px solid #ddd; }
+.image-buttons { display: flex; gap: 8px; margin-top: 8px; }
+.save-btn { background: #007bff; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+.cancel-btn { background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+label { font-weight: 600; margin-top: 10px; display: block; }
+input, textarea, select { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
+.variant-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.variant-row input { flex: 1; }
+.button-row { display: flex; gap: 10px; margin-top: 16px; }
+.btn-green { flex: 1; background: #28a745; color: #fff; border: none; padding: 12px; border-radius: 8px; cursor: pointer; }
+.btn-red { flex: 1; background: #dc3545; color: #fff; border: none; padding: 12px; border-radius: 8px; cursor: pointer; }
+.image-preview-container { display: flex; flex-wrap: wrap; gap: 10px; }
+.image-box { position: relative; width: 120px; }
+.preview-img { width: 100%; height: 100px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
+@media(max-width:768px) { .main-content { margin-left: 0; } .button-row { flex-direction: column; } }
+.alert { padding: 10px; margin-bottom: 12px; border-radius: 6px; }
+.alert-success { background: #d4edda; color: #155724; }
+.alert-danger { background: #f8d7da; color: #721c24; }
 </style>
 
 <div class="main-content">
   <div class="container">
     <h2>Edit Product</h2>
+
+    <% if (successMessage) { %>
+      <div class="alert alert-success"><%= successMessage %></div>
+    <% } %>
+    <% if (errorMessage) { %>
+      <div class="alert alert-danger"><%= errorMessage %></div>
+    <% } %>
+
     <form id="editProductForm" action="/admin/edit-product/<%= product._id %>" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
       <div class="form-wrapper">
 
-        <!-- Left side (Images) -->
+        <!-- LEFT: Images -->
         <div class="left">
-          <% for(let i=1;i<=4;i++){ %>
-            <div class="image-box">
-              <img id="preview-image<%= i %>" 
-                   src="<%= product.images && product.images[i-1] ? '/uploads/' + product.images[i-1] : '/photos/default.jpg' %>" 
-                   data-original="<%= product.images && product.images[i-1] ? '/uploads/' + product.images[i-1] : '/photos/default.jpg' %>" 
-                   alt="Image <%= i %> Preview"/>
-              <label for="productImage<%= i %>">Choose Product Image <%= i %></label>
-              <input type="file" accept="image/jpeg,image/jpg,image/png" class="product-image-input" name="productImage<%= i %>" id="productImage<%= i %>" data-index="<%= i %>" />
-              <input type="hidden" name="productImagesBase64" id="productImageBase64<%= i %>" />
+          <% for (let i = 0; i < 4; i++) { 
+               const img = product.images && product.images[i] ? product.images[i] : null;
+               let previewSrc = '/photos/default.jpg';
+               if (img) previewSrc = img.startsWith('http') || img.startsWith('data:') || img.startsWith('/') ? img : '/uploads/' + img;
+          %>
+            <div class="image-box" style="margin-bottom:14px;">
+              <img id="preview-image-<%= i %>" src="<%= previewSrc %>" data-original-name="<%= img || '' %>" data-original-index="<%= img ? i : '' %>" class="preview-img" />
+              <label>Choose image (slot <%= i+1 %>)</label>
+              <input type="file" accept="image/*" class="product-image-input" data-slot="<%= i %>" />
               <div class="image-buttons">
-                <button type="button" class="save-btn" data-index="<%= i %>">Save</button>
-                <button type="button" class="cancel-btn" onclick="resetImage('<%= i %>')">Cancel</button>
-                <% if(product.images && product.images[i-1]){ %>
-                  <button type="button" class="cancel-btn" onclick="deleteImage('<%= i-1 %>')">Delete</button>
+                <button type="button" class="save-btn" data-slot="<%= i %>">Crop & Save</button>
+                <button type="button" class="cancel-btn" onclick="resetImage(<%= i %>)">Reset</button>
+                <% if (img) { %>
+                  <button type="button" class="cancel-btn" onclick="markDeleteExisting(<%= i %>)">Delete</button>
                 <% } %>
               </div>
-              <p class="error-message" id="productImage<%= i %>-error"></p>
             </div>
           <% } %>
+          <input type="hidden" name="deletedImages" id="deletedImages" value=""/>
         </div>
 
-        <!-- Right side (Form Fields) -->
+        <!-- RIGHT: Product info + variants -->
         <div class="right">
           <label>Product Name</label>
           <input type="text" name="productName" value="<%= product.productName %>" required />
-          <p class="error-message" id="productName-error"></p>
-<!-- FIXED Brand Selection Section -->
-<label>Brand</label>
-<select name="brand" required>
-  <option value="">-- Select Brand --</option>
-  <% brands.forEach(b => { 
-    // Handle both populated and non-populated brand references
-    let productBrandId = '';
-    if (product.brand) {
-      if (typeof product.brand === 'object' && product.brand._id) {
-        // Brand is populated (object with _id)
-        productBrandId = product.brand._id.toString();
-      } else {
-        // Brand is just an ObjectId string
-        productBrandId = product.brand.toString();
-      }
-    }
-  %>
-    <option value="<%= b._id %>" 
-      <%= productBrandId === b._id.toString() ? "selected" : "" %>>
-      <%= b.brandName || b.name %>
-    </option>
-  <% }) %>
-</select>
-<p class="error-message" id="brand-error"></p>
 
-<!-- ALSO FIXED Category Selection for consistency -->
-<label>Category</label>
-<select name="category" required>
-  <option value="">-- Select Category --</option>
-  <% cat.forEach(c => { 
-    // Handle both populated and non-populated category references
-    let productCategoryId = '';
-    if (product.category) {
-      if (typeof product.category === 'object' && product.category._id) {
-        // Category is populated (object with _id)
-        productCategoryId = product.category._id.toString();
-      } else {
-        // Category is just an ObjectId string
-        productCategoryId = product.category.toString();
-      }
-    }
-  %>
-    <option value="<%= c._id %>" 
-      <%= productCategoryId === c._id.toString() ? "selected" : "" %>>
-      <%= c.name %>
-    </option>
-  <% }) %>
-</select>
-<p class="error-message" id="category-error"></p>
+          <label>Brand</label>
+          <select name="brand" required>
+            <option value="">-- Select Brand --</option>
+            <% brands.forEach(b => { %>
+              <option value="<%= b._id %>" <%= (product.brand && (product.brand._id ? product.brand._id.toString() : product.brand.toString()) === b._id.toString()) ? 'selected' : '' %>><%= b.brandName || b.name %></option>
+            <% }) %>
+          </select>
 
-          <label>Description</label>
+          <label>Category</label>
+          <select name="category" required>
+            <option value="">-- Select Category --</option>
+            <% cat.forEach(c => { %>
+              <option value="<%= c._id %>" <%= (product.category && (product.category._id ? product.category._id.toString() : product.category.toString()) === c._id.toString()) ? 'selected' : '' %>><%= c.name %></option>
+            <% }) %>
+          </select>
+
+          <label>Short Description</label>
           <textarea name="description" rows="3" required><%= product.description %></textarea>
-          <p class="error-message" id="description-error"></p>
 
-          <div class="flex-row">
-            <div>
-              <label>Stock Quantity</label>
-              <input type="number" name="stock" value="<%= product.stock %>" required />
-              <p class="error-message" id="stock-error"></p>
-            </div>
-            <div>
-              <label>Variant (ml)</label>
-              <input type="number" name="variant" value="<%= product.variant %>" required />
-              <p class="error-message" id="variant-error"></p>
-            </div>
-          </div>
+           <label>Long Description</label>
+          <textarea name="Longdescription" rows="3" required><%= product.Longdescription %></textarea>
 
-          <div class="flex-row">
-            <div>
-              <label>Regular Price</label>
-              <input type="number" step="0.01" name="regularPrice" value="<%= product.regularPrice %>" required />
-              <p class="error-message" id="regularPrice-error"></p>
-            </div>
-            <div>
-              <label>Sale Price</label>
-              <input type="number" step="0.01" name="salePrice" value="<%= product.salePrice %>" required />
-              <p class="error-message" id="salePrice-error"></p>
-            </div>
+          <label>Variants</label>
+          <div id="variants-wrapper">
+            <% if (product.variants && product.variants.length > 0) { %>
+              <% product.variants.forEach(v => { %>
+                <div class="variant-row">
+                  <input type="number" name="variantSize[]" placeholder="Size (ml)" value="<%= v.size %>" required />
+                  <input type="number" name="variantStock[]" placeholder="Stock" value="<%= v.stock %>" min="0" required />
+                  <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" step="0.01" value="<%= v.regularPrice %>" required />
+                  <input type="number" name="variantSalePrice[]" placeholder="Sale Price" step="0.01" value="<%= v.salePrice %>" required />
+                  <button type="button" onclick="removeVariantRow(this)">Remove</button>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="variant-row">
+                <input type="number" name="variantSize[]" placeholder="Size (ml)" required />
+                <input type="number" name="variantStock[]" placeholder="Stock" min="0" required />
+                <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" step="0.01" required />
+                <input type="number" name="variantSalePrice[]" placeholder="Sale Price" step="0.01" required />
+                <button type="button" onclick="removeVariantRow(this)">Remove</button>
+              </div>
+            <% } %>
           </div>
+          <button type="button" onclick="addVariantRow()" style="margin-top:8px;">Add Variant</button>
 
           <div class="button-row">
-            <button type="submit" class="btn-green">Update</button>
-            <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">Cancel</button>
+            <button class="btn-green" type="submit">Update</button>
+            <button class="btn-red" type="button" onclick="window.location.href='/admin/products'">Cancel</button>
           </div>
         </div>
 
@@ -155,111 +129,118 @@
   </div>
 </div>
 
-<!-- Cropper Modal -->
-<div id="cropper-modal">
-  <div class="modal-content">
-    <img id="cropper-image" src="" alt="Crop Preview" />
-    <div class="image-buttons" style="justify-content:center;margin-top:10px;">
-      <button type="button" class="save-btn" onclick="cropImage()">Crop & Save</button>
-      <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+<!-- Cropper Modal & Script -->
+<div id="cropper-modal" style="display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:12px;border-radius:8px;max-width:90%;max-height:90%;text-align:center;overflow:auto;">
+    <h4>Crop image</h4>
+    <img id="cropper-image" src="" style="max-width:100%;max-height:70vh;display:block;margin:8px auto;" />
+    <div style="margin-top:8px;">
+      <button type="button" class="save-btn" id="cropper-save">Crop & Use</button>
+      <button type="button" class="cancel-btn" id="cropper-cancel">Cancel</button>
     </div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-let cropper;
-let currentImageIndex = null;
-const modal = document.getElementById('cropper-modal');
-const cropperImage = document.getElementById('cropper-image');
-const allowedFormats = ['image/jpeg','image/png','image/jpg'];
+let cropper=null,currentSlot=null;
+const modal=document.getElementById('cropper-modal');
+const cropperImage=document.getElementById('cropper-image');
+const deletedIndexes=new Set();
 
-// Image input change & cropper
-document.querySelectorAll('.product-image-input').forEach(input=>{
-  input.addEventListener('change', function(e){
-    const file = e.target.files[0];
-    currentImageIndex = e.target.getAttribute('data-index');
-    if(!file) return;
-    if(!allowedFormats.includes(file.type)){
-      alert('Invalid file format. Upload JPG/PNG only.');
-      e.target.value='';
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      cropperImage.src = ev.target.result;
+function updateDeletedHidden(){ document.getElementById('deletedImages').value=Array.from(deletedIndexes).join(','); }
+
+function markDeleteExisting(slot){
+  const preview=document.getElementById(`preview-image-${slot}`);
+  deletedIndexes.add(Number(slot));
+  updateDeletedHidden();
+  preview.src='/photos/default.jpg';
+  preview.removeAttribute('data-original-name');
+  preview.removeAttribute('data-original-index');
+  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${slot}"]`).forEach(el=>el.remove());
+}
+
+function resetImage(slot){
+  const preview=document.getElementById(`preview-image-${slot}`);
+  const origName=preview.getAttribute('data-original-name');
+  if(origName){
+    preview.src=origName.startsWith('http')||origName.startsWith('data:')||origName.startsWith('/')?origName:'/uploads/'+origName;
+    deletedIndexes.delete(Number(slot));
+  }else{
+    preview.src='/photos/default.jpg';
+    deletedIndexes.delete(Number(slot));
+  }
+  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${slot}"]`).forEach(el=>el.remove());
+  updateDeletedHidden();
+}
+
+document.querySelectorAll('.save-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const slot=btn.getAttribute('data-slot');
+    const fileInput=document.querySelector(`.product-image-input[data-slot="${slot}"]`);
+    if(!fileInput||!fileInput.files[0]){ alert('Choose an image first'); return; }
+    const reader=new FileReader();
+    reader.onload=e=>{
+      cropperImage.src=e.target.result;
+      currentSlot=Number(slot);
       modal.style.display='flex';
-      setTimeout(()=>{ cropper = new Cropper(cropperImage,{aspectRatio:1,viewMode:1,background:false,autoCropArea:1,zoomable:true}); },100);
-    }
-    reader.readAsDataURL(file);
+      setTimeout(()=>{ if(cropper)cropper.destroy(); cropper=new Cropper(cropperImage,{aspectRatio:1,viewMode:1,autoCropArea:1}); },80);
+    };
+    reader.readAsDataURL(fileInput.files[0]);
   });
 });
 
-// Crop & save
-function cropImage(){
-  const canvas = cropper.getCroppedCanvas({width:400,height:400});
-  const dataURL = canvas.toDataURL('image/jpeg');
+document.getElementById('cropper-save').addEventListener('click',()=>{
+  if(!cropper) return;
+  const canvas=cropper.getCroppedCanvas({width:800,height:800});
+  const dataUrl=canvas.toDataURL('image/jpeg',0.9);
+  const preview=document.getElementById(`preview-image-${currentSlot}`);
+  const origIdx=preview.getAttribute('data-original-index');
+  if(origIdx) deletedIndexes.add(Number(origIdx));
+  preview.src=dataUrl;
 
-  document.getElementById(`preview-image${currentImageIndex}`).src = dataURL;
-  document.getElementById(`productImageBase64${currentImageIndex}`).value = dataURL;
-  closeModal();
+  // remove existing hidden inputs
+  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${currentSlot}"]`).forEach(el=>el.remove());
+
+  const hidden=document.createElement('input');
+  hidden.type='hidden';
+  hidden.name='productImagesBase64[]';
+  hidden.value=dataUrl;
+  hidden.setAttribute('data-slot',currentSlot);
+  document.getElementById('editProductForm').appendChild(hidden);
+  updateDeletedHidden();
+  closeCropper();
+});
+
+document.getElementById('cropper-cancel').addEventListener('click',closeCropper);
+function closeCropper(){ modal.style.display='none'; if(cropper){ cropper.destroy(); cropper=null; } }
+
+function addVariantRow(){
+  const wrapper=document.getElementById('variants-wrapper');
+  const row=document.createElement('div');
+  row.className='variant-row';
+  row.innerHTML=`
+    <input type="number" name="variantSize[]" placeholder="Size (ml)" required />
+    <input type="number" name="variantStock[]" placeholder="Stock" min="0" required />
+    <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" step="0.01" required />
+    <input type="number" name="variantSalePrice[]" placeholder="Sale Price" step="0.01" required />
+    <button type="button" onclick="removeVariantRow(this)">Remove</button>
+  `;
+  wrapper.appendChild(row);
 }
-
-function closeModal(){ 
-  modal.style.display='none'; 
-  if(cropper){ cropper.destroy(); cropper=null; } 
-}
-
-// Reset image
-function resetImage(index){
-  const preview = document.getElementById(`preview-image${index}`);
-  preview.src = preview.getAttribute("data-original") || "/photos/default.jpg";
-  const input = document.querySelector(`input[data-index="${index}"]`);
-  input.value=''; 
-  input.removeAttribute('data-saved');
-  document.getElementById(`productImageBase64${index}`).value='';
-}
-
-// Delete image
-function deleteImage(index){
-  let deletedImagesInput = document.getElementById("deletedImages");
-  if(!deletedImagesInput){
-    deletedImagesInput=document.createElement("input");
-    deletedImagesInput.type="hidden";
-    deletedImagesInput.name="deletedImages";
-    deletedImagesInput.id="deletedImages";
-    document.getElementById("editProductForm").appendChild(deletedImagesInput);
-  }
-  let deleted = deletedImagesInput.value ? deletedImagesInput.value.split(",") : [];
-  if(!deleted.includes(index)) deleted.push(index);
-  deletedImagesInput.value = deleted.join(",");
-  document.getElementById(`preview-image${parseInt(index)+1}`).src="/photos/default.jpg";
-}
-
-// Form validation
-function showError(id,message){ document.getElementById(id).textContent=message; }
-function clearErrors(){ document.querySelectorAll('.error-message').forEach(el=>el.textContent=''); }
+function removeVariantRow(btn){ btn.parentElement.remove(); }
 
 function validateForm(){
-  clearErrors(); let valid=true;
-  const name=document.getElementsByName('productName')[0];
-  if(name.value.trim().length<3){ showError('productName-error','Product name must be at least 3 characters.'); valid=false; }
-
-  const desc=document.getElementsByName('description')[0];
-  if(desc.value.trim().length<5){ showError('description-error','Description should be at least 5 characters.'); valid=false; }
-
-  const stock=document.getElementsByName('stock')[0];
-  if(!/^\d+$/.test(stock.value.trim()) || parseInt(stock.value)<0){ showError('stock-error','Stock must be positive or 0.'); valid=false; }
-
-  const variant=document.getElementsByName('variant')[0];
-  if(!variant.value.trim()){ showError('variant-error','Please enter a valid variant.'); valid=false; }
-
-  const regularPrice=document.getElementsByName('regularPrice')[0];
-  const salePrice=document.getElementsByName('salePrice')[0];
-  if(parseFloat(regularPrice.value)<=0){ showError('regularPrice-error','Regular price must be > 0.'); valid=false; }
-  if(parseFloat(salePrice.value)<0){ showError('salePrice-error','Sale price cannot be negative.'); valid=false; }
-  if(parseFloat(salePrice.value)>parseFloat(regularPrice.value)){ showError('salePrice-error','Sale price cannot be greater than regular price.'); valid=false; }
-
-  return valid;
+  let existingCount=0;
+  for(let i=0;i<4;i++){
+    const preview=document.getElementById(`preview-image-${i}`);
+    if(preview.getAttribute('data-original-name')) existingCount++;
+  }
+  const newCount=document.querySelectorAll('input[name="productImagesBase64[]"]').length;
+  if((existingCount+newCount-deletedIndexes.size)<1){ alert('At least one image required'); return false; }
+  if((existingCount+newCount-deletedIndexes.size)>4){ alert('Max 4 images allowed'); return false; }
+  if(document.getElementsByName('variantSize[]').length===0){ alert('Add at least one variant'); return false; }
+  updateDeletedHidden();
+  return true;
 }
 </script>

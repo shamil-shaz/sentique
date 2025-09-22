@@ -1,5 +1,9 @@
 const Brand = require("../../models/brandSchema");
 const Product = require('../../models/productSchema');
+const cloudinary = require("cloudinary").v2;
+cont = path = require("path");
+const fs = require("fs");
+
 
 
 
@@ -70,42 +74,69 @@ const getBrandList = async (req, res) => {
   }
 };
 
+
+
 const addBrand = async (req, res) => {
   try {
-    const { brandName } = req.body;
-    const imageFile = req.file;
+    const { brandName } = req.body;         // Get brand name from request body
+    const imageFile = req.file;             // Get uploaded brand logo file from Multer
 
+    // Validate brand name
     if (!brandName || !brandName.trim()) {
-      return res.status(400).json({ error: " Brand name is required" });
+      return res.status(400).json({ error: "Brand name is required" });
     }
 
+    // Validate brand logo
     if (!imageFile) {
       return res.status(400).json({ error: "Brand logo is required" });
     }
 
+    // Check if brand already exists (case-insensitive)
     const existingBrand = await Brand.findOne({
-      brandName: { $regex: new RegExp("^" + brandName.trim() + "$", "i") }
+  brandName: { $regex: `^${brandName.trim()}$`, $options: "i" }
+});
+
+if (existingBrand) {
+  return res.status(400).json({ error: "Brand already exists" });
+}
+
+
+    // Upload image to Cloudinary
+    const result = await cloudinary.uploader.upload(imageFile.path, {
+      folder: "brands",
+      width: 500,
+      height: 500,
+      crop: "limit",
     });
 
-    if (existingBrand) {
-      return res.status(400).json({ error: " Brand already exists" });
-    }
-
+    // Create new brand document
     const newBrand = new Brand({
       brandName: brandName.trim(),
-      brandImage: [imageFile.filename],
+      brandImage: [result.secure_url],  // Store Cloudinary URL in DB
       isActive: true,
     });
 
+    // Save brand to database
     await newBrand.save();
 
-    res.status(200).json({ message: " Brand added successfully" });
+    // Return success response
+    res.status(200).json({ message: "Brand added successfully" });
 
   } catch (err) {
     console.error("Error adding brand:", err.message);
+
+    // Handle duplicate key error
+    if (err.code === 11000) {
+      return res.status(400).json({ error: "Brand already exists" });
+    }
+
+    // Handle other errors
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+
 
 
 const blockBrand =async(req,res)=>{
