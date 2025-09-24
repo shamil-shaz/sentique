@@ -144,17 +144,13 @@ nav.nav-links a.active {
     Summer Sale on All Branded Perfumes – Up to 20% Off + Free Express Delivery <a href="/shopPage">Shop Now</a>
 </div>
 
-
 <header class="navbar">
-  
     <div class="nav-logo">
-        <img src="photos/zodiac perfume/brand logo.png" alt="Sentique Logo">
+        <img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo">
     </div>
 
- 
     <div class="hamburger" id="hamburger"><i class="fa fa-bars"></i></div>
 
-   
     <nav class="nav-links" id="navLinks">
         <a href="/home">Home</a>
         <a href="/shopPage">Shop</a>
@@ -162,37 +158,28 @@ nav.nav-links a.active {
         <a href="/">About</a>
     </nav>
 
-    
     <div class="nav-icons">
+        <a href="/wishlist" title="Wishlist"><i class="fa fa-heart"></i></a>
+        <a href="/cart" title="Cart"><i class="fa fa-shopping-cart"></i></a>
 
-        <a href="/wishlist" title="Wishlist">
-            <i class="fa fa-heart"></i>
-        </a>
+       <% if (user) { %>
+  <div class="dropdown">
+    <a href="#" class="user-icon">
+      <i class="fa fa-user-circle"></i>
+    </a>
+    <div class="dropdown-content">
+      <div><strong><%= user.name %></strong></div>
+      <a href="/userProfile">Profile</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </div>
+<% } else { %>
+  <a href="/login" class="active">Login</a>
+  <a href="/signup" class="active">Sign Up</a>
+<% } %>
 
-        
-        <a href="/cart" title="Cart">
-            <i class="fa fa-shopping-cart"></i>
-        </a>
-
-      
-        <% if (user) { %>
-        <div class="dropdown">
-            <a href="#" class="user-icon">
-                <i class="fa fa-user-circle"></i>
-            </a>
-            <div class="dropdown-content">
-                <div><strong><%= user.name %></strong></div>
-                <a href="/userProfile">Profile</a>
-                <a href="/logout">Logout</a>
-            </div>
-        </div>
-        <% } else { %>
-            <a href="/login" class="active">Login</a>
-            <a href="/signup" class="active">Sign Up</a>
-        <% } %>
     </div>
 
-  
     <nav class="mobile-nav" id="mobileNav">
         <a href="/">Home</a>
         <a href="/shopPage">Shop</a>
@@ -206,11 +193,10 @@ nav.nav-links a.active {
 </header>
 
 <script>
- 
-    const hamburger = document.getElementById("hamburger");
-    const mobileNav = document.getElementById("mobileNav");
+const hamburger = document.getElementById("hamburger");
+const mobileNav = document.getElementById("mobileNav");
 
-    hamburger.addEventListener("click", () => {
-        mobileNav.style.display = mobileNav.style.display === "flex" ? "none" : "flex";
-    });
+hamburger.addEventListener("click", () => {
+    mobileNav.style.display = mobileNav.style.display === "flex" ? "none" : "flex";
+});
 </script>

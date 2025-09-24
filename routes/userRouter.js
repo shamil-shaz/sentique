@@ -1,8 +1,9 @@
 const express=require('express')
 const router=express.Router();
-const userController=require("../controllers/user/userController");
 const passport = require('passport');
-const { userAuth, adminAuth } = require('../middlewares/auth');
+const { userAuth } = require('../middlewares/auth');
+const userController=require("../controllers/user/userController");
+const profileController=require("../controllers/user/profileController")
 
 
 router.get('/pageNotFound',userController.pageNotFound)
@@ -13,9 +14,25 @@ router.get('/verify-otp', userController.loadVerifyOtpPage);
 router.post('/verify-otp', userController.verifyOtp);  
 router.post('/resend-otp',userController.resendOtp)
 
+//profile Management
+
+router.get('/forgot-password', profileController.loadForgotPassword);
+router.post('/forgot-password-valid', profileController.handleForgotPassword);
+router.get('/forgotPassword-otp', profileController.loadForgotPageOtp);
+router.post('/forgotPassword-otp', profileController.verifyForgotOtp);
+router.post('/resend-forgot-otp', profileController.resendOtp);
+
+router.get('/reset-password',profileController.loadResetPasswordPage); 
+router.post('/reset-password', profileController.resetPassword);
+
+
+
+
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+
 router.get('/auth/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/signup' }),
+  passport.authenticate('google', { failureRedirect: "/signup?error=blocked" }),
   (req, res) => {
     if (req.user) {
       req.session.user = req.user._id.toString();

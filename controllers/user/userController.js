@@ -35,79 +35,6 @@ const loadLandingPage = async (req, res) => {
 };  
 
 
-// const loadHomepage = async (req, res) => {
-//   try {
-//     const sessionUser = req.session.user;  
-//     const categories = await Category.find({ isListed: true });
-
-//     // 🔹 Flash Sales (latest products)
-//     let productData = await Product.find({
-//       isBlocked: false,
-//       category: { $in: categories.map(category => category._id) },
-//       quantity: { $gt: 0 },
-//     })
-//     .sort({ createdAt: -1 })
-//     .limit(4)
-    
-//     .lean();
-
-//     // 🔹 New Arrivals (latest 4 products)
-//     const newArrivals = await Product.find({
-//       isBlocked: false,
-//       category: { $in: categories.map(category => category._id) },
-//       quantity: { $gt: 0 },
-//     })
-//     .sort({ createdAt: -1 })
-//     .limit(4)
-//     .lean();
-
-//     // 🔹 Best Selling (for now just pick top 4 randomly, 
-//     // later you can add salesCount field in Product schema)
-//     const bestSelling = await Product.find({
-//       isBlocked: false,
-//       category: { $in: categories.map(category => category._id) },
-//       quantity: { $gt: 0 },
-//     })
-//     .sort({ soldCount: -1 }) // needs soldCount field
-//     .limit(4)
-//     .lean();
-
-//     // 🔹 Popular Brands (distinct brands from product collection)
-//     const brands = await Brand.find({ isBlocked: false })
-//       .sort({ createdAt: -1 })
-//       .limit(10)
-//       .lean();
-
-//     // 🔹 User data
-//     let userData = null;
-//     if (sessionUser) {
-//       const user = await User.findById(sessionUser);
-//       if (user) {
-//         userData = {
-//           _id: user._id,
-//           name: user.name,
-//           email: user.email,
-//           phone: user.phone,
-//         };
-//       }
-//     }
-
-
-//     return res.render("home", {
-//       user: userData,
-//       products: productData,   // Flash Sales
-//       newArrivals,             // New Arrival
-//       bestSelling,             // Best Selling
-//       categories,              // Categories
-//       brands                   // Brands
-//     });
-
-//   } catch (error) {
-//     console.error("Home page error:", error);
-//     return res.status(500).send("Server error");
-//   }
-// };
-
 
 
 const loadHomepage = async (req, res) => {
@@ -282,6 +209,7 @@ const signup = async (req, res) => {
   }
 };
 
+
 const loadVerifyOtpPage = async (req, res) => {
     try {
         if (!req.session.userOtp || !req.session.userData) {
@@ -394,39 +322,53 @@ const loadLogin = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // 1. Validation
     if (!email || !password) {
       return res.render("login", { message: "All fields are required" });
     }
-    const findUser = await User.findOne({ isAdmin: 0, email: email });
- 
+
+    // 2. Find user (exclude admin)
+    const findUser = await User.findOne({ email: email, isAdmin: 0 });
+
     if (!findUser) {
-      return res.render("login", { message: "User not Found" });
+      return res.render("login", { message: "User not found" });
     }
 
+    // 3. Check if user is blocked
     if (findUser.isBlocked) {
-      return res.render("login", { message: "User is blocked by admin" });
+      return res.render("login", { message: "User is blocked. Please contact support." });
     }
 
+    // 4. Check if user registered only via Google login
     if (!findUser.password) {
       return res.render("login", { message: "This account uses Google login only" });
     }
+
+    // 5. Compare password
     const passwordMatch = await bcrypt.compare(password, findUser.password);
 
     if (!passwordMatch) {
-      return res.render("login", { message: "Incorrect Password" });
+      return res.render("login", { message: "Incorrect password" });
     }
-     req.session.user = {
-       _id: findUser._id,
-        name: findUser.name,
-       email: findUser.email,
 
-      };
-    res.redirect("/home");
+    // 6. Save session
+    req.session.user = {
+      _id: findUser._id,
+      name: findUser.name,
+      email: findUser.email,
+    };
+
+    // 7. Redirect to home
+    return res.redirect("/home");
+
   } catch (error) {
-    console.error("login error", error);
-    res.render("login", { message: "Login failed. Please try again later" });
+    console.error("Login error:", error);
+    return res.render("login", { message: "Login failed. Please try again later." });
   }
 };
+
+
 
 const logout= async(req,res)=>{
     try{
@@ -442,6 +384,7 @@ const logout= async(req,res)=>{
          res.redirect('/pageNotFound')
     }
 }
+
 
 
 // const loadShopingPage = async (req, res) => {
@@ -533,6 +476,7 @@ const logout= async(req,res)=>{
 // };
 
 
+
 const loadShopingPage = async (req, res) => {
   try {
     const user = req.session.user;
@@ -615,6 +559,8 @@ const loadShopingPage = async (req, res) => {
       sort,
       search,
     });
+
+    console.log(userData);
   } catch (error) {
     console.error("Error in loadShopingPage:", error);
     res.redirect("/pageNotFound");
@@ -625,17 +571,17 @@ const loadShopingPage = async (req, res) => {
 
 const loadProductDetails = async (req, res) => {
   try {
-    const userId = req.session.user ? req.session.user._id : null;
-    const userData = userId ? await User.findById(userId).lean() : null;
+      const user = req.session.user;
+    const userData = await User.findById(user).lean();
 
-    // Get productId (support both query & params)
+
     const productId = req.params.id || req.query.id;
 
     if (!productId) {
       return res.redirect('/shopPage');
     }
 
-    // Fetch product with brand & category
+   
     const product = await Product.findOne({
       _id: productId,
       isBlocked: false
@@ -666,12 +612,14 @@ if (relatedProducts.length < 3) {
     .lean();
   relatedProducts = [...relatedProducts, ...extraProducts];
 }
+  
 
     res.render('productDetails', {
       user: userData,
       product,
       relatedProducts
     });
+ 
 
   } catch (error) {
     console.error("Error loading product details:", error);
@@ -694,6 +642,8 @@ module.exports = {
     logout,    
     loadShopingPage, 
     loadProductDetails,
+    
+   
 };
 
 
