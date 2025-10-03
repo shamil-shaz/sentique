@@ -1,126 +1,676 @@
 <%- include("../partials/admin/header.ejs") %>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-* { box-sizing: border-box; }
-body { font-family: Inter, sans-serif; background: #f9f9f9; }
-.main-content { margin-left: 240px; margin-top: 60px; padding: 20px; min-height: 100vh; }
-.container { max-width: 1100px; background: #fff; padding: 25px; border-radius: 12px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.08); }
-h2 { text-align: center; margin-bottom: 20px; }
-.form-wrapper { display: flex; flex-wrap: wrap; gap: 30px; }
-.left, .right { flex: 1; min-width: 300px; }
-.image-box img { width: 100%; border-radius: 10px; max-height: 250px; object-fit: cover; border: 1px solid #ddd; }
-.image-buttons { display: flex; gap: 8px; margin-top: 8px; }
-.save-btn { background: #007bff; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-.cancel-btn { background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-label { font-weight: 600; margin-top: 10px; display: block; }
-input, textarea, select { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
-.variant-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-.variant-row input { flex: 1; }
-.button-row { display: flex; gap: 10px; margin-top: 16px; }
-.btn-green { flex: 1; background: #28a745; color: #fff; border: none; padding: 12px; border-radius: 8px; cursor: pointer; }
-.btn-red { flex: 1; background: #dc3545; color: #fff; border: none; padding: 12px; border-radius: 8px; cursor: pointer; }
-.image-preview-container { display: flex; flex-wrap: wrap; gap: 10px; }
-.image-box { position: relative; width: 120px; }
-.preview-img { width: 100%; height: 100px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
-@media(max-width:768px) { .main-content { margin-left: 0; } .button-row { flex-direction: column; } }
-.alert { padding: 10px; margin-bottom: 12px; border-radius: 6px; }
-.alert-success { background: #d4edda; color: #155724; }
-.alert-danger { background: #f8d7da; color: #721c24; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { 
+  font-family: 'Inter', sans-serif; 
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  color: #2d3748;
+  line-height: 1.6;
+}
+
+.main-content { 
+  margin-left: 240px; 
+  margin-top: 60px; 
+  padding: 40px 20px; 
+  min-height: 100vh; 
+}
+
+.page-header {
+  max-width: 1200px;
+  margin: 0 auto 30px;
+}
+
+.page-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 8px;
+}
+
+.page-header p {
+  color: #718096;
+  font-size: 15px;
+}
+
+.alert-success { 
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  padding: 16px 20px; 
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: #d4edda; 
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.alert-success svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.container { 
+  max-width: 1200px; 
+  background: #fff; 
+  padding: 0;
+  border-radius: 16px; 
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  margin: auto; 
+  overflow: hidden;
+}
+
+.form-wrapper { 
+  display: grid;
+  grid-template-columns: 480px 1fr;
+  gap: 0;
+}
+
+/* LEFT SIDE - IMAGES */
+.left { 
+  background: #f8fafc;
+  padding: 40px 30px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: #4299e1;
+  border-radius: 2px;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.image-box { 
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.image-box:hover {
+  border-color: #4299e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.15);
+}
+
+.image-box.has-image {
+  border-color: #48bb78;
+}
+
+.image-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #718096;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.image-preview-wrapper {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f7fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  position: relative;
+  border: 2px dashed #cbd5e0;
+}
+
+.image-preview-wrapper.has-content {
+  border-style: solid;
+  border-color: #48bb78;
+}
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-image-input {
+  display: none;
+}
+
+.upload-label {
+  display: block;
+  padding: 8px 12px;
+  background: #4299e1;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.upload-label:hover {
+  background: #3182ce;
+  transform: translateY(-1px);
+}
+
+.image-buttons { 
+  display: flex; 
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.image-buttons button {
+  flex: 1;
+  min-width: 70px;
+}
+
+.save-btn, .cancel-btn, .delete-btn { 
+  padding: 7px 10px; 
+  font-size: 11px; 
+  border-radius: 6px; 
+  border: none; 
+  cursor: pointer; 
+  font-weight: 600;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.save-btn { 
+  background: #48bb78; 
+  color: white; 
+}
+
+.save-btn:hover {
+  background: #38a169;
+  transform: translateY(-1px);
+}
+
+.cancel-btn { 
+  background: #718096; 
+  color: white; 
+}
+
+.cancel-btn:hover {
+  background: #4a5568;
+  transform: translateY(-1px);
+}
+
+.delete-btn {
+  background: #fc8181;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #f56565;
+  transform: translateY(-1px);
+}
+
+/* RIGHT SIDE - FORM */
+.right { 
+  padding: 40px;
+}
+
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+label { 
+  font-weight: 600;
+  font-size: 14px;
+  color: #2d3748;
+  margin-bottom: 8px; 
+  display: block;
+}
+
+label .required {
+  color: #f56565;
+  margin-left: 2px;
+}
+
+input, textarea, select { 
+  width: 100%; 
+  padding: 12px 16px; 
+  border: 2px solid #e2e8f0; 
+  border-radius: 8px; 
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  background: white;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* VARIANTS */
+.variants-container {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.variant-row { 
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  gap: 12px; 
+  margin-bottom: 12px;
+  align-items: start;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.variant-row:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.variant-row input {
+  padding: 10px 12px;
+}
+
+.remove-variant-btn {
+  padding: 10px 16px;
+  background: #fc8181;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.remove-variant-btn:hover {
+  background: #f56565;
+  transform: translateY(-1px);
+}
+
+.add-variant-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: white;
+  color: #4299e1;
+  border: 2px dashed #4299e1;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 12px;
+  transition: all 0.2s;
+}
+
+.add-variant-btn:hover {
+  background: #ebf8ff;
+  border-color: #3182ce;
+}
+
+/* BUTTONS */
+.button-row { 
+  display: flex; 
+  gap: 16px; 
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-green, .btn-red { 
+  padding: 14px 32px; 
+  border: none; 
+  border-radius: 8px; 
+  font-size: 16px; 
+  font-weight: 600; 
+  cursor: pointer; 
+  flex: 1;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-green { 
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white; 
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.btn-green:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(66, 153, 225, 0.4);
+}
+
+.btn-red { 
+  background: white;
+  color: #718096;
+  border: 2px solid #e2e8f0;
+  box-shadow: none;
+}
+
+.btn-red:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+/* CROPPER MODAL */
+#cropper-modal { 
+  display: none; 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999; 
+  justify-content: center; 
+  align-items: center;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content { 
+  background: #fff; 
+  padding: 30px; 
+  border-radius: 16px; 
+  max-width: 90vw;
+  max-height: 90vh; 
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h4 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #1a202c;
+  text-align: center;
+}
+
+.modal-content img { 
+  max-width: 100%; 
+  margin-bottom: 20px;
+  border-radius: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.modal-buttons button {
+  padding: 12px 32px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #e6fffa;
+  color: #047857;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .form-wrapper {
+    grid-template-columns: 1fr;
+  }
+  
+  .left {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .images-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content { 
+    margin-left: 0; 
+    padding: 20px 16px;
+  }
+  
+  .container {
+    border-radius: 12px;
+  }
+  
+  .left, .right {
+    padding: 24px 20px;
+  }
+  
+  .images-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .variant-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .button-row { 
+    flex-direction: column; 
+  }
+  
+  .page-header h2 {
+    font-size: 24px;
+  }
+}
+
+input::placeholder, textarea::placeholder {
+  color: #a0aec0;
+}
 </style>
 
 <div class="main-content">
-  <div class="container">
+  <div class="page-header">
     <h2>Edit Product</h2>
+    <p>Update product information, images, and variant details</p>
+  </div>
 
-    <% if (successMessage) { %>
-      <div class="alert alert-success"><%= successMessage %></div>
-    <% } %>
-    <% if (errorMessage) { %>
-      <div class="alert alert-danger"><%= errorMessage %></div>
-    <% } %>
+  <% if (locals.success && locals.success.length > 0) { %>
+    <div class="alert alert-success">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <%= locals.success[0] %>
+    </div>
+  <% } %>
 
+  <div class="container">
     <form id="editProductForm" action="/admin/edit-product/<%= product._id %>" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
       <div class="form-wrapper">
 
-        <!-- LEFT: Images -->
+    
         <div class="left">
-          <% for (let i = 0; i < 4; i++) { 
-               const img = product.images && product.images[i] ? product.images[i] : null;
-               let previewSrc = '/photos/default.jpg';
-               if (img) previewSrc = img.startsWith('http') || img.startsWith('data:') || img.startsWith('/') ? img : '/uploads/' + img;
-          %>
-            <div class="image-box" style="margin-bottom:14px;">
-              <img id="preview-image-<%= i %>" src="<%= previewSrc %>" data-original-name="<%= img || '' %>" data-original-index="<%= img ? i : '' %>" class="preview-img" />
-              <label>Choose image (slot <%= i+1 %>)</label>
-              <input type="file" accept="image/*" class="product-image-input" data-slot="<%= i %>" />
+          <div class="section-title">Product Images</div>
+          <div class="images-grid">
+            <% for (let i = 0; i < 4; i++) { 
+                 const img = product.images && product.images[i] ? product.images[i] : null;
+                 let previewSrc = '/photos/default.jpg';
+                 if (img) previewSrc = img.startsWith('http') || img.startsWith('data:') || img.startsWith('/') ? img : '/uploads/' + img;
+            %>
+            <div class="image-box <%= img ? 'has-image' : '' %>" id="image-box-<%= i %>">
+              <div class="image-label">Image <%= i + 1 %></div>
+              <div class="image-preview-wrapper <%= img ? 'has-content' : '' %>" id="wrapper-<%= i %>">
+                <img id="preview-image-<%= i %>" 
+                     src="<%= previewSrc %>" 
+                     data-original-name="<%= img || '' %>" 
+                     data-original-index="<%= img ? i : '' %>" 
+                     class="preview-img" 
+                     alt="Product Image <%= i + 1 %>"/>
+              </div>
+              
+              <label class="upload-label" for="file-input-<%= i %>">
+                <%= img ? 'Change Image' : 'Upload Image' %>
+              </label>
+              <input type="file" 
+                     id="file-input-<%= i %>" 
+                     accept="image/*" 
+                     class="product-image-input" 
+                     data-slot="<%= i %>" />
+              
               <div class="image-buttons">
-                <button type="button" class="save-btn" data-slot="<%= i %>">Crop & Save</button>
-                <button type="button" class="cancel-btn" onclick="resetImage(<%= i %>)">Reset</button>
+                <button type="button" class="cancel-btn" onclick="resetImage('<%= i %>')">Reset</button>
                 <% if (img) { %>
-                  <button type="button" class="cancel-btn" onclick="markDeleteExisting(<%= i %>)">Delete</button>
+                  <button type="button" class="delete-btn" onclick="markDeleteExisting('<%= i %>')">Delete</button>
                 <% } %>
               </div>
             </div>
-          <% } %>
+            <% } %>
+          </div>
           <input type="hidden" name="deletedImages" id="deletedImages" value=""/>
         </div>
 
-        <!-- RIGHT: Product info + variants -->
+        <!-- RIGHT SIDE - PRODUCT DETAILS -->
         <div class="right">
-          <label>Product Name</label>
-          <input type="text" name="productName" value="<%= product.productName %>" required />
+          <div class="form-section">
+            <div class="section-title">Basic Information</div>
+            
+            <div class="form-group">
+              <label>Product Name <span class="required">*</span></label>
+              <input type="text" name="productName" value="<%= product.productName %>" placeholder="Enter product name" required />
+            </div>
 
-          <label>Brand</label>
-          <select name="brand" required>
-            <option value="">-- Select Brand --</option>
-            <% brands.forEach(b => { %>
-              <option value="<%= b._id %>" <%= (product.brand && (product.brand._id ? product.brand._id.toString() : product.brand.toString()) === b._id.toString()) ? 'selected' : '' %>><%= b.brandName || b.name %></option>
-            <% }) %>
-          </select>
+            <div class="form-group">
+              <label>Brand <span class="required">*</span></label>
+              <select name="brand" required>
+                <option value="">Select a brand</option>
+                <% brands.forEach(b => { %>
+                  <option value="<%= b._id %>" <%= (product.brand && (product.brand._id ? product.brand._id.toString() : product.brand.toString()) === b._id.toString()) ? 'selected' : '' %>><%= b.brandName || b.name %></option>
+                <% }) %>
+              </select>
+            </div>
 
-          <label>Category</label>
-          <select name="category" required>
-            <option value="">-- Select Category --</option>
-            <% cat.forEach(c => { %>
-              <option value="<%= c._id %>" <%= (product.category && (product.category._id ? product.category._id.toString() : product.category.toString()) === c._id.toString()) ? 'selected' : '' %>><%= c.name %></option>
-            <% }) %>
-          </select>
-
-          <label>Short Description</label>
-          <textarea name="description" rows="3" required><%= product.description %></textarea>
-
-           <label>Long Description</label>
-          <textarea name="Longdescription" rows="3" required><%= product.Longdescription %></textarea>
-
-          <label>Variants</label>
-          <div id="variants-wrapper">
-            <% if (product.variants && product.variants.length > 0) { %>
-              <% product.variants.forEach(v => { %>
-                <div class="variant-row">
-                  <input type="number" name="variantSize[]" placeholder="Size (ml)" value="<%= v.size %>" required />
-                  <input type="number" name="variantStock[]" placeholder="Stock" value="<%= v.stock %>" min="0" required />
-                  <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" step="0.01" value="<%= v.regularPrice %>" required />
-                  <input type="number" name="variantSalePrice[]" placeholder="Sale Price" step="0.01" value="<%= v.salePrice %>" required />
-                  <button type="button" onclick="removeVariantRow(this)">Remove</button>
-                </div>
-              <% }) %>
-            <% } else { %>
-              <div class="variant-row">
-                <input type="number" name="variantSize[]" placeholder="Size (ml)" required />
-                <input type="number" name="variantStock[]" placeholder="Stock" min="0" required />
-                <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" step="0.01" required />
-                <input type="number" name="variantSalePrice[]" placeholder="Sale Price" step="0.01" required />
-                <button type="button" onclick="removeVariantRow(this)">Remove</button>
-              </div>
-            <% } %>
+            <div class="form-group">
+              <label>Category <span class="required">*</span></label>
+              <select name="category" required>
+                <option value="">Select a category</option>
+                <% cat.forEach(c => { %>
+                  <option value="<%= c._id %>" <%= (product.category && (product.category._id ? product.category._id.toString() : product.category.toString()) === c._id.toString()) ? 'selected' : '' %>><%= c.name %></option>
+                <% }) %>
+              </select>
+            </div>
           </div>
-          <button type="button" onclick="addVariantRow()" style="margin-top:8px;">Add Variant</button>
+
+          <div class="form-section">
+            <div class="section-title">Description</div>
+            <div class="form-group">
+              <label>Short Description <span class="required">*</span></label>
+              <textarea name="description" rows="3" placeholder="Brief product description" required><%= product.description %></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Long Description <span class="required">*</span></label>
+              <textarea name="Longdescription" rows="4" placeholder="Detailed product description" required><%= product.Longdescription %></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title">Product Variants</div>
+            <div class="variants-container">
+              <div id="variants-wrapper">
+                <% if (product.variants && product.variants.length > 0) { %>
+                  <% product.variants.forEach(v => { %>
+                    <div class="variant-row">
+                      <input type="number" name="variantSize[]" placeholder="Size (ml)" value="<%= v.size %>" required />
+                      <input type="number" name="variantStock[]" placeholder="Stock" value="<%= v.stock %>" min="0" required />
+                      <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" step="0.01" value="<%= v.regularPrice %>" required />
+                      <input type="number" name="variantSalePrice[]" placeholder="Sale Price" step="0.01" value="<%= v.salePrice %>" required />
+                      <button type="button" class="remove-variant-btn">Remove</button>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <div class="variant-row">
+                    <input type="number" name="variantSize[]" placeholder="Size (ml)" required />
+                    <input type="number" name="variantStock[]" placeholder="Stock" min="0" required />
+                    <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" step="0.01" required />
+                    <input type="number" name="variantSalePrice[]" placeholder="Sale Price" step="0.01" required />
+                    <button type="button" class="remove-variant-btn">Remove</button>
+                  </div>
+                <% } %>
+              </div>
+              <button type="button" class="add-variant-btn" onclick="addVariantRow()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Variant
+              </button>
+            </div>
+          </div>
 
           <div class="button-row">
-            <button class="btn-green" type="submit">Update</button>
-            <button class="btn-red" type="button" onclick="window.location.href='/admin/products'">Cancel</button>
+            <button type="submit" class="btn-green">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Update Product
+            </button>
+            <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">Cancel</button>
           </div>
         </div>
 
@@ -129,13 +679,13 @@ input, textarea, select { width: 100%; padding: 10px; margin: 6px 0; border: 1px
   </div>
 </div>
 
-<!-- Cropper Modal & Script -->
-<div id="cropper-modal" style="display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;padding:12px;border-radius:8px;max-width:90%;max-height:90%;text-align:center;overflow:auto;">
-    <h4>Crop image</h4>
-    <img id="cropper-image" src="" style="max-width:100%;max-height:70vh;display:block;margin:8px auto;" />
-    <div style="margin-top:8px;">
-      <button type="button" class="save-btn" id="cropper-save">Crop & Use</button>
+<!-- Cropper Modal -->
+<div id="cropper-modal">
+  <div class="modal-content">
+    <h4>Crop Image</h4>
+    <img id="cropper-image" src="" />
+    <div class="modal-buttons">
+      <button type="button" class="save-btn" id="cropper-save">Apply Crop</button>
       <button type="button" class="cancel-btn" id="cropper-cancel">Cancel</button>
     </div>
   </div>
@@ -143,104 +693,227 @@ input, textarea, select { width: 100%; padding: 10px; margin: 6px 0; border: 1px
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-let cropper=null,currentSlot=null;
-const modal=document.getElementById('cropper-modal');
-const cropperImage=document.getElementById('cropper-image');
-const deletedIndexes=new Set();
+let cropper = null, currentSlot = null;
+const modal = document.getElementById('cropper-modal');
+const cropperImage = document.getElementById('cropper-image');
+const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+const deletedIndexes = new Set();
 
-function updateDeletedHidden(){ document.getElementById('deletedImages').value=Array.from(deletedIndexes).join(','); }
 
-function markDeleteExisting(slot){
-  const preview=document.getElementById(`preview-image-${slot}`);
+ if (locals.error && locals.error.length > 0) { 
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: '<%= locals.error[0] %>',
+    confirmButtonColor: '#dc3545',
+    confirmButtonText: 'OK'
+  });
+} 
+
+function updateDeletedHidden() {
+  document.getElementById('deletedImages').value = Array.from(deletedIndexes).join(',');
+}
+
+function markDeleteExisting(slot) {
+  const preview = document.getElementById(`preview-image-${slot}`);
   deletedIndexes.add(Number(slot));
   updateDeletedHidden();
-  preview.src='/photos/default.jpg';
+  preview.src = '/photos/default.jpg';
   preview.removeAttribute('data-original-name');
   preview.removeAttribute('data-original-index');
-  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${slot}"]`).forEach(el=>el.remove());
+  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${slot}"]`).forEach(el => el.remove());
 }
 
-function resetImage(slot){
-  const preview=document.getElementById(`preview-image-${slot}`);
-  const origName=preview.getAttribute('data-original-name');
-  if(origName){
-    preview.src=origName.startsWith('http')||origName.startsWith('data:')||origName.startsWith('/')?origName:'/uploads/'+origName;
+function resetImage(slot) {
+  const preview = document.getElementById(`preview-image-${slot}`);
+  const origName = preview.getAttribute('data-original-name');
+  if (origName) {
+    preview.src = origName.startsWith('http') || origName.startsWith('data:') || origName.startsWith('/') ? origName : '/uploads/' + origName;
     deletedIndexes.delete(Number(slot));
-  }else{
-    preview.src='/photos/default.jpg';
+  } else {
+    preview.src = '/photos/default.jpg';
     deletedIndexes.delete(Number(slot));
   }
-  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${slot}"]`).forEach(el=>el.remove());
+  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${slot}"]`).forEach(el => el.remove());
   updateDeletedHidden();
 }
 
-document.querySelectorAll('.save-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const slot=btn.getAttribute('data-slot');
-    const fileInput=document.querySelector(`.product-image-input[data-slot="${slot}"]`);
-    if(!fileInput||!fileInput.files[0]){ alert('Choose an image first'); return; }
-    const reader=new FileReader();
-    reader.onload=e=>{
-      cropperImage.src=e.target.result;
-      currentSlot=Number(slot);
-      modal.style.display='flex';
-      setTimeout(()=>{ if(cropper)cropper.destroy(); cropper=new Cropper(cropperImage,{aspectRatio:1,viewMode:1,autoCropArea:1}); },80);
+// Auto-open cropper on image selection
+document.querySelectorAll('.product-image-input').forEach(input => {
+  input.addEventListener('change', e => {
+    const slot = Number(input.getAttribute('data-slot'));
+    if (!input.files[0]) return;
+    if (!allowedFormats.includes(input.files[0].type)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Image',
+        text: 'Only PNG/JPG/JPEG formats are allowed',
+        confirmButtonColor: '#dc3545'
+      });
+      input.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      cropperImage.src = ev.target.result;
+      currentSlot = slot;
+      modal.style.display = 'flex';
+      setTimeout(() => {
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(cropperImage, { aspectRatio: 1, viewMode: 1, autoCropArea: 1 });
+      }, 50);
     };
-    reader.readAsDataURL(fileInput.files[0]);
+    reader.readAsDataURL(input.files[0]);
   });
 });
 
-document.getElementById('cropper-save').addEventListener('click',()=>{
-  if(!cropper) return;
-  const canvas=cropper.getCroppedCanvas({width:800,height:800});
-  const dataUrl=canvas.toDataURL('image/jpeg',0.9);
-  const preview=document.getElementById(`preview-image-${currentSlot}`);
-  const origIdx=preview.getAttribute('data-original-index');
-  if(origIdx) deletedIndexes.add(Number(origIdx));
-  preview.src=dataUrl;
+document.getElementById('cropper-save').addEventListener('click', () => {
+  if (!cropper) return;
+  const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+  const preview = document.getElementById(`preview-image-${currentSlot}`);
+  const origIdx = preview.getAttribute('data-original-index');
+  if (origIdx) deletedIndexes.add(Number(origIdx));
+  preview.src = dataUrl;
 
-  // remove existing hidden inputs
-  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${currentSlot}"]`).forEach(el=>el.remove());
+  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${currentSlot}"]`).forEach(el => el.remove());
 
-  const hidden=document.createElement('input');
-  hidden.type='hidden';
-  hidden.name='productImagesBase64[]';
-  hidden.value=dataUrl;
-  hidden.setAttribute('data-slot',currentSlot);
+  const hidden = document.createElement('input');
+  hidden.type = 'hidden';
+  hidden.name = 'productImagesBase64[]';
+  hidden.value = dataUrl;
+  hidden.setAttribute('data-slot', currentSlot);
   document.getElementById('editProductForm').appendChild(hidden);
   updateDeletedHidden();
   closeCropper();
 });
 
-document.getElementById('cropper-cancel').addEventListener('click',closeCropper);
-function closeCropper(){ modal.style.display='none'; if(cropper){ cropper.destroy(); cropper=null; } }
+document.getElementById('cropper-cancel').addEventListener('click', closeCropper);
 
-function addVariantRow(){
-  const wrapper=document.getElementById('variants-wrapper');
-  const row=document.createElement('div');
-  row.className='variant-row';
-  row.innerHTML=`
+function closeCropper() {
+  modal.style.display = 'none';
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+}
+
+function addVariantRow() {
+  const wrapper = document.getElementById('variants-wrapper');
+  const row = document.createElement('div');
+  row.className = 'variant-row';
+  row.innerHTML = `
     <input type="number" name="variantSize[]" placeholder="Size (ml)" required />
     <input type="number" name="variantStock[]" placeholder="Stock" min="0" required />
     <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" step="0.01" required />
     <input type="number" name="variantSalePrice[]" placeholder="Sale Price" step="0.01" required />
-    <button type="button" onclick="removeVariantRow(this)">Remove</button>
-  `;
+    <button type="button" class="remove-variant-btn">Remove</button>`;
   wrapper.appendChild(row);
-}
-function removeVariantRow(btn){ btn.parentElement.remove(); }
 
-function validateForm(){
-  let existingCount=0;
-  for(let i=0;i<4;i++){
-    const preview=document.getElementById(`preview-image-${i}`);
-    if(preview.getAttribute('data-original-name')) existingCount++;
+  row.querySelector('.remove-variant-btn').addEventListener('click', () => {
+    if (wrapper.children.length > 1) {
+      row.remove();
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Cannot Remove',
+        text: 'At least one variant is required',
+        confirmButtonColor: '#dc3545'
+      });
+    }
+  });
+}
+
+document.querySelectorAll('.remove-variant-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const wrapper = document.getElementById('variants-wrapper');
+    if (wrapper.children.length > 1) {
+      btn.parentElement.remove();
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Cannot Remove',
+        text: 'At least one variant is required',
+        confirmButtonColor: '#dc3545'
+      });
+    }
+  });
+});
+
+function validateForm() {
+  let errors = [];
+
+ 
+  let existingCount = 0;
+  for (let i = 0; i < 4; i++) {
+    const preview = document.getElementById(`preview-image-${i}`);
+    if (preview.getAttribute('data-original-name') && !deletedIndexes.has(i)) {
+      existingCount++;
+    }
   }
-  const newCount=document.querySelectorAll('input[name="productImagesBase64[]"]').length;
-  if((existingCount+newCount-deletedIndexes.size)<1){ alert('At least one image required'); return false; }
-  if((existingCount+newCount-deletedIndexes.size)>4){ alert('Max 4 images allowed'); return false; }
-  if(document.getElementsByName('variantSize[]').length===0){ alert('Add at least one variant'); return false; }
-  updateDeletedHidden();
+  const newCount = document.querySelectorAll('input[name="productImagesBase64[]"]').length;
+  const totalImages = existingCount + newCount - deletedIndexes.size;
+  if (totalImages < 1) {
+    errors.push('At least one image is required');
+  }
+  if (totalImages > 4) {
+    errors.push('Maximum 4 images allowed');
+  }
+
+  
+  const name = document.getElementsByName('productName')[0];
+  const desc = document.getElementsByName('description')[0];
+  const longDesc = document.getElementsByName('Longdescription')[0];
+  const brand = document.getElementsByName('brand')[0];
+  const category = document.getElementsByName('category')[0];
+
+  if (!name.value.trim()) {
+    errors.push('Product name is required');
+  }
+  if (!desc.value.trim()) {
+    errors.push('Short description is required');
+  }
+  if (!longDesc.value.trim()) {
+    errors.push('Long description is required');
+  }
+  if (!brand.value) {
+    errors.push('Please select a brand');
+  }
+  if (!category.value) {
+    errors.push('Please select a category');
+  }
+
+  
+  document.querySelectorAll('.variant-row').forEach((row, index) => {
+    const inputs = row.querySelectorAll('input');
+    const [size, stock, regPrice, salePrice] = inputs;
+
+    if (!size.value || Number(size.value) <= 0) {
+      errors.push(`Variant ${index + 1}: Size must be positive`);
+    }
+    if (!stock.value || Number(stock.value) < 0) {
+      errors.push(`Variant ${index + 1}: Stock cannot be negative`);
+    }
+    if (!regPrice.value || Number(regPrice.value) <= 0) {
+      errors.push(`Variant ${index + 1}: Regular price must be positive`);
+    }
+    if (!salePrice.value || Number(salePrice.value) < 0) {
+      errors.push(`Variant ${index + 1}: Sale price cannot be negative`);
+    }
+    if (Number(salePrice.value) > Number(regPrice.value)) {
+      errors.push(`Variant ${index + 1}: Sale price must be ≤ regular price`);
+    }
+  });
+
+  if (errors.length > 0) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation Error',
+      html: errors.join('<br>'),
+      confirmButtonColor: '#dc3545'
+    });
+    return false;
+  }
   return true;
 }
 </script>

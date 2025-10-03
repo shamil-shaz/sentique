@@ -7,8 +7,10 @@ const session = require("express-session");
 const flash = require("connect-flash"); 
 const db = require("./config/db");
 const passport = require("./config/passport");
+const nocache = require('nocache');
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
+const MongoStore = require("connect-mongo");
 
 db();
 
@@ -17,19 +19,46 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'yourSecretKey',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: false,
-    httpOnly: true,
-    maxAge: 72 * 60 * 60 * 1000
-  }
-}));
+app.use(
+  session({
+    name: "userSession",
+    secret: process.env.SESSION_SECRET || "super_secret_sentique_key",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI || "mongodb://127.0.0.1:27017/sentique"
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  })
+);  
+
+
+app.use(
+  "/admin",
+  session({
+    name: "adminSession",
+    secret: process.env.ADMIN_SESSION_SECRET || "admin_secret",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI || "mongodb://127.0.0.1:27017/sentique"
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  })
+);
 
 
 app.use(flash());
+
+app.use(nocache());
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -50,6 +79,13 @@ app.set("views", [
 
 app.use("/", userRouter);
 app.use("/admin", adminRouter);
+
+app.use((req, res, next) => {
+  res.status(404).render("page-404", {
+    status: 404,
+    message: "Page not found"
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

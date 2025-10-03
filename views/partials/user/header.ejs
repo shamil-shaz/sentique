@@ -1,10 +1,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-
+/* Top Bar */
 .top-bar {
-    background-color: black;
-    color: white;
+    background-color: #000;
+    color: #fff;
     font-size: 14px;
     text-align: center;
     padding: 10px 5px;
@@ -14,7 +14,7 @@
     text-decoration: underline;
 }
 
-
+/* Navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -28,7 +28,6 @@
     width: 120px;
     height: auto;
 }
-
 nav.nav-links {
     display: flex;
     gap: 15px;
@@ -44,7 +43,7 @@ nav.nav-links a.active {
     text-decoration: underline;
 }
 
-
+/* Nav Icons */
 .nav-icons {
     display: flex;
     align-items: center;
@@ -61,10 +60,9 @@ nav.nav-links a.active {
     transition: transform 0.2s;
 }
 
-
+/* Dropdown for user */
 .dropdown {
     position: relative;
-    display: inline-block;
 }
 .dropdown .user-icon {
     font-size: 24px;
@@ -94,7 +92,7 @@ nav.nav-links a.active {
     display: block;
 }
 
-
+/* Hamburger and Mobile Nav */
 .hamburger {
     display: none;
     font-size: 22px;
@@ -118,35 +116,24 @@ nav.nav-links a.active {
     color: black;
 }
 
-
+/* Responsive */
 @media screen and (max-width: 768px) {
-    .navbar {
-        flex-wrap: wrap;
-        padding: 10px 15px;
-    }
-    nav.nav-links {
-        display: none;
-    }
-    .hamburger {
-        display: block;
-    }
-    .nav-icons {
-        width: 100%;
-        justify-content: flex-end;
-        margin-top: 10px;
-        gap: 15px;
-    }
+    nav.nav-links { display: none; }
+    .hamburger { display: block; }
+    .nav-icons { margin-top: 10px; width: 100%; justify-content: flex-end; gap: 15px; }
 }
 </style>
 
-
+<!-- Top Bar -->
 <div class="top-bar">
-    Summer Sale on All Branded Perfumes – Up to 20% Off + Free Express Delivery <a href="/shopPage">Shop Now</a>
+    Summer Sale on All Branded Perfumes – Up to 20% Off + Free Express Delivery 
+    <a href="/shopPage">Shop Now</a>
 </div>
 
+<!-- Navbar -->
 <header class="navbar">
     <div class="nav-logo">
-        <img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo">
+        <a href="/home"><img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo"></a>
     </div>
 
     <div class="hamburger" id="hamburger"><i class="fa fa-bars"></i></div>
@@ -162,32 +149,30 @@ nav.nav-links a.active {
         <a href="/wishlist" title="Wishlist"><i class="fa fa-heart"></i></a>
         <a href="/cart" title="Cart"><i class="fa fa-shopping-cart"></i></a>
 
-       <% if (user) { %>
-  <div class="dropdown">
-    <a href="#" class="user-icon">
-      <i class="fa fa-user-circle"></i>
-    </a>
-    <div class="dropdown-content">
-      <div><strong><%= user.name %></strong></div>
-      <a href="/userProfile">Profile</a>
-      <a href="/logout">Logout</a>
-    </div>
-  </div>
-<% } else { %>
-  <a href="/login" class="active">Login</a>
-  <a href="/signup" class="active">Sign Up</a>
-<% } %>
-
+        <% if (user) { %>
+        <div class="dropdown">
+            <a href="#" class="user-icon"><i class="fa fa-user-circle"></i></a>
+            <div class="dropdown-content">
+                <div><strong><%= user.name %></strong></div>
+                <a href="/userProfile">Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+        <% } else { %>
+        <a href="/login">Login</a>
+        <a href="/signup">Sign Up</a>
+        <% } %>
     </div>
 
+    <!-- Mobile Nav -->
     <nav class="mobile-nav" id="mobileNav">
-        <a href="/">Home</a>
+        <a href="/home">Home</a>
         <a href="/shopPage">Shop</a>
         <a href="#">Contact</a>
         <a href="#">About</a>
         <% if (!user) { %>
-            <a href="/login">Login</a>
-            <a href="/signup">Sign Up</a>
+        <a href="/login">Login</a>
+        <a href="/signup">Sign Up</a>
         <% } %>
     </nav>
 </header>

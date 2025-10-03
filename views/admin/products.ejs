@@ -5,191 +5,993 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 <style>
-  .main-content { padding: 20px; width: 100%; }
-  .page-title { font-size: 28px; font-weight: 700; margin-bottom: 20px; }
-  .filter-sort-container { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .filter-button, .dropdown, .add-product-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background: white; font-size: 14px; cursor: pointer; }
-  .add-product-btn { background: #459436; color: white; border: none; font-weight: bold; }
-  .table-wrapper { width: 100%; overflow-x: auto; padding-top: 10px; }
-  .product-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-  .product-table th, .product-table td { padding: 12px 16px; text-align: center; border-bottom: 1px solid #eee; }
-  .product-table th { position: sticky; top: 0; background: #fff; z-index: 2; }
-  .action-buttons { display: flex; gap: 8px; justify-content: center; }
-  .btn { padding: 6px 12px; border-radius: 4px; font-size: 14px; font-weight: 500; }
-  .edit-btn { background: #386f39; color: white; border: none; }
-  .pagination .page-item.active .page-link { background: #35b2dc; color: white; border-color: #35b8dc; }
-  .badge { font-size: 13px; padding: 4px 8px; }
+  :root {
+    --primary-color: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #818cf8;
+    --secondary-color: #06b6d4;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+    --light-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --card-shadow-hover: 0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.06);
+    --border-radius: 12px;
+  }
+
+  body {
+    background: var(--light-bg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .main-content {
+    margin-left: 240px;
+    margin-top: 60px;
+    padding: 30px;
+    min-height: calc(100vh - 60px);
+    background: var(--light-bg);
+  }
+
+  .products-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .page-title i {
+    color: var(--primary-color);
+    font-size: 26px;
+  }
+
+  .add-product-btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .add-product-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+  }
+
+  .alert {
+    border-radius: 10px;
+    border: none;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--card-shadow);
+    font-size: 14px;
+  }
+
+  .alert i {
+    font-size: 18px;
+  }
+
+  .filter-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+  }
+
+  .filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+  }
+
+  .filter-group {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .filter-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    font-size: 14px;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+  }
+
+  .filter-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .filter-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: var(--secondary-color);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .filter-btn:hover {
+    background: #0891b2;
+    transform: translateY(-1px);
+  }
+
+  .table-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+  }
+
+  .product-table thead {
+    background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+  }
+
+  .product-table th {
+    padding: 16px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+  }
+
+  .product-table td {
+    padding: 16px 14px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    font-size: 14px;
+  }
+
+  .product-table tbody tr {
+    transition: all 0.2s ease;
+  }
+
+  .product-table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .product-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+    max-width: 200px;
+  }
+
+  .product-brand,
+  .product-category {
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+
+  .btn-view-variants {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, var(--info-color), #2563eb);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  }
+
+  .btn-view-variants:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  }
+
+  .offer-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  }
+
+  .no-offer {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .status-badge i {
+    font-size: 8px;
+  }
+
+  .status-active {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+  }
+
+  .status-blocked {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .btn-action {
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-action i {
+    font-size: 11px;
+  }
+
+  .btn-offer-add {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: white;
+  }
+
+  .btn-offer-add:hover {
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+  }
+
+  .btn-offer-remove {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+  }
+
+  .btn-offer-remove:hover {
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-block {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+  }
+
+  .btn-block:hover {
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-unblock {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+  }
+
+  .btn-unblock:hover {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .btn-edit {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+  }
+
+  .btn-edit:hover {
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  }
+
+  .btn-delete {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+  }
+
+  .btn-delete:hover {
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  }
+
+  .pagination-wrapper {
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .pagination {
+    margin: 0;
+    gap: 6px;
+  }
+
+  .page-item .page-link {
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 13px;
+  }
+
+  .page-item .page-link:hover {
+    background: #f1f5f9;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  }
+
+  .no-products {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+
+  .no-products i {
+    font-size: 64px;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+  }
+
+  .no-products h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+  }
+
+  /* SweetAlert Custom Styles */
+  .swal2-popup {
+    border-radius: 16px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .variant-modal-content {
+    text-align: left;
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  .variant-item-modal {
+    padding: 16px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.2s ease;
+  }
+
+  .variant-item-modal:hover {
+    transform: translateX(4px);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+  }
+
+  .variant-item-modal:last-child {
+    margin-bottom: 0;
+  }
+
+  .variant-size {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .variant-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .variant-detail:last-child {
+    border-bottom: none;
+  }
+
+  .variant-label-modal {
+    color: var(--text-secondary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .variant-value-modal {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0;
+      margin-top: 60px;
+      padding: 15px;
+    }
+
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .page-title {
+      font-size: 22px;
+    }
+
+    .filter-card {
+      padding: 20px;
+    }
+
+    .filter-group {
+      min-width: 100%;
+    }
+
+    .add-product-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .filter-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 </style>
 
 <div class="main-content">
-  <h1 class="page-title">Products</h1>
-
-  <!-- Flash Messages -->
-  <% if (successMessage && successMessage.length > 0) { %>
-    <div class="alert alert-success"><%= successMessage %></div>
-  <% } %>
-  <% if (errorMessage && errorMessage.length > 0) { %>
-    <div class="alert alert-danger"><%= errorMessage %></div>
-  <% } %>
-
-  <!-- Filters -->
-  <form action="/admin/products" method="get" class="filter-sort-container">
-    <div class="filters">
-      <input type="text" name="search" placeholder="Search product..." class="dropdown" value="<%= search || '' %>" />
-      <select name="category" class="dropdown">
-        <option value="">All Categories</option>
-        <% if (cat) { cat.forEach(c => { %>
-          <option value="<%= c._id %>" <%= selectedCategory == c._id ? 'selected' : '' %>><%= c.name %></option>
-        <% }) } %>
-      </select>
-      <select name="brand" class="dropdown">
-        <option value="">All Brands</option>
-        <% if (brands) { brands.forEach(b => { %>
-          <option value="<%= b._id %>" <%= selectedBrand == b._id ? 'selected' : '' %>><%= b.brandName || b.name %></option>
-        <% }) } %>
-      </select>
-      <button type="submit" class="filter-button">Apply</button>
-      <button type="button" class="add-product-btn" onclick="window.location.href='/admin/add-product'">Add Product</button>
+  <div class="products-container">
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-box-open"></i>
+        Products Management
+      </h1>
+      <button class="add-product-btn" onclick="window.location.href='/admin/addProducts'">
+        <i class="fas fa-plus-circle"></i>
+        Add New Product
+      </button>
     </div>
-  </form>
 
-  <!-- Product Table -->
-  <div class="table-wrapper">
-    <table class="product-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Brand</th>
-          <th>Category</th>
-          <th>Variants (Size | Stock | Price)</th>
-          <th>Offer %</th>
-          <th>Offer Action</th>
-          <th>Status</th>
-          <th>Block/Unblock</th>
-          <th>Edit</th>
-          <th>Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (products && products.length > 0) { %>
-          <% products.forEach(product => { %>
+    <!-- Flash Messages -->
+    <% if (successMessage && successMessage.length > 0) { %>
+      <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span><%= successMessage %></span>
+      </div>
+    <% } %>
+    <% if (errorMessage && errorMessage.length > 0) { %>
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <span><%= errorMessage %></span>
+      </div>
+    <% } %>
+
+    <!-- Filters -->
+    <div class="filter-card">
+      <form action="/admin/products" method="get" class="filter-form">
+        <div class="filter-group">
+          <label class="filter-label"><i class="fas fa-search"></i> Search</label>
+          <input type="text" name="search" placeholder="Search by product name..." 
+                 class="filter-input" value="<%= search || '' %>" />
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label"><i class="fas fa-tag"></i> Category</label>
+          <select name="category" class="filter-input">
+            <option value="">All Categories</option>
+            <% if (cat) { cat.forEach(c => { %>
+              <option value="<%= c._id %>" <%= selectedCategory == c._id ? 'selected' : '' %>>
+                <%= c.name %>
+              </option>
+            <% }) } %>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label"><i class="fas fa-copyright"></i> Brand</label>
+          <select name="brand" class="filter-input">
+            <option value="">All Brands</option>
+            <% if (brands) { brands.forEach(b => { %>
+              <option value="<%= b._id %>" <%= selectedBrand == b._id ? 'selected' : '' %>>
+                <%= b.brandName || b.name %>
+              </option>
+            <% }) } %>
+          </select>
+        </div>
+        
+        <button type="submit" class="filter-btn">
+          <i class="fas fa-filter"></i> Apply Filters
+        </button>
+      </form>
+    </div>
+
+    <!-- Product Table -->
+    <div class="table-card">
+      <div class="table-wrapper">
+        <table class="product-table">
+          <thead>
             <tr>
-              <td><%= product.productName %></td>
-              <td><%= product.brand ? (product.brand.brandName || product.brand.name) : 'N/A' %></td>
-              <td><%= product.category ? product.category.name : 'N/A' %></td>
-              <td>
-                <% if (product.variants && product.variants.length > 0) { %>
-                  <ul style="list-style:none; padding:0; margin:0;">
-                    <% product.variants.forEach(v => { %>
-                      <li><%= v.size %> ML | Stock = <%= v.stock %> |  SalePrice = ₹<%= v.salePrice.toFixed(2) %></li>
-                    <% }) %>
-                  </ul>
-                <% } else { %>
-                  No Variants
-                <% } %>
-              </td>
-              <td><%= product.productOffer ? product.productOffer + '%' : '0%' %></td>
-              <td>
-                <% if (!product.productOffer) { %>
-                  <button class="btn btn-info text-white" onclick="addOffer('<%= product._id %>')">Add</button>
-                <% } else { %>
-                  <button class="btn btn-danger text-white" onclick="removeOffer('<%= product._id %>')">Remove</button>
-                <% } %>
-              </td>
-              <td>
-                <% if (product.isBlocked) { %>
-                  <span class="badge bg-danger">Blocked</span>
-                <% } else { %>
-                  <span class="badge bg-success">Active</span>
-                <% } %>
-              </td>
-              <td>
-                <% if (product.isBlocked) { %>
-                  <form action="/admin/unblockProduct/<%= product._id %>" method="post">
-                    <button class="btn btn-success btn-sm">Unblock</button>
-                  </form>
-                <% } else { %>
-                  <form action="/admin/blockProduct/<%= product._id %>" method="post">
-                    <button class="btn btn-danger btn-sm">Block</button>
-                  </form>
-                <% } %>
-              </td>
-              <td>
-                <form action="/admin/edit-product/<%= product._id %>" method="get">
-                  <button class="btn edit-btn">Edit</button>
-                </form>
-              </td>
-              <td><button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= product._id %>')">Delete</button></td>
+              <th>Product Name</th>
+              <th>Brand</th>
+              <th>Category</th>
+              <th>Variants</th>
+              <th>Offer</th>
+              <th>Offer Action</th>
+              <th>Status</th>
+              <th>Actions</th>
+               <th>Edit</th>
+                <th>Delete</th>
             </tr>
-          <% }) %>
-        <% } else { %>
-          <tr><td colspan="10">No products found</td></tr>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
+          </thead>
+          <tbody>
+            <% if (products && products.length > 0) { %>
+              <% products.forEach(product => { %>
+                <tr>
+                  <td>
+                    <div class="product-name"><%= product.productName %></div>
+                  </td>
+                  <td>
+                    <div class="product-brand">
+                      <%= product.brand ? (product.brand.brandName || product.brand.name) : 'N/A' %>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="product-category">
+                      <%= product.category ? product.category.name : 'N/A' %>
+                    </div>
+                  </td>
+                  <td>
+                    <% if (product.variants && product.variants.length > 0) { %>
+                      <button class="btn-view-variants" onclick='viewVariants("<%= JSON.stringify(product.variants) %>")'>
+                        <i class="fas fa-eye"></i> View Variants
+                      </button>
+                    <% } else { %>
+                      <span class="no-offer">No Variants</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (product.productOffer) { %>
+                      <span class="offer-badge"><%= product.productOffer %>% OFF</span>
+                    <% } else { %>
+                      <span class="no-offer">No Offer</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (!product.productOffer) { %>
+                      <button class="btn-action btn-offer-add" onclick="addOffer('<%= product._id %>')">
+                        <i class="fas fa-plus"></i> Add
+                      </button>
+                    <% } else { %>
+                      <button class="btn-action btn-offer-remove" onclick="removeOffer('<%= product._id %>')">
+                        <i class="fas fa-times"></i> Remove
+                      </button>
+                    <% } %>
+                  </td>
+                 <td>
+  <span class="status-badge <%= product.isBlocked ? 'status-blocked' : 'status-active' %>">
+    <i class="fas fa-circle"></i> <%= product.isBlocked ? 'Unlisted' : 'Listed' %>
+  </span>
+</td>
+<td>
+  <div class="action-buttons">
+    <button class="btn-action <%= product.isBlocked ? 'btn-unblock' : 'btn-block' %>" 
+            onclick="toggleProductStatus('<%= product._id %>',' <%= !product.isBlocked %>')">
+      <i class="fas <%= product.isBlocked ? 'fa-check' : 'fa-ban' %>"></i> 
+      <%= product.isBlocked ? 'List' : 'Unlist' %>
+    </button>
 
-  <!-- Pagination -->
-  <nav class="mt-3">
-    <ul class="pagination justify-content-center">
-      <% if (totalPages > 0) { for (let i=1; i<=totalPages; i++) { %>
-        <li class="page-item <%= currentPage == i ? 'active' : '' %>">
-          <a class="page-link" href="?page=<%= i %>&search=<%= search || '' %>&category=<%= selectedCategory || '' %>&brand=<%= selectedBrand || '' %>"><%= i %></a>
-        </li>
-      <% } } %>
-    </ul>
-  </nav>
+  </div>
+</td>
+
+                     <td>
+                       <button class="btn-action btn-edit" onclick="window.location.href='/admin/edit-product/<%= product._id %>'">
+                        <i class="fas fa-edit"></i> Edit
+                      </button>
+
+                     </td> 
+
+                     <td>
+                          
+                      <button type="button" class="btn-action btn-delete" onclick="confirmDelete('<%= product._id %>')">
+                        <i class="fas fa-trash"></i> Delete
+                      </button>
+
+                     </td>
+                     
+                  
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="8">
+                  <div class="no-products">
+                    <i class="fas fa-box-open"></i>
+                    <h3>No Products Found</h3>
+                    <p>Try adjusting your filters or add a new product to get started.</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <% if (products && products.length > 0) { %>
+        <div class="pagination-wrapper">
+          <nav>
+            <ul class="pagination justify-content-center">
+              <% if (totalPages > 0) { for (let i=1; i<=totalPages; i++) { %>
+                <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>&search=<%= search || '' %>&category=<%= selectedCategory || '' %>&brand=<%= selectedBrand || '' %>">
+                    <%= i %>
+                  </a>
+                </li>
+              <% } } %>
+            </ul>
+          </nav>
+        </div>
+      <% } %>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  // Alerts auto-hide
-  setTimeout(()=>document.querySelectorAll('.alert').forEach(a=>a.style.display='none'),3000);
 
-  async function addOffer(id) {
-    const { value: percent } = await Swal.fire({
-      title:'Add Offer (%)', input:'number', inputPlaceholder:'Enter %',
-      showCancelButton:true, confirmButtonText:'Apply',
-      inputValidator: v => (!v || v<=0) ? 'Enter valid %' : null
+<script>
+ 
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      alert.style.transition = 'opacity 0.3s ease';
+      alert.style.opacity = '0';
+      setTimeout(() => alert.remove(), 300);
     });
-    if(percent){
-      const res = await fetch('/admin/addProductOffer',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({productId:id,percentage:percent})
+  }, 3000);
+
+
+  function viewVariants(variants) {
+    if (!variants || variants.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'No Variants Available',
+        text: 'This product has no variants to display.',
+        confirmButtonColor: '#4f46e5'
       });
-      const result = await res.json();
-      result.status ? Swal.fire('Done','Offer added!','success').then(()=>location.reload()) : Swal.fire('Error',result.message,'error');
+      return;
+    }
+
+    let variantsHTML = '<div class="variant-modal-content">';
+    variants.forEach(variant => {
+      const stockStatus = variant.stock > 10 ? 'In Stock' : variant.stock > 0 ? 'Low Stock' : 'Out of Stock';
+      const stockColor = variant.stock > 10 ? '#10b981' : variant.stock > 0 ? '#f59e0b' : '#ef4444';
+
+      variantsHTML += `
+        <div class="variant-item-modal">
+          <div class="variant-size"><i class="fas fa-box"></i> <span>${variant.size} ML</span></div>
+          <div class="variant-detail">
+            <span class="variant-label-modal"><i class="fas fa-warehouse"></i> Stock Status:</span>
+            <span class="variant-value-modal" style="color:${stockColor}">${variant.stock} Units (${stockStatus})</span>
+          </div>
+          <div class="variant-detail">
+            <span class="variant-label-modal"><i class="fas fa-rupee-sign"></i> Sale Price:</span>
+            <span class="variant-value-modal" style="color:#10b981">₹${variant.salePrice.toFixed(2)}</span>
+          </div>
+          ${variant.regularPrice ? `
+            <div class="variant-detail">
+              <span class="variant-label-modal"><i class="fas fa-tag"></i> Regular Price:</span>
+              <span class="variant-value-modal">₹${variant.regularPrice.toFixed(2)}</span>
+            </div>` : ''}
+        </div>`;
+    });
+    variantsHTML += '</div>';
+
+    Swal.fire({
+      title: '<strong><i class="fas fa-cubes"></i> Product Variants</strong>',
+      html: variantsHTML,
+      width: '550px',
+      confirmButtonText: '<i class="fas fa-times"></i> Close',
+      confirmButtonColor: '#4f46e5',
+      customClass: { popup: 'variant-modal' }
+    });
+  }
+
+ 
+  async function addOffer(productId) {
+    const { value: percent } = await Swal.fire({
+      title: '<strong><i class="fas fa-tags"></i> Add Product Offer</strong>',
+      html: '<p style="color:#64748b; font-size:14px; margin-top:10px;">Enter the discount percentage (1-100)</p>',
+      input: 'number',
+      inputAttributes: { min: 1, max: 100, step: 1 },
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-check"></i> Apply Offer',
+      confirmButtonColor: '#10b981',
+      cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+      cancelButtonColor: '#6b7280',
+      inputValidator: value => (!value || value <= 0 || value > 100) ? 'Enter a valid % between 1-100' : undefined,
+      showLoaderOnConfirm: true
+    });
+
+    if (!percent) return;
+
+    try {
+      const res = await fetch('/admin/addProductOffer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, percentage: percent })
+      });
+      const data = await res.json();
+
+      if (data.status) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Offer Added Successfully!',
+          html: `<p style="color:#64748b; font-size:15px; margin-top:10px;"><strong style="color:#10b981; font-size:24px;">${percent}%</strong> discount applied.</p>`,
+          confirmButtonColor: '#10b981',
+          confirmButtonText: '<i class="fas fa-check"></i> OK',
+          timer: 2500,
+          timerProgressBar: true
+        }).then(() => location.reload());
+      } else {
+        Swal.fire({ icon: 'error', title: 'Failed!', text: data.message || 'Try again', confirmButtonColor: '#ef4444' });
+      }
+    } catch (error) {
+      Swal.fire({ icon: 'error', title: 'Network Error', text: 'Check your connection', confirmButtonColor: '#ef4444' });
     }
   }
 
-  function removeOffer(id){
-    Swal.fire({title:'Remove Offer?',showCancelButton:true,confirmButtonText:'Yes'}).then(async r=>{
-      if(r.isConfirmed){
-        const res = await fetch('/admin/removeProductOffer',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({productId:id})
-        });
-        const result = await res.json();
-        result.status ? Swal.fire('Removed!','Offer deleted.','success').then(()=>location.reload()) : Swal.fire('Error',result.message,'error');
-      }
+  
+  async function removeOffer(productId) {
+    const result = await Swal.fire({
+      title: '<strong><i class="fas fa-exclamation-triangle"></i> Remove Product Offer?</strong>',
+      html: '<p style="color:#64748b; font-size:14px; margin-top:10px;">This will remove the discount from the product.</p>',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-check"></i> Yes, Remove',
+      cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
     });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch('/admin/removeProductOffer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      });
+      const data = await res.json();
+
+      if (data.status) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Offer Removed Successfully!',
+          html: '<p style="color:#64748b; font-size:14px; margin-top:10px;">Product is back to original price.</p>',
+          confirmButtonColor: '#10b981',
+          confirmButtonText: '<i class="fas fa-check"></i> OK',
+          timer: 2500,
+          timerProgressBar: true
+        }).then(() => location.reload());
+      } else {
+        Swal.fire({ icon: 'error', title: 'Failed!', text: data.message || 'Try again', confirmButtonColor: '#ef4444' });
+      }
+    } catch (error) {
+      Swal.fire({ icon: 'error', title: 'Network Error', text: 'Check your connection', confirmButtonColor: '#ef4444' });
+    }
   }
 
-  function confirmDelete(id){
-    Swal.fire({
-      title:'Delete product?',
-      text:'This cannot be undone!',
-      icon:'warning',
-      showCancelButton:true,
-      confirmButtonText:'Yes delete!'
-    }).then(r=>{
-      if(r.isConfirmed){
-        fetch(`/admin/deleteProduct/${id}`,{method:'POST'})
-          .then(res=>res.ok?Swal.fire('Deleted!','Product removed.','success').then(()=>location.reload()):Swal.fire('Error','Delete failed.','error'));
-      }
+ 
+async function toggleProductStatus(productId, block = true) {
+  const actionText = block ? 'Unlist' : 'List';
+  const icon = block ? 'ban' : 'check-circle';
+  const color = block ? '#ef4444' : '#10b981';
+
+  const result = await Swal.fire({
+    title: `<strong><i class="fas fa-${icon}"></i> ${actionText} Product?</strong>`,
+    html: `<p style="color:#64748b; font-size:14px; margin-top:10px;">
+            ${block ? 'This product will be hidden from customers.' : 'This product will be visible to customers.'}
+           </p>`,
+    icon: block ? 'warning' : 'question',
+    showCancelButton: true,
+    confirmButtonText: `<i class="fas fa-${block ? 'ban' : 'check'}"></i> Yes, ${actionText} It`,
+    cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+    confirmButtonColor: color,
+    cancelButtonColor: '#6b7280',
+    reverseButtons: true
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    const res = await fetch(`/admin/toggleProductStatus/${productId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ block })
     });
+      
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: data.message,
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true
+      });
+
+    
+      const row = document.querySelector(`button[onclick*="toggleProductStatus('${productId}'"]`).closest('tr');
+      const statusBadge = row.querySelector('.status-badge');
+      const actionBtn = row.querySelector('.action-buttons .btn-action');
+
+      if (block) {
+        statusBadge.className = 'status-badge status-blocked';
+        statusBadge.innerHTML = '<i class="fas fa-circle"></i> Unlisted';
+        actionBtn.className = 'btn-action btn-unblock';
+        actionBtn.innerHTML = '<i class="fas fa-check"></i> List';
+        actionBtn.setAttribute('onclick', `toggleProductStatus('${productId}', false)`);
+      } else {
+        statusBadge.className = 'status-badge status-active';
+        statusBadge.innerHTML = '<i class="fas fa-circle"></i> Listed';
+        actionBtn.className = 'btn-action btn-block';
+        actionBtn.innerHTML = '<i class="fas fa-ban"></i> Unlist';
+        actionBtn.setAttribute('onclick', `toggleProductStatus('${productId}', true)`);
+      }
+    } else {
+      Swal.fire({ icon: 'error', title: 'Failed!', text: data.message || 'Try again', confirmButtonColor: '#ef4444' });
+    }
+  } catch (error) {
+    Swal.fire({ icon: 'error', title: 'Network Error', text: 'Check your connection', confirmButtonColor: '#ef4444' });
+  }
+}
+ 
+  async function confirmDelete(productId) {
+    const firstConfirm = await Swal.fire({
+      title: '<strong><i class="fas fa-trash-alt"></i> Delete Product?</strong>',
+      html: '<p style="color:#ef4444; font-size:15px; margin-top:10px;">⚠️ This action cannot be undone! All product data will be deleted.</p>',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-trash"></i> Yes, Delete',
+      cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    });
+
+    if (!firstConfirm.isConfirmed) return;
+
+    const finalConfirm = await Swal.fire({
+      title: '<strong>Are you absolutely sure?</strong>',
+      html: '<p style="color:#64748b; font-size:14px;">Type <strong style="color:#ef4444;">DELETE</strong> to confirm</p>',
+      input: 'text',
+      inputPlaceholder: 'Type DELETE',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-trash"></i> Delete Now',
+      cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      inputValidator: value => (value !== 'DELETE' ? 'Please type DELETE to confirm' : undefined)
+    });
+
+    if (!finalConfirm.isConfirmed) return;
+
+    try {
+      const res = await fetch(`/admin/deleteProduct/${productId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        Swal.fire({ icon: 'success', title: 'Product Deleted!', html: '<p style="color:#64748b; font-size:14px;">All data removed.</p>', confirmButtonColor: '#10b981', timer: 2500, timerProgressBar: true }).then(() => location.reload());
+      } else {
+        Swal.fire({ icon: 'error', title: 'Failed!', text: data.message || 'Try again', confirmButtonColor: '#ef4444' });
+      }
+    } catch (error) {
+      Swal.fire({ icon: 'error', title: 'Network Error', text: 'Check your connection', confirmButtonColor: '#ef4444' });
+    }
   }
 </script>

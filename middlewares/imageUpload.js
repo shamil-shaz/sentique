@@ -1,42 +1,28 @@
 
-
 const { cloudinary } = require("../config/cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
-const path = require("path");
 
 
-
-
-
-const storage = new CloudinaryStorage({
+const categoryStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "sentique/products",   // Folder in Cloudinary
-    allowed_formats: ["jpg", "jpeg", "png", "webp"], // Allowed formats
-    transformation: [{ width: 500, height: 500, crop: "limit" }], // Optional resizing
+    folder: "sentique/categories",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
+const uploadCategoryImage = multer({ storage: categoryStorage });
 
 
 
-
-const upload = multer({
-    storage,
-    limits : {fileSize : 20 * 1024 * 1024},
-    fileFilter : (req,file,cb)=>{
-        const filetypes = /jpeg|jpg|png|webp/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
-        if(extname && mimetype){
-            cb(null,true)
-        }else{
-            cb(new Error('Only JPG,JPEG,PNG and WEBP images are allowed'));
-        }
-    }
+const productStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "sentique/products",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+  },
 });
+const uploadProductImage = multer({ storage: productStorage });
 
 
-
-
-module.exports = upload;
+module.exports = { uploadCategoryImage, uploadProductImage };

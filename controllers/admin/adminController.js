@@ -20,30 +20,36 @@ const verifyLogin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+  
     const admin = await User.findOne({ email, isAdmin: true });
-    console.log("Admin user:", admin);
-
     if (!admin || admin.isBlocked) {
       return res.render('admin-login', { message: 'Invalid credentials or blocked' });
     }
 
-    const match = await bcrypt.compare(password, admin.password);
-    console.log("Password match:", match);
 
+    const match = await bcrypt.compare(password, admin.password);
     if (!match) {
       return res.render('admin-login', { message: 'Invalid credentials' });
     }
 
-    req.session.admin = admin._id;
-    console.log("Session set for admin:", req.session.admin);
+    req.session.admin = {
+      id: admin._id.toString(),
+      name: admin.name,
+      email: admin.email,
+      role: 'admin',
+    };
 
-    res.redirect('/admin/dashboard');
+   
+    admin.lastLogin = new Date();
+    await admin.save();
 
+    return res.redirect('/admin/dashboard');
   } catch (err) {
     console.error("Admin Login Error:", err);
     return res.redirect('/pageerror');
   }
 };
+
 
 
 const loadDashboard = (req, res) => {
@@ -59,25 +65,21 @@ const loadDashboard = (req, res) => {
 };
 
 
-
 const logout = (req, res) => {
-
   try {
-    req.session.destroy(err=>{
+   
+    if (req.session.admin) {
+      delete req.session.admin;
+    }
 
-      if(err){
-        console.log("Error destroy session",err)
-        return res.redirect('/pageerror')
-      }
-      res.redirect('/admin/login')
-    })
+
+    return res.redirect('/admin/login');
   } catch (error) {
-
-    console.log("unexpected error during logout",error)
-    res.redirect('/pageerror')
+    console.log("Unexpected error during admin logout:", error);
+    return res.redirect('/pageerror');
   }
-  
 };
+
 
 
 module.exports = {

@@ -1,263 +1,779 @@
 <%- include("../partials/user/header.ejs") %>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    color: #333;
-  }
+/* Global font */
+body, p, div, h1, h2, a, span, strong {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
 
-        .banner {
-            width: 100%;
-            height: 300px;
-            background: linear-gradient(135deg, #1a1a1a, #333);
-            color: #fff;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
+/* ========== ZODIAC BANNER STYLES ========== */
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;600&display=swap");
 
-        .section {
-            padding: 40px 20px;
-            text-align: center;
-        }
+.banner {
+  width: 100%;
+  height: 450px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, #0a0a0a 0%, #000000 50%, #000000 100%);
+}
 
-        .section h2 {
-            color: #ff0000;
-            margin-bottom: 30px;
-            font-size: 2rem;
-            font-weight: bold;
-        }
+.zodiac-banner {
+  position: relative;
+  width: 100%;
+  height: 450px;
+  transform: perspective(1200px) rotateX(-5deg);
+  transform-style: preserve-3d;
+}
 
-  .product-grid {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
+.zodiac-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
 
-  .product {
-    width: 220px;
-    text-align: center;
-    border: 1px solid #eee;
-    padding: 15px;
-    border-radius: 12px;
-    background: #fff;
-    position: relative;
-     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-  }
-  .product:hover {
-            transform: translateY(-5px);
-        }
-
-  .product img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-
-  .product p {
-    margin: 8px 0;
-  }
-
-  .sale-price {
-    color: red;
-    font-weight: bold;
-     font-size: 1.1rem;
-  }
-
-  .regular-price {
-    color: black;
-    text-decoration: line-through;
-  }
-   
+input[type="radio"][name="zodiac"] {
+  display: none;
+}
+.zodiac-slide {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%) translateZ(-3000px);
+  margin: auto;
+  width: 100%;
+  height: 400px;
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.33, 0, 0, 1);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
 
 
-  /* Product Action Buttons */
-  .product-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 10px;
-  }
 
-  .action-btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-  }
+.zodiac-content {
+  text-align: center;
+  color: white;
+}
 
-  .cart-btn {
-    background: #151515;
-    color: white;
-  }
+.zodiac-symbol {
+  font-size: 80px;
+  font-family: "Cinzel", serif;
+  margin-bottom: 20px;
+  text-shadow: 0 0 40px var(--zodiac-glow), 0 0 80px var(--zodiac-glow);
+  animation: float 3s ease-in-out infinite;
+  color: var(--zodiac-color);
+}
 
-  .cart-btn:hover {
-    background: #3dcc00;
-  }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
 
-  .wishlist-btn {
-    background: #fff;
-    color: #ff0000;
-    border: 1px solid #252323;
-     font-size: 16px;
-  }
+.zodiac-name {
+  font-size: 56px;
+  letter-spacing: 12px;
+  text-transform: uppercase;
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: white;
+  text-shadow: 0 0 20px var(--zodiac-glow);
+}
 
-  .wishlist-btn:hover {
-    background: #ff0000;
-    color: white;
-  }
+.zodiac-element {
+  font-size: 14px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--zodiac-color);
+  margin-bottom: 10px;
+  font-weight: 300;
+}
 
- .slider-container {
-            position: relative;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 60px;
-        }
+.zodiac-description {
+  font-size: 18px;
+  letter-spacing: 3px;
+  line-height: 28px;
+  opacity: 0.9;
+  max-width: 500px;
+  margin: 0 auto 15px;
+}
 
-        .slider-wrapper {
-            overflow: hidden;
-            border-radius: 12px;
-        }
+.zodiac-dates {
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--zodiac-color);
+  opacity: 0.8;
+}
 
-        .brand-grid,
-        .category-grid {
-            display: flex;
-            gap: 20px;
-            transition: transform 0.4s ease-in-out;
-            padding: 20px 0;
-        }
+.sparkle-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 
-        .brand,
-        .category {
-            min-width: 180px;
-            text-align: center;
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  animation: sparkleFloat 4s ease-in-out infinite;
+  opacity: 0;
+}
 
-        .brand:hover,
-        .category:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-     
+.sparkle:nth-child(1) { left: 20%; top: 15%; animation-delay: 0s; }
+.sparkle:nth-child(2) { left: 80%; top: 25%; animation-delay: 0.5s; }
+.sparkle:nth-child(3) { left: 15%; top: 70%; animation-delay: 1s; }
+.sparkle:nth-child(4) { left: 85%; top: 60%; animation-delay: 1.5s; }
+.sparkle:nth-child(5) { left: 50%; top: 10%; animation-delay: 2s; }
+.sparkle:nth-child(6) { left: 90%; top: 80%; animation-delay: 2.5s; }
 
-        .brand img,
-        .category img {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            border: 3px solid #f0f0f0;
-        }
+@keyframes sparkleFloat {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(1); }
+  50% { opacity: 1; transform: translateY(-20px) scale(1.5); }
+}
 
-        .brand p,
-        .category p {
-            font-weight: bold;
-            color: #333;
-            margin: 0;
-            font-size: 1.1rem;
-        }
+.zodiac-menu {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+}
 
-        .slider-btn {
-            background: linear-gradient(135deg, #7a7979, #8a8888);
-            color: #fff;
-            border: none;
-            font-size: 18px;
-            padding: 15px;
-            cursor: pointer;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(207, 122, 122, 0.3);
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
+.zodiac-menu label {
+  display: block;
+  color: white;
+  margin-bottom: 20px;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.4;
+  transition: all 0.3s;
+  position: relative;
+  padding-left: 25px;
+}
 
-        .slider-btn:hover {
-            background: linear-gradient(135deg, #333535, #ef6e6e);
-            transform: translateY(-50%) scale(1.1);
-        }
+.zodiac-menu label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border: 2px solid white;
+  border-radius: 50%;
+}
 
-        .slider-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+.zodiac-menu label:hover {
+  opacity: 0.8;
+}
 
-        .slider-btn.left {
-            left: 10px;
-        }
-
-        .slider-btn.right {
-            right: 10px;
-        }
-
-  .view-all {
-            display: inline-block;
-            margin-top: 20px;
-            color: #464643;
-            font-weight: bold;
-            text-decoration: none;
-            padding: 12px 24px;
-            border: 2px solid #191917;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-   .view-all:hover {
-            background: #2d280c;
-            color: rgb(227, 225, 225);
-        }
+input[type="radio"]:checked + .zodiac-slide {
+  transform: translateY(-50%) translateZ(0px);
+  opacity: 1;
+  pointer-events: all;
+}
+/* Active zodiac gets higher z-index */
+#aries:checked ~ div:nth-of-type(1),
+#taurus:checked ~ div:nth-of-type(2),
+#gemini:checked ~ div:nth-of-type(3),
+#cancer:checked ~ div:nth-of-type(4),
+#leo:checked ~ div:nth-of-type(5),
+#virgo:checked ~ div:nth-of-type(6),
+#libra:checked ~ div:nth-of-type(7),
+#scorpio:checked ~ div:nth-of-type(8),
+#sagittarius:checked ~ div:nth-of-type(9),
+#capricorn:checked ~ div:nth-of-type(10),
+#aquarius:checked ~ div:nth-of-type(11),
+#pisces:checked ~ div:nth-of-type(12) {
+  transform: translateY(-50%) translateZ(0px) !important;
+  opacity: 1 !important;
+  pointer-events: all;
+  z-index: 10 !important;
+}
 
 
-        @media (max-width: 768px) {
-            .slider-container {
-                padding: 0 40px;
-            }
-            
-            .brand,
-            .category {
-                min-width: 140px;
-            }
-            
-            .slider-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 14px;
-            }
-          }
+/* Highlight active menu item */
+#aries:checked ~ .zodiac-menu label[for="aries"],
+#taurus:checked ~ .zodiac-menu label[for="taurus"],
+#gemini:checked ~ .zodiac-menu label[for="gemini"],
+#cancer:checked ~ .zodiac-menu label[for="cancer"],
+#leo:checked ~ .zodiac-menu label[for="leo"],
+#virgo:checked ~ .zodiac-menu label[for="virgo"],
+#libra:checked ~ .zodiac-menu label[for="libra"],
+#scorpio:checked ~ .zodiac-menu label[for="scorpio"],
+#sagittarius:checked ~ .zodiac-menu label[for="sagittarius"],
+#capricorn:checked ~ .zodiac-menu label[for="capricorn"],
+#aquarius:checked ~ .zodiac-menu label[for="aquarius"],
+#pisces:checked ~ .zodiac-menu label[for="pisces"] {
+  opacity: 1 !important;
+}
+
+#aries:checked ~ .zodiac-menu label[for="aries"]::before,
+#taurus:checked ~ .zodiac-menu label[for="taurus"]::before,
+#gemini:checked ~ .zodiac-menu label[for="gemini"]::before,
+#cancer:checked ~ .zodiac-menu label[for="cancer"]::before,
+#leo:checked ~ .zodiac-menu label[for="leo"]::before,
+#virgo:checked ~ .zodiac-menu label[for="virgo"]::before,
+#libra:checked ~ .zodiac-menu label[for="libra"]::before,
+#scorpio:checked ~ .zodiac-menu label[for="scorpio"]::before,
+#sagittarius:checked ~ .zodiac-menu label[for="sagittarius"]::before,
+#capricorn:checked ~ .zodiac-menu label[for="capricorn"]::before,
+#aquarius:checked ~ .zodiac-menu label[for="aquarius"]::before,
+#pisces:checked ~ .zodiac-menu label[for="pisces"]::before {
+  background: white;
+}
 
 
+.star-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+.banner-logo {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 16px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  z-index: 100;
+  font-weight: 300;
+}
+
+.banner-logo span {
+  display: block;
+  font-size: 13px;
+  color: #d4af37;
+  margin-top: 5px;
+  letter-spacing: 2px;
+}
+
+@media (max-width: 768px) {
+  .zodiac-symbol { font-size: 80px; }
+  .zodiac-name { font-size: 32px; letter-spacing: 6px; }
+  .zodiac-description { font-size: 14px; }
+  .zodiac-menu { left: 20px; font-size: 9px; }
+  .banner { height: 350px; }
+  .zodiac-banner { height: 350px; }
+  .discover-btn { padding: 12px 30px; font-size: 12px; }
+}
+
+/* ========== END ZODIAC BANNER STYLES ========== */
+
+/* Sections */
+.section {
+  padding: 40px 20px;
+  text-align: center;
+}
+.section h2 {
+  color: #ff0000;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Product grid */
+.product-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.discover-btn {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  padding: 15px 40px;
+  background: linear-gradient(135deg, #d4af37, #f0d978);
+  color: #0a0a0a;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.discover-btn:hover {
+  background: linear-gradient(135deg, #f0d978, #d4af37);
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow: 0 12px 35px rgba(212, 175, 55, 0.6);
+}
+
+.discover-btn:active {
+  transform: translateX(-50%) translateY(-1px);
+}
+
+
+
+/* Product card */
+.product {
+  width: 220px;
+  text-align: center;
+  border: 1px solid #eee;
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+.product:hover { transform: translateY(-5px); }
+.product img { width: 100%; height: 300px; object-fit: cover; border-radius: 8px; }
+
+/* Product details */
+.product-details {
+  margin-top: 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.product-details p { font-size: 14px; }
+.product-details div {
+  font-size: 12px;
+  color: #555;
+  display: flex;
+  justify-content: left;
+  gap: 10px;
+}
+
+.sale-price {
+  color: red;
+  font-weight: bold;
+  display: inline-block;
+  margin-right: 8px;
+}
+.regular-price {
+  color: #767676;
+  text-decoration: line-through;
+  display: inline-block;
+}
+
+/* Product icons */
+.product-image-container {
+  position: relative;
+}
+.product-icons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.icon-btn.cart {
+  background: rgba(255,255,255,0.9);
+  color: #007bff;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.icon-btn.cart:hover {
+  background: #007bff;
+  color: #fff;
+}
+.icon-btn i { font-size: 16px; }
+
+.icon-btn.wishlist {
+  background: rgba(255,255,255,0.9);
+  color: #ff0000;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.icon-btn.wishlist:hover {
+  background: #ff0000;
+  color: #fff;
+}
+
+/* Slider */
+.slider-container {
+  position: relative;
+  max-width: 950px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+.slider-wrapper { overflow: hidden; border-radius: 12px; }
+.brand-grid, .category-grid { display: flex; gap: 20px; transition: transform 0.4s ease-in-out; padding: 20px 0; }
+
+/* Brand card */
+.brand {
+  min-width: 180px;
+  text-align: center;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.brand:hover { transform: translateY(-8px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+
+/* Brand image */
+.brand img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  border: 3px solid #f0f0f0;
+}
+.brand p { font-weight: bold; font-size: 1.1rem; color: #333; margin: 0; }
+
+/* Category card */
+.category {
+  min-width: 180px;
+  text-align: center;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.category:hover { transform: translateY(-8px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+
+/* Category image */
+.category img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #f0f0f0;
+}
+.category p { font-weight: bold; font-size: 1.1rem; color: #333; margin: 0; }
+
+/* Slider buttons */
+.slider-btn {
+  background: linear-gradient(135deg,#7a7979,#8a8888);
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  padding: 15px;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(207,122,122,0.3);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+.slider-btn:hover { background: linear-gradient(135deg,#333535,#ef6e6e); transform: translateY(-50%) scale(1.1); }
+.slider-btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+.slider-btn.left { left: 10px; }
+.slider-btn.right { right: 10px; }
+
+/* View all button */
+.view-all {
+  display: inline-block;
+  margin-top: 20px;
+  color: #464643;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 12px 24px;
+  border: 2px solid #191917;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+.view-all:hover { background: #2d280c; color: rgb(227,225,225); }
+
+/* Responsive */
+@media (max-width:768px) {
+  .slider-container { padding: 0 40px; }
+  .brand, .category { min-width: 140px; }
+  .slider-btn { width: 40px; height: 40px; font-size: 14px; }
+  .category img { height: 150px; }
+}
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-
-<!-- Banner -->
+<!-- Zodiac Banner -->
+<!-- Zodiac Banner -->
 <div class="banner">
-  <img src="/photos/banner.jpg" alt="Banner Image">
-  <h1>Explore Sentique</h1>
+  <div class="star-bg" id="starBg"></div>
+  
+  <h1 class="banner-logo">
+  
+    <span>Your Zodiac • Your Scent • Your Signature</span>
+  </h1>
+
+  <div class="zodiac-banner">
+    <div class="zodiac-container">
+      
+      <!-- All radio inputs first -->
+      <input type="radio" name="zodiac" id="aries" checked>
+      <input type="radio" name="zodiac" id="taurus">
+      <input type="radio" name="zodiac" id="gemini">
+      <input type="radio" name="zodiac" id="cancer">
+      <input type="radio" name="zodiac" id="leo">
+      <input type="radio" name="zodiac" id="virgo">
+      <input type="radio" name="zodiac" id="libra">
+      <input type="radio" name="zodiac" id="scorpio">
+      <input type="radio" name="zodiac" id="sagittarius">
+      <input type="radio" name="zodiac" id="capricorn">
+      <input type="radio" name="zodiac" id="aquarius">
+      <input type="radio" name="zodiac" id="pisces">
+      
+      <!-- Aries -->
+      <div class="zodiac-slide" style="--zodiac-color: #ff4444; --zodiac-glow: rgba(255, 68, 68, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♈</div>
+          <div class="zodiac-element">Fire Sign</div>
+          <div class="zodiac-name">ARIES</div>
+          <div class="zodiac-description">Bold & Passionate<br>Fiery Confidence</div>
+          <div class="zodiac-dates">March 21 - April 19</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Taurus -->
+      <div class="zodiac-slide" style="--zodiac-color: #7cb342; --zodiac-glow: rgba(124, 179, 66, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♉</div>
+          <div class="zodiac-element">Earth Sign</div>
+          <div class="zodiac-name">TAURUS</div>
+          <div class="zodiac-description">Sensual & Luxurious<br>Earthy Elegance</div>
+          <div class="zodiac-dates">April 20 - May 20</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Gemini -->
+      <div class="zodiac-slide" style="--zodiac-color: #ffd700; --zodiac-glow: rgba(255, 215, 0, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♊</div>
+          <div class="zodiac-element">Air Sign</div>
+          <div class="zodiac-name">GEMINI</div>
+          <div class="zodiac-description">Vibrant & Dynamic<br>Dual Essence</div>
+          <div class="zodiac-dates">May 21 - June 20</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Cancer -->
+      <div class="zodiac-slide" style="--zodiac-color: #42a5f5; --zodiac-glow: rgba(66, 165, 245, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♋</div>
+          <div class="zodiac-element">Water Sign</div>
+          <div class="zodiac-name">CANCER</div>
+          <div class="zodiac-description">Emotional & Nurturing<br>Moonlit Dream</div>
+          <div class="zodiac-dates">June 21 - July 22</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Leo -->
+      <div class="zodiac-slide" style="--zodiac-color: #ff9800; --zodiac-glow: rgba(255, 152, 0, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♌</div>
+          <div class="zodiac-element">Fire Sign</div>
+          <div class="zodiac-name">LEO</div>
+          <div class="zodiac-description">Radiant & Confident<br>Royal Majesty</div>
+          <div class="zodiac-dates">July 23 - August 22</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Virgo -->
+      <div class="zodiac-slide" style="--zodiac-color: #8bc34a; --zodiac-glow: rgba(139, 195, 74, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♍</div>
+          <div class="zodiac-element">Earth Sign</div>
+          <div class="zodiac-name">VIRGO</div>
+          <div class="zodiac-description">Pure & Refined<br>Elegant Precision</div>
+          <div class="zodiac-dates">August 23 - September 22</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Libra -->
+      <div class="zodiac-slide" style="--zodiac-color: #ec407a; --zodiac-glow: rgba(236, 64, 122, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♎</div>
+          <div class="zodiac-element">Air Sign</div>
+          <div class="zodiac-name">LIBRA</div>
+          <div class="zodiac-description">Balanced & Harmonious<br>Graceful Beauty</div>
+          <div class="zodiac-dates">September 23 - October 22</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Scorpio -->
+      <div class="zodiac-slide" style="--zodiac-color: #9c27b0; --zodiac-glow: rgba(156, 39, 176, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♏</div>
+          <div class="zodiac-element">Water Sign</div>
+          <div class="zodiac-name">SCORPIO</div>
+          <div class="zodiac-description">Intense & Mysterious<br>Deep Passion</div>
+          <div class="zodiac-dates">October 23 - November 21</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Sagittarius -->
+      <div class="zodiac-slide" style="--zodiac-color: #ff6f00; --zodiac-glow: rgba(255, 111, 0, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♐</div>
+          <div class="zodiac-element">Fire Sign</div>
+          <div class="zodiac-name">SAGITTARIUS</div>
+          <div class="zodiac-description">Adventurous & Free<br>Wild Spirit</div>
+          <div class="zodiac-dates">November 22 - December 21</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Capricorn -->
+      <div class="zodiac-slide" style="--zodiac-color: #78909c; --zodiac-glow: rgba(120, 144, 156, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♑</div>
+          <div class="zodiac-element">Earth Sign</div>
+          <div class="zodiac-name">CAPRICORN</div>
+          <div class="zodiac-description">Ambitious & Timeless<br>Classic Strength</div>
+          <div class="zodiac-dates">December 22 - January 19</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Aquarius -->
+      <div class="zodiac-slide" style="--zodiac-color: #00bcd4; --zodiac-glow: rgba(0, 188, 212, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♒</div>
+          <div class="zodiac-element">Air Sign</div>
+          <div class="zodiac-name">AQUARIUS</div>
+          <div class="zodiac-description">Innovative & Unique<br>Electric Energy</div>
+          <div class="zodiac-dates">January 20 - February 18</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Pisces -->
+      <div class="zodiac-slide" style="--zodiac-color: #7e57c2; --zodiac-glow: rgba(126, 87, 194, 0.6);">
+        <div class="zodiac-content">
+          <div class="zodiac-symbol">♓</div>
+          <div class="zodiac-element">Water Sign</div>
+          <div class="zodiac-name">PISCES</div>
+          <div class="zodiac-description">Dreamy & Intuitive<br>Mystical Waters</div>
+          <div class="zodiac-dates">February 19 - March 20</div>
+        </div>
+        <div class="sparkle-container">
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+          <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+       <div class="zodiac-menu">
+        <label for="aries">Aries</label>
+        <label for="taurus">Taurus</label>
+        <label for="gemini">Gemini</label>
+        <label for="cancer">Cancer</label>
+        <label for="leo">Leo</label>
+        <label for="virgo">Virgo</label>
+        <label for="libra">Libra</label>
+        <label for="scorpio">Scorpio</label>
+        <label for="sagittarius">Sagittarius</label>
+        <label for="capricorn">Capricorn</label>
+        <label for="aquarius">Aquarius</label>
+        <label for="pisces">Pisces</label>
+      </div>
+
+    </div>
+  </div>
+  <a href="/zodiac" class="discover-btn">
+    Discover Your Scent
+  </a>
 </div>
 
 <!-- Flash Sales -->
@@ -267,23 +783,25 @@
     <% if (products && products.length > 0) { %>
       <% products.forEach(product => { %>
         <div class="product">
-          <div class="product-img">
-          <a href="/shopPage?id=<%= product._id %>">
-            <img class="default-img" src="<%= product.images[0] %>" alt="<%= product.productName %>">
-          </a>
+          <div class="product-image-container">
+            <a href="/shopPage?id=<%= product._id %>">
+              <img src="<%= product.images && product.images[0] ? product.images[0] : '/photos/default.png' %>" alt="<%= product.productName %>">
+            </a>
+            <div class="product-icons">
+              <button class="icon-btn cart" onclick="addToCart('<%= product._id %>')">
+                <i class="fas fa-shopping-cart"></i>
+              </button>
+              <button class="icon-btn wishlist" onclick="addToWishlist('<%= product._id %>')">
+                <i class="fas fa-heart"></i>
+              </button>
+            </div>
           </div>
-          <p><strong><%= product.productName %></strong></p>
-          <p><%= product.brand %></p>
-          <p><%= product.description.substring(0,50) %>...</p>
-          <p class="sale-price">₹<%= product.salePrice %></p>
-          <p class="regular-price">₹<%= product.regularPrice %></p>
-          <div class="product-actions">
-  <button class="action-btn cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
-  <button class="action-btn wishlist-btn" onclick="addToWishlist('<%= product._id %>')">
-    <i class="fas fa-heart"></i>
-  </button>
-</div>
-
+          <div class="product-details">
+            <p><strong><%= product.productName %></strong></p>
+            <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "No Brand" %></div>
+            <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
+            <p><span class="sale-price">₹<%= product.salePrice %></span><span class="regular-price">₹<%= product.regularPrice %></span></p>
+          </div>
         </div>
       <% }) %>
     <% } else { %>
@@ -293,24 +811,19 @@
   <a href="/shopPage" class="view-all">View All Products</a>
 </div>
 
-<!-- Popular Brands -->
+
 <div class="section">
   <h2>Popular Brands</h2>
   <div class="slider-container">
-     <button class="slider-btn left" onclick="slideLeft('brandGrid')" id="brandLeftBtn">‹</button>
+    <button class="slider-btn left" onclick="slideLeft('brandGrid')" id="brandLeftBtn">‹</button>
     <div class="slider-wrapper">
       <div class="brand-grid" id="brandGrid">
         <% if (brands && brands.length > 0) { %>
           <% brands.forEach(brand => { %>
-           <a href="/shopPage?brands=<%= brand._id %>" class="brand">
-  <div class="brand-imgbox">
-    <img src="<%= brand.brandImage[0] %>" alt="<%= brand.brandName %> Logo"
-         onerror="this.src='/photos/default.png'">
-  </div>
-  <p><%= brand.brandName %></p>
-</a>
-
-
+            <a href="/shopPage?brands=<%= brand._id %>" class="brand">
+              <img src="<%= brand.brandImage && brand.brandImage[0] ? brand.brandImage[0] : '/photos/default.png' %>" alt="<%= brand.brandName %> Logo">
+              <p><%= brand.brandName %></p>
+            </a>
           <% }) %>
         <% } else { %>
           <p>No brands available</p>
@@ -328,48 +841,52 @@
     <button class="slider-btn left" onclick="slideLeft('categoryGrid')" id="categoryLeftBtn">‹</button>
     <div class="slider-wrapper">
       <div class="category-grid" id="categoryGrid">
-       <% if (categories && categories.length > 0) { %>    
-  <% categories.forEach(cat => { %>
-    <a href="/shopPage?categorys=<%= cat._id %>" class="category">
-      <div class="category-imgbox">
-        <img src="<%= cat.categoryImage && cat.categoryImage[0] ? cat.categoryImage[0] : '/photos/default.png' %>" 
-             alt="<%= cat.categoryName %>"
-             onerror="this.src='/photos/default.png'">
-      </div>
-      <p><%= cat.name %></p>
-
-    </a>
-  <% }) %>
-<% } %>
-
+        <% if (categories && categories.length > 0) { %>
+          <% categories.forEach(cat => { %>
+            <a href="/shopPage?categorys=<%= cat._id %>" class="category">
+              <img 
+                src="<%= cat.image ? cat.image : '/photos/default.png' %>" 
+                alt="<%= cat.name %>" 
+                class="category-img"
+              >
+              <p><%= cat.name %></p>
+            </a>
+          <% }) %>
+        <% } else { %>
+          <p>No categories available</p>
+        <% } %>
       </div>
     </div>
     <button class="slider-btn right" onclick="slideRight('categoryGrid')" id="categoryRightBtn">›</button>
   </div>
 </div>
 
-<!-- New Arrival -->
+<!-- New Arrivals -->
 <div class="section">
   <h2>New Arrival</h2>
   <div class="product-grid">
     <% if (newArrivals && newArrivals.length > 0) { %>
       <% newArrivals.forEach(product => { %>
         <div class="product">
-          <a href="/shopPage?id=<%= product._id %>">
-            <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
-          </a>
-          <p><strong><%= product.productName %></strong></p>
-          <p><%= product.brand %></p>
-          <p><%= product.description.substring(0,50) %>...</p>
-          <p class="sale-price">₹<%= product.salePrice %></p>
-          <p class="regular-price">₹<%= product.regularPrice %></p>
-         <div class="product-actions">
-  <button class="action-btn cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
-  <button class="action-btn wishlist-btn" onclick="addToWishlist('<%= product._id %>')">
-    <i class="fas fa-heart"></i>
-  </button>
-</div>
-
+          <div class="product-image-container">
+            <a href="/shopPage?id=<%= product._id %>">
+              <img src="<%= product.images && product.images[0] ? product.images[0] : '/photos/default.png' %>" alt="<%= product.productName %>">
+            </a>
+            <div class="product-icons">
+              <button class="icon-btn cart" onclick="addToCart('<%= product._id %>')">
+                <i class="fas fa-shopping-cart"></i>
+              </button>
+              <button class="icon-btn wishlist" onclick="addToWishlist('<%= product._id %>')">
+                <i class="fas fa-heart"></i>
+              </button>
+            </div>
+          </div>
+          <div class="product-details">
+            <p><strong><%= product.productName %></strong></p>
+            <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "No Brand" %></div>
+            <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
+            <p><span class="sale-price">₹<%= product.salePrice %></span><span class="regular-price">₹<%= product.regularPrice %></span></p>
+          </div>
         </div>
       <% }) %>
     <% } else { %>
@@ -386,21 +903,25 @@
     <% if (bestSelling && bestSelling.length > 0) { %>
       <% bestSelling.forEach(product => { %>
         <div class="product">
-          <a href="/shopPage?id=<%= product._id %>">
-            <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
-          </a>
-          <p><strong><%= product.productName %></strong></p>
-          <p><%= product.brand %></p>
-          <p><%= product.description.substring(0,50) %>...</p>
-          <p class="sale-price">₹<%= product.salePrice %></p>
-          <p class="regular-price">₹<%= product.regularPrice %></p>
-         <div class="product-actions">
-  <button class="action-btn cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
-  <button class="action-btn wishlist-btn" onclick="addToWishlist('<%= product._id %>')">
-    <i class="fas fa-heart"></i>
-  </button>
-</div>
-
+          <div class="product-image-container">
+            <a href="/shopPage?id=<%= product._id %>">
+              <img src="<%= product.images && product.images[0] ? product.images[0] : '/photos/default.png' %>" alt="<%= product.productName %>">
+            </a>
+            <div class="product-icons">
+              <button class="icon-btn cart" onclick="addToCart('<%= product._id %>')">
+                <i class="fas fa-shopping-cart"></i>
+              </button>
+              <button class="icon-btn wishlist" onclick="addToWishlist('<%= product._id %>')">
+                <i class="fas fa-heart"></i>
+              </button>
+            </div>
+          </div>
+          <div class="product-details">
+            <p><strong><%= product.productName %></strong></p>
+            <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "No Brand" %></div>
+            <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
+            <p><span class="sale-price">₹<%= product.salePrice %></span><span class="regular-price">₹<%= product.regularPrice %></span></p>
+          </div>
         </div>
       <% }) %>
     <% } else { %>
@@ -410,125 +931,80 @@
   <a href="/shopPage" class="view-all">View All Products</a>
 </div>
 
-   <script>
-        class Slider {
-            constructor(gridId) {
-                this.grid = document.getElementById(gridId);
-                this.leftBtn = document.getElementById(gridId.replace('Grid', 'LeftBtn'));
-                this.rightBtn = document.getElementById(gridId.replace('Grid', 'RightBtn'));
-                this.currentPosition = 0;
-                this.itemWidth = 200; // Width of each item including gap
-                this.visibleItems = this.calculateVisibleItems();
-                this.maxItems = this.grid.children.length;
-                
-                this.updateButtons();
-                window.addEventListener('resize', () => {
-                    this.visibleItems = this.calculateVisibleItems();
-                    this.updateButtons();
-                });
-            }
+<script>
+  // Generate star background for zodiac banner
+  const starBg = document.getElementById('starBg');
+  if (starBg) {
+    for (let i = 0; i < 80; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
+      starBg.appendChild(star);
+    }
+  }
 
-            calculateVisibleItems() {
-                const containerWidth = this.grid.parentElement.offsetWidth;
-                return Math.floor(containerWidth / this.itemWidth);
-            }
+  // Auto-advance zodiac signs
+ const zodiacs = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 
+                   'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
+  let currentIndex = 0;
+  let isTransitioning = false;
 
-            updateButtons() {
-                if (this.leftBtn && this.rightBtn) {
-                    this.leftBtn.disabled = this.currentPosition <= 0;
-                    this.rightBtn.disabled = this.currentPosition >= this.maxItems - this.visibleItems;
-                }
-            }
+  function advanceZodiac() {
+    if (isTransitioning) return;
+    
+    isTransitioning = true;
+    currentIndex = (currentIndex + 1) % zodiacs.length;
+    const zodiacElement = document.getElementById(zodiacs[currentIndex]);
+    
+    if (zodiacElement) {
+      zodiacElement.checked = true;
+    }
+    
+    // Wait for transition to complete before allowing next change
+    setTimeout(() => {
+      isTransitioning = false;
+    }, 500);
+  }
 
-            slideLeft() {
-                if (this.currentPosition > 0) {
-                    this.currentPosition--;
-                    this.updateTransform();
-                }
-            }
+  setInterval(advanceZodiac, 4500);
 
-            slideRight() {
-                if (this.currentPosition < this.maxItems - this.visibleItems) {
-                    this.currentPosition++;
-                    this.updateTransform();
-                }
-            }
-
-            updateTransform() {
-                const translateX = -this.currentPosition * this.itemWidth;
-                this.grid.style.transform = `translateX(${translateX}px)`;
-                this.updateButtons();
-            }
-        }
-
-        // Initialize sliders
-        const brandSlider = new Slider('brandGrid');
-        const categorySlider = new Slider('categoryGrid');
-
-        // Global functions for onclick handlers
-        function slideLeft(gridId) {
-            if (gridId === 'brandGrid') {
-                brandSlider.slideLeft();
-            } else if (gridId === 'categoryGrid') {
-                categorySlider.slideLeft();
-            }
-        }
-
-        function slideRight(gridId) {
-            if (gridId === 'brandGrid') {
-                brandSlider.slideRight();
-            } else if (gridId === 'categoryGrid') {
-                categorySlider.slideRight();
-            }
-        }
-
-        // Auto-slide functionality (optional)
-        function startAutoSlide(slider, interval = 5000) {
-            setInterval(() => {
-                if (slider.currentPosition >= slider.maxItems - slider.visibleItems) {
-                    slider.currentPosition = 0;
-                } else {
-                    slider.currentPosition++;
-                }
-                slider.updateTransform();
-            }, interval);
-        }
-
-        // Uncomment to enable auto-sliding
-        // startAutoSlide(brandSlider, 4000);
-        // startAutoSlide(categorySlider, 5000);
-
-        // Touch/swipe support for mobile
-        function addSwipeSupport(slider) {
-            let startX = 0;
-            let endX = 0;
-
-            slider.grid.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-            });
-
-            slider.grid.addEventListener('touchmove', (e) => {
-                endX = e.touches[0].clientX;
-            });
-
-            slider.grid.addEventListener('touchend', () => {
-                const diff = startX - endX;
-                if (Math.abs(diff) > 50) { // Minimum swipe distance
-                    if (diff > 0) {
-                        slider.slideRight();
-                    } else {
-                        slider.slideLeft();
-                    }
-                }
-            });
-        }
-
-        
-        addSwipeSupport(brandSlider);
-        addSwipeSupport(categorySlider);
-      </script>
-
-
-
+  // Existing slider code
+  class Slider {
+    constructor(gridId) {
+      this.grid = document.getElementById(gridId);
+      this.leftBtn = document.getElementById(gridId.replace('Grid','LeftBtn'));
+      this.rightBtn = document.getElementById(gridId.replace('Grid','RightBtn'));
+      this.currentPosition = 0;
+      this.itemWidth = 200;
+      this.visibleItems = this.calculateVisibleItems();
+      this.maxItems = this.grid.children.length;
+      this.updateButtons();
+      window.addEventListener('resize', ()=> { this.visibleItems=this.calculateVisibleItems(); this.updateButtons(); });
+    }
+    calculateVisibleItems() { return Math.floor(this.grid.parentElement.offsetWidth / this.itemWidth); }
+    updateButtons() { if(this.leftBtn && this.rightBtn){ this.leftBtn.disabled=this.currentPosition<=0; this.rightBtn.disabled=this.currentPosition>=this.maxItems-this.visibleItems; } }
+    slideLeft(){ if(this.currentPosition>0){ this.currentPosition--; this.updateTransform(); } }
+    slideRight(){ if(this.currentPosition<this.maxItems-this.visibleItems){ this.currentPosition++; this.updateTransform(); } }
+    updateTransform(){ this.grid.style.transform=`translateX(-${this.currentPosition*this.itemWidth}px)`; this.updateButtons(); }
+  }
+  
+  const brandSlider = new Slider('brandGrid');
+  const categorySlider = new Slider('categoryGrid');
+  
+  function slideLeft(gridId){ if(gridId==='brandGrid') brandSlider.slideLeft(); else if(gridId==='categoryGrid') categorySlider.slideLeft(); }
+  function slideRight(gridId){ if(gridId==='brandGrid') brandSlider.slideRight(); else if(gridId==='categoryGrid') categorySlider.slideRight(); }
+  
+  function addSwipeSupport(slider){
+    let startX=0,endX=0;
+    slider.grid.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; });
+    slider.grid.addEventListener('touchmove', e=>{ endX=e.touches[0].clientX; });
+    slider.grid.addEventListener('touchend', ()=> { const diff=startX-endX; if(Math.abs(diff)>50){ if(diff>0) slider.slideRight(); else slider.slideLeft(); } });
+  }
+  
+  addSwipeSupport(brandSlider);
+  addSwipeSupport(categorySlider);
+</script>
 
 <%- include("../partials/user/footer.ejs") %>

@@ -1,122 +1,644 @@
 <%- include("../partials/admin/header.ejs") %>
 
-<!-- Cropper.js CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Inter', sans-serif; background-color: #f9f9f9; }
-  .main-content { margin-left: 240px; margin-top: 60px; padding: 20px; min-height: 100vh; }
-  .container { max-width: 1100px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: auto; }
-  h2 { font-size: 26px; font-weight: 800; margin-bottom: 20px; text-align: center; }
-  .form-wrapper { display: flex; flex-wrap: wrap; gap: 30px; }
-  .left, .right { flex: 1; min-width: 300px; }
-  .image-box { margin-bottom: 10px; }
-  .image-box img { width: 100%; border-radius: 10px; margin-bottom: 5px; }
-  .image-buttons { display: flex; gap: 10px; margin-bottom: 10px; }
-  .save-btn, .cancel-btn { padding: 6px 10px; font-size: 13px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
-  .save-btn { background-color: #007bff; color: white; }
-  .cancel-btn { background-color: #dc3545; color: white; }
-  label { font-weight: bold; margin-top: 10px; display: block; }
-  input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-  .error-message { color: red; font-size: 13px; margin-bottom: 10px; }
-  .flex-row { display: flex; gap: 15px; flex-wrap: wrap; }
-  .flex-row > div { flex: 1; min-width: 140px; }
-  .button-row { display: flex; gap: 10px; margin-top: 20px; }
-  .btn-green, .btn-red { padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; }
-  .btn-green { background-color: #28a745; color: white; }
-  .btn-red { background-color: #dc3545; color: white; }
-  #cropper-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; }
-  .modal-content { background: #fff; padding: 20px; border-radius:10px; max-height:90vh; overflow-y:auto; text-align:center; }
-  .modal-content img { max-width:100%; margin-bottom:10px; }
-  .variant-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-  .variant-row input { flex: 1; }
-  @media (max-width:768px){.main-content{margin-left:0}.button-row{flex-direction:column}.btn-green,.btn-red{width:100%}.variant-row{flex-direction:column}.variant-row button{width:100%;}}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { 
+  font-family: 'Inter', sans-serif; 
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  color: #2d3748;
+  line-height: 1.6;
+}
+
+.main-content { 
+  margin-left: 240px; 
+  margin-top: 60px; 
+  padding: 40px 20px; 
+  min-height: 100vh; 
+}
+
+.page-header {
+  max-width: 1200px;
+  margin: 0 auto 30px;
+}
+
+.page-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 8px;
+}
+
+.page-header p {
+  color: #718096;
+  font-size: 15px;
+}
+
+.alert-success, .alert-error { 
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  padding: 16px 20px; 
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.alert-success {
+  background: #d4edda; 
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.alert-error {
+  background: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+.alert-success svg, .alert-error svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.container { 
+  max-width: 1200px; 
+  background: #fff; 
+  padding: 0;
+  border-radius: 16px; 
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  margin: auto; 
+  overflow: hidden;
+}
+
+.form-wrapper { 
+  display: grid;
+  grid-template-columns: 480px 1fr;
+  gap: 0;
+}
+
+/* LEFT SIDE - IMAGES */
+.left { 
+  background: #f8fafc;
+  padding: 40px 30px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: #4299e1;
+  border-radius: 2px;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.image-box { 
+  background: white;
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.image-box:hover {
+  border-color: #4299e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.15);
+}
+
+.image-box.has-image {
+  border-style: solid;
+  border-color: #48bb78;
+}
+
+.image-preview-wrapper {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f7fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.image-preview-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  text-align: center;
+  color: #a0aec0;
+  font-size: 13px;
+}
+
+.image-placeholder svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.product-image-input {
+  display: none;
+}
+
+.upload-label {
+  display: block;
+  padding: 8px 12px;
+  background: #4299e1;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.upload-label:hover {
+  background: #3182ce;
+  transform: translateY(-1px);
+}
+
+.image-buttons { 
+  display: flex; 
+  gap: 8px;
+}
+
+.save-btn, .cancel-btn { 
+  padding: 8px 12px; 
+  font-size: 12px; 
+  border-radius: 6px; 
+  border: none; 
+  cursor: pointer; 
+  font-weight: 600;
+  flex: 1;
+  transition: all 0.2s;
+}
+
+.save-btn { 
+  background: #48bb78; 
+  color: white; 
+}
+
+.save-btn:hover {
+  background: #38a169;
+  transform: translateY(-1px);
+}
+
+.cancel-btn { 
+  background: #fc8181; 
+  color: white; 
+}
+
+.cancel-btn:hover {
+  background: #f56565;
+  transform: translateY(-1px);
+}
+
+/* RIGHT SIDE - FORM */
+.right { 
+  padding: 40px;
+}
+
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+label { 
+  font-weight: 600;
+  font-size: 14px;
+  color: #2d3748;
+  margin-bottom: 8px; 
+  display: block;
+}
+
+label .required {
+  color: #f56565;
+  margin-left: 2px;
+}
+
+input, textarea, select { 
+  width: 100%; 
+  padding: 12px 16px; 
+  border: 2px solid #e2e8f0; 
+  border-radius: 8px; 
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  background: white;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.error-message { 
+  color: #f56565; 
+  font-size: 12px; 
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* VARIANTS */
+.variants-container {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.variant-row { 
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  gap: 12px; 
+  margin-bottom: 12px;
+  align-items: start;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.variant-row input {
+  padding: 10px 12px;
+}
+
+.remove-variant-btn {
+  padding: 10px 16px;
+  background: #fc8181;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.remove-variant-btn:hover {
+  background: #f56565;
+}
+
+.add-variant-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: white;
+  color: #4299e1;
+  border: 2px dashed #4299e1;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 12px;
+  transition: all 0.2s;
+}
+
+.add-variant-btn:hover {
+  background: #ebf8ff;
+  border-color: #3182ce;
+}
+
+/* BUTTONS */
+.button-row { 
+  display: flex; 
+  gap: 16px; 
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-green, .btn-red { 
+  padding: 14px 32px; 
+  border: none; 
+  border-radius: 8px; 
+  font-size: 16px; 
+  font-weight: 600; 
+  cursor: pointer; 
+  flex: 1;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-green { 
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white; 
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.btn-green:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+}
+
+.btn-red { 
+  background: white;
+  color: #718096;
+  border: 2px solid #e2e8f0;
+  box-shadow: none;
+}
+
+.btn-red:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+/* CROPPER MODAL */
+#cropper-modal { 
+  display: none; 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999; 
+  justify-content: center; 
+  align-items: center;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content { 
+  background: #fff; 
+  padding: 30px; 
+  border-radius: 16px; 
+  max-width: 90vw;
+  max-height: 90vh; 
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #1a202c;
+}
+
+.modal-content img { 
+  max-width: 100%; 
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .form-wrapper {
+    grid-template-columns: 1fr;
+  }
+  
+  .left {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .images-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content { 
+    margin-left: 0; 
+    padding: 20px 16px;
+  }
+  
+  .container {
+    border-radius: 12px;
+  }
+  
+  .left, .right {
+    padding: 24px 20px;
+  }
+  
+  .images-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .variant-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .button-row { 
+    flex-direction: column; 
+  }
+  
+  .page-header h2 {
+    font-size: 24px;
+  }
+}
+
+/* Input Icons/Placeholders */
+input::placeholder, textarea::placeholder {
+  color: #a0aec0;
+}
 </style>
 
 <div class="main-content">
-  <div class="container">
+  <div class="page-header">
     <h2>Add New Product</h2>
+    <p>Create a new product with images, details, and variant options</p>
+  </div>
+
+  <% if (locals.error && locals.error.length > 0) { %>
+    <div class="alert-error">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+      <%= locals.error[0] %>
+    </div>
+  <% } %>
+  <% if (locals.success && locals.success.length > 0) { %>
+    <div class="alert-success">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <%= locals.success[0] %>
+    </div>
+  <% } %>
+
+  <div class="container">
     <form id="addProductForm" action="/admin/addProducts" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
       <div class="form-wrapper">
 
-        <!-- Left: Images -->
+        <!-- LEFT SIDE - IMAGES -->
         <div class="left">
-          <% for(let i=1;i<=4;i++){ %>
-          <div class="image-box">
-            <img id="preview-image<%=i%>" src="/photos/default.jpg" alt="Image <%=i%> Preview"/>
-            <label for="productImage<%=i%>">Choose Product Image <%=i%></label>
-            <input type="file" accept="image/jpeg, image/jpg, image/png" class="product-image-input" name="productImage<%=i%>" id="productImage<%=i%>" data-index="<%=i%>"/>
-            <div class="image-buttons">
-              <button type="button" class="save-btn" data-index="<%=i%>">Save</button>
-              <button type="button" class="cancel-btn" onclick="resetImage('<%=i%>')">Cancel</button>
-            </div>
-            <p class="error-message" id="productImage<%=i%>-error"></p>
-          </div>
-          <% } %>
-
-          <div id="cropper-modal">
-            <div class="modal-content">
-              <h3>Crop Image</h3>
-              <img id="cropper-image"/>
-              <div>
-                <button type="button" class="save-btn" onclick="cropImage()">Crop</button>
-                <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+          <div class="section-title">Product Images</div>
+          <div class="images-grid">
+            <% for(let i=1; i<=4; i++){ %>
+            <div class="image-box" id="image-box-<%=i%>">
+              <div class="image-preview-wrapper">
+                <img id="preview-image<%=i%>" alt="Image <%=i%>" style="display:none;"/>
+                <div class="image-placeholder" id="placeholder-<%=i%>">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <div>Image <%=i%></div>
+                </div>
               </div>
+              
+              <label class="upload-label" for="file-input-<%=i%>">Choose Image</label>
+              <input type="file" id="file-input-<%=i%>" class="product-image-input" data-index="<%=i%>" accept="image/*"/>
+              <input type="hidden" id="cropped-image<%=i%>" name="croppedImages[]"/>
+              
+              <div class="image-buttons">
+                <button type="button" class="save-btn" onclick="triggerCrop('<%=i%>')">Crop</button>
+                <button type="button" class="cancel-btn" onclick="resetImage('<%=i%>')">Reset</button>
+              </div>
+              <p class="error-message" id="productImage<%=i%>-error"></p>
             </div>
+            <% } %>
           </div>
         </div>
 
-        <!-- Right: Product Details -->
+        <!-- RIGHT SIDE - PRODUCT DETAILS -->
         <div class="right">
-          <label>Product Name</label>
-          <input type="text" name="productName" placeholder="Type name here" required/>
-          <p class="error-message" id="productName-error"></p>
+          <div class="form-section">
+            <div class="section-title">Basic Information</div>
+            
+            <div class="form-group">
+              <label>Product Name <span class="required">*</span></label>
+              <input type="text" name="productName" placeholder="Enter product name"/>
+              <p class="error-message" id="productName-error"></p>
+            </div>
 
-          <label>Brand</label>
-          <select name="brand" required>
-            <option value="">-- Select Brand --</option>
-            <% brand.forEach(b => { %>
-              <option value="<%=b._id%>"><%=b.brandName%></option>
-            <% }) %>
-          </select>
-          <p class="error-message" id="brand-error"></p>
+            <div class="form-group">
+              <label>Brand <span class="required">*</span></label>
+              <select name="brand">
+                <option value="">Select a brand</option>
+                <% brand.forEach(b => { %>
+                  <option value="<%=b._id%>"><%=b.brandName%></option>
+                <% }) %>
+              </select>
+              <p class="error-message" id="brand-error"></p>
+            </div>
 
-          <label>Category</label>
-          <select name="category" required>
-            <option value="">-- Select Category --</option>
-            <% category.forEach(c => { %>
-              <option value="<%=c._id%>"><%=c.name%></option>
-            <% }) %>
-          </select>
-          <p class="error-message" id="category-error"></p>
+            <div class="form-group">
+              <label>Category <span class="required">*</span></label>
+              <select name="category">
+                <option value="">Select a category</option>
+                <% category.forEach(c => { %>
+                  <option value="<%=c._id%>"><%=c.name%></option>
+                <% }) %>
+              </select>
+              <p class="error-message" id="category-error"></p>
+            </div>
+          </div>
 
-          <label> Short Description</label>
-          <textarea name="description" placeholder="Type Description here" rows="3" required></textarea>
-          <p class="error-message" id="description-error"></p>
+          <div class="form-section">
+            <div class="section-title">Description</div>
+            
+            <div class="form-group">
+              <label>Short Description <span class="required">*</span></label>
+              <textarea name="description" rows="3" placeholder="Brief product description"></textarea>
+              <p class="error-message" id="description-error"></p>
+            </div>
 
-           <label> Long Description</label>
-          <textarea name="Longdescription" placeholder="Type Description here" rows="3" required></textarea>
-          <p class="error-message" id="description-error"></p>
+            <div class="form-group">
+              <label>Long Description <span class="required">*</span></label>
+              <textarea name="Longdescription" rows="4" placeholder="Detailed product description"></textarea>
+              <p class="error-message" id="longDescription-error"></p>
+            </div>
+          </div>
 
-          <label>Variants</label>
-         <div id="variants-wrapper">
-  <div class="variant-row">
-    <input type="number" name="variantSize[]" placeholder="Size (ml)" required/>
-    <input type="number" name="variantStock[]" placeholder="Stock" min="0" required/>
-    <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" min="0" required/>
-    <input type="number" name="variantSalePrice[]" placeholder="Sale Price" min="0" required/>
-    <button type="button" onclick="removeVariantRow(this)">Remove</button>
-  </div>
-</div>
-<button type="button" onclick="addVariantRow()">Add Variant</button>
-
-          <p class="error-message" id="variant-error"></p>
-
-         
+          <div class="form-section">
+            <div class="section-title">Product Variants</div>
+            <div class="variants-container">
+              <div id="variants-wrapper">
+                <div class="variant-row">
+                  <input type="number" name="variantSize[]" placeholder="Size (ml)" min="0"/>
+                  <input type="number" name="variantStock[]" placeholder="Stock" min="0"/>
+                  <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" min="0"/>
+                  <input type="number" name="variantSalePrice[]" placeholder="Sale Price" min="0"/>
+                  <button type="button" class="remove-variant-btn" onclick="removeVariantRow(this)">Remove</button>
+                </div>
+              </div>
+              <button type="button" class="add-variant-btn" onclick="addVariantRow()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Variant
+              </button>
+            </div>
+            <p class="error-message" id="variant-error"></p>
+          </div>
 
           <div class="button-row">
-            <button type="submit" class="btn-green">Add</button>
+            <button type="submit" class="btn-green">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Add Product
+            </button>
             <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">Cancel</button>
           </div>
         </div>
@@ -126,170 +648,275 @@
   </div>
 </div>
 
-
+<!-- Cropper Modal -->
+<div id="cropper-modal">
+  <div class="modal-content">
+    <h3>Crop Image</h3>
+    <img id="cropper-image"/>
+    <div class="modal-buttons">
+      <button type="button" class="save-btn" onclick="cropImage()">Apply Crop</button>
+      <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-  let cropper, currentImageIndex = null;
-  const modal = document.getElementById('cropper-modal');
-  const cropperImage = document.getElementById('cropper-image');
-  const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+let cropper, currentImageIndex = null;
+const modal = document.getElementById('cropper-modal');
+const cropperImage = document.getElementById('cropper-image');
+const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
 
-  // ---------- Image Upload + Cropper ----------
-  document.querySelectorAll('.product-image-input').forEach(input => {
-    input.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      currentImageIndex = e.target.getAttribute('data-index');
-      if (!file) return;
 
-      if (!allowedFormats.includes(file.type)) {
-        alert('Only PNG/JPG/JPEG allowed');
-        e.target.value = '';
-        return;
-      }
+ if (locals.error && locals.error.length > 0) { 
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: '<%= locals.error[0] %>',
+    confirmButtonColor: '#dc3545',
+    confirmButtonText: 'OK'
+  });
+ }
+ if (locals.success && locals.success.length > 0) { 
+  Swal.fire({
+    icon: 'success',
+    title: 'Success',
+    text: '<%= locals.success[0] %>',
+    confirmButtonColor: '#28a745',
+    confirmButtonText: 'OK'
+  });
+ }
 
+
+document.querySelectorAll('.product-image-input').forEach(input => {
+  input.addEventListener('change', function() {
+    const index = this.dataset.index;
+    const file = this.files[0];
+    if (file && allowedFormats.includes(file.type)) {
       const reader = new FileReader();
-      reader.onload = function (ev) {
-        cropperImage.src = ev.target.result;
-        modal.style.display = 'flex';
-        setTimeout(() => {
-          cropper = new Cropper(cropperImage, {
-            aspectRatio: 1,
-            viewMode: 1,
-            autoCropArea: 1,
-            zoomable: true
-          });
-        }, 100);
+      reader.onload = function(e) {
+        const preview = document.getElementById(`preview-image${index}`);
+        const placeholder = document.getElementById(`placeholder-${index}`);
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+        document.getElementById(`image-box-${index}`).classList.add('has-image');
       };
       reader.readAsDataURL(file);
-    });
-  });
-
-  function cropImage() {
-    const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
-    const dataURL = canvas.toDataURL('image/jpeg');
-    document.getElementById(`preview-image${currentImageIndex}`).src = dataURL;
-    document.querySelector(`input[data-index="${currentImageIndex}"]`).setAttribute('data-saved', 'true');
-    closeModal();
-  }
-
-  function closeModal() {
-    modal.style.display = 'none';
-    if (cropper) {
-      cropper.destroy();
-      cropper = null;
+    } else if (file) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Image',
+        text: 'Only PNG/JPG/JPEG formats are allowed',
+        confirmButtonColor: '#dc3545'
+      });
+      input.value = '';
     }
-  }
+  });
+});
 
-  function resetImage(index) {
-    document.getElementById(`preview-image${index}`).src = '/photos/default.jpg';
-    const input = document.querySelector(`input[data-index="${index}"]`);
+function triggerCrop(index) {
+  const input = document.querySelector(`.product-image-input[data-index="${index}"]`);
+  const file = input.files[0];
+  if (!file) {
+    Swal.fire({
+      icon: 'error',
+      title: 'No Image',
+      text: 'Please select an image first.',
+      confirmButtonColor: '#dc3545'
+    });
+    return;
+  }
+  if (!allowedFormats.includes(file.type)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Image',
+      text: 'Only PNG/JPG/JPEG allowed',
+      confirmButtonColor: '#dc3545'
+    });
     input.value = '';
-    input.removeAttribute('data-saved');
+    return;
   }
+  currentImageIndex = index;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    cropperImage.src = ev.target.result;
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      cropper = new Cropper(cropperImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 1,
+        zoomable: true
+      });
+    }, 100);
+  };
+  reader.readAsDataURL(file);
+}
 
-  document.querySelectorAll('.save-btn').forEach(button => {
-    button.addEventListener('click', function () {
-      const i = button.getAttribute('data-index');
-      const input = document.querySelector(`input[data-index="${i}"]`);
-      if (!input.value) {
-        alert("Please select an image first.");
-        return;
-      }
-      input.dispatchEvent(new Event('change'));
-    });
-  });
+function cropImage() {
+  const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
+  const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+  
+  const previewImg = document.getElementById(`preview-image${currentImageIndex}`);
+  previewImg.src = dataURL;
+  previewImg.style.display = "block";
+  
+  const placeholder = document.getElementById(`placeholder-${currentImageIndex}`);
+  placeholder.style.display = 'none';
 
-  // ---------- Variants ----------
-  function addVariantRow() {
-    const wrapper = document.getElementById('variants-wrapper');
-    const row = document.createElement('div');
-    row.className = 'variant-row';
-    row.innerHTML = `
-      <input type="number" name="variantSize[]" placeholder="Size (ml)" required/>
-      <input type="number" name="variantStock[]" placeholder="Stock" min="0" required/>
-      <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" min="0" required/>
-      <input type="number" name="variantSalePrice[]" placeholder="Sale Price" min="0" required/>
-      <button type="button" onclick="removeVariantRow(this)">Remove</button>`;
-    wrapper.appendChild(row);
+  document.getElementById(`cropped-image${currentImageIndex}`).value = dataURL;
+  document.getElementById(`image-box-${currentImageIndex}`).classList.add('has-image');
+
+  closeModal();
+}
+
+function closeModal() {
+  modal.style.display = 'none';
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
   }
+}
 
-  function removeVariantRow(btn) {
+function resetImage(index) {
+  const preview = document.getElementById(`preview-image${index}`);
+  const placeholder = document.getElementById(`placeholder-${index}`);
+  const input = document.querySelector(`.product-image-input[data-index="${index}"]`);
+  
+  preview.src = '';
+  preview.style.display = 'none';
+  placeholder.style.display = 'block';
+  input.value = '';
+  document.getElementById(`cropped-image${index}`).value = '';
+  document.getElementById(`image-box-${index}`).classList.remove('has-image');
+}
+
+// Variants
+function addVariantRow() {
+  const wrapper = document.getElementById('variants-wrapper');
+  const row = document.createElement('div');
+  row.className = 'variant-row';
+  row.innerHTML = `
+    <input type="number" name="variantSize[]" placeholder="Size (ml)" min="0"/>
+    <input type="number" name="variantStock[]" placeholder="Stock" min="0"/>
+    <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" min="0"/>
+    <input type="number" name="variantSalePrice[]" placeholder="Sale Price" min="0"/>
+    <button type="button" class="remove-variant-btn" onclick="removeVariantRow(this)">Remove</button>
+  `;
+  wrapper.appendChild(row);
+}
+
+function removeVariantRow(btn) {
+  const wrapper = document.getElementById('variants-wrapper');
+  if (wrapper.children.length > 1) {
     btn.parentElement.remove();
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Cannot Remove',
+      text: 'At least one variant is required',
+      confirmButtonColor: '#dc3545'
+    });
+  }
+}
+
+// Validation
+function showError(id, msg) {
+  document.getElementById(id).textContent = msg;
+}
+
+function clearErrors() {
+  document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+}
+
+function validateForm() {
+  clearErrors();
+  let valid = true;
+
+  // Images
+  let imageCount = 0;
+  for (let i = 1; i <= 4; i++) {
+    if (document.getElementById(`cropped-image${i}`).value) {
+      imageCount++;
+    }
+  }
+  if (imageCount < 1) {
+    showError('productImage1-error', 'At least one image is required');
+    valid = false;
+  }
+  if (imageCount > 4) {
+    showError('productImage1-error', 'Maximum 4 images allowed');
+    valid = false;
   }
 
-  // ---------- Validation ----------
-  function showError(id, msg) {
-    document.getElementById(id).textContent = msg;
+  // Product fields
+  const name = document.getElementsByName('productName')[0];
+  const desc = document.getElementsByName('description')[0];
+  const longDesc = document.getElementsByName('Longdescription')[0];
+  const brand = document.getElementsByName('brand')[0];
+  const category = document.getElementsByName('category')[0];
+
+  if (!name.value.trim()) {
+    showError('productName-error', 'Product name is required');
+    valid = false;
+  }
+  if (!desc.value.trim()) {
+    showError('description-error', 'Description is required');
+    valid = false;
+  }
+  if (!longDesc.value.trim()) {
+    showError('longDescription-error', 'Long description is required');
+    valid = false;
+  }
+  if (!brand.value) {
+    showError('brand-error', 'Please select a brand');
+    valid = false;
+  }
+  if (!category.value) {
+    showError('category-error', 'Please select a category');
+    valid = false;
   }
 
-  function clearErrors() {
-    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+  // Variants
+  const variantSizes = document.getElementsByName('variantSize[]');
+  const variantStocks = document.getElementsByName('variantStock[]');
+  const variantRegularPrices = document.getElementsByName('variantRegularPrice[]');
+  const variantSalePrices = document.getElementsByName('variantSalePrice[]');
+
+  for (let i = 0; i < variantSizes.length; i++) {
+    if (!variantSizes[i].value || !variantStocks[i].value || !variantRegularPrices[i].value || !variantSalePrices[i].value) {
+      showError('variant-error', 'All variant fields are required');
+      valid = false;
+      break;
+    }
+    if (Number(variantSizes[i].value) <= 0) {
+      showError('variant-error', 'Size must be positive');
+      valid = false;
+      break;
+    }
+    if (Number(variantStocks[i].value) < 0) {
+      showError('variant-error', 'Stock cannot be negative');
+      valid = false;
+      break;
+    }
+    if (Number(variantRegularPrices[i].value) <= 0) {
+      showError('variant-error', 'Regular price must be positive');
+      valid = false;
+      break;
+    }
+    if (Number(variantSalePrices[i].value) < 0) {
+      showError('variant-error', 'Sale price cannot be negative');
+      valid = false;
+      break;
+    }
+    if (Number(variantSalePrices[i].value) > Number(variantRegularPrices[i].value)) {
+      showError('variant-error', 'Sale price must be ≤ regular price');
+      valid = false;
+      break;
+    }
   }
 
-  function validateForm() {
-    clearErrors();
-    let valid = true;
-
-    // Image validation
-    for (let i = 1; i <= 4; i++) {
-      const input = document.querySelector(`input[data-index="${i}"]`);
-      if (!input.getAttribute('data-saved')) {
-        showError(`productImage${i}-error`, `Please upload and save Product Image ${i}`);
-        valid = false;
-      }
-    }
-
-    // Product name, description, brand, category
-    const name = document.getElementsByName('productName')[0];
-    if (name.value.trim() === '') {
-      showError('productName-error', 'Product name required');
-      valid = false;
-    }
-
-    const description = document.getElementsByName('description')[0];
-    if (description.value.trim() === '') {
-      showError('description-error', 'Description required');
-      valid = false;
-    }
-
-    const Longdescription = document.getElementsByName('Longdescription')[0];
-    if (Longdescription.value.trim() === '') {
-      showError('description-error', 'Description required');
-      valid = false;
-    }
-
-    const brand = document.getElementsByName('brand')[0];
-    if (!brand.value) {
-      showError('brand-error', 'Brand required');
-      valid = false;
-    }
-
-    const category = document.getElementsByName('category')[0];
-    if (!category.value) {
-      showError('category-error', 'Category required');
-      valid = false;
-    }
-
-    // Variant validation
-    const variantSizes = document.getElementsByName('variantSize[]');
-    const variantStocks = document.getElementsByName('variantStock[]');
-    const variantRegularPrices = document.getElementsByName('variantRegularPrice[]');
-    const variantSalePrices = document.getElementsByName('variantSalePrice[]');
-
-    for (let i = 0; i < variantSizes.length; i++) {
-      if (
-        variantSizes[i].value.trim() === '' ||
-        variantStocks[i].value.trim() === '' ||
-        variantRegularPrices[i].value.trim() === '' ||
-        variantSalePrices[i].value.trim() === ''
-      ) {
-        showError('variant-error', 'All variant fields are required');
-        valid = false;
-        break;
-      }
-    }
-
-    return valid;
-  }
+  return valid;
+}
 </script>

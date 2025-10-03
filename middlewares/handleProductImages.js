@@ -8,7 +8,7 @@ module.exports = async function handleProductImages(req, res, next) {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).send('Product not found');
 
-    // ✅ Ensure req.body exists
+   
     req.body = req.body || {};
     req.body.deletedImages = req.body.deletedImages || '';
     req.body.productImagesBase64 = req.body.productImagesBase64 || [];
@@ -18,7 +18,7 @@ module.exports = async function handleProductImages(req, res, next) {
       ? req.body.productImagesBase64
       : [req.body.productImagesBase64];
 
-    // ✅ DELETE images from filesystem + DB
+    
     for (const img of deletedImages) {
       const index = product.images.indexOf(img);
       if (index > -1) product.images.splice(index, 1);
@@ -27,7 +27,7 @@ module.exports = async function handleProductImages(req, res, next) {
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 
-    // ✅ ADD new images from base64
+    
     for (const dataUrl of base64Images) {
       if (!dataUrl || !dataUrl.startsWith("data:image")) continue;
 
@@ -40,7 +40,7 @@ module.exports = async function handleProductImages(req, res, next) {
       product.images.push(filename);
     }
 
-    // Attach product to req for route handler
+  
     req.product = product;
     next();
   } catch (err) {

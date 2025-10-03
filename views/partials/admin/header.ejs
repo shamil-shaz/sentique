@@ -194,13 +194,13 @@
     <nav class="sidebar__nav">
   <a href="/admin/dashboard" class="nav__item <%= activePage === 'dashboard' ? 'active' : '' %>">Dashboard</a>
   <a href="/admin/customers" class="nav__item <%= activePage === 'customers' ? 'active' : '' %>">Users</a>
+  <a href="/admin/category" class="nav__item <%= activePage === 'category' ? 'active' : '' %>">Category</a>
   <a href="/admin/addProducts" class="nav__item <%= activePage === 'addProducts' ? 'active' : '' %>">Add Products</a>
-  <a href="/admin/products" class="nav__item <%= activePage === 'products' ? 'active' : '' %>">Products</a>
-  <a href="/admin/orders" class="nav__item <%= activePage === 'orders' ? 'active' : '' %>">Order Lists</a>
+  <a href="/admin/products" class="nav__item <%= activePage === 'products' ? 'active' : '' %>">Products</a>  
   <a href="/admin/brands" class="nav__item <%= activePage === 'brands' ? 'active' : '' %>">Brands</a>
+  <a href="/admin/orders" class="nav__item <%= activePage === 'orders' ? 'active' : '' %>">Order Lists</a>
   <a href="/admin/sales" class="nav__item <%= activePage === 'sales' ? 'active' : '' %>">Sales</a>
   <a href="/admin/coupons" class="nav__item <%= activePage === 'coupons' ? 'active' : '' %>">Coupons</a>
-  <a href="/admin/category" class="nav__item <%= activePage === 'category' ? 'active' : '' %>">Category</a>
   <a href="/admin/banners" class="nav__item <%= activePage === 'banners' ? 'active' : '' %>">Banner</a>
   <a href="/admin/offers" class="nav__item <%= activePage === 'offers' ? 'active' : '' %>">Refund & Return</a>
 </nav>
@@ -216,8 +216,7 @@
   <header class="admin-header">
     <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('active')">☰</button>
     <div class="search-container">
-      <span class="search-icon">&#128269;</span> <!-- Search icon (Unicode) -->
-      <input type="searchtext" class="search-bar" placeholder="Search" aria-label="Search" />
+      
     </div>
   </header>
 

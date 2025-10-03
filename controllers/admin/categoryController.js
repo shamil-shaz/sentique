@@ -1,6 +1,7 @@
 const Category = require('../../models/categorySchema')
 const Product=require("../../models/productSchema")
 const mongoose =require('mongoose');
+const cloudinary = require('../../config/cloudinary');
 
 
 
@@ -14,7 +15,8 @@ const categoryInfo = async (req, res) => {
     const filter = {
       name: { $regex: ".*" + search + ".*", $options: "i" }
     };
-  
+
+   e
     const categoryData = await Category.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -23,19 +25,18 @@ const categoryInfo = async (req, res) => {
     const totalCategories = await Category.countDocuments(filter);
     const totalPages = Math.ceil(totalCategories / limit);
 
-
     let message = "";
     if (search && totalCategories === 0) {
       message = "No categories found for your search.";
     }
-  
+
     res.render("category", {
-      cat: categoryData,
+      cat: categoryData, 
       currentPage: page,
       totalPages,
       totalCategories,
       search,
-      message, 
+      message,
     });
 
   } catch (error) {
@@ -45,24 +46,30 @@ const categoryInfo = async (req, res) => {
 };
 
 const addCategory = async (req, res) => {
-
   const { name, description } = req.body;
 
   try {
+    
     const existingCategory = await Category.findOne({ name });
-
-    if (existingCategory) {
+    if (existingCategory) 
       return res.status(400).json({ error: "Category already exists" });
+
+    let imageUrl = null;
+
+   
+    if (req.file) {
+      imageUrl = req.file.path; 
     }
 
+    
     const newCategory = new Category({
       name,
       description,
-      isListed: true, // ✅ Fix added here
+      image: imageUrl,
+      isListed: true
     });
 
     await newCategory.save();
-
     return res.json({ message: "Category added successfully" });
 
   } catch (error) {
@@ -70,6 +77,7 @@ const addCategory = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 const addCategoryOffer = async (req, res) => {
   try {
@@ -88,7 +96,7 @@ const addCategoryOffer = async (req, res) => {
       return res.json({ status: false, message: "A product in this category already has a better offer" });
     }
 
-    // ✅ Corrected this line:
+   
     await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
 
     for (const product of products) {
@@ -108,7 +116,7 @@ const removeCategoryOffer = async (req, res) => {
   try {
     const categoryId = req.body.categoryId;
 
-    // 1️⃣ Check if category exists
+    
     const category = await Category.findById(categoryId);
     if (!category) {
       return res.status(404).json({ status: false, message: "Category not found" });
@@ -116,18 +124,18 @@ const removeCategoryOffer = async (req, res) => {
 
     const percentage = category.categoryOffer;
 
-    // 2️⃣ Fetch all products in this category
+   
     const products = await Product.find({ category: categoryId });
 
     if (products.length > 0) {
       for (const product of products) {
-        product.salePrice = product.regularPrice; // Reset to original price
-        product.productOffer = 0; // Remove product-level offer
+        product.salePrice = product.regularPrice; 
+        product.productOffer = 0;
         await product.save();
       }
     }
 
-    // 3️⃣ Remove the category offer
+    
     category.categoryOffer = 0;
     await category.save();
 
@@ -166,78 +174,90 @@ const getEditCategory = async (req, res) => {
     const { id } = req.query;
 
     if (!id) {
-      return res.redirect("/pageerror"); // Prevent DB call without ID
+      return res.redirect("/pageerror");
     }
 
-   const category = await Category.findById(id);
-
+    const category = await Category.findById(id);
 
     if (!category) {
-      return res.redirect("/pageerror"); // If category not found
+      return res.redirect("/pageerror");
     }
 
-res.render("edit-category", { category });
-
-
+    res.render("edit-category", { category });
   } catch (error) {
     console.error("Edit Category Error:", error.message);
     res.redirect("/pageerror");
   }
 };
 
+
+
 const editCategory = async (req, res) => {
   try {
     const id = req.params.id;
-    const { categoryName, description } = req.body;
+    const { categoryName, description, deleteImage } = req.body;
 
-     if (!categoryName) {
-      return res.status(400).json({ error: "Category name is required" });
+
+    if (!categoryName || categoryName.trim().length < 3) {
+      return res.status(400).json({ error: "Category name is required and must be at least 3 characters" });
     }
 
+   
     const existingCategory = await Category.findOne({ name: categoryName, _id: { $ne: id } });
-
     if (existingCategory) {
-      return res.status(400).json({ error: "Category exists, please choose another name" });
+      return res.status(400).json({ error: "Category exists, choose another name" });
     }
 
-    const updatedCategory = await Category.findByIdAndUpdate(
-      id,
-      {
-        name: categoryName,
-        description: description,
-      },
-      { new: true }
-    );
+    const category = await Category.findById(id);
+    if (!category) return res.status(404).json({ error: "Category not found" });
 
-    if (updatedCategory) {
-      res.redirect("/admin/category?edited=true");
+    
+    if (req.file) {
+      
+      if (category.imagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(category.imagePublicId);
+        } catch (err) {
+          console.error("Cloudinary deletion error:", err);
+        }
+      }
 
-    } else {
-      res.status(404).json({ error: "Category not found" });
+      
+      category.image = req.file.path || req.file.location;         
+      category.imagePublicId = req.file.filename || req.file.public_id;
     }
 
-  } catch (error) {
-    console.error("Edit Category Error:", error.message);
+   
+    if ((deleteImage === 'true' || deleteImage === true) && !req.file && category.imagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(category.imagePublicId);
+      } catch (err) {
+        console.error("Cloudinary deletion error:", err);
+      }
+      category.image = null;
+      category.imagePublicId = null;
+    }
+
+    
+    category.name = categoryName;
+    category.description = description;
+
+    await category.save();
+
+    res.json({ success: true, message: "Category updated successfully" });
+  } catch (err) {
+    console.error("Edit Category Error:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-   const deleteCategory = async (req, res) => {
-  try {
-    const id = req.body.id;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: "Invalid category ID" });
-    }
 
-    await Category.findByIdAndDelete(id);
 
-    return res.json({ success: true, message: "Category deleted successfully" });
-  } catch (error) {
-    console.error("Delete Category Error:", error);
-    return res.status(500).json({ success: false, message: "Something went wrong while deleting the category" });
-  }
-};
+
+
+
+
 
 module.exports={
     categoryInfo,
@@ -248,6 +268,6 @@ module.exports={
     getUnlistCategory,
     getEditCategory,
     editCategory,
-    deleteCategory ,
+  
 
 }

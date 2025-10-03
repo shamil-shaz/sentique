@@ -6,6 +6,8 @@ const userController=require("../controllers/user/userController");
 const profileController=require("../controllers/user/profileController")
 
 
+const userProductController = require("../controllers/user/userProductsController");
+
 router.get('/pageNotFound',userController.pageNotFound)
 
 router.get("/signup",userController.loadSignup);
@@ -21,38 +23,47 @@ router.post('/forgot-password-valid', profileController.handleForgotPassword);
 router.get('/forgotPassword-otp', profileController.loadForgotPageOtp);
 router.post('/forgotPassword-otp', profileController.verifyForgotOtp);
 router.post('/resend-forgot-otp', profileController.resendOtp);
-
 router.get('/reset-password',profileController.loadResetPasswordPage); 
 router.post('/reset-password', profileController.resetPassword);
-
-
 
 
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 
-router.get('/auth/google/callback', 
-  passport.authenticate('google', { failureRedirect: "/signup?error=blocked" }),
-  (req, res) => {
-    if (req.user) {
-      req.session.user = req.user._id.toString();
-       
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login", session: false }), 
+  async (req, res) => {
+    try {
+      req.session.user = {
+        id: req.user._id.toString(),
+        name: req.user.name,
+        email: req.user.email,
+        role: "user",
+      };
+
+      res.redirect("/home");
+    } catch (err) {
+      console.error("Google login error:", err);
+      res.redirect("/login");
     }
-    res.redirect('/'); 
   }
 );
+
 
 router.get('/login',userController.loadLogin)
 router.post('/login',userController.login)
 router.get('/logout',userController.logout)
 
+
 router.get("/",userController.loadLandingPage);
-
 router.get("/home",userController.loadHomepage);
+router.get("/shopPage",userController.loadShopingPage);
+router.get("/productDetails",userController.loadProductDetails);
 
-router.get("/shopPage",userAuth,userController.loadShopingPage);
-router.get("/productDetails",userAuth,userController.loadProductDetails);
 
-
+router.get('/zodiac', userProductController.loadZodiacPage);
+router.get('/api/zodiac-products', userProductController.getZodiacProducts);
+ 
 
 module.exports=router;

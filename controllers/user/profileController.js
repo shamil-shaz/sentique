@@ -4,6 +4,8 @@ const bcrypt=require("bcrypt")
 const env=require("dotenv").config();
 const session=require("express-session")
 
+
+
 function generateOtp() {
     const digits = "1234567890";
     let otp = "";
@@ -12,12 +14,6 @@ function generateOtp() {
     }
     return otp;
 }
-
-
-
-// function generateOtp() {
-//     return Math.floor(1000 + Math.random() * 9000).toString();
-// }
 
 const   sendVerificationEmail= async (email, otp)=>{
     try {
@@ -54,8 +50,6 @@ const   sendVerificationEmail= async (email, otp)=>{
     }
 }
 
-
-
  const securePassword = async (password) => {
     try {
          const passwordHash = await bcrypt.hash(password, 10);
@@ -66,14 +60,6 @@ const   sendVerificationEmail= async (email, otp)=>{
     }
 };
 
-
-
-
-
-
-
-
-
  const loadForgotPassword =async(req,res)=>{
     try {
 
@@ -83,7 +69,6 @@ const   sendVerificationEmail= async (email, otp)=>{
         res.redirect("/pageNotFound")
     }
  }
-
 
 const handleForgotPassword = async (req, res) => {
   try {
@@ -96,10 +81,9 @@ const handleForgotPassword = async (req, res) => {
     }
 
     const otp = generateOtp();
-req.session.forgotOtp = otp;
-req.session.forgotEmail = email;
-req.session.otpExpiry = Date.now() + 1 * 60 * 1000; // 2 min expiry
-
+      req.session.forgotOtp = otp;
+      req.session.forgotEmail = email;
+      req.session.otpExpiry = Date.now() + 1 * 60 * 1000; 
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -123,7 +107,6 @@ req.session.otpExpiry = Date.now() + 1 * 60 * 1000; // 2 min expiry
 
    await transporter.sendMail(mailOptions);
     console.log("OTP email sent:", otp);
-   // res.redirect("/forgotPassword-otp");
 
     return res.json({ success: true, message: "OTP sent successfully!" });
 
@@ -133,9 +116,6 @@ req.session.otpExpiry = Date.now() + 1 * 60 * 1000; // 2 min expiry
   }
 };
 
-
-
-// Load OTP page
 const loadForgotPageOtp = async (req, res) => {
   try {
     if (!req.session.forgotOtp || !req.session.forgotEmail) {
@@ -148,49 +128,14 @@ const loadForgotPageOtp = async (req, res) => {
   }
 };
 
-// Verify OTP
-// const verifyForgotOtp = async (req, res) => {
-//   try {
-//     const { otp } = req.body;
-
-//     if (!req.session.forgotOtp || !req.session.forgotEmail) {
-//       return res.status(400).json({ success: false, message: "Session expired. Please try again." });
-//     }
-
-//     // Check OTP expiry
-//     if (req.session.otpExpiry && Date.now() > req.session.otpExpiry) {
-//       req.session.forgotOtp = null;
-//       req.session.forgotEmail = null;
-//       return res.status(400).json({ success: false, message: "OTP expired. Please resend OTP." });
-//     }
-
-//     if (otp.toString() === req.session.forgotOtp.toString()) {
-//       // Clear OTP after success
-//       req.session.forgotOtp = null;
-
-//       return res.status(200).json({ success: true, redirect: "/reset-password" });
-//     } else {
-//       return res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
-//     }
-//   } catch (error) {
-//     console.error("Error verifying forgot OTP:", error);
-//     return res.status(500).json({ success: false, message: "An error occurred while verifying OTP." });
-//   }
-// };
-
-
 const verifyForgotOtp = async (req, res) => {
   try {
-
      const enterdOtp = req.body.otp;
      if(enterdOtp==req.session.forgotOtp){
         res.json({success:true,redirectUrl:"/reset-password"})
-
-
      }else{
         res.json({success:false,message:"Invalid OTP"})
      }
-
   } catch (error) {
     res.status(500).json({ success: false, message: "An error occurred while verifying OTP." });
   }
@@ -217,7 +162,6 @@ const resendOtp = async (req, res) => {
 
     }
 }
-
 
 const loadResetPasswordPage=async(req,res)=>{
     try {

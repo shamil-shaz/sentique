@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - Sentique</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -41,32 +40,39 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
             line-height: 1.6;
             color: var(--text-primary);
+            overflow: hidden;
         }
 
         .login-container {
             display: flex;
-            max-width: 1000px;
+            max-width: 1100px;
             width: 100%;
+            height: 650px;
             background: var(--surface);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-xl);
             overflow: hidden;
-            min-height: 600px;
+            
         }
 
         .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(51, 65, 85, 1) 100%);
+            flex: 0.9;
+            background: 
+                linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(51, 65, 85, 0.8) 100%),
+                url('/photos/product_img/signup-cover\ image.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            padding: 60px 40px;
+            padding: 30px;
             color: white;
+            overflow: hidden;
         }
 
         .login-left::before {
@@ -76,43 +82,176 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('/photos/zodiac perfume/signup-cover image.png') center/cover;
-            opacity: 0.6;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(30, 41, 59, 0.3) 0%, rgba(51, 65, 85, 0.4) 100%);
             z-index: 1;
-        }
-
-        .login-left::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(51, 65, 85, 0.8) 100%);
-            z-index: 2;
         }
 
         .brand-content {
             position: relative;
-            z-index: 3;
+            z-index: 2;
             text-align: center;
-            max-width: 400px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .quick-login-section {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .quick-login-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .quick-login-header h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .quick-login-header p {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .social-login-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: var(--radius);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .social-btn i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .social-btn.google {
+            background: rgba(219, 68, 55, 0.2);
+            border-color: rgba(219, 68, 55, 0.4);
+        }
+
+        .social-btn.google:hover {
+            background: rgba(219, 68, 55, 0.3);
+        }
+
+        .social-btn.facebook {
+            background: rgba(66, 103, 178, 0.2);
+            border-color: rgba(66, 103, 178, 0.4);
+        }
+
+        .social-btn.facebook:hover {
+            background: rgba(66, 103, 178, 0.3);
+        }
+
+        .social-btn.apple {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .social-btn.apple:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .quick-divider {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+        }
+
+        .quick-divider::before,
+        .quick-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .quick-divider span {
+            padding: 0 12px;
+            font-weight: 500;
+        }
+
+        .demo-credentials {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius);
+            padding: 12px;
+            text-align: center;
+        }
+
+        .demo-credentials h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--success-color);
+        }
+
+        .demo-credentials p {
+            font-size: 0.75rem;
+            margin: 2px 0;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .brand-content {
+            text-align: center;
+            max-width: 350px;
         }
 
         .brand-logo {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .welcome-text {
-            font-size: 1.4rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
             opacity: 0.95;
         }
 
@@ -120,54 +259,55 @@
             font-size: 1rem;
             font-weight: 300;
             margin-bottom: 2rem;
-            opacity: 0.8;
-            line-height: 1.5;
+            opacity: 0.85;
+            line-height: 1.6;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
+            gap: 1rem;
             width: 100%;
-            margin-top: 2rem;
+            margin-top: 1.5rem;
         }
 
         .stat-item {
             text-align: center;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.15);
+            padding: 1rem 0.8rem;
+            background: rgba(255, 255, 255, 0.12);
             border-radius: var(--radius);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .stat-number {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--success-color);
             display: block;
         }
 
         .stat-label {
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             opacity: 0.8;
             margin-top: 0.25rem;
         }
 
         .login-right {
-            flex: 1;
-            padding: 60px 50px;
+            flex: 1.1;
+            padding: 40px 45px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .form-header {
-            margin-bottom: 2rem;
+            margin-bottom: 1.8rem;
+            text-align: center;
         }
 
         .form-header h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 0.5rem;
@@ -179,7 +319,7 @@
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.3rem;
             position: relative;
         }
 
@@ -257,7 +397,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .remember-me {
@@ -305,7 +445,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
             position: relative;
             overflow: hidden;
         }
@@ -346,7 +486,7 @@
         .divider {
             display: flex;
             align-items: center;
-            margin: 1.5rem 0;
+            margin: 1rem 0;
             color: var(--text-secondary);
             font-size: 0.875rem;
         }
@@ -377,7 +517,7 @@
             text-decoration: none;
             font-weight: 500;
             transition: all 0.2s ease;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             cursor: pointer;
         }
 
@@ -440,36 +580,55 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1024px) {
+            .login-container {
+                max-width: 900px;
+                height: 600px;
+            }
+            
+            .login-right {
+                padding: 35px 40px;
+            }
+        }
+
         @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                overflow: auto;
+            }
+            
             .login-container {
                 flex-direction: column;
-                margin: 10px;
+                height: auto;
+                max-height: none;
             }
             
             .login-left {
-                padding: 40px 30px;
+                flex: none;
+                padding: 30px 25px;
                 min-height: 300px;
             }
             
             .brand-logo {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
             
             .welcome-text {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
             }
             
             .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
             }
             
             .login-right {
-                padding: 40px 30px;
+                flex: none;
+                padding: 35px 30px;
             }
             
             .form-header h1 {
-                font-size: 1.75rem;
+                font-size: 1.8rem;
             }
             
             .form-group input {
@@ -479,7 +638,25 @@
             .input-icon {
                 left: 0.75rem;
             }
+        }
 
+        @media (max-width: 480px) {
+            .login-right {
+                padding: 25px 20px;
+            }
+            
+            .form-header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .brand-logo {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
             .form-footer {
                 flex-direction: column;
                 gap: 1rem;
@@ -488,20 +665,6 @@
 
             .forgot-password {
                 text-align: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .login-right {
-                padding: 30px 20px;
-            }
-            
-            .form-header h1 {
-                font-size: 1.5rem;
             }
         }
     </style>
@@ -534,6 +697,8 @@
                 </div>
             </div>
         </div>
+
+        
     </div>
 
     <div class="login-right">
@@ -604,11 +769,11 @@
     const loadingSpinner = document.getElementById('loadingSpinner');
     const passwordToggle = document.getElementById('passwordToggle');
 
-    // Error elements
+  
     const emailError = document.getElementById('email-error');
     const passwordError = document.getElementById('password-error');
 
-    // Password toggle functionality
+    
     passwordToggle.addEventListener('click', () => {
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
@@ -616,7 +781,7 @@
         passwordToggle.classList.toggle('fa-eye-slash');
     });
 
-    // Input validation
+   
     function validateField(field, errorElement, validator, errorMessage) {
         const isValid = validator(field.value.trim());
         const formGroup = field.parentElement.parentElement;
@@ -637,7 +802,7 @@
         return isValid || !field.value.trim();
     }
 
-    // Real-time validation
+  
     emailInput.addEventListener('input', () => {
         validateField(emailInput, emailError, val => /^\S+@\S+\.\S+$/.test(val), 'Please enter a valid email address');
     });
@@ -646,7 +811,7 @@
         validateField(passwordInput, passwordError, val => val.length >= 6, 'Password must be at least 6 characters');
     });
 
-    // Clear error states on focus
+    
     [emailInput, passwordInput].forEach(input => {
         input.addEventListener('focus', () => {
             const formGroup = input.parentElement.parentElement;
@@ -667,11 +832,11 @@
         }
     }
 
-    // Form submission with validation
+  
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Basic validation
+        
         let isValid = true;
         
         if (!emailInput.value.trim()) {
@@ -698,10 +863,11 @@
             const response = await fetch('/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: emailInput.value.trim(),
-                    password: passwordInput.value.trim()
+                  body: JSON.stringify({ 
+                 email: emailInput.value.trim(), 
+                 password: passwordInput.value.trim() 
                 })
+
             });
 
             const result = await response.json();
@@ -715,7 +881,7 @@
                     showConfirmButton: false,
                     confirmButtonColor: '#2563eb'
                 });
-                window.location.href = "/home";
+                window.location.href = result.redirectUrl;
             } else {
                 await Swal.fire({
                     icon: 'error',
@@ -740,9 +906,7 @@
         setLoadingState(false);
     });
 
-    // Handle server-side error messages (if using EJS templating)
-    const urlParams = new URLSearchParams(window.location.search);
-    const errorMessage = urlParams.get('error');
+
     
     if (errorMessage) {
         let title = 'Login Failed';
@@ -770,12 +934,13 @@
             confirmButtonColor: '#ef4444',
             footer: errorMessage === 'blocked' ? '<a href="mailto:support@sentique.com">Contact Support</a>' : ''
         }).then(() => {
-            // Clean up URL
+            
             window.history.replaceState({}, document.title, '/login');
         });
     }
 
-    // Welcome back message for returning users
+
+
     if (document.referrer.includes('/signup')) {
         setTimeout(() => {
             Swal.fire({

@@ -7,7 +7,6 @@ const fs = require("fs");
 
 
 
-
 const getBrandPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -75,33 +74,27 @@ const getBrandList = async (req, res) => {
 };
 
 
-
 const addBrand = async (req, res) => {
   try {
-    const { brandName } = req.body;         // Get brand name from request body
-    const imageFile = req.file;             // Get uploaded brand logo file from Multer
+    const { brandName } = req.body;
+    const imageFile = req.file;
 
-    // Validate brand name
     if (!brandName || !brandName.trim()) {
       return res.status(400).json({ error: "Brand name is required" });
     }
 
-    // Validate brand logo
     if (!imageFile) {
       return res.status(400).json({ error: "Brand logo is required" });
     }
 
-    // Check if brand already exists (case-insensitive)
     const existingBrand = await Brand.findOne({
-  brandName: { $regex: `^${brandName.trim()}$`, $options: "i" }
-});
+      brandName: { $regex: `^${brandName.trim()}$`, $options: "i" },
+    });
 
-if (existingBrand) {
-  return res.status(400).json({ error: "Brand already exists" });
-}
+    if (existingBrand) {
+      return res.status(400).json({ error: "Brand already exists" });
+    }
 
-
-    // Upload image to Cloudinary
     const result = await cloudinary.uploader.upload(imageFile.path, {
       folder: "brands",
       width: 500,
@@ -109,79 +102,52 @@ if (existingBrand) {
       crop: "limit",
     });
 
-    // Create new brand document
     const newBrand = new Brand({
       brandName: brandName.trim(),
-      brandImage: [result.secure_url],  // Store Cloudinary URL in DB
+      brandImage: [result.secure_url],
       isActive: true,
     });
 
-    // Save brand to database
     await newBrand.save();
 
-    // Return success response
     res.status(200).json({ message: "Brand added successfully" });
-
   } catch (err) {
     console.error("Error adding brand:", err.message);
 
-    // Handle duplicate key error
     if (err.code === 11000) {
       return res.status(400).json({ error: "Brand already exists" });
     }
 
-    // Handle other errors
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
+const blockBrand = async (req, res) => {
+  try {
+    const { id } = req.query;
+    await Brand.updateOne({ _id: id }, { $set: { isBlocked: true } });
 
-
-
-
-const blockBrand =async(req,res)=>{
-    try {
-        const id=req.query.id;
-        await Brand.updateOne({_id:id},{$set:{isBlocked:true}})
-        res.redirect("/admin/brands")
-
-    } catch (error) {
-        res.redirect("/pageerror")
-    }
-}
+    
+    res.redirect("/admin/brands?success=Brand unlisted successfully");
+  } catch (error) {
+    res.redirect("/pageerror");
+  }
+};
 
 const unBlockBrand = async (req, res) => {
   try {
     const id = req.query.id;
-    console.log("Unblock Brand ID:", id);
+    await Brand.updateOne({ _id: id }, { $set: { isBlocked: false } });
 
-    const result = await Brand.updateOne(
-      { _id: id },
-      { $set: { isBlocked: false } }
-    );
-
-    console.log("Update result:", result);
-
-    res.redirect("/admin/brands");
+    
+    res.redirect("/admin/brands?success=Brand listed successfully");
   } catch (error) {
     console.error("Unblock Brand Error:", error);
     res.redirect("/pageerror");
   }
 };
 
-const deleteBrand=async(req,res)=>{
-    try {
-        const {id}=req.query;
-        if(!id){
-            return res.status(400).redirect("/pageerror")
-        }
-        await Brand.deleteOne({_id:id});
-        res.redirect("/admin/brands")
-    } catch (error) {
-        console.error("error deleting brand")
-        res.status(500).redirect("/pageerror")
-    }
-}
+
 
 module.exports = {
   getBrandPage,
@@ -190,5 +156,5 @@ module.exports = {
   getBrandList,
   blockBrand,
   unBlockBrand,
-  deleteBrand,
+  
 };

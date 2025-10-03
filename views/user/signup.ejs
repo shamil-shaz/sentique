@@ -24,7 +24,7 @@
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
       --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-      --radius: 8px;
+      --radius: 6px;
       --radius-lg: 12px;
     }
 
@@ -41,9 +41,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      line-height: 1.6;
+      padding: 15px;
+      line-height: 1.5;
       color: var(--text-primary);
+      overflow: hidden;
     }
 
     .signup-container {
@@ -54,19 +55,25 @@
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-xl);
       overflow: hidden;
-      min-height: 600px;
+      height: 680px;
     }
 
     .signup-left {
-      flex: 1;
-      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      flex: 0.85;
+      background: 
+        linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.85) 100%),
+        url('/photos/product_img/signup-cover\ image.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       position: relative;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 60px 40px;
+      padding: 25px;
       color: white;
+      overflow: hidden;
     }
 
     .signup-left::before {
@@ -76,8 +83,9 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: url('/photos/zodiac perfume/signup-cover image.png') center/cover;
-      opacity: 0.3;
+      background: 
+        radial-gradient(circle at 25% 35%, rgba(37, 99, 235, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 75% 65%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
       z-index: 1;
     }
 
@@ -85,24 +93,25 @@
       position: relative;
       z-index: 2;
       text-align: center;
-      max-width: 400px;
+      max-width: 350px;
     }
 
     .brand-logo {
       font-size: 2.5rem;
       font-weight: 700;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
     .brand-tagline {
-      font-size: 1.2rem;
-      font-weight: 300;
-      margin-bottom: 2rem;
-      opacity: 0.9;
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      opacity: 0.95;
     }
 
     .brand-features {
@@ -113,54 +122,70 @@
     .brand-features li {
       display: flex;
       align-items: center;
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
-      opacity: 0.8;
+      margin-bottom: 0.8rem;
+      font-size: 0.9rem;
+      opacity: 0.85;
     }
 
     .brand-features li i {
       color: var(--success-color);
-      margin-right: 12px;
-      font-size: 1rem;
+      margin-right: 10px;
+      font-size: 0.9rem;
+      width: 16px;
     }
 
     .signup-right {
-      flex: 1;
-      padding: 60px 50px;
+      flex: 1.15;
+      padding: 35px 40px;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      overflow-y: auto;
     }
 
     .form-header {
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
     }
 
     .form-header h2 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
+     
     }
 
     .form-header p {
       color: var(--text-secondary);
-      font-size: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.1rem;
       position: relative;
+      flex: 1;
+    }
+
+    .form-group.full-width {
+      flex: none;
+      width: 100%;
     }
 
     .form-group label {
       display: block;
       font-weight: 500;
       color: var(--text-primary);
-      margin-bottom: 0.5rem;
-      font-size: 0.875rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.8rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
     }
 
     .input-wrapper {
@@ -169,10 +194,10 @@
 
     .form-group input {
       width: 100%;
-      padding: 1rem 1rem 1rem 3rem;
+      padding: 0.8rem 0.8rem 0.8rem 2.5rem;
       border: 2px solid var(--border-color);
       border-radius: var(--radius);
-      font-size: 1rem;
+      font-size: 0.9rem;
       transition: all 0.2s ease;
       background: var(--surface);
       color: var(--text-primary);
@@ -186,15 +211,16 @@
 
     .form-group input::placeholder {
       color: var(--text-secondary);
+      font-size: 0.85rem;
     }
 
     .input-icon {
       position: absolute;
-      left: 1rem;
+      left: 0.8rem;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-secondary);
-      font-size: 1rem;
+      font-size: 0.9rem;
       pointer-events: none;
       transition: color 0.2s ease;
     }
@@ -203,29 +229,50 @@
       color: var(--border-focus);
     }
 
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: color 0.2s ease;
+      z-index: 10;
+    }
+
+    .password-toggle:hover {
+      color: var(--text-primary);
+    }
+
     .error-message {
       color: var(--error-color);
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
       display: flex;
       align-items: center;
+      min-height: 1rem;
     }
 
     .error-message i {
-      margin-right: 0.5rem;
-      font-size: 0.8rem;
+      margin-right: 0.4rem;
+      font-size: 0.7rem;
     }
 
     .password-strength {
-      margin-top: 0.5rem;
+      margin-top: 0.3rem;
     }
 
     .strength-bar {
-      height: 3px;
+      height: 2px;
       background: var(--border-color);
-      border-radius: 2px;
+      border-radius: 1px;
       overflow: hidden;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
 
     .strength-fill {
@@ -233,26 +280,26 @@
       width: 0%;
       background: var(--error-color);
       transition: all 0.3s ease;
-      border-radius: 2px;
+      border-radius: 1px;
     }
 
     .strength-text {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--text-secondary);
     }
 
     .create-btn {
       width: 100%;
-      padding: 1rem;
+      padding: 0.9rem;
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
       color: white;
       border: none;
       border-radius: var(--radius);
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
-      margin: 2rem 0 1.5rem 0;
+      margin: 1.2rem 0 1rem 0;
       position: relative;
       overflow: hidden;
     }
@@ -278,8 +325,8 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border: 2px solid rgba(255,255,255,0.3);
       border-radius: 50%;
       border-top-color: white;
@@ -293,9 +340,9 @@
     .divider {
       display: flex;
       align-items: center;
-      margin: 1.5rem 0;
+      margin: 1rem 0;
       color: var(--text-secondary);
-      font-size: 0.875rem;
+      font-size: 0.8rem;
     }
 
     .divider::before,
@@ -307,7 +354,7 @@
     }
 
     .divider span {
-      padding: 0 1rem;
+      padding: 0 0.8rem;
     }
 
     .google-btn {
@@ -315,16 +362,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
-      padding: 1rem;
+      gap: 0.6rem;
+      padding: 0.8rem;
       border: 2px solid var(--border-color);
       border-radius: var(--radius);
       background: var(--surface);
       color: var(--text-primary);
       text-decoration: none;
       font-weight: 500;
+      font-size: 0.85rem;
       transition: all 0.2s ease;
-      margin-bottom: 2rem;
+      margin-bottom: 1.2rem;
     }
 
     .google-btn:hover {
@@ -334,14 +382,14 @@
     }
 
     .google-btn img {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
     }
 
     .login-link {
       text-align: center;
       color: var(--text-secondary);
-      font-size: 0.95rem;
+      font-size: 0.85rem;
     }
 
     .login-link a {
@@ -374,50 +422,101 @@
     }
 
     /* Responsive Design */
+    @media (max-width: 1024px) {
+      .signup-container {
+        max-width: 950px;
+        height: 650px;
+      }
+      
+      .signup-right {
+        padding: 30px 35px;
+      }
+      
+      .form-header h2 {
+        font-size: 1.7rem;
+      }
+    }
+
     @media (max-width: 768px) {
+      body {
+        padding: 10px;
+        overflow: auto;
+      }
+      
       .signup-container {
         flex-direction: column;
-        margin: 10px;
+        height: auto;
+        max-height: none;
       }
       
       .signup-left {
-        padding: 40px 30px;
-        min-height: 300px;
+        flex: none;
+        padding: 25px 20px;
+        min-height: 280px;
+      }
+      
+      .brand-logo {
+        font-size: 2.2rem;
+      }
+      
+      .brand-tagline {
+        font-size: 1.1rem;
+      }
+      
+      .signup-right {
+        flex: none;
+        padding: 30px 25px;
+        overflow-y: visible;
+      }
+      
+      .form-header h2 {
+        font-size: 1.6rem;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      
+      .form-group input {
+        padding: 0.9rem 0.9rem 0.9rem 2.5rem;
+      }
+      
+      .input-icon {
+        left: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .signup-right {
+        padding: 25px 20px;
+      }
+      
+      .form-header h2 {
+        font-size: 1.4rem;
       }
       
       .brand-logo {
         font-size: 2rem;
       }
-      
-      .signup-right {
-        padding: 40px 30px;
-      }
-      
-      .form-header h2 {
-        font-size: 1.75rem;
-      }
-      
-      .form-group input {
-        padding: 1rem 1rem 1rem 2.5rem;
-      }
-      
-      .input-icon {
-        left: 0.75rem;
-      }
     }
 
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-      
-      .signup-right {
-        padding: 30px 20px;
-      }
-      
-      .form-header h2 {
-        font-size: 1.5rem;
-      }
+    /* Custom scrollbar for right panel on mobile */
+    .signup-right::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .signup-right::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .signup-right::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 2px;
+    }
+
+    .signup-right::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
     }
   </style>
 </head>
@@ -433,6 +532,8 @@
         <li><i class="fas fa-check"></i>Personalized recommendations</li>
         <li><i class="fas fa-check"></i>Secure & fast delivery</li>
         <li><i class="fas fa-check"></i>Expert customer support</li>
+        <li><i class="fas fa-check"></i>30-day return guarantee</li>
+        <li><i class="fas fa-check"></i>Exclusive member benefits</li>
       </ul>
     </div>
   </div>
@@ -444,63 +545,71 @@
     </div>
 
     <form id="signup-form" class="signup-form" novalidate>
-      <div class="form-group">
-        <label for="fullName">Full Name</label>
-        <div class="input-wrapper">
-          <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
-          <i class="fas fa-user input-icon"></i>
-        </div>
-        <div class="error-message" id="error1"></div>
-      </div>
-
-      <div class="form-group">
-        <label for="phone">Phone Number</label>
-        <div class="input-wrapper">
-          <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
-          <i class="fas fa-phone input-icon"></i>
-        </div>
-        <div class="error-message" id="error2"></div>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <div class="input-wrapper">
-          <input type="email" id="email" name="email" placeholder="Enter your email address" required>
-          <i class="fas fa-envelope input-icon"></i>
-        </div>
-        <div class="error-message" id="error3"></div>
-      </div>
-
-      <div class="form-group">
-        <label for="referral">Referral Code (Optional)</label>
-        <div class="input-wrapper">
-          <input type="text" id="referral" name="referral" placeholder="Enter referral code">
-          <i class="fas fa-gift input-icon"></i>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="input-wrapper">
-          <input type="password" id="password" name="password" placeholder="Create a strong password" required>
-          <i class="fas fa-lock input-icon"></i>
-        </div>
-        <div class="password-strength">
-          <div class="strength-bar">
-            <div class="strength-fill" id="strengthFill"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <div class="input-wrapper">
+            <input type="text" id="fullName" name="fullName" placeholder="Enter full name" required>
+            <i class="fas fa-user input-icon"></i>
           </div>
-          <div class="strength-text" id="strengthText">Password strength</div>
+          <div class="error-message" id="error1"></div>
         </div>
-        <div class="error-message" id="error5"></div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <div class="input-wrapper">
+            <input type="tel" id="phone" name="phone" placeholder="Enter phone number" required>
+            <i class="fas fa-phone input-icon"></i>
+          </div>
+          <div class="error-message" id="error2"></div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="confirmPassword">Confirm Password</label>
-        <div class="input-wrapper">
-          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
-          <i class="fas fa-lock input-icon"></i>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="email" name="email" placeholder="Enter email address" required>
+            <i class="fas fa-envelope input-icon"></i>
+          </div>
+          <div class="error-message" id="error3"></div>
         </div>
-        <div class="error-message" id="error6"></div>
+
+        <div class="form-group">
+          <label for="referral">Referral Code</label>
+          <div class="input-wrapper">
+            <input type="text" id="referral" name="referral" placeholder="Optional">
+            <i class="fas fa-gift input-icon"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper password-wrapper">
+            <input type="password" id="password" name="password" placeholder="Create password" required>
+            <i class="fas fa-lock input-icon"></i>
+            <i class="fas fa-eye password-toggle" id="passwordToggle"></i>
+          </div>
+          <div class="password-strength">
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
+            <div class="strength-text" id="strengthText">Password strength</div>
+          </div>
+          <div class="error-message" id="error5"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="input-wrapper password-wrapper">
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+            <i class="fas fa-lock input-icon"></i>
+            <i class="fas fa-eye password-toggle" id="confirmPasswordToggle"></i>
+          </div>
+          <div class="error-message" id="error6"></div>
+        </div>
       </div>
 
       <button type="button" id="submitBtn" class="create-btn">
@@ -548,6 +657,25 @@
   // Password strength elements
   const strengthFill = document.getElementById("strengthFill");
   const strengthText = document.getElementById("strengthText");
+
+  // Password toggle elements
+  const passwordToggle = document.getElementById('passwordToggle');
+  const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
+
+  // Password toggle functionality
+  passwordToggle.addEventListener('click', function() {
+    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+    password.setAttribute('type', type);
+    this.classList.toggle('fa-eye');
+    this.classList.toggle('fa-eye-slash');
+  });
+
+  confirmPasswordToggle.addEventListener('click', function() {
+    const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+    confirmPassword.setAttribute('type', type);
+    this.classList.toggle('fa-eye');
+    this.classList.toggle('fa-eye-slash');
+  });
 
   // Password strength checker
   function checkPasswordStrength(pwd) {
