@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OTP Verification ssss</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #bcbcba, #c4bec0);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .otp-box {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .otp-box h2 {
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .otp-box p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .otp-box input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .error-message {
+      color: red;
+      display: none;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .countdown {
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .verify {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .resend {
+  background-color: #007bff;
+  color: white;
+  transition: 0.3s;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.resend:disabled {
+  opacity: 0.5;      
+  cursor: not-allowed; 
+  background-color: #007bff; 
+}
+
+
+    .back-login {
+      display: block;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    @media (max-width: 480px) {
+      .otp-box {
+        padding: 20px;
+      }
+    }
+  </style>
+
+</head>
+<body>
+
+   <form id="otpForm" onsubmit="return validateOTPForm(event)">
+    <div class="otp-box">
+      <h2>Enter the OTP</h2>
+      <p>The OTP has been sent to your registered email</p>
+
+      <input type="text" id="otpInput" placeholder="Enter the OTP" name="otp" required />
+      <div class="error-message" id="errorMessage">Please enter a valid 4 or 6 digit OTP.</div>
+
+      <div class="countdown" id="countdown">0 : 57 seconds remaining</div>
+
+      <div class="btn-group">
+          <button type="button" id="resendBtn" class="btn resend" onclick="resendOTP()" disabled>
+            Resend OTP
+          </button>
+        <button type="submit" class="btn verify">Verify</button>
+      </div>
+
+      <a href="/login" class="back-login">Back to Login</a>
+    </div>
+  </form>
+
+
+
+<script>
+const otpInput = document.getElementById("otpInput");
+const countdownEl = document.getElementById("countdown");
+const resendBtn = document.getElementById("resendBtn");
+let seconds = 57;
+let timer;
+
+// Dynamic variables passed from backend
+const type = "<%= type %>";
+const token = "<%= token %>";
+
+// Start countdown
+function startTimer() {
+  resendBtn.disabled = true;
+  otpInput.disabled = false;
+
+  timer = setInterval(() => {
+    let displaySeconds = seconds < 10 ? "0" + seconds : seconds;
+    countdownEl.textContent = `0 : ${displaySeconds} seconds remaining`;
+    seconds--;
+
+    if (seconds < 0) {
+      clearInterval(timer);
+      countdownEl.textContent = "OTP expired. Please resend.";
+      otpInput.disabled = true;
+      resendBtn.disabled = false;
+    }
+  }, 1000);
+}
+startTimer();
+
+// OTP submission
+function validateOTPForm(event) {
+  event.preventDefault();
+  const otp = otpInput.value.trim();
+  const errorEl = document.getElementById("errorMessage");
+  const isValid = /^\d{4}$|^\d{6}$/.test(otp);
+
+  if (!isValid) {
+    errorEl.style.display = "block";
+    return false;
+  } else {
+    errorEl.style.display = "none";
+  }
+
+  fetch("/profile/otp-verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ otp, type, token })
+  })
+    .then(res => res.json())
+    .then(response => {
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "OTP Verified!",
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          window.location.href = response.redirectUrl || "/profile";
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid OTP",
+          text: response.message
+        });
+      }
+    })
+    .catch(() => {
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: "Please try again later."
+      });
+    });
+}
+
+// Resend OTP
+function resendOTP() {
+  resendBtn.disabled = true;
+  otpInput.disabled = false;
+  clearInterval(timer);
+  seconds = 57;
+  countdownEl.textContent = `0 : ${seconds} seconds remaining`;
+  startTimer();
+
+  Swal.fire({ title: "Sending OTP...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+  fetch("/profile/resend-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type })
+  })
+    .then(res => res.json())
+    .then(data => {
+      Swal.close();
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "OTP Resent",
+          text: "A new OTP has been sent to your email.",
+          showConfirmButton: false,
+          timer: 1200
+        });
+      } else {
+        Swal.fire({ icon: "error", title: "Error", text: data.message });
+        resendBtn.disabled = false;
+      }
+    })
+    .catch(() => {
+      Swal.close();
+      Swal.fire({ icon: "error", title: "Server Error", text: "Please try again later." });
+      resendBtn.disabled = false;
+    });
+}
+</script>

@@ -27,12 +27,14 @@ const pageNotFound = async (req, res) => {
 
 const loadLandingPage = async (req, res) => {
   try {
-    res.render("landingPage");  
+    const user = req.session.user || null; 
+    res.render("landingPage", { user });   
   } catch (error) {
     console.error("Landing page error:", error);
     return res.status(500).send("Server error");
   }
-};  
+};
+
 
 
 
@@ -307,6 +309,7 @@ const resendOtp = async (req, res) => {
 };
 
 
+
 const loadLogin = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -383,15 +386,15 @@ const logout = async (req, res) => {
 };
 
 
+
 const loadShopingPage = async (req, res) => {
   try {
     const categories = await Category.find({ isListed: true }).lean();
     const listedCategoryIds = categories.map(cat => cat._id.toString());
-   
+
     const brands = await Brand.find({ isBlocked: false }).lean();
     const unblockedBrandIds = brands.map(b => b._id.toString());
 
-   
     const selectedCategories = Array.isArray(req.query.categorys)
       ? req.query.categorys.filter(catId => listedCategoryIds.includes(catId))
       : req.query.categorys && listedCategoryIds.includes(req.query.categorys)
@@ -410,32 +413,31 @@ const loadShopingPage = async (req, res) => {
     const limit = 9;
     const skip = (page - 1) * limit;
 
-    
     const filterQuery = {
-      isBlocked: false,            
-      "variants.stock": { $gt: 0 } 
+      isBlocked: false,
+      "variants.stock": { $gt: 0 }
     };
 
     const search = req.query.search ? req.query.search.trim() : "";
     if (search) filterQuery.productName = { $regex: search, $options: "i" };
 
-   
     filterQuery.category = {
-      $in: selectedCategories.length > 0
-        ? selectedCategories.map(id => new mongoose.Types.ObjectId(id))
-        : listedCategoryIds.map(id => new mongoose.Types.ObjectId(id))
+      $in:
+        selectedCategories.length > 0
+          ? selectedCategories.map(id => new mongoose.Types.ObjectId(id))
+          : listedCategoryIds.map(id => new mongoose.Types.ObjectId(id))
     };
 
-   
     if (selectedBrands.length > 0) {
       filterQuery.brand = {
         $in: selectedBrands.map(id => new mongoose.Types.ObjectId(id))
       };
     } else {
-      filterQuery.brand = { $in: unblockedBrandIds.map(id => new mongoose.Types.ObjectId(id)) };
+      filterQuery.brand = {
+        $in: unblockedBrandIds.map(id => new mongoose.Types.ObjectId(id))
+      };
     }
 
-    
     if (priceRange) {
       switch (priceRange) {
         case "below1000":
@@ -453,10 +455,19 @@ const loadShopingPage = async (req, res) => {
       }
     }
 
-    
-    let sortOption = { createdAt: -1 };
-    if (sort === "priceLow") sortOption = { "variants.salePrice": 1 };
-    if (sort === "priceHigh") sortOption = { "variants.salePrice": -1 };
+  
+    let sortOption = {};
+    if (sort === "priceLow") {
+      sortOption = { "variants.salePrice": 1 };
+    } else if (sort === "priceHigh") {
+      sortOption = { "variants.salePrice": -1 };
+    } else if (sort === "nameAZ") {
+      sortOption = { productName: 1 }; 
+    } else if (sort === "nameZA") {
+      sortOption = { productName: -1 };
+    } else {
+      sortOption = { createdAt: -1 }; 
+    }
 
     
     let products = await Product.find(filterQuery)
@@ -467,13 +478,10 @@ const loadShopingPage = async (req, res) => {
       .limit(limit)
       .lean();
 
-   
-    products = products.filter(p =>
-      p.category && p.category.isListed &&
-      p.brand && !p.brand.isBlocked
+    products = products.filter(
+      p => p.category && p.category.isListed && p.brand && !p.brand.isBlocked
     );
 
-    
     products.forEach(p => {
       if (p.variants && p.variants.length > 0) {
         p.salePrice = Math.min(...p.variants.map(v => v.salePrice || v.regularPrice));
@@ -487,7 +495,6 @@ const loadShopingPage = async (req, res) => {
     const totalProducts = await Product.countDocuments(filterQuery);
     const totalPages = Math.ceil(totalProducts / limit);
 
-   
     res.render("shopPage", {
       products,
       categories,
@@ -501,12 +508,12 @@ const loadShopingPage = async (req, res) => {
       search,
       priceRange,
     });
-
   } catch (error) {
     console.error("Error in loadShopingPage:", error);
     res.redirect("/pageNotFound");
   }
 };
+
 
 
 
@@ -578,6 +585,7 @@ module.exports = {
     logout,    
     loadShopingPage, 
     loadProductDetails,
+    generateOtp,
     
    
 };

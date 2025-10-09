@@ -32,8 +32,8 @@
 
     .hero-section {
       position: relative;
-      min-height: 100vh;
-      background: linear-gradient(180deg, #1a0a2e 0%, #0f0517 50%, #1a1030 100%);
+      min-height: 95vh;
+      background: linear-gradient(180deg, #1a0a2e 0%, #0f0517 50%, #090412 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -87,7 +87,7 @@
     .perfume-card-3d img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       object-position: center;
       filter: drop-shadow(0 10px 30px rgba(212,175,55,.4));
       transition: transform .6s;
@@ -343,6 +343,23 @@
       border-color: var(--primary-gold);
       box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
     }
+
+    /* ---------- NEW: clear button for search (default hidden) ---------- */
+    .shop-clear-btn {
+      position: absolute;
+      right: 44px; /* sits to the left of the search button */
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 4px;
+      display: none; /* toggled by JS */
+      z-index: 6;
+    }
+    .shop-clear-btn i { font-size: 16px; color: var(--primary-gold); }
+
+    /* adjust existing search icon to make room for clear button */
     .shop-search-btn {
       position: absolute;
       right: 8px;
@@ -352,6 +369,7 @@
       background: none;
       cursor: pointer;
       padding: 4px;
+      z-index: 7;
     }
     .shop-search-btn i {
       font-size: 16px;
@@ -385,7 +403,7 @@
       justify-content: center;
       position: relative;
       overflow: hidden;
-      padding: 20px;
+      padding: 16px;
     }
     .product-image-wrapper a {
       width: 100%;
@@ -395,15 +413,55 @@
       justify-content: center;
     }
     .product-image-wrapper img {
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       object-position: center;
       transition: transform .45s;
     }
     .product-card:hover .product-image-wrapper img { transform: scale(1.06); }
+    .product-actions {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 10;
+    }
+    .action-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(26,26,26,.9);
+      border: 1px solid rgba(212,175,55,.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all .3s ease;
+      backdrop-filter: blur(8px);
+    }
+    .action-btn:hover {
+      background: var(--primary-gold);
+      border-color: var(--primary-gold);
+      transform: scale(1.1);
+    }
+    .action-btn i {
+      font-size: 18px;
+      color: var(--primary-gold);
+      transition: color .3s ease;
+    }
+    .action-btn:hover i {
+      color: #000;
+    }
+    .action-btn.active {
+      background: var(--primary-gold);
+      border-color: var(--primary-gold);
+    }
+    .action-btn.active i {
+      color: #000;
+    }
     .product-info {
       padding: 16px 18px;
       display: flex;
@@ -529,6 +587,8 @@
     <div class="shop-search-bar">
       <form class="shop-search-form">
         <input type="text" id="searchInput" class="shop-search-input" placeholder="Search perfumes by name..." value="<%= search ? search : '' %>">
+        <!-- Clear / cancel button (appears only when there's text) -->
+        <button type="button" id="clearSearchBtn" class="shop-clear-btn" aria-label="Clear search"><i class="fa fa-times"></i></button>
         <button type="submit" class="shop-search-btn"><i class="fa fa-search"></i></button>
       </form>
     </div>
@@ -666,11 +726,19 @@
                         <a href="/productDetails?id=<%= product._id %>">
                           <img src="<%= (product.images && product.images.length > 0) ? (typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url) : 'https://via.placeholder.com/400x400/1a1a1a/d4af37?text=No+Image' %>" alt="<%= product.productName || 'Product' %>"/>
                         </a>
+                        <div class="product-actions">
+                          <button class="action-btn wishlist-btn" onclick="toggleWishlist('<%= product._id %>')" title="Add to Wishlist">
+                            <i class="fa fa-heart"></i>
+                          </button>
+                          <button class="action-btn cart-btn" onclick="addToCart('<%= product._id %>')" title="Add to Cart">
+                            <i class="fa fa-shopping-cart"></i>
+                          </button>
+                        </div>
                       </div>
-                      <div class="product-info">
-                        <div class="product-category"><%= product.category ? product.category.name : 'Perfume' %></div>
+                      <div class="product-info">                       
                         <div class="product-name"><%= product.productName %></div>
-                        <div class="product-meta"><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : 'Sentique' %></div>
+                        <div class="product-category"><%= product.category ? product.category.name : 'Perfume' %></div>
+                       
                         <%
                           let salePrice = 0, regularPrice = 0;
                           if (product.variants && product.variants.length > 0) {
@@ -798,6 +866,22 @@
     const applyFiltersBtn = document.getElementById('applyFiltersBtn');
     const toggleFiltersBtn = document.getElementById('toggleFilters');
     const filterOverlay = document.getElementById('filterOverlay');
+    const clearBtn = document.getElementById('clearSearchBtn');
+
+    // helper: compute minimum price for a product (used for client-side sorting)
+    function getProductMinPrice(product) {
+      const prices = [];
+      if (product && product.variants && product.variants.length > 0) {
+        product.variants.forEach(v => {
+          const p = Number(v.salePrice ?? v.regularPrice ?? v.price ?? 0);
+          if (!isNaN(p)) prices.push(p);
+        });
+      } else {
+        const p = Number(product.salePrice ?? product.price ?? 0);
+        if (!isNaN(p)) prices.push(p);
+      }
+      return prices.length ? Math.min(...prices) : 0;
+    }
 
     function renderProducts(products) {
       productsGrid.innerHTML = '';
@@ -839,11 +923,18 @@
             <a href="/productDetails?id=${product._id}">
               <img src="${imgSrc}" alt="${product.productName || 'Product'}"/>
             </a>
+            <div class="product-actions">
+              <button class="action-btn wishlist-btn" onclick="toggleWishlist('${product._id}')" title="Add to Wishlist">
+                <i class="fa fa-heart"></i>
+              </button>
+              <button class="action-btn cart-btn" onclick="addToCart('${product._id}')" title="Add to Cart">
+                <i class="fa fa-shopping-cart"></i>
+              </button>
+            </div>
           </div>
           <div class="product-info">
-            <div class="product-category">${product.category ? product.category.name : 'Perfume'}</div>
             <div class="product-name">${product.productName || 'Unnamed'}</div>
-            <div class="product-meta"><strong>Brand:</strong> ${product.brand ? product.brand.brandName : 'Sentique'}</div>
+            <div class="product-category">${product.category ? product.category.name : 'Perfume'}</div>
             <div class="product-pricing">
               <span class="sale-price">₹${salePrice.toLocaleString('en-IN')}</span>
               ${discount > 0 ? `<span class="regular-price">₹${regularPrice.toLocaleString('en-IN')}</span>
@@ -899,7 +990,21 @@
         const res = await fetch('/api/zodiac-products' + qs);
         const data = await res.json();
         if (data.success) {
-          renderProducts(data.products || []);
+          let prods = data.products || [];
+
+          // ---------- CLIENT-SIDE FALLBACK SORT FOR RELIABLE PRICE SORTING ----------
+          // If user selected price-low / price-high, sort here to ensure consistent behavior.
+          const sortRadio = filterForm.querySelector('input[name="sort"]:checked');
+          const sortVal = sortRadio ? sortRadio.value : 'newest';
+          if (sortVal === 'price-low' || sortVal === 'price-high') {
+            prods.sort((a, b) => getProductMinPrice(a) - getProductMinPrice(b));
+            if (sortVal === 'price-high') prods.reverse();
+          } else if (sortVal === 'name') {
+            prods.sort((a, b) => ( (a.productName||'').toString().localeCompare((b.productName||'').toString(), 'en', { sensitivity: 'base' }) ));
+          }
+          // ------------------------------------------------------------------------
+
+          renderProducts(prods);
         } else {
           renderProducts([]);
         }
@@ -914,6 +1019,10 @@
       filterForm.querySelectorAll('input[type="checkbox"]').forEach(input => input.checked = false);
       filterForm.querySelector('input[name="price"][value=""]').checked = true;
       filterForm.querySelector('input[name="sort"][value="featured"]').checked = true;
+
+      // hide clear button when clearing filters
+      toggleClearButton();
+
       fetchAndRender();
     }
 
@@ -940,6 +1049,52 @@
       document.getElementById('filters').classList.remove('show');
       filterOverlay.classList.remove('show');
     });
+
+    // ---------- Wishlist & Cart Functions ----------
+    function toggleWishlist(productId) {
+      const btn = event.currentTarget;
+      btn.classList.toggle('active');
+      
+      // Add your wishlist logic here
+      console.log('Toggle wishlist for product:', productId);
+    }
+
+    function addToCart(productId) {
+      const btn = event.currentTarget;
+      btn.classList.add('active');
+      setTimeout(() => btn.classList.remove('active'), 300);
+      console.log('Add to cart product:', productId);
+    }
+
+    // ---------- Clear (cancel) search UI logic ----------
+    function toggleClearButton() {
+      if (!clearBtn || !searchInput) return;
+      const hasText = searchInput.value.trim().length > 0;
+      clearBtn.style.display = hasText ? 'block' : 'none';
+    }
+
+    // Clear button click
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        toggleClearButton();
+        fetchAndRender();
+        searchInput.focus();
+      });
+    }
+
+    // show/hide clear button as user types
+    if (searchInput) {
+      searchInput.addEventListener('input', toggleClearButton);
+      // support pressing Escape to clear
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (clearBtn) clearBtn.click();
+        }
+      });
+      // initial toggle on page load (if server rendered search value exists)
+      toggleClearButton();
+    }
 
     // ---------- Initial Load ----------
     renderProducts(initialProducts);

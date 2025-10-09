@@ -1,12 +1,12 @@
 
-
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
 // Controllers
 const adminController = require("../controllers/admin/adminController");
-const customerController = require('../controllers/admin/customerController'); 
+const customerController = require('../controllers/admin/customerController');
+
 const categoryController = require("../controllers/admin/categoryController");
 const productController = require("../controllers/admin/productController");
 const brandController = require('../controllers/admin/brandController');
@@ -42,7 +42,7 @@ router.get("/logout", adminController.logout);
 // ---------------- CUSTOMER MANAGEMENT ----------------
 router.get('/customers', adminAuth, customerController.customerInfo);
 router.post("/blockCustomer", adminAuth, customerController.customerBlocked);
-router.post("/unblockCustomer", adminAuth, customerController.customerunBlocked);
+router.post("/unblockCustomer", adminAuth, customerController.customerUnBlocked);
 
 // -------------- CATEGORY MANAGEMENT ----------------
 router.get("/category", adminAuth, categoryController.categoryInfo);
@@ -58,10 +58,9 @@ router.get("/editCategory", adminAuth, categoryController.getEditCategory);
 // -------------------- BRAND MANAGEMENT --------------------
 router.get("/brands", adminAuth, brandController.getBrandPage);
 router.get("/addBrand", adminAuth, brandController.getAddBrand);
-router.post("/addBrand", adminAuth,  uploadCategoryImage.single("brandImage"),brandController.addBrand); // Can also use separate middleware if needed
+router.post("/addBrand", adminAuth,  uploadCategoryImage.single("brandImage"),brandController.addBrand); 
 router.get('/blockBrand', adminAuth, brandController.blockBrand);
 router.get('/unBlockBrand', adminAuth, brandController.unBlockBrand);
-
 
 
 // -------------------- PRODUCT MANAGEMENT --------------------

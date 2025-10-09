@@ -1,0 +1,1194 @@
+<%- include("../partials/user/header.ejs") %>
+
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #eeeeee 0%, #f5f5f5 50%, #cbcbcb 100%);
+            min-height: 100vh;
+            color: #2d3748;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .address-content {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+            animation: slideDown 0.6s ease;
+        }
+
+        .header-left {
+            background: white;
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-left h1 {
+            font-size: 32px;
+            font-weight: 900;
+            color: #1a202c;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: none;
+        }
+
+        .header-left p {
+            font-size: 15px;
+            color: #718096;
+        }
+
+        .add-address-btn {
+            padding: 18px 36px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-address-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .add-address-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .addresses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .address-card {
+            background: white;
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 3px solid transparent;
+            overflow: hidden;
+        }
+
+        .address-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .address-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+            border-color: #e9d5ff;
+        }
+
+        .address-card:hover::before {
+            opacity: 1;
+        }
+
+        .address-card.default {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f7faff 0%, #fef5ff 100%);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.25);
+        }
+
+        .address-card.default::before {
+            opacity: 1;
+            height: 6px;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        }
+
+        .address-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .address-type {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .type-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+
+        .address-card:hover .type-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .type-info h4 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .type-info p {
+            font-size: 14px;
+            color: #718096;
+            font-weight: 600;
+        }
+
+        .default-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .address-details {
+            margin: 25px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f9fafb 0%, #f0f4f8 100%);
+            border-radius: 16px;
+            border-left: 5px solid #667eea;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 18px;
+            transition: all 0.3s;
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .detail-row:hover {
+            background: white;
+            transform: translateX(5px);
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-icon {
+            font-size: 22px;
+            width: 28px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .detail-text {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: #667eea;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: #1a202c;
+            font-weight: 600;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .address-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 3px solid #f0f0f0;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+        }
+
+        .edit-btn:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #fee 0%, #fecaca 100%);
+            color: #dc2626;
+            border: 2px solid #fca5a5;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.15);
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 40px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            grid-column: 1 / -1;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .empty-icon {
+            font-size: 100px;
+            margin-bottom: 25px;
+            opacity: 0.6;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .empty-state h3 {
+            font-size: 28px;
+            color: #1a202c;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 17px;
+            color: #718096;
+            margin-bottom: 35px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 45px;
+            max-width: 650px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 4px solid #f0f0f0;
+        }
+
+        .modal-header h2 {
+            font-size: 30px;
+            font-weight: 900;
+            color: #1a202c;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .close-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fee 0%, #fecaca 100%);
+            color: #dc2626;
+            border: none;
+            cursor: pointer;
+            font-size: 26px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        .form-label {
+            font-size: 15px;
+            font-weight: 800;
+            color: #4a5568;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 18px 22px;
+            border: 3px solid #e2e8f0;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f9fafb;
+            font-weight: 600;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f9fafb 0%, #f0f4f8 100%);
+            border-radius: 14px;
+            border: 3px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-group:hover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, white 0%, #f7faff 100%);
+            transform: translateX(5px);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .checkbox-group label {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 18px;
+            margin-top: 35px;
+            padding-top: 35px;
+            border-top: 3px solid #f0f0f0;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 18px 36px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #667eea;
+            border: 3px solid #667eea;
+        }
+
+        .btn-cancel:hover {
+            background: #f7fafc;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(60px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 250px 1fr;
+                gap: 25px;
+            }
+
+            .addresses-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 868px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            .add-address-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .addresses-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .modal-content {
+                padding: 35px 28px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .address-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 25px 15px;
+            }
+
+            .header-left h1 {
+                font-size: 26px;
+            }
+
+            .address-card {
+                padding: 28px;
+            }
+
+            .type-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+
+            .modal-header h2 {
+                font-size: 24px;
+            }
+
+            .edit-btn,
+            .delete-btn {
+                font-size: 13px;
+                padding: 16px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-left h1 {
+                font-size: 22px;
+            }
+
+            .header-left p {
+                font-size: 14px;
+            }
+
+            .add-address-btn {
+                font-size: 15px;
+                padding: 16px 28px;
+            }
+
+            .address-card {
+                padding: 25px;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+        }
+    </style>
+</head>
+
+<body>
+<div class="main-content">
+    <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'address' }) %>
+
+    <div class="address-content">
+        <div class="section-header">
+            <div class="header-left">
+                <h1>📍 Address Book</h1>
+                <p>Manage your shipping and billing addresses</p>
+            </div>
+            <button class="add-address-btn" onclick="openModal()">
+                <span>➕</span>
+                Add New Address
+            </button>
+        </div>
+
+        <div class="addresses-grid" id="addressesGrid">
+            <!-- Addresses will be rendered here dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- Add Address Modal -->
+<div class="modal" id="addressModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span>➕</span> <span>Add New Address</span></h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+
+        <form id="addressForm" onsubmit="saveAddress(event)">
+            <div class="form-group">
+                <label class="form-label">🏷️ Address Type</label>
+                <select class="form-select" name="addressType" id="type" required>
+                    <option value="" disabled selected>Select address type</option>
+                    <option value="Home">🏠 Home</option>
+                    <option value="Work">🏢 Work</option>
+                    <option value="Other">📦 Other</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">👤 Full Name</label>
+                    <input type="text" class="form-input" name="name" id="name" placeholder="Enter full name" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📱 Phone Number</label>
+                    <input type="tel" class="form-input" name="phone" id="phone" placeholder="Enter 10 digit number" required pattern="[0-9]{10}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">🏠 House/Building Name</label>
+                    <input type="text" class="form-input" name="houseName" id="houseName" placeholder="Enter house/building name" required minlength="2">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🔢 Building Number <span style="font-size: 12px; color: #718096; font-weight: 500;">(Optional)</span></label>
+                    <input type="text" class="form-input" name="buildingNumber" id="buildingNumber" placeholder="Enter building number (optional)">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">🏘️ Landmark</label>
+                <textarea class="form-textarea" name="landmark" id="landmark" placeholder="Nearby landmark or reference" required minlength="3"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">☎️ Alternative Number <span style="font-size: 12px; color: #718096; font-weight: 500;">(Optional)</span></label>
+                    <input type="tel" class="form-input" name="altPhone" id="altPhone" placeholder="Enter 10 digit number (optional)">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🌍 Nationality</label>
+                    <input type="text" class="form-input" name="nationality" id="nationality" placeholder="Enter nationality" required minlength="2">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">🏙️ City</label>
+                    <input type="text" class="form-input" name="city" id="city" placeholder="Enter city" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🗺️ State</label>
+                    <input type="text" class="form-input" name="state" id="state" placeholder="Enter state" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">📮 ZIP Code</label>
+                <input type="text" class="form-input" name="pincode" id="zip" placeholder="Enter ZIP code" required>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="setDefault" name="isDefault">
+                    <label for="setDefault">⭐ Set as default address</label>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="modal-btn btn-submit" id="submitBtn">💾 Save Address</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Fetch and render addresses on page load
+    async function fetchAddresses() {
+        try {
+            const res = await fetch('/addresses/list', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+
+            const data = await res.json();
+            
+            if (data.success) {
+                renderAddresses(data.addresses);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to load addresses',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Unable to connect to server',
+                confirmButtonColor: '#667eea'
+            });
+        }
+    }
+
+    // Render addresses in the grid
+    function renderAddresses(addresses) {
+        const grid = document.getElementById('addressesGrid');
+        grid.innerHTML = '';
+
+        if (!addresses || addresses.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h3>No addresses found</h3>
+                    <p>Click "Add New Address" to add your first address</p>
+                </div>`;
+            return;
+        }
+
+        addresses.forEach(addr => {
+            const card = document.createElement('div');
+            card.classList.add('address-card');
+            if (addr.isDefault) card.classList.add('default');
+            
+            const icon = addr.addressType === 'Home' ? '🏠' : addr.addressType === 'Work' ? '🏢' : '📦';
+            
+            card.innerHTML = `
+                <div class="address-header">
+                    <div class="address-type">
+                        <div class="type-icon">${icon}</div>
+                        <div class="type-info">
+                            <h4>${addr.name}</h4>
+                            <p>${addr.addressType}</p>
+                        </div>
+                    </div>
+                    ${addr.isDefault ? '<div class="default-badge">⭐ Default</div>' : ''}
+                </div>
+                <div class="address-details">
+                    <div class="detail-row">
+                        <div class="detail-icon">📱</div>
+                        <div class="detail-text">
+                            <div class="detail-label">Phone Number</div>
+                            <div class="detail-value">${addr.phone}</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-icon">🏠</div>
+                        <div class="detail-text">
+                            <div class="detail-label">House/Building</div>
+                            <div class="detail-value">${addr.houseName}${addr.buildingNumber ? ', ' + addr.buildingNumber : ''}</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-icon">🏘️</div>
+                        <div class="detail-text">
+                            <div class="detail-label">Landmark</div>
+                            <div class="detail-value">${addr.landmark}</div>
+                        </div>
+                    </div>
+                    ${addr.altPhone ? `
+                    <div class="detail-row">
+                        <div class="detail-icon">☎️</div>
+                        <div class="detail-text">
+                            <div class="detail-label">Alternative Number</div>
+                            <div class="detail-value">${addr.altPhone}</div>
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div class="detail-row">
+                        <div class="detail-icon">📍</div>
+                        <div class="detail-text">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">${addr.city}, ${addr.state} - ${addr.pincode}</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-icon">🌍</div>
+                        <div class="detail-text">
+                            <div class="detail-label">Nationality</div>
+                            <div class="detail-value">${addr.nationality}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="address-actions">
+                    <a href="/addresses/edit-address/${addr._id}" class="edit-btn">✏️ Edit</a>
+                    <button class="delete-btn" onclick="deleteAddress('${addr._id}')">🗑️ Delete</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // Open modal for adding new address
+    function openModal() {
+        const modal = document.getElementById('addressModal');
+        const form = document.getElementById('addressForm');
+        
+        // Reset form
+        form.reset();
+        
+        // Show modal
+        modal.classList.add('show');
+    }
+
+    // Close modal
+    function closeModal() {
+        document.getElementById('addressModal').classList.remove('show');
+    }
+
+    // Save new address
+    async function saveAddress(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Saving...';
+        
+        const payload = {
+            addressType: document.getElementById('type').value.trim(),
+            name: document.getElementById('name').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            houseName: document.getElementById('houseName').value.trim(),
+            buildingNumber: document.getElementById('buildingNumber').value.trim(),
+            landmark: document.getElementById('landmark').value.trim(),
+            altPhone: document.getElementById('altPhone').value.trim(),
+            nationality: document.getElementById('nationality').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            state: document.getElementById('state').value.trim(),
+            pincode: document.getElementById('zip').value.trim(),
+            isDefault: document.getElementById('setDefault').checked
+        };
+
+        // Client-side validation
+        if (!payload.addressType || !['Home', 'Work', 'Other'].includes(payload.addressType)) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+            return Swal.fire({
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Please select a valid address type (Home, Work, Other)',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        if (payload.name.length < 3) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+            return Swal.fire({
+                icon: 'error',
+                title: 'Invalid Name',
+                text: 'Name must be at least 3 characters long',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        if (!/^\d{10}$/.test(payload.phone)) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+            return Swal.fire({
+                icon: 'error',
+                title: 'Invalid Phone',
+                text: 'Phone number must be exactly 10 digits',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        if (payload.houseName.length < 2) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+            return Swal.fire({
+                icon: 'error',
+                title: 'Invalid House Name',
+                text: 'House/Building name must be at least 2 characters',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        if (payload.landmark.length < 3) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+            return Swal.fire({
+                icon: 'error',
+                title: 'Invalid Landmark',
+                text: 'Landmark must be at least 3 characters',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        if (payload.altPhone && !/^\d{10}$/.test(payload.altPhone)) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+            return Swal.fire({
+                icon: 'error',
+                title: 'Invalid Alternative Number',
+                text: 'Alternative number must be exactly 10 digits',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        if (payload.nationality.length < 2) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+            return Swal.fire({
+                icon: 'error',
+                title: 'Invalid Nationality',
+                text: 'Nationality must be at least 2 characters',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        if (!payload.city || !payload.state || !payload.pincode) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+            return Swal.fire({
+                icon: 'error',
+                title: 'Missing Information',
+                text: 'City, state, and ZIP code are required',
+                confirmButtonColor: '#667eea'
+            });
+        }
+
+        try {
+            const res = await fetch('/addresses/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message || 'Address added successfully',
+                    confirmButtonColor: '#667eea',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                closeModal();
+                
+                // Fetch and render updated addresses immediately
+                await fetchAddresses();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to add address',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        } catch (err) {
+            console.error('Save error:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: 'Failed to save address. Please try again.',
+                confirmButtonColor: '#667eea'
+            });
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save Address';
+        }
+    }
+
+    // Delete address
+    async function deleteAddress(id) {
+        const confirm = await Swal.fire({
+            title: 'Delete Address?',
+            text: 'Are you sure you want to delete this address?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#667eea',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        });
+        
+        if (!confirm.isConfirmed) return;
+
+        try {
+            const res = await fetch(`/addresses/delete/${id}`, { 
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: data.message || 'Address deleted successfully',
+                    confirmButtonColor: '#667eea',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                // Fetch and render updated addresses immediately
+                await fetchAddresses();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to delete address',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: 'Failed to delete address. Please try again.',
+                confirmButtonColor: '#667eea'
+            });
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('addressModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Load addresses when page loads
+    document.addEventListener('DOMContentLoaded', fetchAddresses);
+</script>
+
+<%- include("../partials/user/footer.ejs") %>

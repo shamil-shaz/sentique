@@ -49,17 +49,15 @@ const userSchema =new Schema({
         type:Schema.Types.ObjectId,
         ref:"Order"
     }],
-    createdOn:{
-        type:Date,
-        default:Date.now
-    },
+    
+    
     refferalCode:{
         type:String,
         required:false
     },
     redeemed:{
         type:Boolean,
-        default:true
+        default:false
     },
     redeemedUsers:[{
         type:Schema.Types.ObjectId,
@@ -79,7 +77,15 @@ const userSchema =new Schema({
             type:Date,
             default:Date.now
         }
-    }]
+    }],
+    image: {
+        type: String,
+        default: null
+    },
+    createdOn:{
+        type:Date,
+        default:Date.now
+    },
 
 
 })

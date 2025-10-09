@@ -545,7 +545,7 @@ input::placeholder, textarea::placeholder {
     <form id="editProductForm" action="/admin/edit-product/<%= product._id %>" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
       <div class="form-wrapper">
 
-    
+        <!-- LEFT SIDE - IMAGES -->
         <div class="left">
           <div class="section-title">Product Images</div>
           <div class="images-grid">
@@ -700,7 +700,7 @@ const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
 const deletedIndexes = new Set();
 
 
- if (locals.error && locals.error.length > 0) { 
+<% if (locals.error && locals.error.length > 0) { %>
   Swal.fire({
     icon: 'error',
     title: 'Error',
@@ -708,7 +708,7 @@ const deletedIndexes = new Set();
     confirmButtonColor: '#dc3545',
     confirmButtonText: 'OK'
   });
-} 
+<% } %>
 
 function updateDeletedHidden() {
   document.getElementById('deletedImages').value = Array.from(deletedIndexes).join(',');
@@ -883,7 +883,7 @@ function validateForm() {
     errors.push('Please select a category');
   }
 
-  
+  // Variants
   document.querySelectorAll('.variant-row').forEach((row, index) => {
     const inputs = row.querySelectorAll('input');
     const [size, stock, regPrice, salePrice] = inputs;

@@ -85,7 +85,6 @@ body {
   gap: 0;
 }
 
-/* LEFT SIDE - IMAGES */
 .left { 
   background: #f8fafc;
   padding: 40px 30px;
@@ -226,7 +225,13 @@ body {
   transform: translateY(-1px);
 }
 
-/* RIGHT SIDE - FORM */
+.error-message { 
+  color: #f56565; 
+  font-size: 12px; 
+  margin-top: 6px;
+  display: none;
+}
+
 .right { 
   padding: 40px;
 }
@@ -278,16 +283,6 @@ textarea {
   min-height: 80px;
 }
 
-.error-message { 
-  color: #f56565; 
-  font-size: 12px; 
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* VARIANTS */
 .variants-container {
   background: #f8fafc;
   padding: 20px;
@@ -351,7 +346,6 @@ textarea {
   border-color: #3182ce;
 }
 
-/* BUTTONS */
 .button-row { 
   display: flex; 
   gap: 16px; 
@@ -398,7 +392,6 @@ textarea {
   border-color: #cbd5e0;
 }
 
-/* CROPPER MODAL */
 #cropper-modal { 
   display: none; 
   position: fixed; 
@@ -449,7 +442,6 @@ textarea {
   font-weight: 600;
 }
 
-/* RESPONSIVE */
 @media (max-width: 1024px) {
   .form-wrapper {
     grid-template-columns: 1fr;
@@ -497,7 +489,6 @@ textarea {
   }
 }
 
-/* Input Icons/Placeholders */
 input::placeholder, textarea::placeholder {
   color: #a0aec0;
 }
@@ -509,30 +500,29 @@ input::placeholder, textarea::placeholder {
     <p>Create a new product with images, details, and variant options</p>
   </div>
 
-  <% if (locals.error && locals.error.length > 0) { %>
+  <% if (locals.flash && locals.flash.error && locals.flash.error.length > 0) { %>
     <div class="alert-error">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
-      <%= locals.error[0] %>
+      <%= locals.flash.error[0] %>
     </div>
   <% } %>
-  <% if (locals.success && locals.success.length > 0) { %>
+  <% if (locals.flash && locals.flash.success && locals.flash.success.length > 0) { %>
     <div class="alert-success">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
       </svg>
-      <%= locals.success[0] %>
+      <%= locals.flash.success[0] %>
     </div>
   <% } %>
 
   <div class="container">
-    <form id="addProductForm" action="/admin/addProducts" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+    <form id="addProductForm" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= locals.csrfToken || '' %>">
       <div class="form-wrapper">
-
-        <!-- LEFT SIDE - IMAGES -->
         <div class="left">
-          <div class="section-title">Product Images</div>
+          <div class="section-title">Product Images (At least 2 required)</div>
           <div class="images-grid">
             <% for(let i=1; i<=4; i++){ %>
             <div class="image-box" id="image-box-<%=i%>">
@@ -560,7 +550,6 @@ input::placeholder, textarea::placeholder {
           </div>
         </div>
 
-        <!-- RIGHT SIDE - PRODUCT DETAILS -->
         <div class="right">
           <div class="form-section">
             <div class="section-title">Basic Information</div>
@@ -599,19 +588,19 @@ input::placeholder, textarea::placeholder {
             
             <div class="form-group">
               <label>Short Description <span class="required">*</span></label>
-              <textarea name="description" rows="3" placeholder="Brief product description"></textarea>
+              <textarea name="description" rows="3" placeholder="Brief product description (min 3 characters)"></textarea>
               <p class="error-message" id="description-error"></p>
             </div>
 
             <div class="form-group">
               <label>Long Description <span class="required">*</span></label>
-              <textarea name="Longdescription" rows="4" placeholder="Detailed product description"></textarea>
+              <textarea name="longDescription" rows="4" placeholder="Detailed product description (min 10 characters)"></textarea>
               <p class="error-message" id="longDescription-error"></p>
             </div>
           </div>
 
           <div class="form-section">
-            <div class="section-title">Product Variants</div>
+            <div class="section-title">Product Variants (At least 1 required)</div>
             <div class="variants-container">
               <div id="variants-wrapper">
                 <div class="variant-row">
@@ -642,13 +631,11 @@ input::placeholder, textarea::placeholder {
             <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">Cancel</button>
           </div>
         </div>
-
       </div>
     </form>
   </div>
 </div>
 
-<!-- Cropper Modal -->
 <div id="cropper-modal">
   <div class="modal-content">
     <h3>Crop Image</h3>
@@ -667,26 +654,24 @@ const modal = document.getElementById('cropper-modal');
 const cropperImage = document.getElementById('cropper-image');
 const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
 
-
- if (locals.error && locals.error.length > 0) { 
+<% if (locals.flash && locals.flash.error && locals.flash.error.length > 0) { %>
   Swal.fire({
     icon: 'error',
     title: 'Error',
-    text: '<%= locals.error[0] %>',
+    text: '<%= locals.flash.error[0] %>',
     confirmButtonColor: '#dc3545',
     confirmButtonText: 'OK'
   });
- }
- if (locals.success && locals.success.length > 0) { 
+<% } %>
+<% if (locals.flash && locals.flash.success && locals.flash.success.length > 0) { %>
   Swal.fire({
     icon: 'success',
     title: 'Success',
-    text: '<%= locals.success[0] %>',
+    text: '<%= locals.flash.success[0] %>',
     confirmButtonColor: '#28a745',
     confirmButtonText: 'OK'
   });
- }
-
+<% } %>
 
 document.querySelectorAll('.product-image-input').forEach(input => {
   input.addEventListener('change', function() {
@@ -792,7 +777,6 @@ function resetImage(index) {
   document.getElementById(`image-box-${index}`).classList.remove('has-image');
 }
 
-// Variants
 function addVariantRow() {
   const wrapper = document.getElementById('variants-wrapper');
   const row = document.createElement('div');
@@ -821,28 +805,31 @@ function removeVariantRow(btn) {
   }
 }
 
-// Validation
 function showError(id, msg) {
-  document.getElementById(id).textContent = msg;
+  const element = document.getElementById(id);
+  element.textContent = msg;
+  element.style.display = 'block';
 }
 
 function clearErrors() {
-  document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+  document.querySelectorAll('.error-message').forEach(el => {
+    el.textContent = '';
+    el.style.display = 'none';
+  });
 }
 
 function validateForm() {
   clearErrors();
   let valid = true;
 
-  // Images
   let imageCount = 0;
   for (let i = 1; i <= 4; i++) {
     if (document.getElementById(`cropped-image${i}`).value) {
       imageCount++;
     }
   }
-  if (imageCount < 1) {
-    showError('productImage1-error', 'At least one image is required');
+  if (imageCount < 2) {
+    showError('productImage1-error', 'At least 2 images are required');
     valid = false;
   }
   if (imageCount > 4) {
@@ -850,23 +837,31 @@ function validateForm() {
     valid = false;
   }
 
-  // Product fields
   const name = document.getElementsByName('productName')[0];
   const desc = document.getElementsByName('description')[0];
-  const longDesc = document.getElementsByName('Longdescription')[0];
+  const longDesc = document.getElementsByName('longDescription')[0];
   const brand = document.getElementsByName('brand')[0];
   const category = document.getElementsByName('category')[0];
 
   if (!name.value.trim()) {
     showError('productName-error', 'Product name is required');
     valid = false;
+  } else if (name.value.trim().length < 3) {
+    showError('productName-error', 'Product name must be at least 3 characters');
+    valid = false;
   }
   if (!desc.value.trim()) {
-    showError('description-error', 'Description is required');
+    showError('description-error', 'Short description is required');
+    valid = false;
+  } else if (desc.value.trim().length < 3) {
+    showError('description-error', 'Short description must be at least 3 characters');
     valid = false;
   }
   if (!longDesc.value.trim()) {
     showError('longDescription-error', 'Long description is required');
+    valid = false;
+  } else if (longDesc.value.trim().length < 10) {
+    showError('longDescription-error', 'Long description must be at least 10 characters');
     valid = false;
   }
   if (!brand.value) {
@@ -878,11 +873,15 @@ function validateForm() {
     valid = false;
   }
 
-  // Variants
   const variantSizes = document.getElementsByName('variantSize[]');
   const variantStocks = document.getElementsByName('variantStock[]');
   const variantRegularPrices = document.getElementsByName('variantRegularPrice[]');
   const variantSalePrices = document.getElementsByName('variantSalePrice[]');
+
+  if (variantSizes.length < 1) {
+    showError('variant-error', 'At least one variant is required');
+    valid = false;
+  }
 
   for (let i = 0; i < variantSizes.length; i++) {
     if (!variantSizes[i].value || !variantStocks[i].value || !variantRegularPrices[i].value || !variantSalePrices[i].value) {
@@ -919,4 +918,57 @@ function validateForm() {
 
   return valid;
 }
+
+document.getElementById('addProductForm').addEventListener('submit', async function(event) {
+  event.preventDefault();
+  if (!validateForm()) return;
+
+  const formData = new FormData(this);
+  console.log('Submitting product:', {
+    productName: formData.get('productName'),
+    brand: formData.get('brand'),
+    category: formData.get('category'),
+    description: formData.get('description'),
+    longDescription: formData.get('longDescription'),
+    imageCount: formData.getAll('croppedImages[]').filter(img => img).length,
+    variantCount: formData.getAll('variantSize[]').length
+  });
+
+  try {
+    const response = await fetch('/admin/addProducts', {
+      method: 'POST',
+      headers: {
+        'CSRF-Token': formData.get('_csrf'),
+        'Accept': 'application/json'
+      },
+      body: formData
+    });
+
+    console.log('Response status:', response.status);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Unknown error');
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: data.message || 'Product added successfully!',
+      confirmButtonColor: '#28a745',
+      showConfirmButton: false,
+      timer: 1500
+    }).then(() => {
+      window.location.href = '/admin/products';
+    });
+  } catch (error) {
+    console.error('Error adding product:', error.message);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message === 'Product name already exists' ? 'This product name already exists!' : `Failed to add product: ${error.message}`,
+      confirmButtonColor: '#dc3545'
+    });
+  }
+});
 </script>

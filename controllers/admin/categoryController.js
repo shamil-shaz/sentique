@@ -16,7 +16,7 @@ const categoryInfo = async (req, res) => {
       name: { $regex: ".*" + search + ".*", $options: "i" }
     };
 
-   e
+   
     const categoryData = await Category.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -45,36 +45,75 @@ const categoryInfo = async (req, res) => {
   }
 };
 
-const addCategory = async (req, res) => {
-  const { name, description } = req.body;
+// const addCategory = async (req, res) => {
+//   const { name, description } = req.body;
 
-  try {
+//   try {
     
-    const existingCategory = await Category.findOne({ name });
-    if (existingCategory) 
-      return res.status(400).json({ error: "Category already exists" });
+//     const existingCategory = await Category.findOne({ name });
+//     if (existingCategory) 
+//       return res.status(400).json({ error: "Category already exists" });
 
-    let imageUrl = null;
+//     let imageUrl = null;
 
    
-    if (req.file) {
-      imageUrl = req.file.path; 
-    }
+//     if (req.file) {
+//       imageUrl = req.file.path; 
+//     }
 
     
+//     const newCategory = new Category({
+//       name,
+//       description,
+//       image: imageUrl,
+//       isListed: true
+//     });
+
+//     await newCategory.save();
+//     return res.json({ message: "Category added successfully" });
+
+//   } catch (error) {
+//     console.error("Error in addCategory:", error);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
+const addCategory = async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const trimmedName = name.trim();
+    console.log('Received category:', { name: trimmedName, description, image: !!req.file });
+
+    // Check for existing category (case-insensitive)
+    const existingCategory = await Category.findOne({
+      name: { $regex: `^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+    });
+
+    if (existingCategory) {
+      console.log(`Duplicate category detected: "${trimmedName}" matches "${existingCategory.name}"`);
+      return res.status(400).json({ error: 'Category already exists' });
+    }
+
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`; // Adjust path as per your setup
+      console.log('Image uploaded:', imageUrl);
+    }
+
     const newCategory = new Category({
-      name,
-      description,
+      name: trimmedName,
+      description: description.trim(),
       image: imageUrl,
       isListed: true
     });
 
     await newCategory.save();
-    return res.json({ message: "Category added successfully" });
-
+    console.log('Category added:', trimmedName);
+    return res.status(201).json({ message: 'Category added successfully' });
   } catch (error) {
-    console.error("Error in addCategory:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error('Error in addCategory:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -192,66 +231,134 @@ const getEditCategory = async (req, res) => {
 
 
 
+// const editCategory = async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     const { categoryName, description, deleteImage } = req.body;
+
+
+//     if (!categoryName || categoryName.trim().length < 3) {
+//       return res.status(400).json({ error: "Category name is required and must be at least 3 characters" });
+//     }
+
+   
+//     const existingCategory = await Category.findOne({ name: categoryName, _id: { $ne: id } });
+//     if (existingCategory) {
+//       return res.status(400).json({ error: "Category exists, choose another name" });
+//     }
+
+//     const category = await Category.findById(id);
+//     if (!category) return res.status(404).json({ error: "Category not found" });
+
+    
+//     if (req.file) {
+      
+//       if (category.imagePublicId) {
+//         try {
+//           await cloudinary.uploader.destroy(category.imagePublicId);
+//         } catch (err) {
+//           console.error("Cloudinary deletion error:", err);
+//         }
+//       }
+
+      
+//       category.image = req.file.path || req.file.location;         
+//       category.imagePublicId = req.file.filename || req.file.public_id;
+//     }
+
+   
+//     if ((deleteImage === 'true' || deleteImage === true) && !req.file && category.imagePublicId) {
+//       try {
+//         await cloudinary.uploader.destroy(category.imagePublicId);
+//       } catch (err) {
+//         console.error("Cloudinary deletion error:", err);
+//       }
+//       category.image = null;
+//       category.imagePublicId = null;
+//     }
+
+    
+//     category.name = categoryName;
+//     category.description = description;
+
+//     await category.save();
+
+//     res.json({ success: true, message: "Category updated successfully" });
+//   } catch (err) {
+//     console.error("Edit Category Error:", err);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 const editCategory = async (req, res) => {
   try {
     const id = req.params.id;
     const { categoryName, description, deleteImage } = req.body;
+    const trimmedName = categoryName.trim();
+    console.log('Editing category:', { id, name: trimmedName, description, deleteImage, image: !!req.file });
 
-
-    if (!categoryName || categoryName.trim().length < 3) {
-      return res.status(400).json({ error: "Category name is required and must be at least 3 characters" });
+    // Validate category name
+    if (!trimmedName || trimmedName.length < 3) {
+      console.log('Validation failed: Category name is too short or empty');
+      return res.status(400).json({ error: 'Category name is required and must be at least 3 characters' });
     }
 
-   
-    const existingCategory = await Category.findOne({ name: categoryName, _id: { $ne: id } });
+    // Check for existing category (case-insensitive, excluding current category)
+    const existingCategory = await Category.findOne({
+      name: { $regex: `^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' },
+      _id: { $ne: id }
+    });
+
     if (existingCategory) {
-      return res.status(400).json({ error: "Category exists, choose another name" });
+      console.log(`Duplicate category detected: "${trimmedName}" matches "${existingCategory.name}"`);
+      return res.status(400).json({ error: 'Category already exists' });
     }
 
     const category = await Category.findById(id);
-    if (!category) return res.status(404).json({ error: "Category not found" });
+    if (!category) {
+      console.log(`Category not found: ID ${id}`);
+      return res.status(404).json({ error: 'Category not found' });
+    }
 
-    
+    // Handle image upload
     if (req.file) {
-      
       if (category.imagePublicId) {
         try {
           await cloudinary.uploader.destroy(category.imagePublicId);
+          console.log('Cloudinary image deleted:', category.imagePublicId);
         } catch (err) {
-          console.error("Cloudinary deletion error:", err);
+          console.error('Cloudinary deletion error:', err);
         }
       }
-
-      
-      category.image = req.file.path || req.file.location;         
+      category.image = req.file.path || req.file.location;
       category.imagePublicId = req.file.filename || req.file.public_id;
+      console.log('New image uploaded:', category.image);
     }
 
-   
+    // Handle image deletion
     if ((deleteImage === 'true' || deleteImage === true) && !req.file && category.imagePublicId) {
       try {
         await cloudinary.uploader.destroy(category.imagePublicId);
+        console.log('Cloudinary image deleted:', category.imagePublicId);
+        category.image = null;
+        category.imagePublicId = null;
       } catch (err) {
-        console.error("Cloudinary deletion error:", err);
+        console.error('Cloudinary deletion error:', err);
       }
-      category.image = null;
-      category.imagePublicId = null;
     }
 
-    
-    category.name = categoryName;
-    category.description = description;
-
+    // Update category fields
+    category.name = trimmedName;
+    category.description = description.trim();
     await category.save();
 
-    res.json({ success: true, message: "Category updated successfully" });
+    console.log('Category updated:', trimmedName);
+    res.json({ success: true, message: 'Category updated successfully' });
   } catch (err) {
-    console.error("Edit Category Error:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error('Edit Category Error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-
 
 
 

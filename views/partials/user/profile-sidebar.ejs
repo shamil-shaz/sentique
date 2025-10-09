@@ -1,0 +1,210 @@
+<style>
+/* SIDEBAR STYLES */
+
+.main-content {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 30px;
+}
+
+.sidebar {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    height: fit-content;
+    transition: all 0.3s;
+}
+
+.sidebar-left {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-avatar-container {
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 40px;
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-name {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 30px;
+}
+
+.sidebar-menu .menu-section {
+    margin-bottom: 25px;
+}
+
+.menu-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #a0aec0;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+}
+
+.menu-item {
+    padding: 12px 15px;
+    margin-bottom: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #4a5568;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.menu-item:hover {
+    background: #f7fafc;
+    color: #667eea;
+    transform: translateX(5px);
+}
+
+.menu-item.active {
+    background: linear-gradient(135deg, #5c5c5c 0%, #3b3a3a 100%);
+    color: white;
+}
+
+/* RESPONSIVE STYLES */
+
+/* Tablets */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 250px 1fr;
+        gap: 25px;
+    }
+}
+
+/* Smaller tablets / landscape phones */
+@media (max-width: 868px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 25px;
+    }
+
+    .sidebar-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .menu-item {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .sidebar {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
+    }
+
+    .profile-name {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .menu-title {
+        font-size: 10px;
+    }
+
+    .menu-item {
+        font-size: 13px;
+        padding: 10px 12px;
+        gap: 8px;
+    }
+}
+</style>
+
+<aside class="sidebar">
+  <div class="sidebar-left">
+    <div class="profile-avatar-container">
+      <div class="profile-avatar">
+  <% if (user.image) { %>
+    <img src="<%= user.image %>" alt="Profile Picture">
+  <% } else { %>
+    <img src="/images/default-profile.png" alt="Default Picture">
+  <% } %>
+</div>
+    </div>
+    <div class="profile-name"><%= user.name %></div>
+  </div>
+
+  <div class="sidebar-menu">
+    <div class="menu-section">
+      <div class="menu-title">Account</div>
+      <a href="/profile" class="menu-item <%= activePage === 'profile' ? 'active' : '' %>">
+        <span>👤</span> My Profile
+      </a>
+      <a href="/profile/address" class="menu-item <%= activePage === 'address' ? 'active' : '' %>">
+        <span>📍</span> Address Book
+      </a>
+    </div>
+    <div class="menu-section">
+      <div class="menu-title">Shopping</div>
+      <a href="/orders" class="menu-item <%= activePage === 'orders' ? 'active' : '' %>">
+        <span>📦</span> My Orders
+      </a>
+      <a href="/wishlist" class="menu-item <%= activePage === 'wishlist' ? 'active' : '' %>">
+        <span>❤️</span> My Wishlist
+      </a>
+      <a href="/cart" class="menu-item <%= activePage === 'cart' ? 'active' : '' %>">
+        <span>🛒</span> Shopping Cart
+      </a>
+    </div>
+    <div class="menu-section">
+      <div class="menu-title">Payments</div>
+      <a href="/wallet" class="menu-item <%= activePage === 'wallet' ? 'active' : '' %>">
+        <span>💳</span> Wallet
+      </a>
+      <a href="/coupons" class="menu-item <%= activePage === 'coupons' ? 'active' : '' %>">
+        <span>🎟️</span> Coupons
+      </a>
+    </div>
+  </div>
+</aside>

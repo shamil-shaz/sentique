@@ -1,0 +1,635 @@
+<%- include("../partials/user/header.ejs") %>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Profile - <%= user.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #d4d4d4 0%, #cecece 50%, #d9d9d9 100%);
+            min-height: 100vh;
+           
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .page-header h1 {
+            color: #1a202c;
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: none;
+        }
+
+        .page-header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 56px;
+            font-weight: 700;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.5);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 50%;
+        }
+
+        .avatar-wrapper:hover .avatar-overlay {
+            opacity: 1;
+        }
+
+        .avatar-overlay-text {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .camera-icon {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            border: 4px solid white;
+        }
+
+        .camera-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .camera-icon::before {
+            content: '📷';
+            font-size: 20px;
+        }
+
+        .avatar-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .avatar-email {
+            font-size: 15px;
+            color: #718096;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-label .icon {
+            font-size: 16px;
+        }
+
+        .form-input {
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #f9fafb;
+            font-weight: 500;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-input:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+            color: #a0aec0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px 40px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f7fafc;
+            transform: translateY(-2px);
+        }
+
+        .success-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1000;
+            text-align: center;
+            display: none;
+        }
+
+        .success-animation.show {
+            display: block;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #4ade80;
+            stroke-miterlimit: 10;
+            margin: 0 auto 20px;
+            box-shadow: inset 0px 0px 0px #4ade80;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3;
+            stroke-miterlimit: 10;
+            stroke: #4ade80;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 30px #4ade80;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .profile-card {
+                padding: 30px 25px;
+                border-radius: 20px;
+            }
+
+            .page-header {
+                padding: 25px 20px;
+            }
+
+            .page-header h1 {
+                font-size: 28px;
+            }
+
+            .avatar {
+                width: 120px;
+                height: 120px;
+                font-size: 48px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .button-group {
+                flex-direction: column-reverse;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .page-header {
+                padding: 20px 15px;
+            }
+
+            .profile-card {
+                padding: 25px 20px;
+            }
+
+            .avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+
+            .avatar-name {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>✨ Edit Your Profile</h1>
+      <p>Update your personal information and preferences</p>
+    </div>
+
+    <div class="profile-card">
+      <form id="profileForm" enctype="multipart/form-data">
+        <div class="avatar-section">
+          <div class="avatar-wrapper">
+            <div
+              class="avatar"
+              id="avatarPreview"
+              onclick="document.getElementById('profilePicture').click()"
+            >
+              <% if (user.image) { %>
+                <img src="<%= user.image %>" alt="Profile" />
+              <% } else { %>
+                <div class="avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
+              <% } %>
+
+              <div class="avatar-overlay">
+                <div class="avatar-overlay-text">Click to<br />Change Photo</div>
+              </div>
+            </div>
+            <div
+              class="camera-icon"
+              onclick="document.getElementById('profilePicture').click()"
+            ></div>
+          </div>
+          <input type="file" id="profilePicture" name="image" accept="image/*" />
+          <div class="avatar-name"><%= user.name %></div>
+          <div class="avatar-email"><%= user.email %></div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">Personal Information</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">
+                <span class="icon">👤</span> Full Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                class="form-input"
+                value="<%= user.name %>"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span class="icon">📱</span> Phone Number
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                class="form-input"
+                value="<%= user.phone || '' %>"
+                placeholder="Enter phone number"
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">
+                <span class="icon">✉️</span> Email Address
+              </label>
+              <input
+                type="email"
+                name="email"
+                class="form-input"
+                value="<%= user.email %>"
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button type="button" class="btn btn-secondary" onclick="window.location.href='/profile'">
+            ← Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Popup -->
+  <div class="success-animation" id="successAnimation">
+    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+      <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+      <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+    </svg>
+    <h3 style="color: #2d3748; font-size: 24px; margin-bottom: 10px;">Profile Updated!</h3>
+    <p style="color: #718096;">Your changes have been saved successfully.</p>
+  </div>
+
+  <script>
+    // Profile Picture Preview
+    document.getElementById("profilePicture").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+
+      if (!file) return;
+
+      if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
+        Swal.fire("Error", "Only JPG, JPEG, PNG allowed", "error");
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) { // 2MB
+        Swal.fire("Error", "File too large. Max 2MB", "error");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const avatarPreview = document.getElementById("avatarPreview");
+        avatarPreview.innerHTML = `
+          <img src="${event.target.result}" alt="Profile" />
+          <div class="avatar-overlay">
+            <div class="avatar-overlay-text">Click to<br />Change Photo</div>
+          </div>
+        `;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Form Submit (AJAX)
+    document.getElementById("profileForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      try {
+        const res = await fetch("/update-profile", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          const successAnimation = document.getElementById("successAnimation");
+          successAnimation.classList.add("show");
+          setTimeout(() => {
+            successAnimation.classList.remove("show");
+            window.location.href = "/profile";
+          }, 2000);
+        } else {
+          Swal.fire("Error", data.message || "Something went wrong!", "error");
+        }
+      } catch (err) {
+        Swal.fire("Error", "Failed to update profile", "error");
+      }
+    });
+  </script>
+</body>
+
+<%- include("../partials/user/footer.ejs") %>
+</html>

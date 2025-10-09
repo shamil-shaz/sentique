@@ -25,41 +25,62 @@ const getProductAddPage = async (req, res) => {
   }
 };
 
+
+
 const addProducts = async (req, res) => {
   try {
     const data = req.body;
+    console.log('Received product:', {
+      productName: data.productName?.trim(),
+      description: data.description?.trim(),
+      longDescription: data.longDescription?.trim(),
+      brand: data.brand,
+      category: data.category,
+      imageCount: data.croppedImages?.filter(img => img).length,
+      variantCount: Array.isArray(data.variantSize) ? data.variantSize.length : 1
+    });
 
-   
+    // Validate required fields
     if (!data.productName?.trim()) throw new Error("Product name is required");
+    if (data.productName.trim().length < 3) throw new Error("Product name must be at least 3 characters");
     if (!data.description?.trim()) throw new Error("Short description is required");
-    if (!data.Longdescription?.trim()) throw new Error("Long description is required");
+    if (data.description.trim().length < 3) throw new Error("Short description must be at least 3 characters");
+    if (!data.longDescription?.trim()) throw new Error("Long description is required");
+    if (data.longDescription.trim().length < 10) throw new Error("Long description must be at least 10 characters");
     if (!data.brand) throw new Error("Brand is required");
     if (!data.category) throw new Error("Category is required");
 
-   
-    const existingProduct = await Product.findOne({ productName: { $regex: `^${data.productName.trim()}$`, $options: 'i' } });
-    if (existingProduct) throw new Error("Product name already exists");
+    // Check for duplicate product name (case-insensitive)
+    const existingProduct = await Product.findOne({
+      productName: { $regex: `^${data.productName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+    });
+    if (existingProduct) {
+      console.log(`Duplicate product detected: "${data.productName.trim()}" matches "${existingProduct.productName}"`);
+      throw new Error("Product name already exists");
+    }
 
-    
+    // Validate brand and category
     const brandObj = await Brand.findById(data.brand);
     const categoryObj = await Category.findById(data.category);
     if (!brandObj) throw new Error("Invalid brand");
     if (!categoryObj) throw new Error("Invalid category");
 
-   
-    if (!data.croppedImages || data.croppedImages.length === 0) throw new Error("At least one image required");
+    // Validate images
+    if (!data.croppedImages || data.croppedImages.length === 0) throw new Error("At least 2 images are required");
+    const validImages = data.croppedImages.filter(img => img);
+    if (validImages.length < 2) throw new Error("At least 2 images are required");
+    if (validImages.length > 4) throw new Error("Maximum 4 images allowed");
 
     const images = [];
-    for (let base64 of data.croppedImages) {
-      if (!base64) continue;
+    for (let base64 of validImages) {
       const upload = await cloudinary.uploader.upload(base64, {
-        folder: "sentique/products"
+        folder: "sentique/products",
+        format: 'jpg'
       });
       images.push(upload.secure_url);
     }
-    if (images.length === 0) throw new Error("At least one valid image required");
 
-   
+    // Validate variants
     if (!data.variantSize || !data.variantStock || !data.variantRegularPrice || !data.variantSalePrice) {
       throw new Error("At least one variant is required");
     }
@@ -69,18 +90,29 @@ const addProducts = async (req, res) => {
     const regPrices = Array.isArray(data.variantRegularPrice) ? data.variantRegularPrice : [data.variantRegularPrice];
     const salePrices = Array.isArray(data.variantSalePrice) ? data.variantSalePrice : [data.variantSalePrice];
 
+    if (sizes.length < 1) throw new Error("At least one variant is required");
+
     const variants = sizes.map((size, i) => ({
       size: Number(size),
       stock: Number(stocks[i]),
       regularPrice: Number(regPrices[i]),
-      salePrice: Number(salePrices[i]),
+      salePrice: Number(salePrices[i])
     }));
 
-   
+    // Validate variant data
+    for (const variant of variants) {
+      if (variant.size <= 0) throw new Error("Size must be positive");
+      if (variant.stock < 0) throw new Error("Stock cannot be negative");
+      if (variant.regularPrice <= 0) throw new Error("Regular price must be positive");
+      if (variant.salePrice < 0) throw new Error("Sale price cannot be negative");
+      if (variant.salePrice > variant.regularPrice) throw new Error("Sale price must be ≤ regular price");
+    }
+
+    // Create product
     const product = new Product({
       productName: data.productName.trim(),
       description: data.description.trim(),
-      Longdescription: data.Longdescription.trim(),
+      longDescription: data.longDescription.trim(),
       brand: brandObj._id,
       category: categoryObj._id,
       images,
@@ -90,15 +122,27 @@ const addProducts = async (req, res) => {
     });
 
     await product.save();
+    console.log('Product added:', data.productName.trim());
     req.flash("success", "Product added successfully!");
+
+    // Check if request expects JSON (from fetch)
+    if (req.get('Accept').includes('application/json')) {
+      return res.status(201).json({ message: "Product added successfully" });
+    }
     res.redirect("/admin/products");
 
   } catch (error) {
-    console.error("Add product error:", error);
+    console.error("Add product error:", error.message);
     req.flash("error", error.message);
+
+    // Check if request expects JSON (from fetch)
+    if (req.get('Accept').includes('application/json')) {
+      return res.status(400).json({ error: error.message });
+    }
     res.redirect("/admin/addProducts");
   }
 };
+
 
 const getAllProducts = async (req, res) => {
   try {
@@ -251,9 +295,12 @@ const toggleProductStatus = async (req, res) => {
       return res.json({ success: false, message: "Invalid product ID" });
     }
 
+    
+    const isBlocked = String(block).trim().toLowerCase() === "true";
+
     const product = await Product.findByIdAndUpdate(
       productId,
-      { isBlocked: block },
+      { isBlocked },
       { new: true }
     );
 
@@ -263,7 +310,9 @@ const toggleProductStatus = async (req, res) => {
 
     res.json({
       success: true,
-      message: block ? "Product unlisted successfully" : "Product listed successfully",
+      message: isBlocked
+        ? "Product unlisted successfully"
+        : "Product listed successfully",
       status: product.isBlocked ? "Unlisted" : "Listed"
     });
   } catch (error) {

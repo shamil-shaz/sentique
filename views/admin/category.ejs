@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="<%= locals.csrfToken || '' %>">
   <title>Categories</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -292,22 +293,22 @@
     }
     
     .category-image {
-      width: 45px;
-      height: 45px;
+      width: 80px;
+      height: 80px;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       border: 2px solid #e1e8ed;
     }
     
     .no-image {
-      width: 45px;
-      height: 45px;
+      width: 80px;
+      height: 80px;
       background: #f0f0f0;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
+      border-radius: 8px;
       color: #999;
       font-size: 10px;
       margin: 0 auto;
@@ -339,7 +340,6 @@
       box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
     }
     
-    /* Description Modal Styles */
     .description-modal {
       display: none;
       position: fixed;
@@ -502,33 +502,27 @@
             <tr>
               <th>ID</th>
               <th>Name</th>
-               <th>Image</th>
+              <th>Image</th>
               <th>Description</th>
               <th>Offer Price</th>
               <th>Offer</th>
               <th>Status</th>
               <th>List / Unlist</th>
               <th>Edit</th>
-             
             </tr>
           </thead>
           <tbody>
             <% cat.forEach((category, index) => { %>
               <tr>
                 <td><%= (currentPage - 1) * 4 + index + 1 %></td>
-
                 <td><%= category.name %></td>
-                
-              <td>
-  <% if (category.image) { %>
-    <img src="<%= category.image %>" alt="<%= category.name %>" class="category-image" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
-  <% } else { %>
-    <div class="no-image" style="width:80px; height:80px; display:flex; align-items:center; justify-content:center; background:#f0f0f0; border-radius:8px;">No Image</div>
-  <% } %>
-</td>
-
-
-
+                <td>
+                  <% if (category.image) { %>
+                    <img src="<%= category.image %>" alt="<%= category.name %>" class="category-image" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                  <% } else { %>
+                    <div class="no-image" style="width:80px; height:80px; display:flex; align-items:center; justify-content:center; background:#f0f0f0; border-radius:8px;">No Image</div>
+                  <% } %>
+                </td>
                 <td class="description-cell">
                   <button class="view-btn" onclick="viewDescription('<%= category.description %>')">View</button>
                 </td>
@@ -537,7 +531,7 @@
                   <% if (category.categoryOffer === 0 || !category.categoryOffer) { %>
                     <button onclick="addOffer('<%= category._id %>')" class="btn btn-success">Add Offer</button>
                   <% } else { %>
-                    <button onclick="removeOffer('<%= category._id %>')"  class="btn btn-danger">Remove Offer</button>
+                    <button onclick="removeOffer('<%= category._id %>')" class="btn btn-danger">Remove Offer</button>
                   <% } %>
                 </td>
                 <td>
@@ -547,24 +541,22 @@
                     <span class="badge rounded-pill bg-danger" style="width:70px">Unlisted</span>
                   <% } %>
                 </td>
-              <td>
-  <% if (category.isListed) { %>
-    <form action="/admin/listCategory" method="get" class="list-toggle-form">
-      <input type="hidden" name="id" value="<%= category._id %>">
-      <button type="button" class="btn btn-danger list-toggle-btn" style="width:70px" data-action="unlist">Unlist</button>
-    </form>
-  <% } else { %>
-    <form action="/admin/unlistCategory" method="get" class="list-toggle-form">
-      <input type="hidden" name="id" value="<%= category._id %>">
-      <button type="button" class="btn btn-success list-toggle-btn" style="width:70px" data-action="list">List</button>
-    </form>
-  <% } %>
-</td>
-
+                <td>
+                  <% if (category.isListed) { %>
+                    <form action="/admin/listCategory" method="get" class="list-toggle-form">
+                      <input type="hidden" name="id" value="<%= category._id %>">
+                      <button type="button" class="btn btn-danger list-toggle-btn" style="width:70px" data-action="unlist">Unlist</button>
+                    </form>
+                  <% } else { %>
+                    <form action="/admin/unlistCategory" method="get" class="list-toggle-form">
+                      <input type="hidden" name="id" value="<%= category._id %>">
+                      <button type="button" class="btn btn-success list-toggle-btn" style="width:70px" data-action="list">List</button>
+                    </form>
+                  <% } %>
+                </td>
                 <td>
                   <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info btn-sm">Edit</a>
                 </td>
-               
               </tr>
             <% }); %>
           </tbody>
@@ -750,14 +742,13 @@
       }
     }
 
-    // Form submission - New separate function
+    // Form submission
     function submitForm() {
       const form = document.getElementById('categoryForm');
       const event = new Event('submit');
       form.dispatchEvent(event);
     }
 
-    // Form submission
     document.getElementById("categoryForm").addEventListener("submit", handleFormSubmit);
 
     function handleFormSubmit(event) {
@@ -765,19 +756,27 @@
       if (!validateForm()) return;
 
       const formData = new FormData();
-      formData.append('name', document.getElementById("categoryName").value);
-      formData.append('description', document.getElementById("categoryDesc").value);
+      const categoryName = document.getElementById("categoryName").value.trim();
+      const description = document.getElementById("categoryDesc").value.trim();
+      formData.append('name', categoryName);
+      formData.append('description', description);
       if (selectedImage) {
         formData.append('image', selectedImage);
       }
 
+      console.log('Submitting category:', { name: categoryName, description, hasImage: !!selectedImage });
+
       fetch('/admin/addCategory', {
         method: 'POST',
+        headers: {
+          'CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
         body: formData
       })
       .then(response => {
+        console.log('Response status:', response.status); // Debug
         if (!response.ok) {
-          return response.json().then(err => { throw new Error(err.error); });
+          return response.json().then(err => { throw new Error(err.error || 'Unknown error'); });
         }
         return response.json();
       })
@@ -794,10 +793,19 @@
         });
       })
       .catch(error => {
+        console.error('Error adding category:', error.message);
         if (error.message === "Category already exists") {
-          Swal.fire({ icon: 'error', title: 'Oops!', text: 'Category already exists!' });
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            text: 'This category name already exists!'
+          });
         } else {
-          Swal.fire({ icon: 'error', title: 'Error!', text: 'An error occurred while adding the category' });
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: `Failed to add category: ${error.message}`
+          });
         }
       });
     }
@@ -844,7 +852,7 @@
       });
     }
 
-    // Existing functions for offers and delete
+    // Offer functions
     async function addOffer(categoryId) {
       const { value: amount } = await Swal.fire({
         title: "Offer in percentage",
@@ -858,7 +866,10 @@
         try {
           const response = await fetch("/admin/addCategoryOffer", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
             body: JSON.stringify({ percentage: amount, categoryId })
           });
 
@@ -870,6 +881,7 @@
             Swal.fire("Failed", data.message || "Adding offer failed", "error");
           }
         } catch (error) {
+          console.error('Error adding offer:', error);
           Swal.fire("Error", "An error occurred while adding the offer", "error");
         }
       }
@@ -879,7 +891,10 @@
       try {
         const response = await fetch("/admin/removeCategoryOffer", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || ''
+          },
           body: JSON.stringify({ categoryId })
         });
 
@@ -891,11 +906,10 @@
           Swal.fire("Failed", data.message || "Removing offer failed", "error");
         }
       } catch (error) {
+        console.error('Error removing offer:', error);
         Swal.fire("Error", "An error occurred while removing the offer", "error");
       }
     }
-
-   
 
     // Description modal functions
     function viewDescription(description) {
@@ -917,28 +931,26 @@
     }
 
     // SweetAlert confirmation for List/Unlist
-document.querySelectorAll('.list-toggle-btn').forEach(button => {
-  button.addEventListener('click', function () {
-    const form = this.closest('form');
-    const action = this.dataset.action; // list or unlist
+    document.querySelectorAll('.list-toggle-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        const form = this.closest('form');
+        const action = this.dataset.action;
 
-    Swal.fire({
-      title: `Are you sure you want to ${action} this category?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: `Yes, ${action} it!`
-    }).then((result) => {
-      if (result.isConfirmed) {
-        form.submit();
-      }
+        Swal.fire({
+          title: `Are you sure you want to ${action} this category?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: `Yes, ${action} it!`
+        }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
+      });
     });
-  });
-});
 
-
-    // Handle URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const edited = urlParams.get('edited');
 

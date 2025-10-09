@@ -540,6 +540,10 @@
 
   <div class="signup-right">
     <div class="form-header">
+
+
+    
+
       <h2>Create Account</h2>
       <p>Join thousands of fragrance enthusiasts today</p>
     </div>
@@ -874,21 +878,36 @@
     setLoadingState(false);
   });
 
-  // Handle blocked user error
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("error") === "blocked") {
-    Swal.fire({
-      icon: "error",
-      title: "Access Denied",
-      text: "Your account has been suspended. Please contact support.",
-      confirmButtonColor: "#ef4444",
-      footer: '<a href="mailto:support@sentique.com">Contact Support</a>'
-    }).then(() => {
-      window.history.replaceState({}, document.title, "/signup");
-    });
-  }
 
-  // Form submission on Enter key
+    const params = new URLSearchParams(window.location.search);
+  const blockedError = params.get('error');
+
+if (blockedError === 'blocked') {
+  Swal.fire({
+    icon: "error",
+    title: "Access Denied",
+    text: "Your account has been suspended. Please contact support.",
+    confirmButtonColor: "#ef4444",
+    footer: '<a href="mailto:support@sentique.com">Contact Support</a>'
+  }).then(() => {
+    window.history.replaceState({}, document.title, "/signup");
+  });
+}
+
+const googleError = params.get('googleError');
+
+if (googleError) {
+  Swal.fire({
+    icon: 'error',
+    title: 'Google Login Failed',
+    text: googleError,
+    confirmButtonColor: '#ef4444'
+  }).then(() => {
+    window.history.replaceState({}, document.title, "/signup");
+  });
+}
+
+  
   form.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !submitBtn.disabled) {
       e.preventDefault();

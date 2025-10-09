@@ -1,7 +1,6 @@
 <%- include("../partials/user/header.ejs") %>
 
 <style>
-  /* --- Layout --- */ 
 
 
   .site-wrapper {
@@ -16,10 +15,10 @@
     align-items: flex-start;
   }
 
-  /* Professional Filter Sidebar */
+
   .filters {
     width: 280px;
-    background: #ffffff;
+    background: #eceaea;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     overflow: hidden;
@@ -83,7 +82,7 @@
     align-items: center;
     gap: 8px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #f1f5f9;
+    border-bottom: 2px solid #bdbebe;
   }
 
   .filter-section h5::before {
@@ -174,9 +173,9 @@
     border-radius: 50%;
   }
 
-  /* Price Range Special Styling */
+
   .price-range-section {
-    background: #f8fafc;
+    background: #ececed;
     border-radius: 8px;
     padding: 16px;
     margin-top: 8px;
@@ -192,11 +191,11 @@
     background: #e2e8f0;
   }
 
-  /* Filter Actions */
+ 
   .filter-actions {
     padding: 20px 24px;
     border-top: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: #eeeff0;
     display: flex;
     gap: 12px;
   }
@@ -218,7 +217,7 @@
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, #7aea66 0%, #4ba258 100%);
+    background: linear-gradient(135deg, #626362 0%, #363636 100%);
     color: white;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
   }
@@ -240,7 +239,7 @@
     transform: translateY(-1px);
   }
 
-  /* Mobile filter toggle button */
+
   .filters-toggle {
     display: none;
     width: 100%;
@@ -274,11 +273,10 @@
     min-width: 170px;
     padding: 8px 12px;
     border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background: white;
+    border: 1px solid #0b0b0b;
+    background: rgb(230, 227, 227);
   }
 
-  /* --- Product Grid --- */
   .product-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -286,12 +284,12 @@
   }
 
   .product-card {
-    border: 1px solid #eee;
+    border: 1px solid #9a9898;
     border-radius: 10px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: #fff;
+    background: #e8e7e7;
     transition: all .18s ease;
     height: 100%;
   }
@@ -317,7 +315,7 @@
     transform: scale(1.05);
   }
 
-  /* Wishlist & Cart icons overlay */
+
   .product-icons {
     position: absolute;
     top: 8px;
@@ -411,7 +409,7 @@
     border-color: #9ca3af;
   }
   .page-item.active .page-link {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #767676 0%, #636364 100%);
     color:#fff;
     border-color:#667eea;
   }
@@ -456,6 +454,24 @@
     font-size: 16px;
     color: #6b7280;
   }
+  .shop-reset-btn {
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.shop-reset-btn i {
+  font-size: 16px;
+  color: #ef4444; /* red close icon */
+}
+.shop-reset-btn:hover i {
+  color: #dc2626;
+}
+
 
   /* Responsive Design */
   @media (max-width: 480px) {
@@ -512,7 +528,7 @@
     text-align: center;
   }
 
-  /* Overlay for mobile filter */
+
   .filter-overlay {
     display: none;
     position: fixed;
@@ -535,12 +551,12 @@
 </style>
 <body>
 
-  
 <!-- Search Bar -->
 <div class="shop-search-bar">
   <form method="GET" action="/shopPage" class="shop-search-form">
     <input 
       type="text" 
+      id="shopSearchInput"
       name="search" 
       placeholder="Search products..." 
       value="<%= search ? search : '' %>"
@@ -549,8 +565,16 @@
     <button type="submit" class="shop-search-btn">
       <i class="fa fa-search"></i>
     </button>
+
+   
+    <% if (search && search.trim() !== "") { %>
+      <button type="button" class="shop-reset-btn" onclick="resetSearch()">
+        <i class="fa fa-times"></i>
+      </button>
+    <% } %>
   </form>
 </div>
+
 
 <div class="site-wrapper">
   <button id="toggleFilters" class="filters-toggle">
@@ -685,23 +709,33 @@
     </aside>
 
     <!-- Products -->
-    <main class="products">
-      <div class="sort-bar">
-        <form method="GET">
-          <% if (selectedCategories) { selectedCategories.forEach(c => { %>
-            <input type="hidden" name="categorys" value="<%= c %>">
-          <% }) } %>
-          <% if (selectedBrands) { selectedBrands.forEach(b => { %>
-            <input type="hidden" name="brands" value="<%= b %>">
-          <% }) } %>
-          <select name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
-            <option value="">Sort By</option>
-            <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
-            <option value="priceLow" <%= sort === 'priceLow' ? 'selected' : '' %>>Price: Low to High</option>
-            <option value="priceHigh" <%= sort === 'priceHigh' ? 'selected' : '' %>>Price: High to Low</option>
-          </select>
-        </form>
-      </div>
+      <main class="products">
+  <div class="sort-bar">
+  <form method="GET">
+    <% if (selectedCategories) { selectedCategories.forEach(c => { %>
+      <input type="hidden" name="categorys" value="<%= c %>">
+    <% }) } %>
+    <% if (selectedBrands) { selectedBrands.forEach(b => { %>
+      <input type="hidden" name="brands" value="<%= b %>">
+    <% }) } %>
+    <% if (priceRange) { %>
+      <input type="hidden" name="priceRange" value="<%= priceRange %>">
+    <% } %>
+    <% if (search) { %>
+      <input type="hidden" name="search" value="<%= search %>">
+    <% } %>
+
+    <select name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">Sort By</option>
+      <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
+      <option value="priceLow" <%= sort === 'priceLow' ? 'selected' : '' %>>Price: Low to High</option>
+      <option value="priceHigh" <%= sort === 'priceHigh' ? 'selected' : '' %>>Price: High to Low</option>
+      <option value="nameAZ" <%= sort === 'nameAZ' ? 'selected' : '' %>>Name: A to Z</option>
+      <option value="nameZA" <%= sort === 'nameZA' ? 'selected' : '' %>>Name: Z to A</option>
+    </select>
+  </form>
+</div>
+
 
       <section class="product-grid">
         <% if (products && products.length > 0) { %>
@@ -721,7 +755,7 @@
                   <% } %>
                 </a>
                 <div class="product-icons">
-                  <a href="/wishlist/add/<%= product._id %>" title="Add to Wishlist"><i class="fa fa-heart"></i></a>
+                  <a href="/wishlist<%= product._id %>" title="Add to Wishlist"><i class="fa fa-heart"></i></a>
                   <a href="/cart/add/<%= product._id %>" title="Add to Cart"><i class="fa fa-shopping-cart"></i></a>
                 </div>
               </div>
@@ -816,6 +850,13 @@
       });
     };
   })();
+
+  function resetSearch() {
+  const input = document.getElementById("shopSearchInput");
+  input.value = "";
+  window.location.href = "/shopPage";
+}
+
 </script>
 
 </body>
