@@ -1,39 +1,55 @@
-const mongoose=require("mongoose");
+// const mongoose=require("mongoose");
 
-const {Schema}=mongoose;
+// const {Schema}=mongoose;
 
-const cartSchema=new Schema({
-    userId:{
-        type:Schema.Types.ObjectId,
-        ref:"User",
-        required:true
-    },
-    items:[{
+// const cartSchema=new Schema({
+//     userId:{
+//         type:Schema.Types.ObjectId,
+//         ref:"User",
+//         required:true
+//     },
+//     items:[{
 
-        productId:{
-            type:Schema.Types.ObjectId,
-            ref:"Product",
-            required:true
-        },
-        quantity:{
-            type:Number,
-            default:1
-        },
-        price:{
-            type:Number,
-            required:true
-        },
-        status:{
-            type:String,
-            default:"placed"
-        },
-        cancellationReason:{
-            type:String,
-            default:"none"
-        }
-    }]
-})
+//         productId:{
+//             type:Schema.Types.ObjectId,
+//             ref:"Product",
+//             required:true
+//         },
+//         quantity:{
+//             type:Number,
+//             default:1
+//         },
+//         price:{
+//             type:Number,
+//             required:true
+//         },
+//         status:{
+//             type:String,
+//             default:"placed"
+//         },
+//         cancellationReason:{
+//             type:String,
+//             default:"none"
+//         }
+//     }]
+// })
 
- const Cart=mongoose.model("Cart",cartSchema);
+//  const Cart=mongoose.model("Cart",cartSchema);
 
- module.exports=Cart;
+//  module.exports=Cart;
+
+const mongoose = require("mongoose");
+
+const cartItemSchema = new mongoose.Schema({
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+  variantSize: { type: Number, required: true }, // e.g. 50 or 100 ml
+  quantity: { type: Number, required: true, min: 1 },
+  price: { type: Number, required: true }, // sale price
+});
+
+const cartSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  items: [cartItemSchema],
+});
+
+module.exports = mongoose.model("Cart", cartSchema);

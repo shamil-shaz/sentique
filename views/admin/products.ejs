@@ -3,6 +3,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <style>
   :root {
@@ -571,11 +574,18 @@
     <!-- Filters -->
     <div class="filter-card">
       <form action="/admin/products" method="get" class="filter-form">
-        <div class="filter-group">
-          <label class="filter-label"><i class="fas fa-search"></i> Search</label>
-          <input type="text" name="search" placeholder="Search by product name..." 
-                 class="filter-input" value="<%= search || '' %>" />
-        </div>
+         <div class="filter-group">
+    <label class="filter-label"><i class="fas fa-search"></i> Search</label>
+    <div style="position: relative; display: flex; align-items: center;">
+      <i class="fas fa-search" style="position: absolute; left: 12px; color: #999; pointer-events: none;"></i>
+      <input type="text" name="search" id="searchInput" placeholder="Search by product name..." 
+             class="filter-input" value="<%= search || '' %>" 
+             style="padding-left: 38px; padding-right: 38px;" />
+      <i class="fas fa-times-circle" id="clearSearch" 
+         style="position: absolute; right: 12px; color: #999; cursor: pointer; display: none;"
+         title="Clear search"></i>
+    </div>
+  </div>
         
         <div class="filter-group">
           <label class="filter-label"><i class="fas fa-tag"></i> Category</label>
@@ -644,9 +654,11 @@
                   </td>
                   <td>
                     <% if (product.variants && product.variants.length > 0) { %>
-                      <button class="btn-view-variants" onclick='viewVariants("<%= JSON.stringify(product.variants) %>")'>
-                        <i class="fas fa-eye"></i> View Variants
-                      </button>
+                     <button class="btn-view-variants" 
+  onclick='viewVariants(<%- JSON.stringify(product.variants) %>)'>
+  <i class="fas fa-eye"></i> View Variants
+</button>
+
                     <% } else { %>
                       <span class="no-offer">No Variants</span>
                     <% } %>
@@ -739,6 +751,34 @@
     </div>
   </div>
 </div>
+<% if (locals.success_msg && locals.success_msg.length > 0) { %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= locals.success_msg[0] %>',
+        confirmButtonColor: '#28a745',
+        timer: 3000,
+        showConfirmButton: true
+      });
+    });
+  </script>
+<% } %>
+
+<% if (locals.error_msg && locals.error_msg.length > 0) { %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: '<%= locals.error_msg[0] %>',
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'OK'
+      });
+    });
+  </script>
+<% } %>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -994,4 +1034,43 @@ async function toggleProductStatus(productId, block = true) {
       Swal.fire({ icon: 'error', title: 'Network Error', text: 'Check your connection', confirmButtonColor: '#ef4444' });
     }
   }
+
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('searchInput');
+  const clearIcon = document.getElementById('clearSearch');
+  const filterForm = document.querySelector('.filter-form');
+
+  // Show clear icon on page load if there's a search value
+  if (searchInput && searchInput.value.trim()) {
+    clearIcon.style.display = 'block';
+  }
+
+  // Clear search functionality
+  if (clearIcon) {
+    clearIcon.addEventListener('click', function() {
+      searchInput.value = '';
+      this.style.display = 'none';
+      // Auto-submit form to refresh results
+      filterForm.submit();
+    });
+  }
+
+  // Show/hide clear icon based on input
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      clearIcon.style.display = this.value.trim() ? 'block' : 'none';
+    });
+
+    // Add hover effect for clear icon
+    clearIcon.addEventListener('mouseenter', function() {
+      this.style.color = '#ef4444';
+    });
+    
+    clearIcon.addEventListener('mouseleave', function() {
+      this.style.color = '#999';
+    });
+  }
+});
 </script>

@@ -366,12 +366,195 @@ const getEditProductPage = async (req, res) => {
   }
 };
 
+
+
+
+// const updateProduct = async (req, res) => {
+//   try {
+//     const {
+//       productName,
+//       description,
+//       Longdescription,
+//       brand,
+//       category,
+//       deletedImages,
+//       variantSize,
+//       variantStock,
+//       variantRegularPrice,
+//       variantSalePrice,
+//       productOffer,
+//       productImagesBase64
+//     } = req.body;
+
+//     const productId = req.params.id;
+//     if (!mongoose.Types.ObjectId.isValid(productId)) {
+//       req.flash("error", "Invalid Product ID");
+//       return res.redirect("/admin/products");
+//     }
+
+//     const product = await Product.findById(productId);
+//     if (!product) {
+//       req.flash("error", "Product not found");
+//       return res.redirect("/admin/products");
+//     }
+
+    
+//     if (!productName?.trim() || !description?.trim() || !Longdescription?.trim() || !brand || !category) {
+//       req.flash("error", "All fields are required!");
+//       return res.redirect(`/admin/edit-product/${productId}`);
+//     }
+
+    
+//     const originalName = product.productName;
+//     const newName = productName.trim();
+//     if (newName !== originalName) {
+//       const existing = await Product.findOne({ productName: { $regex: `^${newName}$`, $options: 'i' }, _id: { $ne: productId } });
+//       if (existing) {
+//         req.flash("error", "Product name already exists");
+//         return res.redirect(`/admin/edit-product/${productId}`);
+//       }
+//     }
+
+//     product.productName = newName;
+//     product.description = description.trim();
+//     product.Longdescription = Longdescription.trim();
+
+   
+//     if (!mongoose.Types.ObjectId.isValid(brand)) {
+//       req.flash("error", "Invalid Brand");
+//       return res.redirect(`/admin/edit-product/${productId}`);
+//     }
+//     const brandExists = await Brand.findById(brand);
+//     if (!brandExists) {
+//       req.flash("error", "Brand not found");
+//       return res.redirect(`/admin/edit-product/${productId}`);
+//     }
+//     product.brand = brand;
+
+
+//     if (!mongoose.Types.ObjectId.isValid(category)) {
+//       req.flash("error", "Invalid Category");
+//       return res.redirect(`/admin/edit-product/${productId}`);
+//     }
+//     const categoryExists = await Category.findById(category);
+//     if (!categoryExists) {
+//       req.flash("error", "Category not found");
+//       return res.redirect(`/admin/edit-product/${productId}`);
+//     }
+//     product.category = category;
+
+ 
+//     const sizeArr = Array.isArray(variantSize) ? variantSize : [variantSize];
+//     const stockArr = Array.isArray(variantStock) ? variantStock : [variantStock];
+//     const rPriceArr = Array.isArray(variantRegularPrice) ? variantRegularPrice : [variantRegularPrice];
+//     const sPriceArr = Array.isArray(variantSalePrice) ? variantSalePrice : [variantSalePrice];
+
+//     const newVariants = [];
+//     for (let i = 0; i < sizeArr.length; i++) {
+//       const sizeVal = Number(sizeArr[i]);
+//       const stockVal = Number(stockArr[i]) || 0;
+//       const rPriceVal = Number(rPriceArr[i]) || 1;
+//       const sPriceVal = Number(sPriceArr[i]) || 0;
+
+//       if (sizeVal <= 0) continue;
+//       if (stockVal < 0) stockVal = 0;
+
+//       const finalSalePrice = sPriceVal >= rPriceVal ? rPriceVal - 0.01 : sPriceVal;
+
+//       newVariants.push({
+//         size: sizeVal,
+//         stock: stockVal,
+//         regularPrice: rPriceVal,
+//         salePrice: finalSalePrice < 0 ? 0 : finalSalePrice
+//       });
+//     }
+
+//     if (newVariants.length === 0) {
+//       req.flash("error", "At least one valid variant is required.");
+//       return res.redirect(`/admin/edit-product/${productId}`);
+//     }
+//     product.variants = newVariants;
+
+   
+//     let deletedIndexesArr = [];
+//     if (deletedImages) {
+//       deletedIndexesArr = deletedImages.split(",").map(i => Number(i));
+//     }
+
+//     if (product.images && product.images.length && deletedIndexesArr.length) {
+//       const imagesToDelete = product.images.filter((img, idx) => deletedIndexesArr.includes(idx));
+//       for (const url of imagesToDelete) {
+//         try {
+//           const parts = url.split("/");
+//           const filename = parts[parts.length - 1];
+//           const publicId = `products/${filename.split(".")[0]}`;
+//           await cloudinary.uploader.destroy(publicId);
+//         } catch (err) {
+//           console.error("Failed to delete image from Cloudinary:", err);
+//         }
+//       }
+//       product.images = product.images.filter((img, idx) => !deletedIndexesArr.includes(idx));
+//     }
+
+   
+//     if (productImagesBase64) {
+//       const imagesArr = Array.isArray(productImagesBase64) ? productImagesBase64 : [productImagesBase64];
+//       for (const base64 of imagesArr) {
+//         try {
+//           const result = await cloudinary.uploader.upload(base64, { folder: "products" });
+//           product.images.push(result.secure_url);
+//         } catch (err) {
+//           console.error("Failed to upload image to Cloudinary:", err);
+//           req.flash("error", "Failed to upload one or more images.");
+//           return res.redirect(`/admin/edit-product/${productId}`);
+//         }
+//       }
+//     }
+
+   
+//     if (product.images.length < 1) {
+//       req.flash("error", "At least one product image is required.");
+//       return res.redirect(`/admin/edit-product/${productId}`);
+//     }
+//     if (product.images.length > 4) {
+//       req.flash("error", "Maximum 4 images allowed.");
+//       return res.redirect(`/admin/edit-product/${productId}`);
+//     }
+
+  
+//     let offer = Number(productOffer) || 0;
+//     if (offer < 0 || offer > 100) offer = 0;
+//     product.productOffer = offer;
+
+   
+//     product.slug = product.productName
+//       .toLowerCase()
+//       .replace(/[^\w\s-]/g, '')
+//       .replace(/[\s_-]+/g, '-')
+//       .replace(/^-+|-+$/g, '');
+
+    
+//     product.status = product.variants.some(v => v.stock > 0) ? "Available" : "Out of stock";
+//     product.updatedAt = new Date();
+
+//     await product.save();
+
+//     req.flash('success', 'Product updated successfully!');
+//     res.redirect('/admin/products');
+//   } catch (err) {
+//     console.error("Update product error:", err);
+//     req.flash('error', err.message || 'Something went wrong!');
+//     res.redirect(`/admin/edit-product/${req.params.id}`);
+//   }
+// };
+
+
 const updateProduct = async (req, res) => {
   try {
     const {
       productName,
       description,
-      Longdescription,
+      longDescription,
       brand,
       category,
       deletedImages,
@@ -395,17 +578,20 @@ const updateProduct = async (req, res) => {
       return res.redirect("/admin/products");
     }
 
-    
-    if (!productName?.trim() || !description?.trim() || !Longdescription?.trim() || !brand || !category) {
+    // Validate required fields
+    if (!productName?.trim() || !description?.trim() || !longDescription?.trim() || !brand || !category) {
       req.flash("error", "All fields are required!");
       return res.redirect(`/admin/edit-product/${productId}`);
     }
 
-    
+    // Check for duplicate product name
     const originalName = product.productName;
     const newName = productName.trim();
     if (newName !== originalName) {
-      const existing = await Product.findOne({ productName: { $regex: `^${newName}$`, $options: 'i' }, _id: { $ne: productId } });
+      const existing = await Product.findOne({ 
+        productName: { $regex: `^${newName}$`, $options: 'i' }, 
+        _id: { $ne: productId } 
+      });
       if (existing) {
         req.flash("error", "Product name already exists");
         return res.redirect(`/admin/edit-product/${productId}`);
@@ -414,9 +600,9 @@ const updateProduct = async (req, res) => {
 
     product.productName = newName;
     product.description = description.trim();
-    product.Longdescription = Longdescription.trim();
+    product.longDescription = longDescription.trim();
 
-   
+    // Validate brand
     if (!mongoose.Types.ObjectId.isValid(brand)) {
       req.flash("error", "Invalid Brand");
       return res.redirect(`/admin/edit-product/${productId}`);
@@ -428,7 +614,7 @@ const updateProduct = async (req, res) => {
     }
     product.brand = brand;
 
-
+    // Validate category
     if (!mongoose.Types.ObjectId.isValid(category)) {
       req.flash("error", "Invalid Category");
       return res.redirect(`/admin/edit-product/${productId}`);
@@ -440,7 +626,7 @@ const updateProduct = async (req, res) => {
     }
     product.category = category;
 
- 
+    // Process variants
     const sizeArr = Array.isArray(variantSize) ? variantSize : [variantSize];
     const stockArr = Array.isArray(variantStock) ? variantStock : [variantStock];
     const rPriceArr = Array.isArray(variantRegularPrice) ? variantRegularPrice : [variantRegularPrice];
@@ -449,12 +635,12 @@ const updateProduct = async (req, res) => {
     const newVariants = [];
     for (let i = 0; i < sizeArr.length; i++) {
       const sizeVal = Number(sizeArr[i]);
-      const stockVal = Number(stockArr[i]) || 0;
+      let stockVal = Number(stockArr[i]) || 0; // Changed from const to let
       const rPriceVal = Number(rPriceArr[i]) || 1;
       const sPriceVal = Number(sPriceArr[i]) || 0;
 
       if (sizeVal <= 0) continue;
-      if (stockVal < 0) stockVal = 0;
+      if (stockVal < 0) stockVal = 0; // Now this works
 
       const finalSalePrice = sPriceVal >= rPriceVal ? rPriceVal - 0.01 : sPriceVal;
 
@@ -472,7 +658,7 @@ const updateProduct = async (req, res) => {
     }
     product.variants = newVariants;
 
-   
+    // Handle deleted images
     let deletedIndexesArr = [];
     if (deletedImages) {
       deletedIndexesArr = deletedImages.split(",").map(i => Number(i));
@@ -493,7 +679,7 @@ const updateProduct = async (req, res) => {
       product.images = product.images.filter((img, idx) => !deletedIndexesArr.includes(idx));
     }
 
-   
+    // Upload new images (base64)
     if (productImagesBase64) {
       const imagesArr = Array.isArray(productImagesBase64) ? productImagesBase64 : [productImagesBase64];
       for (const base64 of imagesArr) {
@@ -508,7 +694,7 @@ const updateProduct = async (req, res) => {
       }
     }
 
-   
+    // Validate final image count
     if (product.images.length < 1) {
       req.flash("error", "At least one product image is required.");
       return res.redirect(`/admin/edit-product/${productId}`);
@@ -518,19 +704,19 @@ const updateProduct = async (req, res) => {
       return res.redirect(`/admin/edit-product/${productId}`);
     }
 
-  
+    // Handle product offer
     let offer = Number(productOffer) || 0;
     if (offer < 0 || offer > 100) offer = 0;
     product.productOffer = offer;
 
-   
+    // Generate slug
     product.slug = product.productName
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/[\s_-]+/g, '-')
       .replace(/^-+|-+$/g, '');
 
-    
+    // Update status
     product.status = product.variants.some(v => v.stock > 0) ? "Available" : "Out of stock";
     product.updatedAt = new Date();
 

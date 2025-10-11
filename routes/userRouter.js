@@ -119,6 +119,8 @@ const profileController = require("../controllers/user/profileController");
 
 const addressController=require('../controllers/user/addressController')
 const wishlistController=require('../controllers/user/whishlistController')
+const cartController=require('../controllers/user/cartController')
+
 const multer = require("multer");
 
 // Configure Multer for file uploads
@@ -239,11 +241,20 @@ router.delete("/addresses/delete/:id", userAuth, addressController.deleteAddress
 router.get("/addresses/list", userAuth, addressController.getAddressesJSON);
 
 //// whish List 
-
 router.get("/wishlist", userAuth, wishlistController.loadWishlist);
 router.post("/wishlist/add", userAuth, wishlistController.addToWishlist);
 router.delete("/wishlist/remove/:id", userAuth, wishlistController.removeFromWishlist);
 router.post("/wishlist/move-all-to-cart", userAuth, wishlistController.moveAllToCart);
+
+
+//// cart
+
+ router.get('/cart',userAuth,cartController.getCartPage)
+
+router.post('/cart/add',userAuth, cartController.addToCart);
+router.delete('/cart/remove/:productId',userAuth, cartController.removeFromCart);
+router.put('/cart/update', userAuth, cartController.updateCart);
+
 
 
 

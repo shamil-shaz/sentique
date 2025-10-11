@@ -541,8 +541,9 @@ input::placeholder, textarea::placeholder {
     </div>
   <% } %>
 
-  <div class="container">
-    <form id="editProductForm" action="/admin/edit-product/<%= product._id %>" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+<div class="container">
+    <!-- REMOVED enctype="multipart/form-data" since we're using base64 -->
+    <form id="editProductForm" action="/admin/edit-product/<%= product._id %>" method="POST" onsubmit="return validateForm()">
       <div class="form-wrapper">
 
         <!-- LEFT SIDE - IMAGES -->
@@ -626,7 +627,7 @@ input::placeholder, textarea::placeholder {
 
             <div class="form-group">
               <label>Long Description <span class="required">*</span></label>
-              <textarea name="Longdescription" rows="4" placeholder="Detailed product description" required><%= product.Longdescription %></textarea>
+              <textarea name="longDescription" rows="4" placeholder="Detailed product description" required><%= product.longDescription || product.Longdescription || '' %></textarea>
             </div>
           </div>
 
@@ -676,7 +677,7 @@ input::placeholder, textarea::placeholder {
 
       </div>
     </form>
-  </div>
+  </div> 
 </div>
 
 <!-- Cropper Modal -->
@@ -692,6 +693,8 @@ input::placeholder, textarea::placeholder {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 let cropper = null, currentSlot = null;
 const modal = document.getElementById('cropper-modal');
@@ -700,15 +703,7 @@ const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
 const deletedIndexes = new Set();
 
 
-<% if (locals.error && locals.error.length > 0) { %>
-  Swal.fire({
-    icon: 'error',
-    title: 'Error',
-    text: '<%= locals.error[0] %>',
-    confirmButtonColor: '#dc3545',
-    confirmButtonText: 'OK'
-  });
-<% } %>
+
 
 function updateDeletedHidden() {
   document.getElementById('deletedImages').value = Array.from(deletedIndexes).join(',');
@@ -916,4 +911,6 @@ function validateForm() {
   }
   return true;
 }
+
+
 </script>

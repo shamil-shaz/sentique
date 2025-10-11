@@ -138,8 +138,8 @@ const app = express();
 
 // ----------------- MIDDLEWARE -----------------
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -185,6 +185,7 @@ app.use("/admin", adminSession);
 app.use(flash());
 app.use(nocache());
 
+
 // Set flash messages in res.locals
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash("success") || [];
@@ -211,6 +212,7 @@ app.set("views", [
 // ----------------- ROUTES -----------------
 app.use("/", userRouter);
 app.use("/admin", adminRouter);
+
 
 // ----------------- 404 PAGE -----------------
 app.use((req, res, next) => {

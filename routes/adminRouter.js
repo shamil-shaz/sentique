@@ -71,7 +71,8 @@ router.post('/addProductOffer', adminAuth, productController.addProductOffer);
 router.post('/removeProductOffer', adminAuth, productController.removeProductOffer);
 router.post('/toggleProductStatus/:id', adminAuth, productController.toggleProductStatus);
 router.get("/edit-product/:id", adminAuth, productController.getEditProductPage);
-router.post("/edit-product/:id",adminAuth,uploadProductImage.array("images", 4),productController.updateProduct);
+//router.post("/edit-product/:id",adminAuth,uploadProductImage.array("images", 4),productController.updateProduct);
+router.post("/edit-product/:id", adminAuth, uploadProductImage.none(), productController.updateProduct);
 router.delete('/deleteProduct/:id', adminAuth, productController.deleteProduct);
 
 
