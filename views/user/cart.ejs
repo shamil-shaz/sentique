@@ -65,6 +65,7 @@
         border-bottom: 1px solid #e0e0e0;
         align-items: center;
         transition: background-color 0.2s ease;
+        position: relative;
     }
 
     .cart-item:last-child {
@@ -73,6 +74,11 @@
 
     .cart-item:hover {
         background-color: #f9f9f9;
+    }
+
+    .cart-item.out-of-stock-item {
+        background-color: #fff5f5;
+        opacity: 0.8;
     }
 
     .product-image-wrapper {
@@ -88,6 +94,23 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    .out-of-stock-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(220, 53, 69, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-align: center;
+        padding: 10px;
     }
 
     .product-details {
@@ -117,6 +140,20 @@
 
     .variant-info strong {
         color: #333;
+    }
+
+    .stock-info {
+        color: #28a745;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .stock-info.low-stock {
+        color: #ffc107;
+    }
+
+    .stock-info.out-of-stock {
+        color: #dc3545;
     }
 
     .price-info {
@@ -158,9 +195,14 @@
         justify-content: center;
     }
 
-    .quantity-control button:hover {
+    .quantity-control button:hover:not(:disabled) {
         background: #e9ecef;
         border-color: #adb5bd;
+    }
+
+    .quantity-control button:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
     }
 
     .quantity-control input {
@@ -170,6 +212,11 @@
         border-radius: 4px;
         padding: 6px;
         font-size: 0.95rem;
+    }
+
+    .quantity-control input:disabled {
+        background: #f8f9fa;
+        opacity: 0.5;
     }
 
     .item-actions {
@@ -185,20 +232,41 @@
         color: #333;
     }
 
-    .remove-button {
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-direction: column;
+    }
+
+    .remove-button, .wishlist-button {
         background: transparent;
-        border: none;
-        color: #dc3545;
+        border: 1px solid;
         cursor: pointer;
-        padding: 8px 12px;
+        padding: 8px 16px;
         border-radius: 4px;
         transition: all 0.2s ease;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .remove-button {
+        color: #dc3545;
+        border-color: #dc3545;
     }
 
     .remove-button:hover {
-        background: #fff5f5;
-        color: #c82333;
+        background: #dc3545;
+        color: white;
+    }
+
+    .wishlist-button {
+        color: #007bff;
+        border-color: #007bff;
+    }
+
+    .wishlist-button:hover {
+        background: #007bff;
+        color: white;
     }
 
     .cart-summary {
@@ -240,6 +308,16 @@
     .summary-value {
         color: #333;
         font-weight: 600;
+    }
+
+    .out-of-stock-notice {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        color: #856404;
     }
 
     .checkout-button {
@@ -316,18 +394,6 @@
         color: white;
     }
 
-    .out-of-stock {
-        color: #dc3545;
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-top: 5px;
-    }
-
-    .quantity-control.disabled button, .quantity-control.disabled input {
-        opacity: 0.5;
-        pointer-events: none;
-    }
-
     @media (max-width: 992px) {
         .cart-container {
             grid-template-columns: 1fr;
@@ -348,6 +414,10 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 10px;
+        }
+
+        .action-buttons {
+            flex-direction: row;
         }
     }
 
@@ -382,24 +452,35 @@
 
   <% if (cartItems && cartItems.length > 0) { %>
     <div class="cart-container">
-      <!-- Cart Items Section -->
+    
       <div class="cart-items-section">
-        <% cartItems.forEach(item => { %>
-          <div class="cart-item">
+        <% 
+        let outOfStockCount = 0;
+        cartItems.forEach(item => {
+      
+          const actualStock = item.variant?.stock !== undefined ? item.variant.stock : (item.productId?.stock || 0);
+          const isOutOfStock = actualStock <= 0;
+          if (isOutOfStock) outOfStockCount++;
+          const maxQtyPerOrder = 5;
+       
+          const availableQty = isOutOfStock ? 0 : Math.min(actualStock, maxQtyPerOrder);
+        %>
+          <div class="cart-item <%= isOutOfStock ? 'out-of-stock-item' : '' %>" data-out-of-stock="<%= isOutOfStock %>">
             <!-- Product Image -->
             <div class="product-image-wrapper">
-              <% console.log('Cart product images:', item.productId?.images); %>
               <% if (item.productId && item.productId.images && item.productId.images.length > 0) { %>
-                <img src="/uploads/product-images/<%= item.productId.images[0] %>" 
+                <img src="<%= item.productId && item.productId.images && item.productId.images[0] ? item.productId.images[0] : 'https://via.placeholder.com/350?text=No+Image' %>" alt="<%= item.productId && item.productId.productName ? item.productId.productName : 'Unknown Product' %>" class="product-image" loading="lazy"> 
                      alt="<%= item.productId.productName || 'Product' %>"
                      class="product-image"
-                     loading="lazy"
                      onerror="this.onerror=null; this.src='https://via.placeholder.com/120x120?text=No+Image'">
               <% } else { %>
                 <img src="https://via.placeholder.com/120x120?text=No+Image" 
                      alt="No Image"
-                     class="product-image"
-                     loading="lazy">
+                     class="product-image">
+              <% } %>
+              
+              <% if (isOutOfStock) { %>
+                <div class="out-of-stock-overlay">OUT OF STOCK</div>
               <% } %>
             </div>
 
@@ -412,6 +493,20 @@
                   <span class="variant-info"><strong>Variant:</strong> <%= item.variant.size %> ml</span>
                 <% } %>
               </div>
+              
+              <% if (isOutOfStock) { %>
+                <span class="stock-info out-of-stock">
+                  <i class="fas fa-times-circle"></i> Out of Stock
+                </span>
+              <% } else if (item.productId.stock <= 5) { %>
+                <span class="stock-info low-stock">
+                  <i class="fas fa-exclamation-triangle"></i> Only <%= item.productId.stock %> left
+                </span>
+              <% } else { %>
+                <span class="stock-info">
+                  <i class="fas fa-check-circle"></i> In Stock
+                </span>
+              <% } %>
 
               <div class="price-info">
                 <span class="current-price">₹<%= (item.variant?.salePrice || item.price).toLocaleString() %></span>
@@ -420,21 +515,34 @@
                 <% } %>
               </div>
 
-              <% if (item.productId.stock <= 0) { %>
-                <span class="out-of-stock">Out of Stock</span>
-              <% } %>
-
-              <div class="quantity-control <%= item.productId.stock <= 0 ? 'disabled' : '' %>">
-                <button <%= item.productId.stock <= 0 ? 'disabled' : '' %> onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', -1, <%= item.productId.stock %>)">-</button>
-                <input id="qty-<%= item.productId._id %>-<%= item.variant.size %>" 
-                       type="number" 
-                       value="<%= item.quantity %>" 
-                       min="1" 
-                       max="<%= item.productId.stock %>"
-                       readonly
-                       <%= item.productId.stock <= 0 ? 'disabled' : '' %>>
-                <button <%= item.productId.stock <= 0 ? 'disabled' : '' %> onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', 1, <%= item.productId.stock %>)">+</button>
+              <div class="quantity-control">
+                <button 
+                  <%= isOutOfStock || item.quantity <= 1 ? 'disabled' : '' %> 
+                  id="minus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
+                  onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', -1, <%= availableQty %>, <%= item.quantity %>)">
+                  -
+                </button>
+                <input 
+                  id="qty-<%= item.productId._id %>-<%= item.variant.size %>" 
+                  type="number" 
+                  value="<%= item.quantity %>" 
+                  min="1" 
+                  max="<%= availableQty %>"
+                  readonly
+                  <%= isOutOfStock ? 'disabled' : '' %>>
+                <button 
+                  <%= isOutOfStock || item.quantity >= availableQty ? 'disabled' : '' %> 
+                  id="plus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
+                  onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', 1, <%= availableQty %>, <%= item.quantity %>)">
+                  +
+                </button>
               </div>
+              
+              <% if (!isOutOfStock && item.quantity >= maxQtyPerOrder) { %>
+                <small style="color: #856404; font-size: 0.8rem;">
+                  <i class="fas fa-info-circle"></i> Maximum <%= maxQtyPerOrder %> items per order
+                </small>
+              <% } %>
             </div>
 
             <!-- Item Actions -->
@@ -442,10 +550,18 @@
               <div class="item-total">
                 ₹<%= ((item.variant?.salePrice || item.price) * item.quantity).toLocaleString() %>
               </div>
-              <button class="remove-button" 
-                      onclick="removeFromCart('<%= item.productId._id %>', '<%= item.variant.size %>')">
-                <i class="fas fa-trash"></i> Remove
-              </button>
+              <div class="action-buttons">
+                <% if (isOutOfStock) { %>
+                  <button class="wishlist-button" 
+                          onclick="moveToWishlist('<%= item.productId._id %>', '<%= item.variant.size %>')">
+                    <i class="fas fa-heart"></i> Wishlist
+                  </button>
+                <% } %>
+                <button class="remove-button" 
+                        onclick="removeFromCart('<%= item.productId._id %>', '<%= item.variant.size %>')">
+                  <i class="fas fa-trash"></i> Remove
+                </button>
+              </div>
             </div>
           </div>
         <% }); %>
@@ -454,6 +570,13 @@
       <!-- Cart Summary -->
       <div class="cart-summary">
         <h3>Cart Total</h3>
+        
+        <% if (outOfStockCount > 0) { %>
+          <div class="out-of-stock-notice">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong><%= outOfStockCount %></strong> product<%= outOfStockCount > 1 ? 's are' : ' is' %> out of stock
+          </div>
+        <% } %>
         
         <div class="summary-row">
           <span class="summary-label">Subtotal:</span>
@@ -470,7 +593,7 @@
           <span class="summary-value">₹<%= totalPrice.toLocaleString() %></span>
         </div>
 
-        <button id="checkout-button" class="checkout-button" onclick="proceedToCheckout()">
+        <button id="checkout-button" href="/checkout" class="checkout-button" onclick="proceedToCheckout()">
           Proceed to checkout
         </button>
       </div>
@@ -481,7 +604,7 @@
       <i class="fas fa-shopping-cart"></i>
       <h2>Your Cart is Empty</h2>
       <p>Add some amazing products to your cart!</p>
-      <a href="/shop" class="shop-button">
+      <a href="/shopPage" class="shop-button">
         Start Shopping
       </a>
     </div>
@@ -490,15 +613,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+  const MAX_QTY_PER_ORDER = 5;
+
   // Quantity change
-  function changeQuantity(productId, variantSize, change, stock) {
+  function changeQuantity(productId, variantSize, change, maxAvailable, currentQty) {
     const input = document.getElementById(`qty-${productId}-${variantSize}`);
+    const plusBtn = document.getElementById(`plus-btn-${productId}-${variantSize}`);
+    const minusBtn = document.getElementById(`minus-btn-${productId}-${variantSize}`);
+    
     if (!input) return;
+    
     let newQty = parseInt(input.value) + change;
 
+    // Check minimum quantity
     if (newQty < 1) {
       Swal.fire({
-        icon: 'error',
+        icon: 'warning',
         title: 'Minimum Quantity',
         text: 'Quantity cannot be less than 1.',
         confirmButtonColor: '#dc3545'
@@ -506,23 +636,45 @@
       return;
     }
 
-    if (newQty > stock) {
+    // Check maximum quantity
+    if (newQty > maxAvailable) {
+      const limitType = maxAvailable === MAX_QTY_PER_ORDER ? 'order limit (max 5 per order)' : 'available stock';
       Swal.fire({
-        icon: 'error',
-        title: 'Stock Limit',
-        text: 'Cannot add more than available stock.',
+        icon: 'warning',
+        title: 'Quantity Limit Reached',
+        text: `Cannot add more than ${maxAvailable} items due to ${limitType}.`,
         confirmButtonColor: '#dc3545'
       });
       return;
     }
 
+    // Update input value
     input.value = newQty;
+    
+    // Disable/enable buttons based on new quantity
+    if (minusBtn) {
+      minusBtn.disabled = newQty <= 1;
+    }
+    if (plusBtn) {
+      plusBtn.disabled = newQty >= maxAvailable;
+    }
+    
+    // Update cart
     updateCart(productId, variantSize);
   }
 
   // Update Cart
   function updateCart(productId, variantSize) {
     const quantity = parseInt(document.getElementById(`qty-${productId}-${variantSize}`).value);
+    
+    Swal.fire({
+      title: 'Updating...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     fetch('/cart/update', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -531,7 +683,15 @@
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        location.reload();
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated',
+          text: 'Cart updated successfully',
+          timer: 1000,
+          showConfirmButton: false
+        }).then(() => {
+          location.reload();
+        });
       } else {
         Swal.fire({
           icon: 'error',
@@ -555,8 +715,8 @@
   // Remove from Cart
   function removeFromCart(productId, variantSize) {
     Swal.fire({
-      title: 'Remove from Cart?',
-      text: 'Are you sure you want to remove this item?',
+      title: 'Remove Item?',
+      text: 'Are you sure you want to remove this item from cart?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#dc3545',
@@ -575,7 +735,7 @@
             Swal.fire({
               icon: 'success',
               title: 'Removed',
-              text: 'Item removed from cart successfully.',
+              text: 'Item removed from cart',
               timer: 1500,
               showConfirmButton: false
             }).then(() => {
@@ -603,29 +763,89 @@
     });
   }
 
+  // Move to Wishlist
+  function moveToWishlist(productId, variantSize) {
+    Swal.fire({
+      title: 'Move to Wishlist?',
+      text: 'This item is out of stock. Would you like to save it to your wishlist?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#007bff',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Move to Wishlist',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // First add to wishlist
+        fetch('/wishlist/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Then remove from cart
+            return fetch(`/cart/remove/${productId}?variantSize=${variantSize}`, {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' }
+            });
+          } else {
+            throw new Error(data.message || 'Failed to add to wishlist');
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Moved to Wishlist',
+              text: 'Item moved to your wishlist successfully',
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => {
+              location.reload();
+            });
+          }
+        })
+        .catch(err => {
+          console.error('Move to wishlist error:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.message || 'Failed to move to wishlist',
+            confirmButtonColor: '#dc3545'
+          });
+        });
+      }
+    });
+  }
+
   // Proceed to Checkout
   function proceedToCheckout() {
-    const outOfStockItems = document.querySelectorAll('.out-of-stock');
+    const outOfStockItems = document.querySelectorAll('.cart-item[data-out-of-stock="true"]');
+    
     if (outOfStockItems.length > 0) {
       Swal.fire({
         icon: 'error',
-        title: 'Out of Stock',
-        text: 'Cannot proceed to checkout with out-of-stock products.',
-        confirmButtonColor: '#dc3545'
+        title: 'Cannot Proceed',
+        html: `<strong>${outOfStockItems.length}</strong> product${outOfStockItems.length > 1 ? 's are' : ' is'} out of stock.<br><br>Please remove out of stock items or move them to wishlist before proceeding to checkout.`,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Got it'
       });
       return;
     }
+    
     window.location.href = '/checkout';
   }
 
-  // Disable checkout button if out-of-stock items exist
+  // Page load checks
   document.addEventListener('DOMContentLoaded', () => {
-    const outOfStockItems = document.querySelectorAll('.out-of-stock');
-    if (outOfStockItems.length > 0) {
-      const checkoutButton = document.getElementById('checkout-button');
-      checkoutButton.disabled = true;
-      checkoutButton.style.opacity = '0.5';
-      checkoutButton.style.cursor = 'not-allowed';
+    const outOfStockItems = document.querySelectorAll('.cart-item[data-out-of-stock="true"]');
+    const checkoutButton = document.getElementById('checkout-button');
+    
+    if (outOfStockItems.length > 0 && checkoutButton) {
+      checkoutButton.style.opacity = '0.7';
     }
   });
 </script>

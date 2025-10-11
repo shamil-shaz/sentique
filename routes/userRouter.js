@@ -120,6 +120,7 @@ const profileController = require("../controllers/user/profileController");
 const addressController=require('../controllers/user/addressController')
 const wishlistController=require('../controllers/user/whishlistController')
 const cartController=require('../controllers/user/cartController')
+const checkoutController=require('../controllers/user/checkoutController')
 
 const multer = require("multer");
 
@@ -226,7 +227,6 @@ router.post("/profile/resend-otp", userAuth, profileController.resendProfileOtp)
 
 
 
-
 router.get('/profile-edit', userAuth, profileController.loadEditProfile);
 router.post("/update-profile", userAuth, upload.single("image"), profileController.updateProfile);
 
@@ -250,12 +250,18 @@ router.post("/wishlist/move-all-to-cart", userAuth, wishlistController.moveAllTo
 //// cart
 
  router.get('/cart',userAuth,cartController.getCartPage)
-
 router.post('/cart/add',userAuth, cartController.addToCart);
 router.delete('/cart/remove/:productId',userAuth, cartController.removeFromCart);
 router.put('/cart/update', userAuth, cartController.updateCart);
 
 
+//// checkout
+
+
+ router.get('/checkout',userAuth,checkoutController.getCheckoutPage)
+router.delete('/cart/remove/:id', checkoutController.removeCartItem);
+// router.post('/addresses/add', userAuth,checkoutController.addAddress);
+// router.delete('/addresses/delete/:id', userAuth,checkoutController.deleteAddress);
 
 
 

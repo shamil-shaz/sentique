@@ -38,13 +38,18 @@
 
 //  module.exports=Cart;
 
+
+
+
+
+
 const mongoose = require("mongoose");
 
 const cartItemSchema = new mongoose.Schema({
   productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
-  variantSize: { type: Number, required: true }, // e.g. 50 or 100 ml
+  variantSize: { type: Number, required: true }, 
   quantity: { type: Number, required: true, min: 1 },
-  price: { type: Number, required: true }, // sale price
+  price: { type: Number, required: true }, 
 });
 
 const cartSchema = new mongoose.Schema({

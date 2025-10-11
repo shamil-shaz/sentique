@@ -283,44 +283,132 @@ textarea {
   min-height: 80px;
 }
 
-.variants-container {
+/* Variants Display */
+.variants-display {
   background: #f8fafc;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-}
-
-.variant-row { 
-  display: grid;
-  grid-template-columns: repeat(4, 1fr) auto;
-  gap: 12px; 
-  margin-bottom: 12px;
-  align-items: start;
-  background: white;
-  padding: 16px;
   border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+  min-height: 150px;
   border: 1px solid #e2e8f0;
 }
 
-.variant-row input {
-  padding: 10px 12px;
+.variant-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
 }
 
-.remove-variant-btn {
-  padding: 10px 16px;
-  background: #fc8181;
+.variant-empty-state i {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.variant-empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.variant-card {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.variant-card:hover {
+  border-color: #4299e1;
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.1);
+}
+
+.variant-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.variant-size-badge {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
   color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 13px;
-  transition: all 0.2s;
-  white-space: nowrap;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.remove-variant-btn:hover {
-  background: #f56565;
+.variant-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-variant-edit, .btn-variant-delete {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-variant-edit {
+  background: #8b5cf6;
+  color: white;
+}
+
+.btn-variant-edit:hover {
+  background: #7c3aed;
+  transform: translateY(-1px);
+}
+
+.btn-variant-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-variant-delete:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.variant-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.variant-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.variant-detail-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.variant-detail-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .add-variant-btn {
@@ -337,7 +425,6 @@ textarea {
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  margin-top: 12px;
   transition: all 0.2s;
 }
 
@@ -392,6 +479,7 @@ textarea {
   border-color: #cbd5e0;
 }
 
+/* Cropper Modal */
 #cropper-modal { 
   display: none; 
   position: fixed; 
@@ -406,7 +494,7 @@ textarea {
   backdrop-filter: blur(4px);
 }
 
-.modal-content { 
+#cropper-modal .modal-content { 
   background: #fff; 
   padding: 30px; 
   border-radius: 16px; 
@@ -416,14 +504,14 @@ textarea {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
-.modal-content h3 {
+#cropper-modal .modal-content h3 {
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 20px;
   color: #1a202c;
 }
 
-.modal-content img { 
+#cropper-modal .modal-content img { 
   max-width: 100%; 
   margin-bottom: 20px;
   border-radius: 8px;
@@ -440,6 +528,187 @@ textarea {
   padding: 12px 24px;
   font-size: 15px;
   font-weight: 600;
+}
+
+/* Variant Modal */
+.variant-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.variant-modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 550px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.variant-modal-header {
+  padding: 24px;
+  border-bottom: 2px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 16px 16px 0 0;
+}
+
+.variant-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.variant-modal-header h3 i {
+  color: #4299e1;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #64748b;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.variant-modal-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-form-group {
+  margin-bottom: 20px;
+}
+
+.modal-form-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-form-group label i {
+  color: #4299e1;
+  font-size: 16px;
+}
+
+.modal-form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.modal-form-group input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.input-hint {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.variant-modal-footer {
+  padding: 20px 24px;
+  border-top: 2px solid #e2e8f0;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  background: #f8fafc;
+  border-radius: 0 0 16px 16px;
+}
+
+.btn-modal-cancel,
+.btn-modal-save {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-modal-cancel {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.btn-modal-cancel:hover {
+  background: #cbd5e1;
+}
+
+.btn-modal-save {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.btn-modal-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
 }
 
 @media (max-width: 1024px) {
@@ -475,17 +744,20 @@ textarea {
     grid-template-columns: 1fr 1fr;
   }
   
-  .variant-row {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  
   .button-row { 
     flex-direction: column; 
   }
   
   .page-header h2 {
     font-size: 24px;
+  }
+  
+  .variant-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .variant-modal-content {
+    width: 95%;
   }
 }
 
@@ -601,24 +873,27 @@ input::placeholder, textarea::placeholder {
 
           <div class="form-section">
             <div class="section-title">Product Variants (At least 1 required)</div>
-            <div class="variants-container">
-              <div id="variants-wrapper">
-                <div class="variant-row">
-                  <input type="number" name="variantSize[]" placeholder="Size (ml)" min="0"/>
-                  <input type="number" name="variantStock[]" placeholder="Stock" min="0"/>
-                  <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" min="0"/>
-                  <input type="number" name="variantSalePrice[]" placeholder="Sale Price" min="0"/>
-                  <button type="button" class="remove-variant-btn" onclick="removeVariantRow(this)">Remove</button>
-                </div>
+            
+            <!-- Variants Display List -->
+            <div class="variants-display" id="variantsDisplay">
+              <div class="variant-empty-state" id="emptyState">
+                <i class="fas fa-box-open"></i>
+                <p>No variants added yet. Click "Add Variant" to get started.</p>
               </div>
-              <button type="button" class="add-variant-btn" onclick="addVariantRow()">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add Variant
-              </button>
             </div>
+
+            <!-- Add Variant Button -->
+            <button type="button" class="add-variant-btn" onclick="openVariantModal()">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Add Variant
+            </button>
+            
             <p class="error-message" id="variant-error"></p>
+            
+            <!-- Hidden inputs for form submission -->
+            <div id="hiddenVariantsContainer"></div>
           </div>
 
           <div class="button-row">
@@ -636,6 +911,7 @@ input::placeholder, textarea::placeholder {
   </div>
 </div>
 
+<!-- Cropper Modal -->
 <div id="cropper-modal">
   <div class="modal-content">
     <h3>Crop Image</h3>
@@ -647,13 +923,78 @@ input::placeholder, textarea::placeholder {
   </div>
 </div>
 
+<!-- Variant Modal -->
+<div class="variant-modal" id="variantModal">
+  <div class="variant-modal-content">
+    <div class="variant-modal-header">
+      <h3><i class="fas fa-cubes"></i> <span id="modalTitle">Add Product Variant</span></h3>
+      <button type="button" class="modal-close-btn" onclick="closeVariantModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="variant-modal-body">
+      <div class="modal-form-group">
+        <label for="modalSize">
+          <i class="fas fa-ruler"></i> Size (ml)
+          <span class="required">*</span>
+        </label>
+        <input type="number" id="modalSize" placeholder="Enter size in ml (e.g., 50, 100)" min="1" />
+        <small class="input-hint">Product size in milliliters</small>
+      </div>
+
+      <div class="modal-form-group">
+        <label for="modalStock">
+          <i class="fas fa-warehouse"></i> Stock Quantity
+          <span class="required">*</span>
+        </label>
+        <input type="number" id="modalStock" placeholder="Enter available stock" min="0" />
+        <small class="input-hint">Number of units available</small>
+      </div>
+
+      <div class="modal-form-group">
+        <label for="modalRegularPrice">
+          <i class="fas fa-tag"></i> Regular Price (₹)
+          <span class="required">*</span>
+        </label>
+        <input type="number" id="modalRegularPrice" placeholder="Enter regular price" min="0" step="0.01" />
+        <small class="input-hint">Original selling price</small>
+      </div>
+
+      <div class="modal-form-group">
+        <label for="modalSalePrice">
+          <i class="fas fa-tags"></i> Sale Price (₹)
+          <span class="required">*</span>
+        </label>
+        <input type="number" id="modalSalePrice" placeholder="Enter sale price" min="0" step="0.01" />
+        <small class="input-hint">Discounted price (must be ≤ regular price)</small>
+      </div>
+    </div>
+    
+    <div class="variant-modal-footer">
+      <button type="button" class="btn-modal-cancel" onclick="closeVariantModal()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      <button type="button" class="btn-modal-save" onclick="saveVariant()">
+        <i class="fas fa-check"></i> <span id="saveButtonText">Add Variant</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
+// Image Cropper Variables
 let cropper, currentImageIndex = null;
 const modal = document.getElementById('cropper-modal');
 const cropperImage = document.getElementById('cropper-image');
 const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
 
+// Variant Variables
+let variants = [];
+let editingIndex = null;
+
+// Flash Messages
 <% if (locals.flash && locals.flash.error && locals.flash.error.length > 0) { %>
   Swal.fire({
     icon: 'error',
@@ -672,6 +1013,8 @@ const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
     confirmButtonText: 'OK'
   });
 <% } %>
+
+// ==================== IMAGE HANDLING ====================
 
 document.querySelectorAll('.product-image-input').forEach(input => {
   input.addEventListener('change', function() {
@@ -777,33 +1120,186 @@ function resetImage(index) {
   document.getElementById(`image-box-${index}`).classList.remove('has-image');
 }
 
-function addVariantRow() {
-  const wrapper = document.getElementById('variants-wrapper');
-  const row = document.createElement('div');
-  row.className = 'variant-row';
-  row.innerHTML = `
-    <input type="number" name="variantSize[]" placeholder="Size (ml)" min="0"/>
-    <input type="number" name="variantStock[]" placeholder="Stock" min="0"/>
-    <input type="number" name="variantRegularPrice[]" placeholder="Regular Price" min="0"/>
-    <input type="number" name="variantSalePrice[]" placeholder="Sale Price" min="0"/>
-    <button type="button" class="remove-variant-btn" onclick="removeVariantRow(this)">Remove</button>
-  `;
-  wrapper.appendChild(row);
+// ==================== VARIANT MODAL HANDLING ====================
+
+function openVariantModal(index = null) {
+  editingIndex = index;
+  const variantModalElement = document.getElementById('variantModal');
+  
+  if (index !== null) {
+    // Edit mode
+    const variant = variants[index];
+    document.getElementById('modalTitle').textContent = 'Edit Product Variant';
+    document.getElementById('saveButtonText').textContent = 'Update Variant';
+    document.getElementById('modalSize').value = variant.size;
+    document.getElementById('modalStock').value = variant.stock;
+    document.getElementById('modalRegularPrice').value = variant.regularPrice;
+    document.getElementById('modalSalePrice').value = variant.salePrice;
+  } else {
+    // Add mode
+    document.getElementById('modalTitle').textContent = 'Add Product Variant';
+    document.getElementById('saveButtonText').textContent = 'Add Variant';
+    document.getElementById('modalSize').value = '';
+    document.getElementById('modalStock').value = '';
+    document.getElementById('modalRegularPrice').value = '';
+    document.getElementById('modalSalePrice').value = '';
+  }
+  
+  variantModalElement.style.display = 'block';
+  setTimeout(() => document.getElementById('modalSize').focus(), 100);
 }
 
-function removeVariantRow(btn) {
-  const wrapper = document.getElementById('variants-wrapper');
-  if (wrapper.children.length > 1) {
-    btn.parentElement.remove();
-  } else {
-    Swal.fire({
-      icon: 'error',
-      title: 'Cannot Remove',
-      text: 'At least one variant is required',
-      confirmButtonColor: '#dc3545'
-    });
-  }
+function closeVariantModal() {
+  document.getElementById('variantModal').style.display = 'none';
+  editingIndex = null;
 }
+
+function saveVariant() {
+  const size = parseFloat(document.getElementById('modalSize').value);
+  const stock = parseInt(document.getElementById('modalStock').value);
+  const regularPrice = parseFloat(document.getElementById('modalRegularPrice').value);
+  const salePrice = parseFloat(document.getElementById('modalSalePrice').value);
+  
+  // Validation
+  if (!size || size <= 0) {
+    Swal.fire({ icon: 'error', title: 'Invalid Size', text: 'Size must be greater than 0', confirmButtonColor: '#ef4444' });
+    return;
+  }
+  
+  if (isNaN(stock) || stock < 0) {
+    Swal.fire({ icon: 'error', title: 'Invalid Stock', text: 'Stock cannot be negative', confirmButtonColor: '#ef4444' });
+    return;
+  }
+  
+  if (!regularPrice || regularPrice <= 0) {
+    Swal.fire({ icon: 'error', title: 'Invalid Regular Price', text: 'Regular price must be greater than 0', confirmButtonColor: '#ef4444' });
+    return;
+  }
+  
+  if (isNaN(salePrice) || salePrice < 0) {
+    Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price cannot be negative', confirmButtonColor: '#ef4444' });
+    return;
+  }
+  
+  if (salePrice > regularPrice) {
+    Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price must be less than or equal to regular price', confirmButtonColor: '#ef4444' });
+    return;
+  }
+  
+  const variant = { size, stock, regularPrice, salePrice };
+  
+  if (editingIndex !== null) {
+    // Update existing variant
+    variants[editingIndex] = variant;
+    Swal.fire({ icon: 'success', title: 'Variant Updated!', timer: 1500, showConfirmButton: false });
+  } else {
+    // Add new variant
+    variants.push(variant);
+    Swal.fire({ icon: 'success', title: 'Variant Added!', timer: 1500, showConfirmButton: false });
+  }
+  
+  renderVariants();
+  closeVariantModal();
+}
+
+function deleteVariant(index) {
+  Swal.fire({
+    title: 'Delete Variant?',
+    text: 'This action cannot be undone',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, Delete',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      variants.splice(index, 1);
+      renderVariants();
+      Swal.fire({ icon: 'success', title: 'Variant Deleted!', timer: 1500, showConfirmButton: false });
+    }
+  });
+}
+
+function renderVariants() {
+  const display = document.getElementById('variantsDisplay');
+  const emptyState = document.getElementById('emptyState');
+  const hiddenContainer = document.getElementById('hiddenVariantsContainer');
+  
+  // Clear hidden inputs
+  hiddenContainer.innerHTML = '';
+  
+  if (variants.length === 0) {
+    emptyState.style.display = 'block';
+    display.querySelectorAll('.variant-card').forEach(card => card.remove());
+    return;
+  }
+  
+  emptyState.style.display = 'none';
+  display.querySelectorAll('.variant-card').forEach(card => card.remove());
+  
+  variants.forEach((variant, index) => {
+    // Create visible card
+    const card = document.createElement('div');
+    card.className = 'variant-card';
+    card.innerHTML = `
+      <div class="variant-card-header">
+        <span class="variant-size-badge">
+          <i class="fas fa-box"></i> ${variant.size} ML
+        </span>
+        <div class="variant-actions">
+          <button type="button" class="btn-variant-edit" onclick="openVariantModal(${index})">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button type="button" class="btn-variant-delete" onclick="deleteVariant(${index})">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+      <div class="variant-details">
+        <div class="variant-detail-item">
+          <span class="variant-detail-label"><i class="fas fa-warehouse"></i> Stock</span>
+          <span class="variant-detail-value">${variant.stock} Units</span>
+        </div>
+        <div class="variant-detail-item">
+          <span class="variant-detail-label"><i class="fas fa-tag"></i> Regular Price</span>
+          <span class="variant-detail-value">₹${variant.regularPrice.toFixed(2)}</span>
+        </div>
+        <div class="variant-detail-item">
+          <span class="variant-detail-label"><i class="fas fa-tags"></i> Sale Price</span>
+          <span class="variant-detail-value" style="color: #48bb78;">₹${variant.salePrice.toFixed(2)}</span>
+        </div>
+      </div>
+    `;
+    display.appendChild(card);
+    
+    // Create hidden inputs for form submission
+    hiddenContainer.innerHTML += `
+      <input type="hidden" name="variantSize[]" value="${variant.size}">
+      <input type="hidden" name="variantStock[]" value="${variant.stock}">
+      <input type="hidden" name="variantRegularPrice[]" value="${variant.regularPrice}">
+      <input type="hidden" name="variantSalePrice[]" value="${variant.salePrice}">
+    `;
+  });
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+  const variantModalElement = document.getElementById('variantModal');
+  if (event.target === variantModalElement) {
+    closeVariantModal();
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeVariantModal();
+    closeModal();
+  }
+});
+
+// ==================== FORM VALIDATION ====================
 
 function showError(id, msg) {
   const element = document.getElementById(id);
@@ -822,6 +1318,7 @@ function validateForm() {
   clearErrors();
   let valid = true;
 
+  // Image validation
   let imageCount = 0;
   for (let i = 1; i <= 4; i++) {
     if (document.getElementById(`cropped-image${i}`).value) {
@@ -837,6 +1334,7 @@ function validateForm() {
     valid = false;
   }
 
+  // Basic info validation
   const name = document.getElementsByName('productName')[0];
   const desc = document.getElementsByName('description')[0];
   const longDesc = document.getElementsByName('longDescription')[0];
@@ -873,51 +1371,16 @@ function validateForm() {
     valid = false;
   }
 
-  const variantSizes = document.getElementsByName('variantSize[]');
-  const variantStocks = document.getElementsByName('variantStock[]');
-  const variantRegularPrices = document.getElementsByName('variantRegularPrice[]');
-  const variantSalePrices = document.getElementsByName('variantSalePrice[]');
-
-  if (variantSizes.length < 1) {
+  // Variant validation
+  if (variants.length < 1) {
     showError('variant-error', 'At least one variant is required');
     valid = false;
   }
 
-  for (let i = 0; i < variantSizes.length; i++) {
-    if (!variantSizes[i].value || !variantStocks[i].value || !variantRegularPrices[i].value || !variantSalePrices[i].value) {
-      showError('variant-error', 'All variant fields are required');
-      valid = false;
-      break;
-    }
-    if (Number(variantSizes[i].value) <= 0) {
-      showError('variant-error', 'Size must be positive');
-      valid = false;
-      break;
-    }
-    if (Number(variantStocks[i].value) < 0) {
-      showError('variant-error', 'Stock cannot be negative');
-      valid = false;
-      break;
-    }
-    if (Number(variantRegularPrices[i].value) <= 0) {
-      showError('variant-error', 'Regular price must be positive');
-      valid = false;
-      break;
-    }
-    if (Number(variantSalePrices[i].value) < 0) {
-      showError('variant-error', 'Sale price cannot be negative');
-      valid = false;
-      break;
-    }
-    if (Number(variantSalePrices[i].value) > Number(variantRegularPrices[i].value)) {
-      showError('variant-error', 'Sale price must be ≤ regular price');
-      valid = false;
-      break;
-    }
-  }
-
   return valid;
 }
+
+// ==================== FORM SUBMISSION ====================
 
 document.getElementById('addProductForm').addEventListener('submit', async function(event) {
   event.preventDefault();
@@ -970,5 +1433,10 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
       confirmButtonColor: '#dc3545'
     });
   }
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  renderVariants();
 });
 </script>

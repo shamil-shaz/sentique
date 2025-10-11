@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Cart = require('../../models/cartSchema');
 const Product = require('../../models/productSchema');
 
+
+
 const getCartPage = async (req, res) => {
   try {
     const userId = req.session.user?.id;
@@ -18,30 +20,61 @@ const getCartPage = async (req, res) => {
     }
 
     let totalPrice = 0;
+    let outOfStockCount = 0;
+    
     const cartItems = cart.items.map((item) => {
       const product = item.productId;
+      
+   
       const variant = product.variants.find(v => v.size === item.variantSize);
+      
+   
+      const variantStock = variant ? variant.stock : 0;
+      const productStock = product.stock || 0;
+      
+   
+      const actualStock = variantStock !== undefined ? variantStock : productStock;
+      
       const salePrice = variant ? (variant.salePrice || variant.regularPrice) : item.price;
       const regularPrice = variant ? variant.regularPrice : null;
 
       const itemTotal = salePrice * item.quantity;
-      totalPrice += itemTotal;
+      
+   
+      if (actualStock > 0) {
+        totalPrice += itemTotal;
+      } else {
+        outOfStockCount++;
+      }
 
       return {
-        productId: product,
-        variant: variant || {}, // Fallback empty if variant not found
+        productId: {
+          ...product.toObject(),
+          stock: actualStock  
+        },
+        variant: variant ? {
+          size: variant.size,
+          salePrice: variant.salePrice,
+          regularPrice: variant.regularPrice,
+          stock: variantStock
+        } : {},
         quantity: item.quantity,
         price: item.price,
         itemTotal,
       };
     });
 
-    res.render("cart", { cartItems, totalPrice });
+    res.render("cart", { 
+      cartItems, 
+      totalPrice,
+      outOfStockCount 
+    });
   } catch (err) {
-    console.error(err);
+    console.error('Cart page error:', err);
     res.redirect("/pageNotFound");
   }
 };
+
 
 const addToCart = async (req, res) => {
     try {
@@ -86,7 +119,7 @@ const addToCart = async (req, res) => {
             cart = new Cart({ userId, items: [] });
         }
 
-        // Clean invalid items
+       
         cart.items = cart.items.filter(item => item.variantSize != null && item.price != null);
 
         const existingItem = cart.items.find(
@@ -198,7 +231,7 @@ const updateCart = async (req, res) => {
     const variant = product.variants.find(v => v.size === varSize);
     let stock = product.stock;
     if (variant && variant.stock !== undefined) {
-      stock = variant.stock; // Optional: if stock per variant
+      stock = variant.stock; 
     }
     if (stock < quantity) {
       return res.json({ success: false, message: `Only ${stock} items in stock` });
@@ -215,4 +248,11 @@ const updateCart = async (req, res) => {
   }
 };
 
-module.exports = { getCartPage, addToCart, removeFromCart, updateCart };
+module.exports = {
+    getCartPage, 
+    addToCart,
+    removeFromCart,
+    updateCart
+
+    
+};
