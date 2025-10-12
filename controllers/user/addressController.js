@@ -277,6 +277,10 @@ const addAddress = async (req, res) => {
       isDefault: !!isDefault
     });
 
+    if (req.query.from === 'checkout') {
+      return res.redirect('/checkout');
+    }
+
     await userAddress.save();
     res.json({ success: true, message: "Address added successfully" });
   } catch (err) {
@@ -327,6 +331,10 @@ const editAddress = async (req, res) => {
             pincode,
             isDefault
         } = req.body;
+
+        if (req.query.from === 'checkout') {
+      return res.redirect('/checkout');
+    }
 
         if (!userId) return res.status(401).json({ success: false, message: "Please log in", redirect: '/login' });
         if (!id) return res.status(400).json({ success: false, message: "Address ID is required" });

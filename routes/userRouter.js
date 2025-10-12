@@ -121,6 +121,7 @@ const addressController=require('../controllers/user/addressController')
 const wishlistController=require('../controllers/user/whishlistController')
 const cartController=require('../controllers/user/cartController')
 const checkoutController=require('../controllers/user/checkoutController')
+const orderController=require('../controllers/user/orderController')
 
 const multer = require("multer");
 
@@ -235,6 +236,10 @@ router.get("/profile/address", userAuth, addressController.getAddresses);
 router.post("/addresses/add", userAuth, addressController.addAddress);
 router.get('/addresses/edit-address/:id', userAuth, addressController.getEditAddress);
 
+
+
+router.get('/profile/order-list',userAuth,orderController.getOrderList)
+
 // Update address
 router.post("/addresses/edit", userAuth, addressController.editAddress);
 router.delete("/addresses/delete/:id", userAuth, addressController.deleteAddress);
@@ -257,11 +262,17 @@ router.put('/cart/update', userAuth, cartController.updateCart);
 
 //// checkout
 
+router.get('/checkout', userAuth, checkoutController.getCheckoutPage);
+router.get('/addresses/addresses-edit/:id', userAuth, checkoutController.getAddressForEdit);
+router.post('/checkout/add-address', userAuth, checkoutController.addAddress);
+router.post('/checkout/edit-address/:id', userAuth, checkoutController.editAddress);
+router.post('/order/place', userAuth, checkoutController.placeOrder);
 
- router.get('/checkout',userAuth,checkoutController.getCheckoutPage)
-router.delete('/cart/remove/:id', checkoutController.removeCartItem);
-// router.post('/addresses/add', userAuth,checkoutController.addAddress);
-// router.delete('/addresses/delete/:id', userAuth,checkoutController.deleteAddress);
+//// order
+
+router.get("/orderSuccess",userAuth,orderController.getOrderSuccess)
+
+router.get('/orderDetails/:orderId', userAuth, orderController.getOrderDetails);
 
 
 
