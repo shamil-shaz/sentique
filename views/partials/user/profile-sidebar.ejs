@@ -29,7 +29,7 @@
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #141a31 0%, #18342f 100%);
     margin: 0 auto 15px;
     display: flex;
     align-items: center;
@@ -91,7 +91,7 @@
 }
 
 .menu-item.active {
-    background: linear-gradient(135deg, #5c5c5c 0%, #3b3a3a 100%);
+     background: linear-gradient(135deg, #183043 0%, #10262c 100%);
     color: white;
 }
 
@@ -165,14 +165,15 @@
   <div class="sidebar-left">
     <div class="profile-avatar-container">
       <div class="profile-avatar">
-  <% if (user.image) { %>
-    <img src="<%= user.image %>" alt="Profile Picture">
-  <% } else { %>
-    <img src="/images/default-profile.png" alt="Default Picture">
-  <% } %>
-</div>
+        <% if (user && user.image) { %>
+          <img src="<%= user.image %>" alt="Profile Picture" />
+        <% } else { %>
+          <img src="/images/default-profile.png" alt="Default Picture" />
+        <% } %>
+      </div>
     </div>
-    <div class="profile-name"><%= user.name %></div>
+    <div class="profile-name"><%= user && user.name ? user.name : 'Guest' %></div>
+
   </div>
 
   <div class="sidebar-menu">

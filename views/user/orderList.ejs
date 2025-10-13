@@ -904,86 +904,94 @@
 
             <!-- Orders List -->
             <div class="orders-list" id="ordersList">
-                <% if (orders && orders.length > 0) { %>
-                    <% orders.forEach(order => { %>
-                        <div class="order-card" 
-                             data-status="<%= order.status %>" 
-                             data-date="<%= order.date %>" 
-                             data-price="<%= order.total %>"
-                             data-product="<%= order.productName.toLowerCase() %>">
-                            <div class="order-header">
-                                <div class="order-info-item">
-                                    <span class="order-info-label">Order Placed</span>
-                                    <span class="order-info-value"><%= new Date(order.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
-                                </div>
-                                <div class="order-info-item">
-                                    <span class="order-info-label">Total</span>
-                                    <span class="order-info-value">₹<%= order.total.toLocaleString() %></span>
-                                </div>
-                                <div class="order-info-item">
-                                    <span class="order-info-label">Ship To</span>
-                                    <span class="order-info-value"><%= order.shipTo %></span>
-                                </div>
-                                <div class="order-info-item">
-                                    <span class="order-info-label">Order ID</span>
-                                    <span class="order-info-value order-id">#<%= order.orderId %></span>
-                                </div>
-                                <div class="order-info-item">
-                                    <a href="/orders/<%= order.orderId %>" class="view-details-btn">View Details</a>
-                                </div>
-                            </div>
-                            <div class="order-body">
-                                <div class="product-image-wrapper">
-                                    <img src="<%= order.productImage %>" alt="<%= order.productName %>" class="product-image">
-                                    <% if (order.isNew) { %>
-                                        <span class="product-badge">New</span>
-                                    <% } %>
-                                </div>
-                                <div class="product-details">
-                                    <h3 class="product-name"><%= order.productName %></h3>
-                                    <p class="product-variant"><%= order.productVariant %></p>
-                                    <div class="product-price">₹<%= order.total.toLocaleString() %></div>
-                                    <div class="product-meta">
-                                        <% if (order.returnEligible) { %>
-                                            <span class="return-eligible">Return eligible through <%= new Date(order.returnDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
-                                        <% } %>
-                                        <% if (order.quantity > 1) { %>
-                                            <span class="quantity-badge">Qty: <%= order.quantity %></span>
-                                        <% } %>
-                                    </div>
-                                </div>
-                                <div class="order-actions">
-                                    <span class="status-badge status-<%= order.status %>">
-                                        <%= order.status.toUpperCase() %>
-                                    </span>
-                                    <div class="action-buttons">
-                                        <% if (order.status === 'processing') { %>
-                                            <button class="btn btn-cancel" onclick="cancelOrder('<%= order.orderId %>')">Cancel Order</button>
-                                            <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-primary">Invoice</a>
-                                        <% } else if (order.status === 'delivered') { %>
-                                            <button class="btn btn-secondary" onclick="returnOrder('<%= order.orderId %>')">Return</button>
-                                            <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-primary">Invoice</a>
-                                        <% } else if (order.status === 'shipped') { %>
-                                            <button class="btn btn-primary" onclick="trackOrder('<%= order.orderId %>')">Track Order</button>
-                                            <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-secondary">Invoice</a>
-                                        <% } else if (order.status === 'cancelled') { %>
-                                            <button class="btn btn-primary" onclick="reorder('<%= order.orderId %>')">Reorder</button>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <% }); %>
-                <% } else { %>
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📦</div>
-                        <h3 class="empty-state-title">No Orders Yet</h3>
-                        <p class="empty-state-text">Looks like you haven't placed any orders. Start shopping now!</p>
-                        <a href="/shop" class="btn btn-primary">Start Shopping</a>
-                    </div>
-                <% } %>
-            </div>
+  <% if (orders && orders.length > 0) { %>
+    <% orders.forEach(order => { %>
+      <div class="order-card" 
+           data-status="<%= order.status %>" 
+           data-date="<%= order.date %>" 
+           data-price="<%= order.total %>"
+           data-product="<%= order.productName.toLowerCase() %>">
+        <div class="order-header">
+          <div class="order-info-item">
+            <span class="order-info-label">Order Placed</span>
+            <span class="order-info-value"><%= new Date(order.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+          </div>
+          <div class="order-info-item">
+            <span class="order-info-label">Total</span>
+            <span class="order-info-value">₹<%= order.total.toLocaleString() %></span>
+          </div>
+          <div class="order-info-item">
+            <span class="order-info-label">Ship To</span>
+            <span class="order-info-value"><%= order.shipTo %></span>
+          </div>
+          <div class="order-info-item">
+            <span class="order-info-label">Order ID</span>
+            <span class="order-info-value order-id">#<%= order.orderId %></span>
+          </div>
+          <div class="order-info-item">
+            <a href="/orderDetails/<%= order.orderId %>" class="view-details-btn">View Details</a>
+
+          </div>
         </div>
+        <div class="order-body">
+          <div class="product-image-wrapper">
+            <img src="<%= order.product && order.product.images && order.product.images[0] 
+                          ? (order.product.images[0].startsWith('http') 
+                             ? order.product.images[0] 
+                             : `/uploads/product-images/${order.product.images[0]}`) 
+                          : 'https://via.placeholder.com/120x120?text=No+Image' %>" 
+                 alt="<%= order.productName || 'Unknown Product' %>" 
+                 class="product-image" 
+                 loading="lazy"
+                 onerror="this.src='https://via.placeholder.com/120x120?text=No+Image'" />
+            <% if (order.isNew) { %>
+              <span class="product-badge">New</span>
+            <% } %>
+          </div>
+          <div class="product-details">
+            <h3 class="product-name"><%= order.productName %></h3>
+            <p class="product-variant"><%= order.productVariant %></p>
+            <div class="product-price">₹<%= order.total.toLocaleString() %></div>
+            <div class="product-meta">
+              <% if (order.returnEligible) { %>
+                <span class="return-eligible">Return eligible through <%= new Date(order.returnDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+              <% } %>
+              <% if (order.quantity > 1) { %>
+                <span class="quantity-badge">Qty: <%= order.quantity %></span>
+              <% } %>
+            </div>
+          </div>
+          <div class="order-actions">
+            <span class="status-badge status-<%= order.status.toLowerCase() %>">
+              <%= order.status.toUpperCase() %>
+            </span>
+            <div class="action-buttons">
+              <% if (order.status === 'Processing') { %>
+                <button class="btn btn-cancel" onclick="cancelOrder('<%= order.orderId %>')">Cancel Order</button>
+                <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-primary">Invoice</a>
+              <% } else if (order.status === 'Delivered') { %>
+                <button class="btn btn-secondary" onclick="returnOrder('<%= order.orderId %>')">Return</button>
+                <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-primary">Invoice</a>
+              <% } else if (order.status === 'Shipped') { %>
+                <button class="btn btn-primary" onclick="trackOrder('<%= order.orderId %>')">Track Order</button>
+                <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-secondary">Invoice</a>
+              <% } else if (order.status === 'Cancelled') { %>
+                <button class="btn btn-primary" onclick="reorder('<%= order.orderId %>')">Reorder</button>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  <% } else { %>
+    <div class="empty-state">
+      <div class="empty-state-icon">📦</div>
+      <h3 class="empty-state-title">No Orders Yet</h3>
+      <p class="empty-state-text">Looks like you haven't placed any orders. Start shopping now!</p>
+      <a href="/shopPage" class="btn btn-primary">Start Shopping</a>
+    </div>
+  <% } %>
+</div>
 
         <!-- Loading Spinner -->
         <div class="loading-spinner" id="loadingSpinner">

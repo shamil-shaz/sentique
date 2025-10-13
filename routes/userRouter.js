@@ -274,6 +274,10 @@ router.get("/orderSuccess",userAuth,orderController.getOrderSuccess)
 
 router.get('/orderDetails/:orderId', userAuth, orderController.getOrderDetails);
 
+// Cancel entire order
+router.post('/orders/:orderId/cancel', userAuth, orderController.cancelAllOrder);
 
+// Cancel single item from order
+router.post('/orders/:orderId/items/:productName/cancel', userAuth, orderController.cancelSingleOrder);
 
 module.exports = router;

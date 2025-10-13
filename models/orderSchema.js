@@ -68,6 +68,100 @@
 
 
 
+// const mongoose = require('mongoose');
+// const { Schema } = mongoose;
+// const { v4: uuidv4 } = require('uuid');
+
+// const orderSchema = new Schema({
+//   orderId: {
+//     type: String,
+//     default: () => uuidv4(),
+//     unique: true,
+//     index: true,
+//   },
+//   user: {
+//     type: Schema.Types.ObjectId,
+//     ref: 'User',
+//     required: true,
+//   },
+//   orderItems: [
+//   {
+//     product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+//     productName: { type: String, required: true },
+//     variantSize: { type: String },
+//     quantity: { type: Number, required: true, min: 1 },
+//     price: { type: Number, required: true },
+//     total: { type: Number, required: true },
+//     status: { // 👈 add this field
+//       type: String,
+//       enum: ['Pending', 'Processing', 'Cancelled', 'Delivered', 'Returned'],
+//       default: 'Pending'
+//     }
+//   },
+// ],
+
+//   totalPrice: {
+//     type: Number,
+//     required: true,
+//     min: 0,
+//   },
+//   discount: {
+//     type: Number,
+//     default: 0,
+//     min: 0,
+//   },
+//   finalAmount: {
+//     type: Number,
+//     required: true,
+//     min: 0,
+//   },
+//   deliveryAddress: {
+//     name: { type: String, required: true },
+//     phone: { type: String, required: true },
+//     houseName: { type: String, required: true },
+//     buildingNumber: { type: String },
+//     landmark: { type: String },
+//     city: { type: String, required: true },
+//     state: { type: String, required: true },
+//     pincode: { type: String, required: true },
+//     addressType: { type: String, enum: ['Home', 'Work', 'Other'], required: true },
+//   },
+//   paymentMethod: {
+//     type: String,
+//     required: true,
+//     enum: ['COD', 'Online Payment', 'Wallet'],
+//   },
+//   paymentStatus: {
+//     type: String,
+//     required: true,
+//     enum: ['Pending', 'Completed', 'Failed', 'Refunded'],
+//     default: 'Pending',
+//   },
+//   createdOn: {
+//     type: Date,
+//     default: Date.now,
+//   },
+//   couponApplied: {
+//     type: Boolean,
+//     default: false,
+//   },
+//   couponCode: {
+//     type: String,
+//   },
+//   status: {
+//     type: String,
+//     required: true,
+//     enum: ['Pending', 'Processing', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+//     default: 'Pending',
+//   },
+// });
+
+// orderSchema.index({ user: 1, createdOn: -1 });
+
+// const Order = mongoose.model('Order', orderSchema);
+// module.exports = Order;
+
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const { v4: uuidv4 } = require('uuid');
@@ -86,30 +180,46 @@ const orderSchema = new Schema({
   },
   orderItems: [
     {
-      product: {
-        type: Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true,
+      product: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'Product', 
+        required: true 
       },
-      productName: {
+      productName: { 
+        type: String, 
+        required: true 
+      },
+      variantSize: { 
+        type: String 
+      },
+      quantity: { 
+        type: Number, 
+        required: true, 
+        min: 1 
+      },
+      price: { 
+        type: Number, 
+        required: true 
+      },
+      total: { 
+        type: Number, 
+        required: true 
+      },
+  
+      status: {
         type: String,
-        required: true,
+        enum: ['Active', 'Pending', 'Processing','shipped', 'Delivered','Cancelled', 'Returned'],
+        default: 'Active'
       },
-      variantSize: {
+    
+      cancelReason: {
         type: String,
       },
-      quantity: {
-        type: Number,
-        required: true,
-        min: 1,
+      cancelDetails: {
+        type: String,
       },
-      price: {
-        type: Number,
-        required: true,
-      },
-      total: {
-        type: Number,
-        required: true,
+      cancelledAt: {
+        type: Date,
       },
     },
   ],
@@ -137,7 +247,11 @@ const orderSchema = new Schema({
     city: { type: String, required: true },
     state: { type: String, required: true },
     pincode: { type: String, required: true },
-    addressType: { type: String, enum: ['Home', 'Work', 'Other'], required: true },
+    addressType: { 
+      type: String, 
+      enum: ['Home', 'Work', 'Other'], 
+      required: true 
+    },
   },
   paymentMethod: {
     type: String,
@@ -161,15 +275,29 @@ const orderSchema = new Schema({
   couponCode: {
     type: String,
   },
+  
   status: {
     type: String,
     required: true,
-    enum: ['Pending', 'Processing', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
     default: 'Pending',
+  },
+  
+  cancelReason: {
+    type: String,
+  },
+  cancelDetails: {
+    type: String,
+  },
+  cancelledAt: {
+    type: Date,
   },
 });
 
+
 orderSchema.index({ user: 1, createdOn: -1 });
+orderSchema.index({ orderId: 1 });
+orderSchema.index({ status: 1 });
 
 const Order = mongoose.model('Order', orderSchema);
 module.exports = Order;

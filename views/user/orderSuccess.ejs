@@ -1,740 +1,463 @@
 <%- include('../../views/partials/user/header') %>
+<link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet">
 
 <style>
-    /* Reset for this page only */
-    .payment-success-wrapper {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        min-height: calc(100vh - 200px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        position: relative;
-        overflow: hidden;
-        padding: 10px 0px;
-    }
+  body {
+    background: #f9f9fa;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+  }
 
-    /* Animated Background Elements */
-    .bg-decoration {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        z-index: 0;
-        top: 0;
-        left: 0;
-    }
+  .payment-success-wrapper {
+    margin: 0;
+    padding: 20px 0;
+    width: 100%;
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1d3d38 0%, #112819 100%);
+    position: relative;
+    overflow: hidden;
+  }
 
-    .circle {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
-        animation: float 6s ease-in-out infinite;
-    }
+  .bg-decoration {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    top: 0;
+    left: 0;
+  }
 
-    .circle-1 {
-        width: 300px;
-        height: 300px;
-        top: -100px;
-        left: -100px;
-        animation-delay: 0s;
-    }
+  .circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: float 6s ease-in-out infinite;
+  }
 
-    .circle-2 {
-        width: 200px;
-        height: 200px;
-        bottom: -50px;
-        right: -50px;
-        animation-delay: 2s;
-    }
+  .circle-1 {
+    width: 300px;
+    height: 300px;
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+  }
 
-    .circle-3 {
-        width: 150px;
-        height: 150px;
-        top: 50%;
-        right: 10%;
-        animation-delay: 4s;
-    }
+  .circle-2 {
+    width: 200px;
+    height: 200px;
+    bottom: -50px;
+    right: -50px;
+    animation-delay: 2s;
+  }
 
-    @keyframes float {
-        0%, 100% {
-            transform: translateY(0) scale(1);
-        }
-        50% {
-            transform: translateY(-30px) scale(1.1);
-        }
-    }
+  .circle-3 {
+    width: 150px;
+    height: 150px;
+    top: 50%;
+    right: 10%;
+    animation-delay: 4s;
+  }
 
-    /* Main Container */
-    .payment-container {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-        max-width: 600px;
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
     }
-
-    /* Breadcrumbs */
-    .payment-breadcrumbs {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        flex-wrap: wrap;
-        padding: 12px 20px;
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 50px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        margin-bottom: 30px;
+    50% {
+      transform: translateY(-30px) scale(1.1);
     }
+  }
 
-    .payment-breadcrumb-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 13px;
-        font-weight: 500;
-        text-decoration: none;
-        transition: all 0.3s ease;
+  .payment-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 700px;
+    padding: 0 20px;
+  }
+
+  .payment-success-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 8px 50px rgba(0, 0, 0, 0.1);
+    padding: 40px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+    animation: cardEntry 0.8s cubic-bezier(0.61, 1.44, 0.55, 0.97) both;
+  }
+
+  @keyframes cardEntry {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.97);
     }
-
-    .payment-breadcrumb-item:hover:not(.active) {
-        color: #fff;
-        transform: translateY(-2px);
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
+  }
 
-    .payment-breadcrumb-item.active {
-        color: #fff;
-        font-weight: 600;
+  .order-status-graphic img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+  }
+
+  .order-status-title {
+    margin-top: 12px;
+    font-size: 1.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #18191f;
+    text-align: center;
+    letter-spacing: 0.01em;
+    animation: fadeIn 1s 0.2s both;
+  }
+
+  .order-status-subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-bottom: 24px;
+    font-weight: 400;
+    text-align: center;
+    letter-spacing: 0.02em;
+    animation: fadeIn 1.1s 0.3s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
     }
-
-    .payment-breadcrumb-icon {
-        width: 24px;
-        height: 24px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
+    to {
+      opacity: 1;
+      transform: none;
     }
+  }
 
-    .payment-breadcrumb-item.active .payment-breadcrumb-icon {
-        background: #fff;
-        color: #667eea;
+  .order-items-box {
+    width: 100%;
+    background: #e8e9e9;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+    min-height: 60px;
+    animation: itemsListEntry 0.9s 0.2s both;
+  }
+
+  @keyframes itemsListEntry {
+    from {
+      opacity: 0;
+      transform: translateY(25px);
     }
-
-    .payment-breadcrumb-separator {
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 16px;
+    to {
+      opacity: 1;
+      transform: none;
     }
+  }
 
-    /* Success Card */
+  .order-item-row {
+    color: #1a1d1f;
+    margin-bottom: 10px;
+    font-weight: 400;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    animation: fadeInOrderItem 0.7s forwards;
+  }
+
+  .order-item-row:nth-child(1) {
+    animation-delay: 0.25s;
+  }
+  .order-item-row:nth-child(2) {
+    animation-delay: 0.32s;
+  }
+  .order-item-row:nth-child(3) {
+    animation-delay: 0.39s;
+  }
+  .order-item-row:nth-child(4) {
+    animation-delay: 0.46s;
+  }
+  .order-item-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .order-item-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 12px;
+  }
+
+  .order-item-details {
+    flex-grow: 1;
+    margin-right: 12px;
+  }
+
+  @keyframes fadeInOrderItem {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .order-summary {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 28px;
+    animation: fadeIn 1.1s 0.45s both;
+  }
+
+  .os-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #474857;
+  }
+
+  .os-label {
+    color: #6b7280;
+    font-weight: 400;
+  }
+
+  .os-value {
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .payment-amount-row {
+    width: 100%;
+    background: linear-gradient(135deg, #15393c 0%, #638659 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    animation: fadeIn 1.1s 0.6s both;
+  }
+
+  .amount-label {
+    font-weight: 400;
+  }
+
+  .amount-value {
+    font-size: 1.1rem;
+  }
+
+  .payment-action-buttons {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 16px;
+    animation: fadeIn 1.1s 0.7s both;
+  }
+
+  .payment-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    min-width: 48%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+  }
+
+  .payment-btn-secondary {
+    background: #4b5563;
+  }
+
+  .payment-btn-secondary:hover {
+    background: #1f2937;
+  }
+
+  .payment-btn-primary {
+    background: #3b82f6;
+  }
+
+  .payment-btn-primary:hover {
+    background: #2563eb;
+  }
+
+  .order-status-footer {
+    color: #22c55e;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  @media (max-width: 500px) {
     .payment-success-card {
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 25px 30px;
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-        animation: slideUp 0.6s ease-out;
-        position: relative;
-        overflow: hidden;
+      width: 92vw;
+      padding: 24px 5vw;
     }
 
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .order-items-box,
+    .payment-amount-row,
+    .order-summary {
+      padding: 16px;
     }
 
-    /* Success Icon */
-    .payment-success-icon-wrapper {
-        position: relative;
-        width: 90px;
-        height: 90px;
-        margin: 0 auto 20px;
+    .order-status-title {
+      font-size: 1.3rem;
     }
 
-    .payment-success-icon {
-        width: 90px;
-        height: 90px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        animation: scaleIn 0.5s ease-out 0.2s both;
-        position: relative;
+    .order-status-graphic img {
+      width: 50px;
+      height: 50px;
     }
 
-    @keyframes scaleIn {
-        from {
-            transform: scale(0);
-            opacity: 0;
-        }
-        to {
-            transform: scale(1);
-            opacity: 1;
-        }
+    .order-item-image {
+      width: 32px;
+      height: 32px;
     }
 
-    .payment-checkmark {
-        stroke: #fff;
-        stroke-width: 3;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        fill: none;
-        width: 45px;
-        height: 45px;
-        stroke-dasharray: 100;
-        stroke-dashoffset: 100;
-        animation: drawCheck 0.8s ease-out 0.5s forwards;
+    .order-item-details {
+      margin-right: 8px;
     }
-
-    @keyframes drawCheck {
-        to {
-            stroke-dashoffset: 0;
-        }
-    }
-
-    .payment-success-ring {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border: 3px solid rgba(102, 126, 234, 0.3);
-        border-radius: 50%;
-        animation: pulse 2s ease-out infinite;
-    }
-
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-            opacity: 1;
-        }
-        100% {
-            transform: scale(1.3);
-            opacity: 0;
-        }
-    }
-
-    /* Title */
-    .payment-success-title {
-        text-align: center;
-        font-size: 28px;
-        font-weight: 700;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 10px;
-        animation: fadeIn 0.6s ease-out 0.3s both;
-    }
-
-    .payment-subtitle {
-        text-align: center;
-        color: #6b7280;
-        font-size: 14px;
-        margin-bottom: 25px;
-        animation: fadeIn 0.6s ease-out 0.4s both;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Order Details */
-    .payment-order-details {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-radius: 14px;
-        padding: 20px;
-        margin-bottom: 20px;
-        animation: fadeIn 0.6s ease-out 0.5s both;
-    }
-
-    .payment-detail-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
-    .payment-detail-row:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .payment-detail-row:first-child {
-        padding-top: 0;
-    }
-
-    .payment-detail-label {
-        color: #6b7280;
-        font-size: 14px;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .payment-detail-icon {
-        width: 18px;
-        height: 18px;
-        opacity: 0.7;
-    }
-
-    .payment-detail-value {
-        color: #1f2937;
-        font-weight: 600;
-        font-size: 14px;
-        text-align: right;
-    }
-
-    .payment-amount-row {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        margin: -20px -20px 0;
-        padding: 16px 20px;
-        border-radius: 0 0 14px 14px;
-    }
-
-    .payment-amount-row .payment-detail-label,
-    .payment-amount-row .payment-detail-value {
-        color: #fff;
-    }
-
-    .payment-amount {
-        font-size: 20px;
-        font-weight: 700;
-    }
-
-    /* Delivery Info */
-    .payment-delivery-info {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: #fff;
-        padding: 14px;
-        border-radius: 10px;
-        text-align: center;
-        margin-bottom: 20px;
-        font-size: 14px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        animation: fadeIn 0.6s ease-out 0.6s both;
-    }
-
-    .payment-delivery-icon {
-        width: 20px;
-        height: 20px;
-    }
-
-    /* Action Buttons */
-    .payment-action-buttons {
-        display: flex;
-        gap: 12px;
-        animation: fadeIn 0.6s ease-out 0.7s both;
-    }
-
-    .payment-btn {
-        flex: 1;
-        padding: 14px 20px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 15px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .payment-btn::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
-
-    .payment-btn:hover::before {
-        width: 300px;
-        height: 300px;
-    }
-
-    .payment-btn span {
-        position: relative;
-        z-index: 1;
-    }
-
-    .payment-btn-secondary {
-        background: #fff;
-        color: #667eea;
-        border: 2px solid #667eea;
-    }
-
-    .payment-btn-secondary:hover {
-        background: #667eea;
-        color: #fff;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-    }
-
-    .payment-btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: #fff;
-        border: none;
-    }
-
-    .payment-btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-    }
-
-    .payment-btn-icon {
-        width: 18px;
-        height: 18px;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .payment-success-wrapper {
-            min-height: calc(100vh - 150px);
-            padding: 30px 15px;
-        }
-
-        .payment-breadcrumbs {
-            padding: 10px 15px;
-            gap: 8px;
-            margin-bottom: 25px;
-        }
-
-        .payment-breadcrumb-item {
-            font-size: 11px;
-        }
-
-        .payment-breadcrumb-icon {
-            width: 22px;
-            height: 22px;
-            font-size: 11px;
-        }
-
-        .payment-success-card {
-            padding: 30px 20px;
-        }
-
-        .payment-success-icon-wrapper {
-            width: 80px;
-            height: 80px;
-        }
-
-        .payment-success-icon {
-            width: 80px;
-            height: 80px;
-        }
-
-        .payment-checkmark {
-            width: 40px;
-            height: 40px;
-        }
-
-        .payment-success-title {
-            font-size: 24px;
-        }
-
-        .payment-subtitle {
-            font-size: 13px;
-        }
-
-        .payment-order-details {
-            padding: 18px 15px;
-        }
-
-        .payment-detail-row {
-            padding: 10px 0;
-        }
-
-        .payment-detail-label,
-        .payment-detail-value {
-            font-size: 13px;
-        }
-
-        .payment-amount-row {
-            margin: -18px -15px 0;
-            padding: 14px 15px;
-        }
-
-        .payment-amount {
-            font-size: 18px;
-        }
-
-        .payment-delivery-info {
-            font-size: 13px;
-            padding: 12px;
-        }
-
-        .payment-action-buttons {
-            flex-direction: column;
-        }
-
-        .payment-btn {
-            width: 100%;
-            font-size: 14px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .payment-breadcrumb-item span {
-            display: none;
-        }
-
-        .payment-breadcrumb-item.active span {
-            display: inline;
-        }
-
-        .payment-success-card {
-            padding: 25px 18px;
-        }
-
-        .payment-success-title {
-            font-size: 22px;
-        }
-
-        .payment-detail-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 6px;
-        }
-
-        .payment-detail-value {
-            text-align: left;
-        }
-    }
+  }
 </style>
 
-<!-- Payment Success Wrapper -->
 <div class="payment-success-wrapper">
-    <!-- Background Decoration -->
-    <div class="bg-decoration">
-        <div class="circle circle-1"></div>
-        <div class="circle circle-2"></div>
-        <div class="circle circle-3"></div>
+  <div class="bg-decoration">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+  </div>
+  <div class="payment-container">
+    <div class="payment-success-card">
+      <div class="order-status-graphic">
+        <img src="/photos/product_img/delevery_boy-removebg-preview.png" alt="Delivery" />
+      </div>
+      <h2 class="order-status-title">Order Status</h2>
+      <div class="order-status-subtitle">Your package is on the way</div>
+     <div class="order-items-box">
+  <% items.forEach((item) => { %>
+    <div class="order-item-row">
+      <img src="<%= item.productId && item.productId.images && item.productId.images[0] && item.productId.images[0].length > 2
+          ? (item.productId.images[0].startsWith('http')
+              ? item.productId.images[0]
+              : `/uploads/product-images/${item.productId.images[0]}`)
+          : 'https://via.placeholder.com/40x40?text=No+Image' %>"
+          alt="<%= item.productName || 'Unknown Product' %>"
+          class="order-item-image"
+          loading="lazy" />
+      <span class="order-item-details"><%= item.productName %> (<%= item.variantSize %>) x <%= item.quantity %></span>
+      <span><%= item.total %></span>
     </div>
-
-    <!-- Main Container -->
-    <div class="payment-container">
-        <!-- Breadcrumbs -->
-        <nav class="payment-breadcrumbs">
-            <a href="/" class="payment-breadcrumb-item">
-                <div class="payment-breadcrumb-icon">🏠</div>
-                <span>Home</span>
-            </a>
-            <span class="payment-breadcrumb-separator">›</span>
-            <a href="/cart" class="payment-breadcrumb-item">
-                <div class="payment-breadcrumb-icon">🛒</div>
-                <span>Cart</span>
-            </a>
-            <span class="payment-breadcrumb-separator">›</span>
-            <a href="/checkout" class="payment-breadcrumb-item">
-                <div class="payment-breadcrumb-icon">💳</div>
-                <span>Checkout</span>
-            </a>
-            <span class="payment-breadcrumb-separator">›</span>
-            <div class="payment-breadcrumb-item active">
-                <div class="payment-breadcrumb-icon">✓</div>
-                <span>Success</span>
-            </div>
-        </nav>
-
-        <div class="payment-success-card">
-            <!-- Success Icon -->
-            <div class="payment-success-icon-wrapper">
-                <div class="payment-success-ring"></div>
-                <div class="payment-success-icon">
-                    <svg class="payment-checkmark" viewBox="0 0 52 52">
-                        <path d="M14 27l7.5 7.5L38 18"/>
-                    </svg>
-                </div>
-            </div>
-
-            <!-- Title -->
-            <h1 class="payment-success-title">Payment Successful!</h1>
-            <p class="payment-subtitle">Your order has been confirmed and is being processed</p>
-
-            <!-- Order Details -->
-            <div class="payment-order-details">
-                <div class="payment-detail-row">
-                    <span class="payment-detail-label">
-                        <svg class="payment-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        Order ID
-                    </span>
-                    <span class="payment-detail-value"><%= orderId %></span>
-                </div>
-                <div class="payment-detail-row">
-                    <span class="payment-detail-label">
-                        <svg class="payment-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        Date & Time
-                    </span>
-                    <span class="payment-detail-value"><%= date %> at <%= time %></span>
-                </div>
-                <div class="payment-detail-row">
-                    <span class="payment-detail-label">
-                        <svg class="payment-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                            <line x1="1" y1="10" x2="23" y2="10"></line>
-                        </svg>
-                        Payment Method
-                    </span>
-                    <span class="payment-detail-value"><%= paymentMethod %></span>
-                </div>
-                <!-- New Section for Order Items -->
-                <div class="payment-detail-row">
-                    <span class="payment-detail-label">
-                        <svg class="payment-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <path d="M16 10a4 4 0 0 1-8 0"></path>
-                        </svg>
-                        Order Items
-                    </span>
-                    <div class="payment-detail-value">
-                        <% items.forEach(item => { %>
-                            <div style="margin-bottom: 8px;">
-                                <%= item.productName %> (<%= item.variantSize %>) x <%= item.quantity %> - <%= item.total %>
-                            </div>
-                        <% }) %>
-                    </div>
-                </div>
-                <div class="payment-detail-row payment-amount-row">
-                    <span class="payment-detail-label">
-                        <svg class="payment-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                        </svg>
-                        Total Amount
-                    </span>
-                    <span class="payment-detail-value payment-amount"><%= amount %></span>
-                </div>
-            </div>
-
-            <!-- Delivery Info -->
-            <div class="payment-delivery-info">
-                <svg class="payment-delivery-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="1" y="3" width="15" height="13"></rect>
-                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                </svg>
-                <span>Estimated Delivery: <%= deliveryDate %> to <%= deliveryAddress %></span>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="payment-action-buttons">
-                <button class="payment-btn payment-btn-secondary" onclick="viewOrder()">
-                    <svg class="payment-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    <span href="/orderDetails">View Order</span>
-                </button>
-                <button class="payment-btn payment-btn-primary" onclick="continueShopping()">
-                    <svg class="payment-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                    <span>Continue Shopping</span>
-                </button>
-            </div>
-        </div>
-    </div>
+  <% }); %>
 </div>
 
+      <div class="order-summary">
+        <div class="os-row">
+          <span class="os-label">Order ID</span>
+          <span class="os-value"><%= orderId %></span>
+        </div>
+        <div class="os-row">
+          <span class="os-label">Date & Time</span>
+          <span class="os-value"><%= date %> at <%= time %></span>
+        </div>
+        <div class="os-row">
+          <span class="os-label">Payment Method</span>
+          <span class="os-value"><%= paymentMethod %></span>
+        </div>
+        <div class="os-row">
+          <span class="os-label">Delivery Address</span>
+          <span class="os-value"><%= deliveryAddress %></span>
+        </div>
+        <div class="os-row">
+          <span class="os-label">Est. Delivery</span>
+          <span class="os-value"><%= deliveryDate %></span>
+        </div>
+      </div>
+      <div class="payment-amount-row">
+        <span class="amount-label">Total Amount</span>
+        <span class="amount-value"><%= amount %></span>
+      </div>
+      <div class="payment-action-buttons">
+        <button class="payment-btn payment-btn-secondary" onclick="viewOrder()">View Order</button>
+        <button class="payment-btn payment-btn-primary" onclick="continueShopping()">Continue Shopping</button>
+      </div>
+      <div class="order-status-footer">Your order is confirmed and in transit.</div>
+    </div>
+  </div>
+</div>
 
 <script>
-    // View order function
-    function viewOrder() {
-        const orderId = '<%= orderId %>';
-        window.location.href = '/orderDetails/' + orderId;
+  function viewOrder() {
+    const orderId = '<%= orderId %>';
+    window.location.href = '/orderDetails/' + orderId;
+  }
+
+  function continueShopping() {
+    window.location.href = '/shopPage';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    createPaymentConfetti();
+  });
+
+  function createPaymentConfetti() {
+    const colors = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444'];
+    const confettiCount = 38;
+    for (let i = 0; i < confettiCount; i++) {
+      setTimeout(() => {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'fixed';
+        const size = Math.random() * 8 + 4 + 'px';
+        confetti.style.width = size;
+        confetti.style.height = size;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.left = Math.random() * window.innerWidth + 'px';
+        confetti.style.top = '-10px';
+        confetti.style.opacity = '0.8';
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        confetti.style.zIndex = '9999';
+        confetti.style.pointerEvents = 'none';
+        document.body.appendChild(confetti);
+        const fall = confetti.animate(
+          [
+            { transform: 'translateY(0) rotate(0deg)', opacity: 0.8 },
+            {
+              transform: `translateY(${window.innerHeight + 10}px) rotate(${Math.random() * 360}deg)`,
+              opacity: 0,
+            },
+          ],
+          {
+            duration: 3000 + Math.random() * 2000,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          }
+        );
+        fall.onfinish = () => confetti.remove();
+      }, i * 30);
     }
-
-    // Continue shopping function
-    function continueShopping() {
-        window.location.href = '/shopPage';
-    }
-
-    // Add smooth animation on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        // Confetti effect on success
-        createPaymentConfetti();
-    });
-
-    // Simple confetti effect
-    function createPaymentConfetti() {
-        const colors = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444'];
-        const confettiCount = 40;
-
-        for (let i = 0; i < confettiCount; i++) {
-            setTimeout(() => {
-                const confetti = document.createElement('div');
-                confetti.style.position = 'fixed';
-                confetti.style.width = '8px';
-                confetti.style.height = '8px';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.left = Math.random() * window.innerWidth + 'px';
-                confetti.style.top = '-10px';
-                confetti.style.opacity = '1';
-                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                confetti.style.zIndex = '9999';
-                confetti.style.pointerEvents = 'none';
-                document.body.appendChild(confetti);
-
-                const fall = confetti.animate([
-                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                    { transform: `translateY(${window.innerHeight + 10}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
-                ], {
-                    duration: 3000 + Math.random() * 2000,
-                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-                });
-
-                fall.onfinish = () => confetti.remove();
-            }, i * 30);
-        }
-    }
+  }
 </script>
-
 
 <%- include('../../views/partials/user/footer') %>
