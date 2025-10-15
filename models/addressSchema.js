@@ -127,11 +127,11 @@ const addressSchema = new mongoose.Schema({
     addressType: { type: String, enum: ['Home', 'Work', 'Other'], required: true },
     name: { type: String, required: true, minlength: 3 },
     phone: { type: String, required: true, match: /^\d{10}$/ },
-    houseName: { type: String, default: "Unknown" }, // Optional with default
+    houseName: { type: String, default: "Unknown" }, 
     buildingNumber: { type: String },
     landmark: { type: String, required: true, minlength: 3 },
     altPhone: { type: String, match: /^\d{10}$/ },
-    nationality: { type: String, default: "Unknown" }, // Optional with default
+    nationality: { type: String, default: "Unknown" }, 
     city: { type: String, required: true },
     state: { type: String, required: true },
     pincode: { type: String, required: true },

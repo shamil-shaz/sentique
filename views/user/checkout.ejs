@@ -907,7 +907,7 @@ body {
   position: relative;
   height: 63px;
   width: 100%;
-  max-width: 400px;
+  max-width: 250px;
   margin: 20px auto;
   padding: 0;
   outline: none;
@@ -2090,7 +2090,7 @@ document.getElementById('place-order-btn').addEventListener('click', async () =>
         html: `
           <div style="text-align: center; margin-bottom: 10px;">
             <strong>Thank you for your order!</strong><br>
-            Order ID: ${data.orderId || 'N/A'}
+           
           </div>
           <div class="swal2-order-animation" id="orderAnimation">
             <span class="default">Processing Order</span>
@@ -2111,7 +2111,7 @@ document.getElementById('place-order-btn').addEventListener('click', async () =>
             <div class="lines"></div>
           </div>
         `,
-        confirmButtonText: 'View Order',
+        confirmButtonText: 'View Status',
         confirmButtonColor: '#22c55e',
         allowOutsideClick: false,
         didOpen: () => {

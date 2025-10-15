@@ -240,7 +240,7 @@ const productSchema = new Schema({
     minlength: [3, 'Product name must be at least 3 characters'],
     maxlength: [100, 'Product name cannot exceed 100 characters'],
     unique: true,
-    collation: { locale: 'en', strength: 2 } // Case-insensitive uniqueness
+    collation: { locale: 'en', strength: 2 } 
   },
   description: {
     type: String,
@@ -317,7 +317,7 @@ const productSchema = new Schema({
   versionKey: '__v'
 });
 
-// Indexes (no duplicates)
+
 productSchema.index({ brand: 1 });
 productSchema.index({ category: 1 });
 productSchema.index({ status: 1 });
@@ -326,7 +326,7 @@ productSchema.index({ createdAt: -1 });
 productSchema.index({ updatedAt: -1 });
 
 
-// Virtuals
+
 productSchema.virtual('totalStock').get(function() {
   return this.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
 });
@@ -360,7 +360,7 @@ productSchema.pre('save', function(next) {
   } catch (err) { next(err); }
 });
 
-// Pre-validate hook
+
 productSchema.pre('validate', function(next) {
   this.productName = this.productName?.trim();
   this.description = this.description?.trim();
@@ -369,7 +369,7 @@ productSchema.pre('validate', function(next) {
   next();
 });
 
-// Methods
+
 productSchema.methods.getAvailableVariants = function() {
   return this.variants.filter(v => v.stock > 0);
 };
@@ -382,7 +382,7 @@ productSchema.methods.getVariantBySize = function(size) {
   return this.variants.find(v => v.size === size);
 };
 
-// Statics
+
 productSchema.statics.findAvailable = function() {
   return this.find({ status: 'Available', isBlocked: false }).populate('brand category');
 };
@@ -395,7 +395,6 @@ productSchema.statics.findByCategory = function(categoryId) {
   return this.find({ category: categoryId, isBlocked: false });
 };
 
-// Enable virtuals in JSON/Object output
 productSchema.set('toJSON', { virtuals: true });
 productSchema.set('toObject', { virtuals: true });
 

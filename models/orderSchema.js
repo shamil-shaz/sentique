@@ -1,71 +1,3 @@
-// const mongoose=require('mongoose')
-
-// const {Schema}=mongoose;
-
-// const {v4:uuidv4, stringify}=require('uuid');
-
-// const orderSchema= new Schema({
-//     orderId:{
-//         type:String,
-//         default:()=>uuidv4(),
-//         unique:true
-//     },
-//     orderItems:[{
-//         product:{
-//             type:Schema.Types.orderId,
-//             ref:'Product',
-//             required:true
-//         },
-//         quantity:{
-//             type:Number,
-//             default:0
-//         }
-//     }],
-
-//     totalPrice:{
-//         type:Number,
-//         required:true
-//     },
-//     discount:{
-//         type:Number,
-//         default:0
-//     },
-//     finalAmount:{
-//         type:Number,
-//         required:true
-//     },
-//     address:{
-//         type:Schema.Types.ObjectId,
-//         ref:"User",
-//         required:true
-
-//     },
-//     invoiceDate:{
-//         type:Date
-
-//     },
-
-//     status:{
-//         type:String,
-//         required:true,
-//         enum:['Pending',"Processing","Deliverd","Canecelled","Return Request","Returned"]
-//     },
-//     createdOn:{
-//         type:Date,
-//         default:Date.now,
-//         required:true
-//     },
-//     couponApplied:{
-//         type:Boolean,
-//         default:false
-//     }
-
-
-// })
-
-// const Order=mongoose.model("Order",orderSchema)
-// module.exports=Order;
-
 
 
 // const mongoose = require('mongoose');
@@ -76,8 +8,7 @@
 //   orderId: {
 //     type: String,
 //     default: () => uuidv4(),
-//     unique: true,
-//     index: true,
+//     unique: true, // Unique index is sufficient
 //   },
 //   user: {
 //     type: Schema.Types.ObjectId,
@@ -85,21 +16,63 @@
 //     required: true,
 //   },
 //   orderItems: [
-//   {
-//     product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-//     productName: { type: String, required: true },
-//     variantSize: { type: String },
-//     quantity: { type: Number, required: true, min: 1 },
-//     price: { type: Number, required: true },
-//     total: { type: Number, required: true },
-//     status: { // 👈 add this field
-//       type: String,
-//       enum: ['Pending', 'Processing', 'Cancelled', 'Delivered', 'Returned'],
-//       default: 'Pending'
-//     }
-//   },
-// ],
-
+//     {
+//       product: { 
+//         type: Schema.Types.ObjectId, 
+//         ref: 'Product', 
+//         required: true 
+//       },
+//       productName: { 
+//         type: String, 
+//         required: true 
+//       },
+//       variantSize: { 
+//         type: String 
+//       },
+//       quantity: { 
+//         type: Number, 
+//         required: true, 
+//         min: 1 
+//       },
+//       price: { 
+//         type: Number, 
+//         required: true 
+//       },
+//       total: { 
+//         type: Number, 
+//         required: true 
+//       },
+//       status: {
+//         type: String,
+//         enum: ['Active', 'Pending', 'Processing', 'Shipped', 'OutForDelivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+//         default: 'Active'
+//       },
+//       cancelReason: {
+//         type: String,
+//       },
+//       cancelDetails: {
+//         type: String,
+//       },
+//       cancelledAt: {
+//         type: Date,
+//       },
+//       returnReason: {
+//         type: String,
+//       },
+//       returnDetails: {
+//         type: String,
+//       },
+//       returnRequestedAt: {
+//         type: Date,
+//       },
+//       returnedAt: {
+//         type: Date,
+//       },
+//       deliveredAt: {
+//         type: Date,
+//       },
+//     },
+//   ],
 //   totalPrice: {
 //     type: Number,
 //     required: true,
@@ -124,7 +97,11 @@
 //     city: { type: String, required: true },
 //     state: { type: String, required: true },
 //     pincode: { type: String, required: true },
-//     addressType: { type: String, enum: ['Home', 'Work', 'Other'], required: true },
+//     addressType: { 
+//       type: String, 
+//       enum: ['Home', 'Work', 'Other'], 
+//       required: true 
+//     },
 //   },
 //   paymentMethod: {
 //     type: String,
@@ -141,6 +118,9 @@
 //     type: Date,
 //     default: Date.now,
 //   },
+//   deliveredAt: {
+//     type: Date,
+//   },
 //   couponApplied: {
 //     type: Boolean,
 //     default: false,
@@ -151,15 +131,51 @@
 //   status: {
 //     type: String,
 //     required: true,
-//     enum: ['Pending', 'Processing', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+//     enum: ['Pending', 'Processing', 'Shipped', 'OutForDelivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
 //     default: 'Pending',
+//   },
+//   cancelReason: {
+//     type: String,
+//   },
+//   cancelDetails: {
+//     type: String,
+//   },
+//   cancelledAt: {
+//     type: Date,
+//   },
+//   returnReason: {
+//     type: String,
+//   },
+//   returnDetails: {
+//     type: String,
+//   },
+//   returnRequestedAt: {
+//     type: Date,
+//   },
+//   returnedAt: {
+//     type: Date,
+//   },
+//   tracking: {
+//     placedDate: { type: Date, default: Date.now },
+//     confirmedDate: { type: Date },
+//     processingDate: { type: Date },
+//     shippedDate: { type: Date },
+//     shippedLocation: { type: String },
+//     outForDeliveryDate: { type: Date },
+//     outForDeliveryLocation: { type: String },
+//     deliveredDate: { type: Date },
+//     estimatedDeliveryDate: { type: Date },
 //   },
 // });
 
+// // Keep other indexes, remove redundant orderId index
 // orderSchema.index({ user: 1, createdOn: -1 });
+// orderSchema.index({ status: 1 });
 
 // const Order = mongoose.model('Order', orderSchema);
 // module.exports = Order;
+
+
 
 
 const mongoose = require('mongoose');
@@ -171,7 +187,6 @@ const orderSchema = new Schema({
     type: String,
     default: () => uuidv4(),
     unique: true,
-    index: true,
   },
   user: {
     type: Schema.Types.ObjectId,
@@ -205,13 +220,11 @@ const orderSchema = new Schema({
         type: Number, 
         required: true 
       },
-  
       status: {
         type: String,
-        enum: ['Active', 'Pending', 'Processing','shipped', 'Delivered','Cancelled', 'Returned'],
-        default: 'Active'
+        enum: ['Placed', 'Confirmed', 'Processing', 'Shipped', 'OutForDelivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+        default: 'Placed'
       },
-    
       cancelReason: {
         type: String,
       },
@@ -220,6 +233,39 @@ const orderSchema = new Schema({
       },
       cancelledAt: {
         type: Date,
+      },
+      returnReason: {
+        type: String,
+      },
+      returnDetails: {
+        type: String,
+      },
+      returnRequestedAt: {
+        type: Date,
+      },
+      returnedAt: {
+        type: Date,
+      },
+      tracking: {
+        placedDate: { type: String }, // Changed to String for formatted date
+        placedTime: { type: String },
+        confirmedDate: { type: String },
+        confirmedTime: { type: String },
+        processingDate: { type: String },
+        processingTime: { type: String },
+        shippedDate: { type: String },
+        shippedTime: { type: String },
+        shippedLocation: { type: String },
+        outForDeliveryDate: { type: String },
+        outForDeliveryTime: { type: String },
+        outForDeliveryLocation: { type: String },
+        deliveredDate: { type: String },
+        deliveredTime: { type: String },
+        estimatedDeliveryDate: { type: String }, // Changed to String
+      },
+      isReturnEligible: {
+        type: Boolean,
+        default: true,
       },
     },
   ],
@@ -275,14 +321,12 @@ const orderSchema = new Schema({
   couponCode: {
     type: String,
   },
-  
   status: {
     type: String,
     required: true,
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+    enum: ['Pending', 'Processing', 'Shipped', 'OutForDelivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
     default: 'Pending',
   },
-  
   cancelReason: {
     type: String,
   },
@@ -292,11 +336,22 @@ const orderSchema = new Schema({
   cancelledAt: {
     type: Date,
   },
+  returnReason: {
+    type: String,
+  },
+  returnDetails: {
+    type: String,
+  },
+  returnRequestedAt: {
+    type: Date,
+  },
+  returnedAt: {
+    type: Date,
+  },
 });
 
-
+// Indexes for efficient querying
 orderSchema.index({ user: 1, createdOn: -1 });
-orderSchema.index({ orderId: 1 });
 orderSchema.index({ status: 1 });
 
 const Order = mongoose.model('Order', orderSchema);

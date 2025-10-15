@@ -1,0 +1,687 @@
+<%- include('../../views/partials/user/header') %>
+
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f8f9fa;
+        color: #2c3e50;
+        line-height: 1.6;
+       
+    }
+
+    .wallet-container {
+        display: grid;
+     
+        margin-left: 280px;
+        margin-top: 100px;
+        padding: 40px 30px;
+        min-height: 100vh;
+    }
+
+    .page-header {
+        margin-bottom: 35px;
+    }
+
+    .page-header h1 {
+        font-size: 32px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .breadcrumb span {
+        color: #c5a572;
+    }
+
+    .wallet-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .balance-card {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        border-radius: 20px;
+        padding: 40px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .balance-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 300px;
+        height: 300px;
+        background: rgba(197, 165, 114, 0.1);
+        border-radius: 50%;
+    }
+
+    .balance-label {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.9;
+        margin-bottom: 15px;
+    }
+
+    .balance-amount {
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .balance-currency {
+        font-size: 32px;
+        margin-right: 5px;
+    }
+
+    .balance-actions {
+        display: flex;
+        gap: 15px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn {
+        padding: 12px 28px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+        background: #c5a572;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #b8965f;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(197, 165, 114, 0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+    }
+
+    .quick-stats {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .stat-item {
+        padding: 20px;
+        border-radius: 12px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        background: #e9ecef;
+        transform: translateY(-3px);
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .stat-value.credit {
+        color: #27ae60;
+    }
+
+    .stat-value.debit {
+        color: #e74c3c;
+    }
+
+    .transactions-section {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .section-header h2 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+    }
+
+    .tab-btn {
+        padding: 8px 20px;
+        border: 1px solid #dee2e6;
+        background: white;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #6c757d;
+    }
+
+    .tab-btn.active {
+        background: #2c3e50;
+        color: white;
+        border-color: #2c3e50;
+    }
+
+    .tab-btn:hover:not(.active) {
+        border-color: #c5a572;
+        color: #c5a572;
+    }
+
+    .transaction-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 12px;
+    }
+
+    .transaction-table thead th {
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0 15px 15px;
+        border-bottom: 2px solid #f1f3f5;
+    }
+
+    .transaction-table tbody tr {
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .transaction-table tbody tr:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .transaction-table tbody td {
+        padding: 20px 15px;
+    }
+
+    .transaction-table tbody tr td:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .transaction-table tbody tr td:last-child {
+        border-radius: 0 10px 10px 0;
+    }
+
+    .transaction-id {
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .transaction-date {
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .transaction-amount {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .transaction-status {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-credit {
+        background: #d4edda;
+        color: #27ae60;
+    }
+
+    .status-debit {
+        background: #f8d7da;
+        color: #e74c3c;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 35px;
+        flex-wrap: wrap;
+    }
+
+    .pagination button {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #dee2e6;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .pagination button:hover:not(:disabled) {
+        background: #2c3e50;
+        color: white;
+        border-color: #2c3e50;
+    }
+
+    .pagination button.active {
+        background: #c5a572;
+        color: white;
+        border-color: #c5a572;
+    }
+
+    .pagination button:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .pagination .dots {
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .wallet-container {
+            margin-left: 0;
+            margin-top: 80px;
+            padding: 30px 20px;
+        }
+
+        .wallet-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .wallet-container {
+            margin-top: 70px;
+            padding: 20px 15px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+        }
+
+        .balance-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .filter-tabs {
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .transaction-table {
+            font-size: 13px;
+        }
+
+        .transaction-table thead th,
+        .transaction-table tbody td {
+            padding: 15px 10px;
+        }
+
+        .balance-card {
+            padding: 30px 25px;
+        }
+
+        .transactions-section,
+        .quick-stats {
+            padding: 25px 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .balance-amount {
+            font-size: 32px;
+        }
+
+        .balance-currency {
+            font-size: 24px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .filter-tabs {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="wallet-container">
+
+    <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'wallet' }) %>
+    <div class="page-header">
+        <div class="breadcrumb">
+            Home <span>/</span> My Account <span>/</span> Wallet
+        </div>
+        <h1>Wallet Management</h1>
+    </div>
+
+    <div class="wallet-grid">
+        <div class="balance-card">
+            <div class="balance-label">Available Balance</div>
+            <div class="balance-amount">
+                <span class="balance-currency">₹</span><span id="walletBalance"><%= walletData.balance.toFixed(2) %></span>
+            </div>
+            <div class="balance-actions">
+                <button class="btn btn-primary" onclick="addFunds()">Add Funds</button>
+                <button class="btn btn-secondary" onclick="withdraw()">Withdraw</button>
+            </div>
+        </div>
+
+        <div class="quick-stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Total Credits</div>
+                    <div class="stat-value credit" id="totalCredits">₹0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Debits</div>
+                    <div class="stat-value debit" id="totalDebits">₹0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">This Month</div>
+                    <div class="stat-value" id="monthlyTotal">₹0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Transactions</div>
+                    <div class="stat-value" id="transactionCount">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="transactions-section">
+        <div class="section-header">
+            <h2>Transaction History</h2>
+            <div class="filter-tabs">
+                <button class="tab-btn active" onclick="filterTransactions('all')">All</button>
+                <button class="tab-btn" onclick="filterTransactions('credit')">Credits</button>
+                <button class="tab-btn" onclick="filterTransactions('debit')">Debits</button>
+            </div>
+        </div>
+
+        <table class="transaction-table">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="transactionBody">
+                <!-- Transactions will be loaded from backend -->
+            </tbody>
+        </table>
+
+        <div class="pagination" id="paginationContainer">
+            <!-- Pagination will be generated dynamically -->
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let allTransactions = [];
+    let currentFilter = 'all';
+
+    // Initialize dashboard on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadWalletData();
+    });
+
+    // Load wallet data from backend
+    async function loadWalletData() {
+        try {
+            const response = await fetch('/api/wallet/data');
+            const data = await response.json();
+            
+            // Update statistics
+            document.getElementById('totalCredits').textContent = '₹' + data.totalCredits;
+            document.getElementById('totalDebits').textContent = '₹' + data.totalDebits;
+            document.getElementById('monthlyTotal').textContent = '₹' + data.monthlyTotal;
+            document.getElementById('transactionCount').textContent = data.transactionCount;
+            
+            // Store transactions
+            allTransactions = data.transactions;
+            totalPages = data.totalPages || 1;
+            
+            // Display transactions
+            displayTransactions(allTransactions);
+            renderPagination();
+        } catch (error) {
+            console.error('Error loading wallet data:', error);
+            showError('Unable to load wallet data. Please try again.');
+        }
+    }
+
+    // Display transactions in table
+    function displayTransactions(transactions) {
+        const tbody = document.getElementById('transactionBody');
+        tbody.innerHTML = '';
+        
+        if (transactions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #6c757d;">No transactions found</td></tr>';
+            return;
+        }
+        
+        transactions.forEach(transaction => {
+            const row = document.createElement('tr');
+            row.dataset.type = transaction.type.toLowerCase();
+            
+            const statusClass = transaction.type.toLowerCase() === 'credit' ? 'status-credit' : 'status-debit';
+            const statusText = transaction.type.toLowerCase() === 'credit' ? 'Amount Credited' : 'Amount Debited';
+            
+            row.innerHTML = `
+                <td class="transaction-id">#${transaction.id}</td>
+                <td class="transaction-date">${transaction.date}</td>
+                <td class="transaction-amount">₹${transaction.amount}</td>
+                <td><span class="transaction-status ${statusClass}">${statusText}</span></td>
+            `;
+            
+            tbody.appendChild(row);
+        });
+    }
+
+    // Render pagination controls
+    function renderPagination() {
+        const container = document.getElementById('paginationContainer');
+        container.innerHTML = '';
+        
+        if (totalPages <= 1) return;
+        
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '←';
+        prevBtn.onclick = () => changePage('prev');
+        prevBtn.disabled = currentPage === 1;
+        container.appendChild(prevBtn);
+        
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => goToPage(i);
+                if (i === currentPage) pageBtn.classList.add('active');
+                container.appendChild(pageBtn);
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                const dots = document.createElement('span');
+                dots.className = 'dots';
+                dots.textContent = '...';
+                container.appendChild(dots);
+            }
+        }
+        
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = '→';
+        nextBtn.onclick = () => changePage('next');
+        nextBtn.disabled = currentPage === totalPages;
+        container.appendChild(nextBtn);
+    }
+
+    // Filter transactions by type
+    function filterTransactions(type) {
+        currentFilter = type;
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        const rows = document.querySelectorAll('#transactionBody tr');
+        rows.forEach(row => {
+            if (type === 'all') {
+                row.style.display = '';
+            } else {
+                row.style.display = row.dataset.type === type ? '' : 'none';
+            }
+        });
+    }
+
+    // Change page
+    async function changePage(direction) {
+        if (direction === 'prev' && currentPage > 1) {
+            currentPage--;
+        } else if (direction === 'next' && currentPage < totalPages) {
+            currentPage++;
+        }
+        await loadPageData(currentPage);
+    }
+
+    // Go to specific page
+    async function goToPage(page) {
+        currentPage = page;
+        await loadPageData(page);
+    }
+
+    // Load data for specific page
+    async function loadPageData(page) {
+        try {
+            const response = await fetch(`/api/wallet/transactions?page=${page}&filter=${currentFilter}`);
+            const data = await response.json();
+            
+            allTransactions = data.transactions;
+            displayTransactions(allTransactions);
+            renderPagination();
+        } catch (error) {
+            console.error('Error loading page data:', error);
+            showError('Unable to load transactions. Please try again.');
+        }
+    }
+
+    // Add funds functionality
+    function addFunds() {
+        window.location.href = '/wallet/add-funds';
+    }
+
+    // Withdraw functionality
+    function withdraw() {
+        window.location.href = '/wallet/withdraw';
+    }
+
+    // Show error message
+    function showError(message) {
+        alert(message);
+    }
+</script>
+
+<%- include('../../views/partials/user/footer') %>

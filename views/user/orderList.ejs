@@ -174,7 +174,7 @@
             margin-top: 4px;
         }
 
-        /* Controls Bar (Search and Sort) */
+        /* Controls Bar */
         .controls-bar {
             background: white;
             padding: 20px 24px;
@@ -233,30 +233,6 @@
             border-color: #d4af37;
         }
 
-        /* Filter Section */
-        .filter-section {
-            background: white;
-            border-radius: 12px;
-            padding: 28px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            margin-bottom: 24px;
-        }
-
-        .filter-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .filter-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
         .clear-filters {
             background: none;
             border: none;
@@ -271,74 +247,6 @@
 
         .clear-filters:hover {
             background: rgba(212, 175, 55, 0.1);
-        }
-
-        .filter-group {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .filter-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .filter-group-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
-
-        /* Main Layout */
-        .orders-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 24px;
-            align-items: start;
-        }
-
-        /* Profile Sidebar */
-        .profile-sidebar {
-            background: white;
-            border-radius: 12px;
-            padding: 28px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            position: sticky;
-            top: 20px;
-        }
-
-        .profile-sidebar .sidebar-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 28px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .profile-sidebar .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            font-size: 15px;
-            color: #495057;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .profile-sidebar .sidebar-item:hover,
-        .profile-sidebar .sidebar-item.active {
-            color: #d4af37;
-            padding-left: 8px;
-        }
-
-        .profile-sidebar .sidebar-item.active {
-            font-weight: 600;
         }
 
         /* Mobile Profile Toggle */
@@ -361,6 +269,24 @@
 
         .mobile-profile-toggle:hover {
             border-color: #d4af37;
+        }
+
+        /* Main Layout */
+        .orders-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* Profile Sidebar */
+        .profile-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 20px;
         }
 
         /* Orders List */
@@ -447,11 +373,27 @@
             transform: translateX(4px);
         }
 
-        .order-body {
-            padding: 28px;
+        /* Products Container - NEW */
+        .order-products {
+            padding: 20px 28px;
+        }
+
+        .product-item {
             display: flex;
-            gap: 24px;
+            gap: 20px;
             align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-item:hover {
+            background: #f8f9fa;
+            border-radius: 8px;
         }
 
         .product-image-wrapper {
@@ -460,26 +402,26 @@
         }
 
         .product-image {
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: 8px;
             background: #f8f9fa;
             border: 2px solid #e9ecef;
         }
 
         .product-badge {
             position: absolute;
-            top: -8px;
-            right: -8px;
+            top: -6px;
+            right: -6px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            font-size: 10px;
-            padding: 4px 8px;
-            border-radius: 12px;
+            font-size: 9px;
+            padding: 3px 6px;
+            border-radius: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
 
         .product-details {
@@ -488,74 +430,57 @@
         }
 
         .product-name {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 15px;
+            font-weight: 600;
             color: #2c3e50;
-            margin-bottom: 6px;
-            letter-spacing: -0.3px;
+            margin-bottom: 4px;
+            letter-spacing: -0.2px;
         }
 
         .product-variant {
-            font-size: 14px;
+            font-size: 12px;
             color: #6c757d;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             font-weight: 500;
-        }
-
-        .product-price {
-            font-size: 20px;
-            font-weight: 800;
-            color: #2c3e50;
-            margin-bottom: 12px;
         }
 
         .product-meta {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
-        }
-
-        .return-eligible {
-            font-size: 12px;
-            color: #28a745;
-            display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(40, 167, 69, 0.1);
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .return-eligible::before {
-            content: "✓";
-            font-weight: bold;
         }
 
         .quantity-badge {
-            font-size: 12px;
-            color: #6c757d;
-            background: #f8f9fa;
-            padding: 4px 12px;
-            border-radius: 6px;
+            font-size: 11px;
+            color: #495057;
+            background: #e9ecef;
+            padding: 3px 10px;
+            border-radius: 12px;
             font-weight: 600;
         }
 
-        .order-actions {
+        .product-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .product-status {
             display: flex;
             flex-direction: column;
-            gap: 16px;
             align-items: flex-end;
+            gap: 8px;
         }
 
         .status-badge {
-            padding: 8px 20px;
-            border-radius: 24px;
-            font-size: 11px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .status-processing {
@@ -578,15 +503,64 @@
             color: white;
         }
 
+        .return-eligible {
+            font-size: 10px;
+            color: #28a745;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(40, 167, 69, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .return-eligible::before {
+            content: "✓";
+            font-weight: bold;
+        }
+
+        /* Order Footer - NEW */
+        .order-footer {
+            background: #f8f9fa;
+            padding: 16px 28px;
+            border-top: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .order-total {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .total-label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .total-amount {
+            font-size: 20px;
+            font-weight: 800;
+            color: #2c3e50;
+        }
+
         .action-buttons {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 13px;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
@@ -594,20 +568,21 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
-            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(44, 62, 80, 0.4);
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.4);
         }
 
         .btn-secondary {
@@ -757,19 +732,26 @@
                 gap: 16px;
             }
 
-            .order-body {
+            .product-item {
                 flex-direction: column;
-                padding: 20px;
-                gap: 20px;
+                align-items: flex-start;
+                gap: 12px;
             }
 
             .product-image {
                 width: 100%;
-                height: 240px;
+                height: 200px;
             }
 
-            .order-actions {
+            .product-status {
                 width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .order-footer {
+                flex-direction: column;
                 align-items: stretch;
             }
 
@@ -821,38 +803,39 @@
         </div>
 
         <!-- Stats Bar -->
-        <div class="stats-bar">
-            <div class="stat-card">
-                <div class="stat-icon total">📦</div>
-                <div class="stat-content">
-                    <h3>Total Orders</h3>
-                    <p><%= orders.length %></p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon processing">⏳</div>
-                <div class="stat-content">
-                    <h3>Processing</h3>
-                    <p><%= orders.filter(o => o.status === 'processing').length %></p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon delivered">✓</div>
-                <div class="stat-content">
-                    <h3>Delivered</h3>
-                    <p><%= orders.filter(o => o.status === 'delivered').length %></p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon amount">💰</div>
-                <div class="stat-content">
-                    <h3>Total Spent</h3>
-                    <p>₹<%= orders.reduce((sum, o) => sum + o.total, 0).toLocaleString() %></p>
-                </div>
-            </div>
+<!-- Stats Bar -->
+<div class="stats-bar">
+    <div class="stat-card">
+        <div class="stat-icon total">📦</div>
+        <div class="stat-content">
+            <h3>Total Items</h3>
+            <p><%= itemStats.totalItems %></p>
         </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon processing">⏳</div>
+        <div class="stat-content">
+            <h3>Processing</h3>
+            <p><%= itemStats.processing %></p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon delivered">✓</div>
+        <div class="stat-content">
+            <h3>Delivered</h3>
+            <p><%= itemStats.delivered %></p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon amount">💰</div>
+        <div class="stat-content">
+            <h3>Total Spent</h3>
+            <p>₹<%= itemStats.totalSpent.toLocaleString() %></p>
+        </div>
+    </div>
+</div>
 
-        <!-- Controls Bar (Search, Sort, Filters) -->
+        <!-- Controls Bar -->
         <div class="controls-bar">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
@@ -882,12 +865,6 @@
                         <option value="<%= year %>"><%= year %></option>
                 <% }); %>
             </select>
-            <select class="filter-dropdown" id="priceFilter" onchange="applyFilters()">
-                <option value="">All Prices</option>
-                <option value="under10k">Under ₹10,000</option>
-                <option value="10kto15k">₹10,000 - ₹15,000</option>
-                <option value="above15k">Above ₹15,000</option>
-            </select>
             <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
         </div>
 
@@ -904,94 +881,114 @@
 
             <!-- Orders List -->
             <div class="orders-list" id="ordersList">
-  <% if (orders && orders.length > 0) { %>
-    <% orders.forEach(order => { %>
-      <div class="order-card" 
-           data-status="<%= order.status %>" 
-           data-date="<%= order.date %>" 
-           data-price="<%= order.total %>"
-           data-product="<%= order.productName.toLowerCase() %>">
-        <div class="order-header">
-          <div class="order-info-item">
-            <span class="order-info-label">Order Placed</span>
-            <span class="order-info-value"><%= new Date(order.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
-          </div>
-          <div class="order-info-item">
-            <span class="order-info-label">Total</span>
-            <span class="order-info-value">₹<%= order.total.toLocaleString() %></span>
-          </div>
-          <div class="order-info-item">
-            <span class="order-info-label">Ship To</span>
-            <span class="order-info-value"><%= order.shipTo %></span>
-          </div>
-          <div class="order-info-item">
-            <span class="order-info-label">Order ID</span>
-            <span class="order-info-value order-id">#<%= order.orderId %></span>
-          </div>
-          <div class="order-info-item">
-            <a href="/orderDetails/<%= order.orderId %>" class="view-details-btn">View Details</a>
+                <% if (orders && orders.length > 0) { %>
+                    <% orders.forEach(order => { %>
+                        <div class="order-card" 
+                             data-status="<%= order.status %>" 
+                             data-date="<%= order.date %>" 
+                             data-price="<%= order.total %>">
+                            
+                            <!-- Order Header -->
+                            <div class="order-header">
+                                <div class="order-info-item">
+                                    <span class="order-info-label">Order Placed</span>
+                                    <span class="order-info-value"><%= new Date(order.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+                                </div>
+                                <div class="order-info-item">
+                                    <span class="order-info-label">Total</span>
+                                    <span class="order-info-value">₹<%= order.total.toLocaleString() %></span>
+                                </div>
+                                <div class="order-info-item">
+                                    <span class="order-info-label">Ship To</span>
+                                    <span class="order-info-value"><%= order.shipTo %></span>
+                                </div>
+                                <div class="order-info-item">
+                                    <span class="order-info-label">Order ID</span>
+                                    <span class="order-info-value order-id">#<%= order.orderId %></span>
+                                </div>
+                                <div class="order-info-item">
+                                    <a href="/orderDetails/<%= order.orderId %>" class="view-details-btn">View Details</a>
+                                </div>
+                            </div>
 
-          </div>
-        </div>
-        <div class="order-body">
-          <div class="product-image-wrapper">
-            <img src="<%= order.product && order.product.images && order.product.images[0] 
-                          ? (order.product.images[0].startsWith('http') 
-                             ? order.product.images[0] 
-                             : `/uploads/product-images/${order.product.images[0]}`) 
-                          : 'https://via.placeholder.com/120x120?text=No+Image' %>" 
-                 alt="<%= order.productName || 'Unknown Product' %>" 
-                 class="product-image" 
-                 loading="lazy"
-                 onerror="this.src='https://via.placeholder.com/120x120?text=No+Image'" />
-            <% if (order.isNew) { %>
-              <span class="product-badge">New</span>
-            <% } %>
-          </div>
-          <div class="product-details">
-            <h3 class="product-name"><%= order.productName %></h3>
-            <p class="product-variant"><%= order.productVariant %></p>
-            <div class="product-price">₹<%= order.total.toLocaleString() %></div>
-            <div class="product-meta">
-              <% if (order.returnEligible) { %>
-                <span class="return-eligible">Return eligible through <%= new Date(order.returnDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
-              <% } %>
-              <% if (order.quantity > 1) { %>
-                <span class="quantity-badge">Qty: <%= order.quantity %></span>
-              <% } %>
+                            <!-- Products List -->
+                            <div class="order-products">
+                                <% 
+                                // Check if order has items array or single product
+                                const orderItems = order.items || [{ 
+                                    product: order.product, 
+                                    productName: order.productName,
+                                    productVariant: order.productVariant,
+                                    quantity: order.quantity || 1,
+                                    price: order.itemPrice || order.total,
+                                    status: order.status,
+                                    returnEligible: order.returnEligible,
+                                    returnDate: order.returnDate,
+                                    isNew: order.isNew
+                                }];
+                                
+                                orderItems.forEach((item, index) => { 
+                                %>
+                                    <div class="product-item">
+                                        <div class="product-image-wrapper">
+                                            <img src="<%= item.product && item.product.images && item.product.images[0] 
+                                                          ? (item.product.images[0].startsWith('http') 
+                                                             ? item.product.images[0] 
+                                                             : `/uploads/product-images/${item.product.images[0]}`) 
+                                                          : 'https://via.placeholder.com/80x80?text=No+Image' %>" 
+                                                 alt="<%= item.productName || 'Product' %>" 
+                                                 class="product-image" 
+                                                 loading="lazy"
+                                                 onerror="this.src='https://via.placeholder.com/80x80?text=No+Image'" />
+                                            <% if (item.isNew) { %>
+                                                <span class="product-badge">New</span>
+                                            <% } %>
+                                        </div>
+                                        
+                                        <div class="product-details">
+                                            <h3 class="product-name"><%= item.productName || 'Unknown Product' %></h3>
+                                            <% if (item.productVariant) { %>
+                                                <p class="product-variant"><%= item.productVariant %></p>
+                                            <% } %>
+                                            <div class="product-meta">
+                                                <span class="quantity-badge">Qty: <%= item.quantity || 1 %></span>
+                                                <span class="product-price">₹<%= (item.price || 0).toLocaleString() %></span>
+                                                <% if (item.returnEligible) { %>
+                                                    <span class="return-eligible">Return eligible</span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="product-status">
+                                            <span class="status-badge status-<%= (item.status || order.status).toLowerCase() %>">
+                                                <%= (item.status || order.status).toUpperCase() %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            </div>
+
+                            <!-- Order Footer -->
+                            <div class="order-footer">
+                                <div class="order-total">
+                                    <span class="total-label">Order Total:</span>
+                                    <span class="total-amount">₹<%= order.total.toLocaleString() %></span>
+                                </div>
+                                
+                          
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <h3 class="empty-state-title">No Orders Yet</h3>
+                        <p class="empty-state-text">Looks like you haven't placed any orders. Start shopping now!</p>
+                        <a href="/shopPage" class="btn btn-primary">Start Shopping</a>
+                    </div>
+                <% } %>
             </div>
-          </div>
-          <div class="order-actions">
-            <span class="status-badge status-<%= order.status.toLowerCase() %>">
-              <%= order.status.toUpperCase() %>
-            </span>
-            <div class="action-buttons">
-              <% if (order.status === 'Processing') { %>
-                <button class="btn btn-cancel" onclick="cancelOrder('<%= order.orderId %>')">Cancel Order</button>
-                <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-primary">Invoice</a>
-              <% } else if (order.status === 'Delivered') { %>
-                <button class="btn btn-secondary" onclick="returnOrder('<%= order.orderId %>')">Return</button>
-                <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-primary">Invoice</a>
-              <% } else if (order.status === 'Shipped') { %>
-                <button class="btn btn-primary" onclick="trackOrder('<%= order.orderId %>')">Track Order</button>
-                <a href="/orders/<%= order.orderId %>/invoice" class="btn btn-secondary">Invoice</a>
-              <% } else if (order.status === 'Cancelled') { %>
-                <button class="btn btn-primary" onclick="reorder('<%= order.orderId %>')">Reorder</button>
-              <% } %>
-            </div>
-          </div>
         </div>
-      </div>
-    <% }); %>
-  <% } else { %>
-    <div class="empty-state">
-      <div class="empty-state-icon">📦</div>
-      <h3 class="empty-state-title">No Orders Yet</h3>
-      <p class="empty-state-text">Looks like you haven't placed any orders. Start shopping now!</p>
-      <a href="/shopPage" class="btn btn-primary">Start Shopping</a>
-    </div>
-  <% } %>
-</div>
 
         <!-- Loading Spinner -->
         <div class="loading-spinner" id="loadingSpinner">
@@ -1011,7 +1008,6 @@
             const profileSidebar = document.querySelector('.profile-sidebar');
             profileSidebar.classList.toggle('active');
             
-            // Prevent body scroll when profile sidebar is open
             if (profileSidebar.classList.contains('active')) {
                 document.body.style.overflow = 'hidden';
             } else {
@@ -1023,31 +1019,24 @@
         function clearFilters() {
             document.getElementById('statusFilter').value = '';
             document.getElementById('timeFilter').value = '';
-            document.getElementById('priceFilter').value = '';
+            document.getElementById('searchInput').value = '';
             applyFilters();
             updateFilterDropdowns();
         }
 
-        // Update filter dropdowns (for visual feedback, if needed)
+        // Update filter dropdowns
         function updateFilterDropdowns() {
-            // Could add visual feedback like a badge if multiple filters are selected
             const filters = [
                 document.getElementById('statusFilter').value,
-                document.getElementById('timeFilter').value,
-                document.getElementById('priceFilter').value
+                document.getElementById('timeFilter').value
             ].filter(val => val !== '');
-            // Optionally, add a badge or visual indicator here if needed
         }
 
         // Apply filters
         function applyFilters() {
             const orderCards = document.querySelectorAll('.order-card');
-            
-            // Get selected filter values
             const statusFilter = document.getElementById('statusFilter').value;
             const timeFilter = document.getElementById('timeFilter').value;
-            const priceFilter = document.getElementById('priceFilter').value;
-
             let visibleCount = 0;
 
             orderCards.forEach(card => {
@@ -1071,9 +1060,7 @@
                         matchTime = true;
                     } else if (timeFilter === 'last6months' && orderDate >= sixMonthsAgo) {
                         matchTime = true;
-                    } else if (timeFilter === '2025' && orderDate.getFullYear() === 2025) {
-                        matchTime = true;
-                    } else if (timeFilter === '2024' && orderDate.getFullYear() === 2024) {
+                    } else if (!isNaN(timeFilter) && orderDate.getFullYear() === parseInt(timeFilter)) {
                         matchTime = true;
                     }
                     
@@ -1082,25 +1069,7 @@
                     }
                 }
 
-                // Price filter
-                if (priceFilter && showCard) {
-                    const price = parseInt(card.dataset.price);
-                    let matchPrice = false;
-                    
-                    if (priceFilter === 'under10k' && price < 10000) {
-                        matchPrice = true;
-                    } else if (priceFilter === '10kto15k' && price >= 10000 && price <= 15000) {
-                        matchPrice = true;
-                    } else if (priceFilter === 'above15k' && price > 15000) {
-                        matchPrice = true;
-                    }
-                    
-                    if (!matchPrice) {
-                        showCard = false;
-                    }
-                }
-
-                // Show/hide card with animation
+                // Show/hide card
                 if (showCard) {
                     card.style.display = 'block';
                     setTimeout(() => card.style.opacity = '1', 10);
@@ -1111,7 +1080,6 @@
                 }
             });
 
-            // Show empty state if no results
             showEmptyState(visibleCount === 0, 'filter');
             updateFilterDropdowns();
         }
@@ -1123,10 +1091,12 @@
             let visibleCount = 0;
 
             orderCards.forEach(card => {
-                const productName = card.dataset.product;
                 const orderId = card.querySelector('.order-id').textContent.toLowerCase();
+                const productNames = Array.from(card.querySelectorAll('.product-name'))
+                    .map(el => el.textContent.toLowerCase())
+                    .join(' ');
                 
-                if (productName.includes(searchTerm) || orderId.includes(searchTerm)) {
+                if (productNames.includes(searchTerm) || orderId.includes(searchTerm)) {
                     card.style.display = 'block';
                     visibleCount++;
                 } else {
@@ -1158,7 +1128,6 @@
                 }
             });
 
-            // Re-append sorted cards
             orderCards.forEach(card => ordersList.appendChild(card));
         }
 
@@ -1179,7 +1148,7 @@
                             <p class="empty-state-text">Try adjusting your filters to see more results</p>
                             <button class="btn btn-primary" onclick="clearFilters()">Clear Filters</button>
                         `;
-                    } else if (type == 'search') {
+                    } else if (type === 'search') {
                         emptyState.innerHTML = `
                             <div class="empty-state-icon">🔍</div>
                             <h3 class="empty-state-title">No Results Found</h3>
@@ -1201,7 +1170,6 @@
         function cancelOrder(orderId) {
             if (confirm('Are you sure you want to cancel this order?')) {
                 showLoading(true);
-                // Add your cancel order API call here
                 setTimeout(() => {
                     showLoading(false);
                     alert('Order cancelled successfully!');
@@ -1223,7 +1191,6 @@
         function reorder(orderId) {
             if (confirm('Would you like to place this order again?')) {
                 showLoading(true);
-                // Add your reorder API call here
                 setTimeout(() => {
                     showLoading(false);
                     window.location.href = '/cart';
@@ -1272,7 +1239,6 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Apply any URL parameters if present
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
             

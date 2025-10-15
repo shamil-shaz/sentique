@@ -10,6 +10,7 @@ const customerController = require('../controllers/admin/customerController');
 const categoryController = require("../controllers/admin/categoryController");
 const productController = require("../controllers/admin/productController");
 const brandController = require('../controllers/admin/brandController');
+const adminOrderController=require('../controllers/admin/adminOrderController')
 
 // Middlewares
 const { userAuth, adminAuth } = require('../middlewares/auth');
@@ -76,4 +77,12 @@ router.post("/edit-product/:id", adminAuth, uploadProductImage.none(), productCo
 router.delete('/deleteProduct/:id', adminAuth, productController.deleteProduct);
 
 
+////--------- ORDER MANAGEMENT ------------
+
+router.get("/orders", adminAuth, adminOrderController.getAdminOrderList);
+
+router.post('/orders/approve-cancellation', adminAuth, adminOrderController.approveCancellation);
+
+router.post('/orders/reject-cancellation', adminAuth, adminOrderController.rejectCancellation);
+router.post('/orders/update-product-status', adminOrderController.updateProductStatus)
 module.exports = router;

@@ -122,6 +122,7 @@ const wishlistController=require('../controllers/user/whishlistController')
 const cartController=require('../controllers/user/cartController')
 const checkoutController=require('../controllers/user/checkoutController')
 const orderController=require('../controllers/user/orderController')
+const walletController=require('../controllers/user/walletController')
 
 const multer = require("multer");
 
@@ -260,7 +261,7 @@ router.delete('/cart/remove/:productId',userAuth, cartController.removeFromCart)
 router.put('/cart/update', userAuth, cartController.updateCart);
 
 
-//// checkout
+////----------------- checkout
 
 router.get('/checkout', userAuth, checkoutController.getCheckoutPage);
 router.get('/addresses/addresses-edit/:id', userAuth, checkoutController.getAddressForEdit);
@@ -268,16 +269,28 @@ router.post('/checkout/add-address', userAuth, checkoutController.addAddress);
 router.post('/checkout/edit-address/:id', userAuth, checkoutController.editAddress);
 router.post('/order/place', userAuth, checkoutController.placeOrder);
 
-//// order
+
+//// ----------------------order
 
 router.get("/orderSuccess",userAuth,orderController.getOrderSuccess)
 
 router.get('/orderDetails/:orderId', userAuth, orderController.getOrderDetails);
-
-// Cancel entire order
 router.post('/orders/:orderId/cancel', userAuth, orderController.cancelAllOrder);
-
-// Cancel single item from order
 router.post('/orders/:orderId/items/:productName/cancel', userAuth, orderController.cancelSingleOrder);
+
+
+//router.get('/orders/:orderId', orderController.getOrderDetails);
+router.post('/orders/:orderId/items/:productName/return', orderController.returnSingleOrder);
+router.post('/orders/:orderId/return', orderController.returnAllOrder);
+router.post('/orders/:orderId/items/:productName/cancel-return', orderController.cancelReturnSingleOrder);
+router.post('/orders/:orderId/cancel-return', orderController.cancelReturnAllOrder);
+
+router.post('/orders/:orderId/items/:productName/status', orderController.updateItemStatusRoute);
+
+
+////-------wallet----
+
+router.get('/profile/wallet', userAuth, walletController.getWalletPage);
+
 
 module.exports = router;
