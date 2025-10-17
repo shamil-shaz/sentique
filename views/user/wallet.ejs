@@ -1,6 +1,5 @@
 <%- include('../../views/partials/user/header') %>
 
-
 <style>
     * {
         margin: 0;
@@ -10,635 +9,958 @@
 
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f8f9fa;
+        background: #f5f7fa;
         color: #2c3e50;
-        line-height: 1.6;
-       
+    }
+
+    .wallet-wrapper {
+        display: flex;
+        gap: 20px;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .sidebar-section {
+        width: 280px;
+        flex-shrink: 0;
     }
 
     .wallet-container {
-        display: grid;
-     
-        margin-left: 280px;
-        margin-top: 100px;
-        padding: 40px 30px;
-        min-height: 100vh;
+        flex: 1;
+        min-width: 0;
     }
 
     .page-header {
-        margin-bottom: 35px;
+        margin-bottom: 30px;
     }
 
     .page-header h1 {
-        font-size: 32px;
-        font-weight: 600;
+        font-size: 28px;
+        font-weight: 700;
         color: #1a1a1a;
         margin-bottom: 8px;
     }
 
     .breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
+        font-size: 13px;
         color: #6c757d;
-        margin-bottom: 10px;
     }
 
     .breadcrumb span {
         color: #c5a572;
+        margin: 0 5px;
     }
 
     .wallet-grid {
         display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 30px;
-        margin-bottom: 40px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
+        margin-bottom: 30px;
     }
 
-    .balance-card {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        border-radius: 20px;
-        padding: 40px;
-        color: white;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .balance-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -30%;
-        width: 300px;
-        height: 300px;
-        background: rgba(197, 165, 114, 0.1);
-        border-radius: 50%;
-    }
-
-    .balance-label {
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        opacity: 0.9;
-        margin-bottom: 15px;
-    }
-
-    .balance-amount {
-        font-size: 48px;
-        font-weight: 700;
-        margin-bottom: 25px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .balance-currency {
-        font-size: 32px;
-        margin-right: 5px;
-    }
-
-    .balance-actions {
-        display: flex;
-        gap: 15px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .btn {
-        padding: 12px 28px;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .btn-primary {
-        background: #c5a572;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: #b8965f;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(197, 165, 114, 0.3);
-    }
-
-    .btn-secondary {
-        background: rgba(255, 255, 255, 0.15);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.25);
-        transform: translateY(-2px);
-    }
-
-    .quick-stats {
+    .stat-card {
         background: white;
-        border-radius: 20px;
-        padding: 35px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
-    }
-
-    .stat-item {
-        padding: 20px;
-        border-radius: 12px;
-        background: #f8f9fa;
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
+        border-left: 4px solid #c5a572;
     }
 
-    .stat-item:hover {
-        background: #e9ecef;
+    .stat-card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
         transform: translateY(-3px);
     }
 
+    .stat-card.balance {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        border-left-color: #c5a572;
+    }
+
     .stat-label {
-        font-size: 13px;
-        color: #6c757d;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
+        letter-spacing: 0.8px;
+        opacity: 0.8;
+        margin-bottom: 10px;
+        font-weight: 700;
     }
 
     .stat-value {
-        font-size: 28px;
-        font-weight: 700;
+        font-size: 26px;
+        font-weight: 800;
         color: #2c3e50;
     }
 
-    .stat-value.credit {
+    .stat-card.balance .stat-value {
+        color: white;
+        font-size: 32px;
+    }
+
+    .stat-card.credit {
+        border-left-color: #27ae60;
+    }
+
+    .stat-card.credit .stat-label {
         color: #27ae60;
     }
 
-    .stat-value.debit {
+    .stat-card.debit {
+        border-left-color: #e74c3c;
+    }
+
+    .stat-card.debit .stat-label {
         color: #e74c3c;
     }
 
-    .transactions-section {
+    .transactions-card {
         background: white;
-        border-radius: 20px;
-        padding: 35px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
     }
 
-    .section-header {
+    .card-header {
+        padding: 28px 28px 20px;
+        border-bottom: 2px solid #f0f2f5;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
         flex-wrap: wrap;
         gap: 15px;
     }
 
-    .section-header h2 {
-        font-size: 24px;
-        font-weight: 600;
+    .card-header h2 {
+        font-size: 22px;
+        font-weight: 800;
         color: #1a1a1a;
     }
 
     .filter-tabs {
         display: flex;
-        gap: 10px;
+        gap: 8px;
+        background: #f8f9fa;
+        padding: 4px;
+        border-radius: 10px;
     }
 
     .tab-btn {
-        padding: 8px 20px;
-        border: 1px solid #dee2e6;
-        background: white;
+        padding: 10px 20px;
+        border: none;
+        background: transparent;
         border-radius: 8px;
         font-size: 13px;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         color: #6c757d;
     }
 
     .tab-btn.active {
-        background: #2c3e50;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
         color: white;
-        border-color: #2c3e50;
+        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.25);
     }
 
     .tab-btn:hover:not(.active) {
-        border-color: #c5a572;
-        color: #c5a572;
+        color: #2c3e50;
+        background: rgba(44, 62, 80, 0.05);
+    }
+
+    .card-body {
+        padding: 0;
+        overflow-x: auto;
     }
 
     .transaction-table {
         width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 12px;
+        border-collapse: collapse;
     }
 
-    .transaction-table thead th {
+    .transaction-table thead {
+        background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+    }
+
+    .transaction-table th {
+        padding: 16px 20px;
         text-align: left;
-        font-size: 13px;
-        font-weight: 600;
-        color: #6c757d;
+        font-size: 12px;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 0 15px 15px;
-        border-bottom: 2px solid #f1f3f5;
+        letter-spacing: 0.8px;
+        color: #495057;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .transaction-table td {
+        padding: 18px 20px;
+        border-bottom: 1px solid #f0f2f5;
+        font-size: 14px;
     }
 
     .transaction-table tbody tr {
-        background: #f8f9fa;
         transition: all 0.3s ease;
     }
 
     .transaction-table tbody tr:hover {
-        background: #e9ecef;
-        transform: translateX(5px);
+        background: #f8f9fa;
     }
 
-    .transaction-table tbody td {
-        padding: 20px 15px;
+    .serial-no {
+        font-weight: 700;
+        color: #2c3e50;
+        width: 50px;
+        font-size: 15px;
     }
 
-    .transaction-table tbody tr td:first-child {
-        border-radius: 10px 0 0 10px;
-    }
-
-    .transaction-table tbody tr td:last-child {
-        border-radius: 0 10px 10px 0;
-    }
-
-    .transaction-id {
+    .order-id {
         font-family: 'Courier New', monospace;
         font-size: 13px;
-        color: #495057;
+        color: #2c3e50;
+        font-weight: 700;
+        background: #f8f9fa;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+
+    .reason-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
         font-weight: 600;
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .reason-badge.refund {
+        background: #fff9e6;
+        color: #d4941e;
+    }
+
+    .reason-badge.return {
+        background: #ffe6e6;
+        color: #c41e1e;
+    }
+
+    .reason-badge.referral {
+        background: #e6f7e6;
+        color: #2d8a2d;
+    }
+
+    .reason-badge.add-money {
+        background: #e6f2ff;
+        color: #0066cc;
+    }
+
+    .reason-badge.add-wallet {
+        background: #e6f2ff;
+        color: #0066cc;
+    }
+
+    .reason-badge.purchase {
+        background: #f0f0f0;
+        color: #404040;
+    }
+
+    .reason-badge.order-cancellation {
+        background: #ffe6e6;
+        color: #c41e1e;
+    }
+
+    .reason-badge.adjustment {
+        background: #fff9e6;
+        color: #d4941e;
+    }
+
+    .reason-badge.cashback {
+        background: #e6f7e6;
+        color: #2d8a2d;
+    }
+
+    .reason-badge.order-refunded {
+        background: #fff9e6;
+        color: #d4941e;
+    }
+
+    .reason-badge.item-purchased {
+        background: #f0f0f0;
+        color: #404040;
+    }
+
+    .reason-badge.friend-referral {
+        background: #e6f7e6;
+        color: #2d8a2d;
     }
 
     .transaction-date {
         color: #6c757d;
-        font-size: 14px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .transaction-time {
+        font-size: 11px;
+        color: #adb5bd;
     }
 
     .transaction-amount {
-        font-size: 16px;
-        font-weight: 600;
-        color: #2c3e50;
+        font-weight: 800;
+        font-size: 15px;
     }
 
-    .transaction-status {
+    .amount-credit {
+        color: #27ae60;
+    }
+
+    .amount-debit {
+        color: #e74c3c;
+    }
+
+    .status-badge {
         display: inline-block;
-        padding: 6px 16px;
+        padding: 6px 14px;
         border-radius: 20px;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
     .status-credit {
-        background: #d4edda;
+        background: rgba(39, 174, 96, 0.15);
         color: #27ae60;
     }
 
     .status-debit {
-        background: #f8d7da;
+        background: rgba(231, 76, 60, 0.15);
         color: #e74c3c;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        color: #6c757d;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.6;
+    }
+
+    .empty-state-text {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .card-footer {
+        padding: 30px 28px;
+        border-top: 2px solid #f0f2f5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    /* Modern Pagination Styles */
+    .pagination-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
     }
 
     .pagination {
         display: flex;
-        justify-content: center;
         align-items: center;
-        gap: 10px;
-        margin-top: 35px;
-        flex-wrap: wrap;
+        gap: 6px;
+        background: #f8f9fa;
+        padding: 8px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
     .pagination button {
-        width: 40px;
+        min-width: 40px;
         height: 40px;
-        border: 1px solid #dee2e6;
+        padding: 0 12px;
+        border: 2px solid transparent;
         background: white;
         border-radius: 8px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         font-weight: 600;
         color: #495057;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
     }
 
-    .pagination button:hover:not(:disabled) {
-        background: #2c3e50;
-        color: white;
+    .pagination button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+    }
+
+    .pagination button span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .pagination button:hover:not(:disabled):not(.active) {
         border-color: #2c3e50;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
     }
 
     .pagination button.active {
-        background: #c5a572;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
         color: white;
-        border-color: #c5a572;
+        border-color: #2c3e50;
+        box-shadow: 0 4px 16px rgba(44, 62, 80, 0.3);
+        transform: scale(1.05);
     }
 
     .pagination button:disabled {
         opacity: 0.3;
         cursor: not-allowed;
+        background: #e9ecef;
+        color: #adb5bd;
     }
 
-    .pagination .dots {
-        color: #6c757d;
+    .pagination button:disabled:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: transparent;
+    }
+
+    .pagination .page-nav {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .pagination .page-nav:hover:not(:disabled) {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+    }
+
+    .pagination-dots {
+        color: #adb5bd;
+        font-weight: 700;
+        padding: 0 8px;
+        user-select: none;
+        font-size: 16px;
+    }
+
+    .pagination-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 13px;
         font-weight: 600;
+        color: #495057;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
-    /* Responsive Design */
-    @media (max-width: 1200px) {
-        .wallet-container {
-            margin-left: 0;
-            margin-top: 80px;
-            padding: 30px 20px;
+    .pagination-info .page-indicator {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .pagination-info .divider {
+        color: #c5a572;
+        font-weight: 700;
+    }
+
+    @media (max-width: 1024px) {
+        .wallet-wrapper {
+            flex-direction: column;
         }
 
-        .wallet-grid {
-            grid-template-columns: 1fr;
+        .sidebar-section {
+            width: 100%;
+        }
+
+        .wallet-container {
+            flex: 1;
         }
     }
 
     @media (max-width: 768px) {
-        .wallet-container {
-            margin-top: 70px;
-            padding: 20px 15px;
+        .wallet-wrapper {
+            padding: 15px;
         }
 
-        .page-header h1 {
-            font-size: 26px;
+        .wallet-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
 
-        .stats-grid {
-            grid-template-columns: 1fr;
+        .stat-card {
+            padding: 16px;
         }
 
-        .balance-amount {
-            font-size: 36px;
+        .stat-value {
+            font-size: 20px;
         }
 
-        .balance-actions {
+        .stat-card.balance .stat-value {
+            font-size: 24px;
+        }
+
+        .card-header {
             flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
+            align-items: flex-start;
+            padding: 20px;
         }
 
         .filter-tabs {
-            flex-wrap: wrap;
             width: 100%;
         }
 
         .tab-btn {
             flex: 1;
-            min-width: 80px;
+            padding: 10px 12px;
+            font-size: 12px;
         }
 
         .transaction-table {
+            font-size: 12px;
+        }
+
+        .transaction-table th,
+        .transaction-table td {
+            padding: 12px 10px;
+        }
+
+        .card-footer {
+            padding: 20px;
+        }
+
+        .pagination-wrapper {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pagination button {
+            min-width: 36px;
+            height: 36px;
             font-size: 13px;
         }
 
-        .transaction-table thead th,
-        .transaction-table tbody td {
-            padding: 15px 10px;
-        }
-
-        .balance-card {
-            padding: 30px 25px;
-        }
-
-        .transactions-section,
-        .quick-stats {
-            padding: 25px 20px;
+        .pagination .page-nav {
+            width: 36px;
+            height: 36px;
         }
     }
 
     @media (max-width: 480px) {
-        .balance-amount {
-            font-size: 32px;
+        .wallet-wrapper {
+            padding: 12px;
         }
 
-        .balance-currency {
-            font-size: 24px;
+        .page-header h1 {
+            font-size: 22px;
+        }
+
+        .wallet-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 18px;
         }
 
-        .section-header {
-            flex-direction: column;
-            align-items: flex-start;
+        .stat-card.balance .stat-value {
+            font-size: 22px;
         }
 
-        .filter-tabs {
-            width: 100%;
+        .card-header {
+            padding: 15px;
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+        }
+
+        .transaction-table th {
+            font-size: 10px;
+            padding: 8px 6px;
+        }
+
+        .transaction-table td {
+            padding: 10px 6px;
+            font-size: 11px;
+        }
+
+        .pagination {
+            gap: 4px;
+            padding: 6px;
+        }
+
+        .pagination button {
+            min-width: 32px;
+            height: 32px;
+            font-size: 12px;
+        }
+
+        .pagination .page-nav {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+
+        .pagination-info {
+            font-size: 12px;
+            padding: 8px 14px;
+        }
+
+        .card-footer {
+            padding: 15px;
         }
     }
 </style>
 
-<div class="wallet-container">
-
-    <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'wallet' }) %>
-    <div class="page-header">
-        <div class="breadcrumb">
-            Home <span>/</span> My Account <span>/</span> Wallet
-        </div>
-        <h1>Wallet Management</h1>
+<div class="wallet-wrapper">
+    <!-- Sidebar Section -->
+    <div class="sidebar-section">
+        <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'wallet' }) %>
     </div>
 
-    <div class="wallet-grid">
-        <div class="balance-card">
-            <div class="balance-label">Available Balance</div>
-            <div class="balance-amount">
-                <span class="balance-currency">₹</span><span id="walletBalance"><%= walletData.balance.toFixed(2) %></span>
+    <!-- Main Content -->
+    <div class="wallet-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="breadcrumb">
+                Home <span>/</span> My Account <span>/</span> Wallet
             </div>
-            <div class="balance-actions">
-                <button class="btn btn-primary" onclick="addFunds()">Add Funds</button>
-                <button class="btn btn-secondary" onclick="withdraw()">Withdraw</button>
+            <h1>💰 Wallet Management</h1>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="wallet-grid">
+            <div class="stat-card balance">
+                <div class="stat-label">Available Balance</div>
+                <div class="stat-value" id="walletBalance">₹<%= parseFloat(walletData.balance).toFixed(2) %></div>
+            </div>
+            <div class="stat-card credit">
+                <div class="stat-label">Total Credits</div>
+                <div class="stat-value" id="totalCredits">₹<%= walletData.totalCredits %></div>
+            </div>
+            <div class="stat-card debit">
+                <div class="stat-label">Total Debits</div>
+                <div class="stat-value" id="totalDebits">₹<%= walletData.totalDebits %></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">This Month</div>
+                <div class="stat-value" id="monthlyTotal">₹<%= walletData.monthlyTotal %></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Transactions</div>
+                <div class="stat-value" id="transactionCount"><%= walletData.transactionCount %></div>
             </div>
         </div>
 
-        <div class="quick-stats">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-label">Total Credits</div>
-                    <div class="stat-value credit" id="totalCredits">₹0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Total Debits</div>
-                    <div class="stat-value debit" id="totalDebits">₹0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">This Month</div>
-                    <div class="stat-value" id="monthlyTotal">₹0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Transactions</div>
-                    <div class="stat-value" id="transactionCount">0</div>
+        <!-- Transactions Card -->
+        <div class="transactions-card">
+            <div class="card-header">
+                <h2>📋 Transaction History</h2>
+                <div class="filter-tabs">
+                    <button class="tab-btn active" onclick="filterTransactions('all', event)">All</button>
+                    <button class="tab-btn" onclick="filterTransactions('credit', event)">Credits</button>
+                    <button class="tab-btn" onclick="filterTransactions('debit', event)">Debits</button>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="transactions-section">
-        <div class="section-header">
-            <h2>Transaction History</h2>
-            <div class="filter-tabs">
-                <button class="tab-btn active" onclick="filterTransactions('all')">All</button>
-                <button class="tab-btn" onclick="filterTransactions('credit')">Credits</button>
-                <button class="tab-btn" onclick="filterTransactions('debit')">Debits</button>
+            <div class="card-body">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Order ID</th>
+                            <th>Reason</th>
+                            <th>Date & Time</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionBody">
+                        <% if (transactions && transactions.length > 0) { %>
+                            <% transactions.forEach(t => { %>
+                                <tr>
+                                    <td class="serial-no"><%= t.serialNo %></td>
+                                    <td class="order-id"><%= t.orderId %></td>
+                                    <td>
+                                      <span class="reason-badge <%= t.reason.toLowerCase().replace(/\s+/g, '-') %>">
+        <%= t.reason %>
+    </span>
+                                    </td>
+                                    <td>
+                                        <div class="transaction-date"><%= t.date %></div>
+                                        <div class="transaction-time"><%= t.time %></div>
+                                    </td>
+                                    <td class="transaction-amount <%= t.type === 'credit' ? 'amount-credit' : 'amount-debit' %>">
+                                        <%= t.type === 'credit' ? ' +' : ' -' %>₹<%= t.amount %>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge <%= t.type === 'credit' ? 'status-credit' : 'status-debit' %>">
+                                            <%= t.type === 'credit' ? 'Credited' : 'Debited' %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">📭</div>
+                                        <div class="empty-state-text">No transactions found</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
-        </div>
 
-        <table class="transaction-table">
-            <thead>
-                <tr>
-                    <th>Transaction ID</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="transactionBody">
-                <!-- Transactions will be loaded from backend -->
-            </tbody>
-        </table>
-
-        <div class="pagination" id="paginationContainer">
-            <!-- Pagination will be generated dynamically -->
+            <% if (totalPages > 1 || totalTransactions > 0) { %>
+                <div class="card-footer">
+                    <div class="pagination-wrapper">
+                        <div class="pagination" id="paginationContainer">
+                            <!-- Pagination will be generated dynamically -->
+                        </div>
+                        <div class="pagination-info">
+                            <span>Page</span>
+                            <span class="page-indicator" id="currentPageInfo"><%= currentPage %></span>
+                            <span class="divider">/</span>
+                            <span class="page-indicator" id="totalPagesInfo"><%= totalPages %></span>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
         </div>
     </div>
 </div>
 
 <script>
-    let currentPage = 1;
-    let totalPages = 1;
-    let allTransactions = [];
+    let currentPage = <%= currentPage %>;
+    let totalPages = <%= totalPages %>;
+    let totalTransactions = <%= totalTransactions %>;
     let currentFilter = 'all';
 
-    // Initialize dashboard on page load
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Initial transactions:', <%- JSON.stringify(transactions) %>); // Debug log
+        console.log('Initial totalPages:', totalPages, 'currentPage:', currentPage); // Debug log
+        renderPagination();
         loadWalletData();
     });
 
-    // Load wallet data from backend
     async function loadWalletData() {
         try {
             const response = await fetch('/api/wallet/data');
+            if (!response.ok) throw new Error('Failed to fetch wallet data');
             const data = await response.json();
+            console.log('Wallet data:', data); // Debug log
             
-            // Update statistics
+            document.getElementById('walletBalance').textContent = '₹' + parseFloat(data.balance).toFixed(2);
             document.getElementById('totalCredits').textContent = '₹' + data.totalCredits;
             document.getElementById('totalDebits').textContent = '₹' + data.totalDebits;
             document.getElementById('monthlyTotal').textContent = '₹' + data.monthlyTotal;
             document.getElementById('transactionCount').textContent = data.transactionCount;
             
-            // Store transactions
-            allTransactions = data.transactions;
             totalPages = data.totalPages || 1;
-            
-            // Display transactions
-            displayTransactions(allTransactions);
-            renderPagination();
+            totalTransactions = data.transactionCount;
         } catch (error) {
             console.error('Error loading wallet data:', error);
-            showError('Unable to load wallet data. Please try again.');
         }
     }
 
-    // Display transactions in table
-    function displayTransactions(transactions) {
+    function filterTransactions(type, event) {
+        currentFilter = type;
+        currentPage = 1;
+        
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach((tab) => tab.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        loadPageData(currentPage);
+    }
+
+    function renderTransactionTable(transactions) {
         const tbody = document.getElementById('transactionBody');
         tbody.innerHTML = '';
         
-        if (transactions.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #6c757d;">No transactions found</td></tr>';
+        console.log('Rendering transactions:', transactions); // Debug log
+        if (!transactions || transactions.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-text">No transactions found for this filter</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
             return;
         }
-        
-        transactions.forEach(transaction => {
-            const row = document.createElement('tr');
-            row.dataset.type = transaction.type.toLowerCase();
-            
-            const statusClass = transaction.type.toLowerCase() === 'credit' ? 'status-credit' : 'status-debit';
-            const statusText = transaction.type.toLowerCase() === 'credit' ? 'Amount Credited' : 'Amount Debited';
-            
-            row.innerHTML = `
-                <td class="transaction-id">#${transaction.id}</td>
-                <td class="transaction-date">${transaction.date}</td>
-                <td class="transaction-amount">₹${transaction.amount}</td>
-                <td><span class="transaction-status ${statusClass}">${statusText}</span></td>
+
+        let html = '';
+        transactions.forEach((t) => {
+            const reasonClass = t.reason.toLowerCase().replace(/\s+/g, '-');
+            const statusClass = t.type === 'credit' ? 'status-credit' : 'status-debit';
+            const amountClass = t.type === 'credit' ? 'amount-credit' : 'amount-debit';
+            const amountSign = t.type === 'credit' ? ' +' : ' -';
+            const statusText = t.type === 'credit' ? 'Credited' : 'Debited';
+
+            html += `
+                <tr>
+                    <td class="serial-no">${t.serialNo}</td>
+                    <td class="order-id">${t.orderId}</td>
+                    <td>
+                        <span class="reason-badge ${reasonClass}">
+                            ${t.reason}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="transaction-date">${t.date}</div>
+                        <div class="transaction-time">${t.time}</div>
+                    </td>
+                    <td class="transaction-amount ${amountClass}">
+                        ${amountSign}₹${t.amount}
+                    </td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                </tr>
             `;
-            
-            tbody.appendChild(row);
         });
+        tbody.innerHTML = html;
     }
 
-    // Render pagination controls
     function renderPagination() {
         const container = document.getElementById('paginationContainer');
+        if (!container) return;
+        
         container.innerHTML = '';
-        
-        if (totalPages <= 1) return;
-        
+        console.log('Rendering pagination: totalPages=', totalPages, 'currentPage=', currentPage); // Debug log
+        if (totalPages <= 1) {
+            container.innerHTML = `
+                <button class="page-nav" disabled>
+                    <span>←</span>
+                </button>
+                <button class="active">
+                    <span>1</span>
+                </button>
+                <button class="page-nav" disabled>
+                    <span>→</span>
+                </button>
+            `;
+            return;
+        }
+
+        // Previous button
         const prevBtn = document.createElement('button');
-        prevBtn.innerHTML = '←';
+        prevBtn.className = 'page-nav';
+        prevBtn.innerHTML = '<span>←</span>';
+        prevBtn.title = 'Previous Page';
         prevBtn.onclick = () => changePage('prev');
         prevBtn.disabled = currentPage === 1;
         container.appendChild(prevBtn);
+
+        // Page numbers with smart ellipsis
+        const maxVisible = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
         
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                const pageBtn = document.createElement('button');
-                pageBtn.textContent = i;
-                pageBtn.onclick = () => goToPage(i);
-                if (i === currentPage) pageBtn.classList.add('active');
-                container.appendChild(pageBtn);
-            } else if (i === currentPage - 2 || i === currentPage + 2) {
+        if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        // First page
+        if (startPage > 1) {
+            const pageBtn = document.createElement('button');
+            pageBtn.innerHTML = '<span>1</span>';
+            pageBtn.onclick = () => goToPage(1);
+            container.appendChild(pageBtn);
+            
+            if (startPage > 2) {
                 const dots = document.createElement('span');
-                dots.className = 'dots';
-                dots.textContent = '...';
+                dots.className = 'pagination-dots';
+                dots.textContent = '•••';
                 container.appendChild(dots);
             }
         }
-        
+
+        // Middle pages
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.innerHTML = `<span>${i}</span>`;
+            pageBtn.onclick = () => goToPage(i);
+            if (i === currentPage) pageBtn.classList.add('active');
+            container.appendChild(pageBtn);
+        }
+
+        // Last page
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const dots = document.createElement('span');
+                dots.className = 'pagination-dots';
+                dots.textContent = '•••';
+                container.appendChild(dots);
+            }
+            
+            const pageBtn = document.createElement('button');
+            pageBtn.innerHTML = `<span>${totalPages}</span>`;
+            pageBtn.onclick = () => goToPage(totalPages);
+            container.appendChild(pageBtn);
+        }
+
+        // Next button
         const nextBtn = document.createElement('button');
-        nextBtn.innerHTML = '→';
+        nextBtn.className = 'page-nav';
+        nextBtn.innerHTML = '<span>→</span>';
+        nextBtn.title = 'Next Page';
         nextBtn.onclick = () => changePage('next');
         nextBtn.disabled = currentPage === totalPages;
         container.appendChild(nextBtn);
+
+        // Update page info
+        const currentPageInfo = document.getElementById('currentPageInfo');
+        const totalPagesInfo = document.getElementById('totalPagesInfo');
+        if (currentPageInfo) currentPageInfo.textContent = currentPage;
+        if (totalPagesInfo) totalPagesInfo.textContent = totalPages;
     }
 
-    // Filter transactions by type
-    function filterTransactions(type) {
-        currentFilter = type;
-        const tabs = document.querySelectorAll('.tab-btn');
-        tabs.forEach(tab => tab.classList.remove('active'));
-        event.target.classList.add('active');
-
-        const rows = document.querySelectorAll('#transactionBody tr');
-        rows.forEach(row => {
-            if (type === 'all') {
-                row.style.display = '';
-            } else {
-                row.style.display = row.dataset.type === type ? '' : 'none';
-            }
-        });
-    }
-
-    // Change page
     async function changePage(direction) {
+        console.log('Changing page:', direction, 'currentPage:', currentPage, 'totalPages:', totalPages); // Debug log
         if (direction === 'prev' && currentPage > 1) {
             currentPage--;
         } else if (direction === 'next' && currentPage < totalPages) {
@@ -647,40 +969,40 @@
         await loadPageData(currentPage);
     }
 
-    // Go to specific page
     async function goToPage(page) {
-        currentPage = page;
-        await loadPageData(page);
-    }
-
-    // Load data for specific page
-    async function loadPageData(page) {
-        try {
-            const response = await fetch(`/api/wallet/transactions?page=${page}&filter=${currentFilter}`);
-            const data = await response.json();
-            
-            allTransactions = data.transactions;
-            displayTransactions(allTransactions);
-            renderPagination();
-        } catch (error) {
-            console.error('Error loading page data:', error);
-            showError('Unable to load transactions. Please try again.');
+        console.log('Going to page:', page); // Debug log
+        if (page >= 1 && page <= totalPages && page !== currentPage) {
+            currentPage = page;
+            await loadPageData(page);
         }
     }
 
-    // Add funds functionality
-    function addFunds() {
-        window.location.href = '/wallet/add-funds';
-    }
-
-    // Withdraw functionality
-    function withdraw() {
-        window.location.href = '/wallet/withdraw';
-    }
-
-    // Show error message
-    function showError(message) {
-        alert(message);
+    async function loadPageData(page) {
+        try {
+            const response = await fetch(`/api/wallet/transactions?page=${page}&filter=${currentFilter}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch transactions');
+            }
+            
+            const data = await response.json();
+            
+            console.log('Paginated data:', data); // Debug log
+            totalPages = data.totalPages || 1;
+            totalTransactions = data.totalTransactions || 0;
+            currentPage = page;
+            
+            renderTransactionTable(data.transactions);
+            renderPagination();
+            
+            // Smooth scroll to top of table
+            const cardBody = document.querySelector('.card-body');
+            if (cardBody) {
+                cardBody.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        } catch (error) {
+            console.error('Error loading page data:', error);
+        }
     }
 </script>
 

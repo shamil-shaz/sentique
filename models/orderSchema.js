@@ -177,7 +177,6 @@
 
 
 
-
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const { v4: uuidv4 } = require('uuid');
@@ -246,8 +245,19 @@ const orderSchema = new Schema({
       returnedAt: {
         type: Date,
       },
+      // ✅ NEW: Return rejection fields
+      returnRejected: {
+        type: Boolean,
+        default: false,
+      },
+      returnRejectedAt: {
+        type: Date,
+      },
+      returnRejectionReason: {
+        type: String,
+      },
       tracking: {
-        placedDate: { type: String }, // Changed to String for formatted date
+        placedDate: { type: String },
         placedTime: { type: String },
         confirmedDate: { type: String },
         confirmedTime: { type: String },
@@ -261,7 +271,7 @@ const orderSchema = new Schema({
         outForDeliveryLocation: { type: String },
         deliveredDate: { type: String },
         deliveredTime: { type: String },
-        estimatedDeliveryDate: { type: String }, // Changed to String
+        estimatedDeliveryDate: { type: String },
       },
       isReturnEligible: {
         type: Boolean,

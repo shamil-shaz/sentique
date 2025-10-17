@@ -81,8 +81,16 @@ router.delete('/deleteProduct/:id', adminAuth, productController.deleteProduct);
 
 router.get("/orders", adminAuth, adminOrderController.getAdminOrderList);
 
-router.post('/orders/approve-cancellation', adminAuth, adminOrderController.approveCancellation);
 
-router.post('/orders/reject-cancellation', adminAuth, adminOrderController.rejectCancellation);
-router.post('/orders/update-product-status', adminOrderController.updateProductStatus)
+
+// router.post('/orders/update-product-status', adminOrderController.updateProductStatus)
+
+// router.post('/admin/orders/approve-return', adminOrderController.approveReturn);
+// router.post('/admin/orders/reject-return', adminOrderController.rejectReturn);
+
+router.post('/orders/update-product-status',adminAuth, adminOrderController.updateProductStatus);
+router.post('/orders/approve-return', adminAuth,adminOrderController.approveReturn);
+router.post('/orders/reject-return', adminAuth,adminOrderController.rejectReturn);
+
+
 module.exports = router;

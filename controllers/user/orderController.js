@@ -6,6 +6,7 @@ const Address = require('../../models/addressSchema');
 const Product = require('../../models/productSchema');
 const User = require('../../models/userSchema');
 const Order=require('../../models/orderSchema')
+const Wallet=require('../../models/walletSchema')
 
 const getOrderSuccess = async (req, res) => {
   try {
@@ -113,7 +114,9 @@ const cancelSingleOrder = async (req, res) => {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    const order = await Order.findOne({ orderId, user: userId });
+    const order = await Order.findOne({ orderId, user: userId })
+      .populate('orderItems.product');
+    
     if (!order) {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
@@ -133,6 +136,33 @@ const cancelSingleOrder = async (req, res) => {
     // Check if item is already cancelled
     if (item.status === 'Cancelled') {
       return res.status(400).json({ success: false, error: 'Item already cancelled' });
+    }
+
+    // Restore stock before marking as cancelled
+    try {
+      const product = await Product.findById(item.product._id);
+      if (!product) {
+        console.warn(`Product not found for stock restoration: ${item.product._id}`);
+      } else {
+        // Find variant by size and restore stock
+        if (item.variantSize && product.variants && Array.isArray(product.variants)) {
+          const variant = product.variants.find(v => v.size === Number(item.variantSize));
+          
+          if (variant) {
+            variant.stock += item.quantity || 1;
+            console.log(`✅ Stock restored from user cancellation: ${item.variantSize}ml - Added ${item.quantity || 1} units. New stock: ${variant.stock}`);
+          } else {
+            console.warn(`❌ Variant ${item.variantSize}ml not found for product ${product.productName}`);
+          }
+        } else {
+          console.warn(`❌ No size info or variants not found for product ${product._id}`);
+        }
+
+        await product.save();
+      }
+    } catch (stockError) {
+      console.error(`Error restoring stock for product ${item.product._id}:`, stockError);
+      // Continue with cancellation even if stock restoration fails
     }
 
     // Mark item as cancelled
@@ -156,12 +186,12 @@ const cancelSingleOrder = async (req, res) => {
 
     await order.save();
 
-    console.log(`Item ${decodedProductName} cancelled successfully`);
+    console.log(`Item ${decodedProductName} cancelled successfully and stock restored`);
     
     // Return success response
     res.json({ 
       success: true, 
-      message: `Item ${decodedProductName} cancelled successfully`,
+      message: `Item ${decodedProductName} cancelled successfully and stock restored`,
       allCancelled: allCancelled
     });
     
@@ -170,7 +200,6 @@ const cancelSingleOrder = async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to cancel item' });
   }
 };
-
 
 const cancelAllOrder = async (req, res) => {
   try {
@@ -183,7 +212,9 @@ const cancelAllOrder = async (req, res) => {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    const order = await Order.findOne({ orderId, user: userId });
+    const order = await Order.findOne({ orderId, user: userId })
+      .populate('orderItems.product'); // Add populate to get product details
+
     if (!order) {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
@@ -192,29 +223,103 @@ const cancelAllOrder = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Order cannot be cancelled' });
     }
 
-    // Update all items to "Cancelled"
-    order.orderItems.forEach(item => {
-      item.status = 'Cancelled';
-      item.cancelReason = reason;
-      item.cancelDetails = details;
-      item.cancelledAt = new Date();
-    });
+    // Check if any item is shipped or delivered
+    const hasShippedOrDeliveredItems = order.orderItems.some(item => 
+      item.status === 'Shipped' || 
+      item.status === 'OutForDelivery' || 
+      item.status === 'Out for Delivery' ||
+      item.status === 'Delivered'
+    );
 
-    // Mark entire order as cancelled
-    order.status = 'Cancelled';
-    order.cancelReason = reason;
-    order.cancelDetails = details;
-    order.cancelledAt = new Date();
-    order.finalAmount = 0; // Set final amount to 0 when entire order is cancelled
+    if (hasShippedOrDeliveredItems) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Cannot cancel entire order. Some items are already shipped or delivered. Please cancel individual items instead.' 
+      });
+    }
+
+    // Only cancel items that are NOT shipped/delivered
+    let cancelledCount = 0;
+    
+    for (const item of order.orderItems) {
+      // Only cancel if item is not shipped/delivered
+      if (item.status !== 'Shipped' && 
+          item.status !== 'OutForDelivery' && 
+          item.status !== 'Out for Delivery' &&
+          item.status !== 'Delivered' &&
+          item.status !== 'Cancelled') {
+
+        // Restore stock before marking as cancelled
+        try {
+          const product = await Product.findById(item.product._id);
+          if (!product) {
+            console.warn(`Product not found for stock restoration: ${item.product._id}`);
+          } else {
+            // Find variant by size and restore stock
+            if (item.variantSize && product.variants && Array.isArray(product.variants)) {
+              const variant = product.variants.find(v => v.size === Number(item.variantSize));
+              
+              if (variant) {
+                variant.stock += item.quantity || 1;
+                console.log(`✅ Stock restored from bulk cancellation: ${item.variantSize}ml - Added ${item.quantity || 1} units. New stock: ${variant.stock}`);
+              } else {
+                console.warn(`❌ Variant ${item.variantSize}ml not found for product ${product.productName}`);
+              }
+            } else {
+              console.warn(`❌ No size info or variants not found for product ${product._id}`);
+            }
+
+            await product.save();
+          }
+        } catch (stockError) {
+          console.error(`Error restoring stock for product ${item.product._id}:`, stockError);
+          // Continue with cancellation even if stock restoration fails
+        }
+
+        // Mark item as cancelled
+        item.status = 'Cancelled';
+        item.cancelReason = reason;
+        item.cancelDetails = details;
+        item.cancelledAt = new Date();
+        
+        // Deduct from final amount
+        order.finalAmount -= item.total;
+        cancelledCount++;
+      }
+    }
+
+    if (cancelledCount === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'No items available to cancel' 
+      });
+    }
+
+    if (order.finalAmount < 0) order.finalAmount = 0;
+
+    // Check if all items are now cancelled
+    const allCancelled = order.orderItems.every(item => 
+      item.status === 'Cancelled' || 
+      item.status === 'Delivered' || 
+      item.status === 'Shipped' ||
+      item.status === 'OutForDelivery' ||
+      item.status === 'Out for Delivery'
+    );
+    
+    if (allCancelled) {
+      order.status = 'Cancelled';
+      order.cancelReason = reason;
+      order.cancelDetails = details;
+      order.cancelledAt = new Date();
+    }
 
     await order.save();
 
-    console.log('Order cancelled successfully');
+    console.log(`${cancelledCount} items cancelled successfully and stock restored`);
     
-    // Return success response
     res.json({ 
       success: true, 
-      message: 'Order cancelled successfully' 
+      message: `${cancelledCount} item(s) cancelled successfully and stock restored` 
     });
     
   } catch (error) {
@@ -222,7 +327,6 @@ const cancelAllOrder = async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to cancel order' });
   }
 };
-
 
 // const getOrderList = async (req, res) => {
 //   try {
@@ -431,6 +535,7 @@ const getOrderList = async (req, res) => {
   }
 };
 
+
 // const getOrderDetails = async (req, res) => {
 //   try {
 //     const user = req.session.user;
@@ -447,50 +552,17 @@ const getOrderList = async (req, res) => {
 //       .populate('orderItems.product')
 //       .lean();
 
-//     console.log('Latest order:', JSON.stringify(latestOrder, null, 2));
-
 //     if (!latestOrder) {
 //       console.log('No order found for user:', userId, 'with orderId:', orderId);
-//       return res.render('orderDetails', {
-//         orderId: 'N/A',
-//         date: 'N/A',
-//         status: 'N/A',
-//         paymentMethod: 'N/A',
-//         amount: 'N/A',
-//         deliveryDate: 'N/A',
-//         items: [],
-//         deliveryAddress: {
-//           name: 'N/A',
-//           houseName: 'N/A',
-//           city: 'N/A',
-//           state: 'N/A',
-//           pincode: 'N/A',
-//           phone: 'N/A',
-//         },
-//         isReturnEligible: false,
-//         isShippedOrOut: false,
-//         canCancelEntireOrder: false, // Added for safety
-//         success: req.flash('success'),
-//         tracking: null,
-//       });
+//       return res.redirect('/pageNotFound');
 //     }
 
-//     // Format date
-//     const orderDate = new Date(latestOrder.createdOn);
-//     const formattedDate = orderDate.toLocaleDateString('en-IN', {
-//       day: '2-digit',
-//       month: 'short',
-//       year: 'numeric',
-//     });
+//     console.log('Latest order items:', JSON.stringify(latestOrder.orderItems, null, 2));
 
-//     // Estimated delivery = 5 days later
-//     const deliveryDate = new Date(orderDate);
-//     deliveryDate.setDate(deliveryDate.getDate() + 5);
-//     const formattedDelivery = deliveryDate.toLocaleDateString('en-IN', {
-//       day: '2-digit',
-//       month: 'short',
-//       year: 'numeric',
-//     });
+//     // Format order date
+//     const formattedDate = latestOrder.createdOn
+//       ? new Date(latestOrder.createdOn).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+//       : 'N/A';
 
 //     // Format delivery address
 //     const deliveryAddress = latestOrder.deliveryAddress || {
@@ -502,53 +574,63 @@ const getOrderList = async (req, res) => {
 //       phone: 'N/A',
 //     };
 
-//     // Format order items with per-item return eligibility
-//     const formattedItems = latestOrder.orderItems.map((item) => {
-//       let itemStatus = item.status || 'Active';
+//     // Format order items with tracking
+//     const formattedItems = latestOrder.orderItems.map(item => {
+//       let itemStatus = item.status || 'Placed';
 //       if (itemStatus === 'Active') {
-//         itemStatus = latestOrder.status;
+//         itemStatus = latestOrder.status || 'Placed';
 //       }
-//       // Calculate return eligibility per item (7-day window from deliveredAt or createdOn)
+
+//       // Calculate return eligibility (7-day window from deliveredAt or createdOn)
 //       const itemDeliveredDate = item.deliveredAt || latestOrder.deliveredAt || latestOrder.createdOn;
 //       const returnDate = new Date(itemDeliveredDate);
 //       returnDate.setDate(returnDate.getDate() + 7);
 //       const isItemReturnEligible = itemStatus === 'Delivered' && Date.now() <= returnDate.getTime();
 
+//       // ✅ NEW: Check if return was rejected
+//       const isReturnRejected = item.returnRejected === true || item.returnStatus === 'Rejected';
+
+//       // Use tracking data directly (already formatted in updateItemStatus)
+//       const tracking = {
+//         placedDate: item.tracking?.placedDate || null,
+//         placedTime: item.tracking?.placedTime || null,
+//         confirmedDate: item.tracking?.confirmedDate || null,
+//         confirmedTime: item.tracking?.confirmedTime || null,
+//         processingDate: item.tracking?.processingDate || null,
+//         processingTime: item.tracking?.processingTime || null,
+//         shippedDate: item.tracking?.shippedDate || null,
+//         shippedTime: item.tracking?.shippedTime || null,
+//         shippedLocation: item.tracking?.shippedLocation || 'Warehouse',
+//         outForDeliveryDate: item.tracking?.outForDeliveryDate || null,
+//         outForDeliveryTime: item.tracking?.outForDeliveryTime || null,
+//         outForDeliveryLocation: item.tracking?.outForDeliveryLocation || deliveryAddress.city,
+//         deliveredDate: item.tracking?.deliveredDate || null,
+//         deliveredTime: item.tracking?.deliveredTime || null,
+//         estimatedDeliveryDate: item.tracking?.estimatedDeliveryDate || 'N/A'
+//       };
+
 //       return {
-//         productName: item.productName,
+//         productName: item.productName || item.product?.name || 'Unknown Product',
 //         variantSize: item.variantSize ? `${item.variantSize}ml` : 'N/A',
-//         quantity: item.quantity,
-//         price: `₹${item.price}`,
-//         total: `₹${item.total}`,
+//         quantity: item.quantity || 1,
+//         price: item.price ? `₹${item.price.toFixed(2)}` : 'N/A',
+//         total: item.total ? `₹${item.total.toFixed(2)}` : 'N/A',
 //         status: itemStatus,
 //         isReturnEligible: isItemReturnEligible,
-//         image: item.product?.images && item.product.images[0]
+//         isReturnRejected: isReturnRejected, // ✅ NEW
+//         returnRejectionReason: item.returnRejectionReason || null, // ✅ NEW: Optional rejection reason
+//         image: item.product?.images?.[0]
 //           ? (item.product.images[0].startsWith('http')
 //               ? item.product.images[0]
 //               : `/Uploads/product-images/${item.product.images[0]}`)
 //           : 'https://via.placeholder.com/130x130?text=No+Image',
+//         tracking
 //       };
 //     });
 
-//     // Compute status summary
-//     const statusSummary = formattedItems.reduce((acc, item) => {
-//       const status = item.status === 'OutForDelivery' ? 'Out for Delivery' : item.status;
-//       acc[status] = (acc[status] || 0) + 1;
-//       return acc;
-//     }, {});
-
-//     const statusSummaryString = Object.entries(statusSummary)
-//       .map(([status, count]) => `${count} ${status}`)
-//       .join(', ');
-
-//     // Check if all non-cancelled items are delivered
-//     const allNonCancelledDelivered = formattedItems.every(
-//       item => item.status === 'Delivered' || item.status === 'Cancelled'
-//     );
-
-//     // Overall return eligibility for the order
-//     const isReturnEligible = allNonCancelledDelivered && formattedItems.some(
-//       item => item.isReturnEligible && item.status !== 'Cancelled'
+//     // Check if can cancel entire order
+//     const canCancelEntireOrder = formattedItems.some(
+//       item => ['Placed', 'Confirmed', 'Processing', 'Active'].includes(item.status)
 //     );
 
 //     // Check if any items are shipped or out for delivery
@@ -556,306 +638,137 @@ const getOrderList = async (req, res) => {
 //       item => item.status === 'Shipped' || item.status === 'OutForDelivery'
 //     );
 
-//     // Check if can cancel entire order (all non-cancelled items are in Pending, Processing, or Active)
-//     const canCancelEntireOrder = formattedItems.every(
-//       item => item.status === 'Cancelled' || item.status === 'Pending' || item.status === 'Processing' || item.status === 'Active'
-//     ) && !formattedItems.every(item => item.status === 'Cancelled');
+//     // Overall return eligibility for the order
+//     const isReturnEligible = formattedItems.some(
+//       item => item.status === 'Delivered' && item.isReturnEligible
+//     );
 
-//     // Tracking data
-//     const tracking = {
-//       placedDate: latestOrder.tracking?.placedDate
-//         ? new Date(latestOrder.tracking.placedDate).toLocaleDateString('en-IN', {
-//             day: '2-digit',
-//             month: 'short',
-//             year: 'numeric',
-//           })
-//         : formattedDate,
-//       confirmedDate: latestOrder.tracking?.confirmedDate
-//         ? new Date(latestOrder.tracking.confirmedDate).toLocaleDateString('en-IN', {
-//             day: '2-digit',
-//             month: 'short',
-//             year: 'numeric',
-//           })
-//         : 'Pending',
-//       processingDate: latestOrder.tracking?.processingDate
-//         ? new Date(latestOrder.tracking.processingDate).toLocaleDateString('en-IN', {
-//             day: '2-digit',
-//             month: 'short',
-//             year: 'numeric',
-//           })
-//         : 'Pending',
-//       shippedDate: latestOrder.tracking?.shippedDate
-//         ? new Date(latestOrder.tracking.shippedDate).toLocaleDateString('en-IN', {
-//             day: '2-digit',
-//             month: 'short',
-//             year: 'numeric',
-//           })
-//         : 'Pending',
-//       shippedLocation: latestOrder.tracking?.shippedLocation || null,
-//       outForDeliveryDate: latestOrder.tracking?.outForDeliveryDate
-//         ? new Date(latestOrder.tracking.outForDeliveryDate).toLocaleDateString('en-IN', {
-//             day: '2-digit',
-//             month: 'short',
-//             year: 'numeric',
-//           })
-//         : 'Pending',
-//       outForDeliveryLocation: latestOrder.tracking?.outForDeliveryLocation || null,
-//       deliveredDate: latestOrder.tracking?.deliveredDate
-//         ? new Date(latestOrder.tracking.deliveredDate).toLocaleDateString('en-IN', {
-//             day: '2-digit',
-//             month: 'short',
-//             year: 'numeric',
-//           })
-//         : 'Pending',
-//       estimatedDeliveryDate: latestOrder.tracking?.estimatedDeliveryDate
-//         ? new Date(latestOrder.tracking.estimatedDeliveryDate).toLocaleDateString('en-IN', {
-//             day: '2-digit',
-//             month: 'short',
-//             year: 'numeric',
-//           })
-//         : formattedDelivery,
+//     // Collect unique active statuses
+//     const statusPriority = {
+//       'Placed': 1,
+//       'Confirmed': 2,
+//       'Processing': 3,
+//       'Shipped': 4,
+//       'OutForDelivery': 5,
+//       'Delivered': 6,
+//       'Cancelled': 7,
+//       'Return Request': 8,
+//       'Returned': 9
 //     };
 
-//     console.log('Formatted items:', JSON.stringify(formattedItems, null, 2));
-//     console.log('Tracking data:', JSON.stringify(tracking, null, 2));
-//     console.log('Status summary:', statusSummaryString);
-//     console.log('All non-cancelled delivered:', allNonCancelledDelivered);
-//     console.log('Is return eligible:', isReturnEligible);
-//     console.log('Can cancel entire order:', canCancelEntireOrder);
-//     console.log('Flash messages in getOrderDetails:', req.flash());
+//     const activeStatuses = [...new Set(
+//       formattedItems
+//         .filter(item => !['Cancelled', 'Returned', 'Return Request'].includes(item.status))
+//         .map(item => item.status)
+//     )].sort((a, b) => statusPriority[a] - statusPriority[b]);
+
+//     console.log('Active statuses:', activeStatuses);
+//     console.log('Formatted items with tracking:', JSON.stringify(formattedItems.map(item => ({
+//       productName: item.productName,
+//       status: item.status,
+//       tracking: item.tracking
+//     })), null, 2));
 
 //     res.render('orderDetails', {
-//       orderId: latestOrder.orderId || 'N/A',
+//       orderId: latestOrder.orderId || latestOrder._id,
+//       status: activeStatuses.join(', '),
 //       date: formattedDate,
-//       status: statusSummaryString || 'N/A',
-//       paymentMethod: latestOrder.paymentMethod || 'Unknown',
-//       amount: latestOrder.finalAmount ? `₹${latestOrder.finalAmount}` : 'N/A',
-//       deliveryDate: formattedDelivery,
+//       deliveryAddress: deliveryAddress,
+//       paymentMethod: latestOrder.paymentMethod || 'N/A',
+//       amount: latestOrder.finalAmount ? `₹${latestOrder.finalAmount.toFixed(2)}` : 'N/A',
+//       deliveryDate: latestOrder.estimatedDeliveryDate || 'N/A',
 //       items: formattedItems,
-//       deliveryAddress: {
-//         name: deliveryAddress.name,
-//         houseName: deliveryAddress.houseName,
-//         city: deliveryAddress.city,
-//         state: deliveryAddress.state,
-//         pincode: deliveryAddress.pincode,
-//         phone: deliveryAddress.phone,
-//       },
+//       canCancelEntireOrder,
 //       isReturnEligible,
 //       isShippedOrOut,
-//       canCancelEntireOrder, // New flag for cancel button
-//       success: req.flash('success'),
-//       tracking,
+//       activeStatuses,
+//       success: req.flash('success')
 //     });
 //   } catch (error) {
-//     console.error('Error loading order details page:', error.message, error.stack);
+//     console.error('Error fetching order details:', error);
 //     res.redirect('/pageNotFound');
+//   }
+// };
+
+//// orginal
+
+// const returnSingleOrder = async (req, res) => {
+//   try {
+//     const user = req.session.user;
+//     const userId = user?._id || user?.id;
+//     const { orderId, productName } = req.params;
+//     const { reason, details } = req.body;
+
+//     console.log('Return single order request:', { orderId, productName, reason, details });
+
+//     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+//       console.log('Unauthorized: Invalid user or userId');
+//       return res.status(401).json({ success: false, error: 'Unauthorized' });
+//     }
+
+//     const order = await Order.findOne({ orderId, user: userId });
+//     if (!order) {
+//       console.log('Order not found:', { orderId, userId });
+//       return res.status(404).json({ success: false, error: 'Order not found' });
+//     }
+
+//     const decodedProductName = decodeURIComponent(productName);
+//     const item = order.orderItems.find(i => i.productName === decodedProductName);
+    
+//     if (!item) {
+//       console.log('Item not found:', decodedProductName);
+//       return res.status(404).json({ success: false, error: 'Item not found' });
+//     }
+
+//     // Check if item is delivered
+//     if (item.status !== 'Delivered') {
+//       console.log('Item not eligible for return:', { productName: decodedProductName, status: item.status });
+//       return res.status(400).json({ success: false, error: 'Return can only be requested for delivered items' });
+//     }
+
+//     // Check return window for the item
+//     const deliveredDate = item.deliveredAt || order.deliveredAt || order.createdOn;
+//     const returnWindow = new Date(deliveredDate);
+//     returnWindow.setDate(returnWindow.getDate() + 7);
+//     if (Date.now() > returnWindow.getTime()) {
+//       console.log('Return window expired for item:', { productName: decodedProductName, deliveredDate, returnWindow });
+//       return res.status(400).json({ success: false, error: 'Return window has expired' });
+//     }
+
+//     // Update item status to Return Request
+//     item.status = 'Return Request';
+//     item.returnReason = reason;
+//     item.returnDetails = details;
+//     item.returnRequestedAt = new Date();
+
+//     // Update order status if all non-cancelled items are in Return Request or Returned
+//     const allNonCancelledReturnRequested = order.orderItems.every(
+//       i => i.status === 'Return Request' || i.status === 'Returned' || i.status === 'Cancelled'
+//     );
+//     if (allNonCancelledReturnRequested) {
+//       order.status = 'Return Request';
+//       order.returnReason = reason;
+//       order.returnDetails = details;
+//       order.returnRequestedAt = new Date();
+//     }
+
+//     await order.save();
+
+//     console.log('Return request submitted for item:', decodedProductName);
+//     res.json({ 
+//       success: true, 
+//       message: `Return request for ${decodedProductName} submitted successfully`
+//     });
+    
+//   } catch (error) {
+//     console.error('Error submitting return request:', error.message, error.stack);
+//     res.status(500).json({ success: false, error: 'Failed to submit return request' });
 //   }
 // };
 
 
 
-// const getOrderDetails = async (req, res) => {
-//     try {
-//         const user = req.session.user;
-//         console.log('Session user in getOrderDetails:', user);
 
-//         const userId = user?._id || user?.id;
-//         if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-//             console.log('Redirecting to /login due to invalid user or userId');
-//             return res.redirect('/login');
-//         }
-
-//         const orderId = req.params.orderId;
-//         const latestOrder = await Order.findOne({ orderId, user: userId })
-//             .populate('orderItems.product')
-//             .lean();
-
-//         if (!latestOrder) {
-//             console.log('No order found for user:', userId, 'with orderId:', orderId);
-//             return res.redirect('/pageNotFound');
-//         }
-
-//         console.log('Latest order items:', JSON.stringify(latestOrder.orderItems, null, 2));
-
-//         // Format date
-//         const formattedDate = latestOrder.createdOn
-//             ? new Date(latestOrder.createdOn).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-//             : 'N/A';
-
-//         // Estimated delivery = 5 days later
-//         const deliveryDate = new Date(latestOrder.createdOn);
-//         deliveryDate.setDate(deliveryDate.getDate() + 5);
-//         const formattedDelivery = latestOrder.estimatedDeliveryDate
-//             ? new Date(latestOrder.estimatedDeliveryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-//             : deliveryDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-
-//         // Format delivery address
-//         const deliveryAddress = latestOrder.deliveryAddress || {
-//             name: 'N/A',
-//             houseName: 'N/A',
-//             city: 'N/A',
-//             state: 'N/A',
-//             pincode: 'N/A',
-//             phone: 'N/A',
-//         };
-
-//         // Helper function to format date and time
-//         const formatDateTime = (date) => {
-//             if (!date) return { date: null, time: null };
-//             const d = new Date(date);
-//             return {
-//                 date: d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-//                 time: d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-//             };
-//         };
-
-//         // Format order items with per-item tracking
-//         const formattedItems = latestOrder.orderItems.map(item => {
-//             let itemStatus = item.status || 'Active';
-//             if (itemStatus === 'Active') {
-//                 itemStatus = latestOrder.status || 'Placed';
-//             }
-//             // Calculate return eligibility per item (7-day window from deliveredAt or createdOn)
-//             const itemDeliveredDate = item.deliveredAt || latestOrder.deliveredAt || latestOrder.createdOn;
-//             const returnDate = new Date(itemDeliveredDate);
-//             returnDate.setDate(returnDate.getDate() + 7);
-//             const isItemReturnEligible = itemStatus === 'Delivered' && Date.now() <= returnDate.getTime();
-
-//             // Per-item tracking
-//             const tracking = {
-//                 placedDate: null,
-//                 placedTime: null,
-//                 confirmedDate: null,
-//                 confirmedTime: null,
-//                 processingDate: null,
-//                 processingTime: null,
-//                 shippedDate: null,
-//                 shippedTime: null,
-//                 shippedLocation: item.shippedLocation || latestOrder.tracking?.shippedLocation || 'Warehouse',
-//                 outForDeliveryDate: null,
-//                 outForDeliveryTime: null,
-//                 outForDeliveryLocation: item.outForDeliveryLocation || latestOrder.tracking?.outForDeliveryLocation || deliveryAddress.city,
-//                 deliveredDate: null,
-//                 deliveredTime: null,
-//                 estimatedDeliveryDate: formattedDelivery
-//             };
-
-//             // Set tracking fields based on item status
-//             if (item.placedAt || latestOrder.createdOn) {
-//                 const formatted = formatDateTime(item.placedAt || latestOrder.createdOn);
-//                 tracking.placedDate = formatted.date;
-//                 tracking.placedTime = formatted.time;
-//             }
-//             if (item.confirmedAt) {
-//                 const formatted = formatDateTime(item.confirmedAt);
-//                 tracking.confirmedDate = formatted.date;
-//                 tracking.confirmedTime = formatted.time;
-//             }
-//             if (item.processingAt) {
-//                 const formatted = formatDateTime(item.processingAt);
-//                 tracking.processingDate = formatted.date;
-//                 tracking.processingTime = formatted.time;
-//             }
-//             if (item.shippedAt) {
-//                 const formatted = formatDateTime(item.shippedAt);
-//                 tracking.shippedDate = formatted.date;
-//                 tracking.shippedTime = formatted.time;
-//             }
-//             if (item.outForDeliveryAt) {
-//                 const formatted = formatDateTime(item.outForDeliveryAt);
-//                 tracking.outForDeliveryDate = formatted.date;
-//                 tracking.outForDeliveryTime = formatted.time;
-//             }
-//             if (item.deliveredAt) {
-//                 const formatted = formatDateTime(item.deliveredAt);
-//                 tracking.deliveredDate = formatted.date;
-//                 tracking.deliveredTime = formatted.time;
-//             }
-
-//             return {
-//                 productName: item.productName || item.product?.name || 'Unknown Product',
-//                 variantSize: item.variantSize ? `${item.variantSize}ml` : 'N/A',
-//                 quantity: item.quantity || 1,
-//                 price: item.price ? `₹${item.price.toFixed(2)}` : 'N/A',
-//                 total: item.total ? `₹${item.total.toFixed(2)}` : 'N/A',
-//                 status: itemStatus,
-//                 isReturnEligible: isItemReturnEligible,
-//                 image: item.product?.images?.[0]
-//                     ? (item.product.images[0].startsWith('http')
-//                         ? item.product.images[0]
-//                         : `/Uploads/product-images/${item.product.images[0]}`)
-//                     : 'https://via.placeholder.com/130x130?text=No+Image',
-//                 placedAt: item.placedAt || latestOrder.createdOn,
-//                 confirmedAt: item.confirmedAt,
-//                 processingAt: item.processingAt,
-//                 shippedAt: item.shippedAt,
-//                 outForDeliveryAt: item.outForDeliveryAt,
-//                 deliveredAt: item.deliveredAt,
-//                 tracking
-//             };
-//         });
-
-//         // Check if can cancel entire order
-//         const canCancelEntireOrder = formattedItems.some(
-//             item => ['Placed', 'Confirmed', 'Processing', 'Active'].includes(item.status)
-//         );
-
-//         // Check if any items are shipped or out for delivery
-//         const isShippedOrOut = formattedItems.some(
-//             item => item.status === 'Shipped' || item.status === 'OutForDelivery'
-//         );
-
-//         // Overall return eligibility for the order
-//         const isReturnEligible = formattedItems.some(
-//             item => item.status === 'Delivered' && item.isReturnEligible
-//         );
-
-//         // Collect unique active statuses
-//         const statusPriority = {
-//             'Placed': 1,
-//             'Confirmed': 2,
-//             'Processing': 3,
-//             'Shipped': 4,
-//             'OutForDelivery': 5,
-//             'Delivered': 6,
-//             'Cancelled': 7,
-//             'Returned': 8,
-//             'Return Request': 9
-//         };
-
-//         const activeStatuses = [...new Set(
-//             formattedItems
-//                 .filter(item => !['Cancelled', 'Returned', 'Return Request'].includes(item.status))
-//                 .map(item => item.status)
-//         )].sort((a, b) => statusPriority[a] - statusPriority[b]);
-
-//         console.log('Active statuses:', activeStatuses);
-//         console.log('Formatted items with tracking:', JSON.stringify(formattedItems.map(item => ({
-//             productName: item.productName,
-//             status: item.status,
-//             tracking: item.tracking
-//         })), null, 2));
-
-//         res.render('orderDetails', {
-//             orderId: latestOrder.orderId || latestOrder._id,
-//             status: activeStatuses.join(', '), // Display all active statuses
-//             date: formattedDate,
-//             deliveryAddress: deliveryAddress,
-//             paymentMethod: latestOrder.paymentMethod || 'N/A',
-//             amount: latestOrder.finalAmount ? `₹${latestOrder.finalAmount.toFixed(2)}` : 'N/A',
-//             deliveryDate: formattedDelivery,
-//             items: formattedItems,
-//             canCancelEntireOrder,
-//             isReturnEligible,
-//             isShippedOrOut,
-//             activeStatuses,
-//             success: req.flash('success')
-//         });
-//     } catch (error) {
-//         console.error('Error fetching order details:', error);
-//         res.redirect('/pageNotFound');
-//     }
-// };
 
 
 const getOrderDetails = async (req, res) => {
@@ -909,6 +822,9 @@ const getOrderDetails = async (req, res) => {
       returnDate.setDate(returnDate.getDate() + 7);
       const isItemReturnEligible = itemStatus === 'Delivered' && Date.now() <= returnDate.getTime();
 
+      // Check if return was rejected by admin
+      const isReturnRejected = item.returnRejected === true;
+
       // Use tracking data directly (already formatted in updateItemStatus)
       const tracking = {
         placedDate: item.tracking?.placedDate || null,
@@ -936,6 +852,8 @@ const getOrderDetails = async (req, res) => {
         total: item.total ? `₹${item.total.toFixed(2)}` : 'N/A',
         status: itemStatus,
         isReturnEligible: isItemReturnEligible,
+        returnRejected: isReturnRejected, // Pass rejection status
+        returnRejectionReason: item.returnRejectionReason || 'Return request was not approved', // Rejection reason
         image: item.product?.images?.[0]
           ? (item.product.images[0].startsWith('http')
               ? item.product.images[0]
@@ -955,9 +873,12 @@ const getOrderDetails = async (req, res) => {
       item => item.status === 'Shipped' || item.status === 'OutForDelivery'
     );
 
-    // Overall return eligibility for the order
+    // Check if ANY item has a rejected return
+    const hasAnyRejectedReturn = formattedItems.some(item => item.returnRejected === true);
+
+    // Overall return eligibility for the order (only if no rejections)
     const isReturnEligible = formattedItems.some(
-      item => item.status === 'Delivered' && item.isReturnEligible
+      item => item.status === 'Delivered' && item.isReturnEligible && !item.returnRejected
     );
 
     // Collect unique active statuses
@@ -980,10 +901,10 @@ const getOrderDetails = async (req, res) => {
     )].sort((a, b) => statusPriority[a] - statusPriority[b]);
 
     console.log('Active statuses:', activeStatuses);
-    console.log('Formatted items with tracking:', JSON.stringify(formattedItems.map(item => ({
+    console.log('Formatted items:', JSON.stringify(formattedItems.map(item => ({
       productName: item.productName,
       status: item.status,
-      tracking: item.tracking
+      returnRejected: item.returnRejected
     })), null, 2));
 
     res.render('orderDetails', {
@@ -998,6 +919,7 @@ const getOrderDetails = async (req, res) => {
       canCancelEntireOrder,
       isReturnEligible,
       isShippedOrOut,
+      hasAnyRejectedReturn, // Pass rejection flag to view
       activeStatuses,
       success: req.flash('success')
     });
@@ -1081,6 +1003,84 @@ const returnSingleOrder = async (req, res) => {
   }
 };
 
+
+//// orginal 
+
+// const returnAllOrder = async (req, res) => {
+//   try {
+//     const user = req.session.user;
+//     const userId = user?._id || user?.id;
+//     const { orderId } = req.params;
+//     const { reason, details } = req.body;
+
+//     console.log('Return entire order request:', { orderId, reason, details });
+
+//     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+//       console.log('Unauthorized: Invalid user or userId');
+//       return res.status(401).json({ success: false, error: 'Unauthorized' });
+//     }
+
+//     const order = await Order.findOne({ orderId, user: userId });
+//     if (!order) {
+//       console.log('Order not found:', { orderId, userId });
+//       return res.status(404).json({ success: false, error: 'Order not found' });
+//     }
+
+//     // Check if all non-cancelled items are delivered
+//     const allNonCancelledDelivered = order.orderItems.every(
+//       item => item.status === 'Delivered' || item.status === 'Cancelled'
+//     );
+//     if (!allNonCancelledDelivered) {
+//       console.log('Not all non-cancelled items are delivered:', order.orderItems.map(i => ({ productName: i.productName, status: i.status })));
+//       return res.status(400).json({ success: false, error: 'Return can only be requested when all non-cancelled items are delivered' });
+//     }
+
+//     // Check return window for each delivered item
+//     const now = Date.now();
+//     const allWithinReturnWindow = order.orderItems.every(item => {
+//       if (item.status === 'Cancelled') return true;
+//       const deliveredDate = item.deliveredAt || order.deliveredAt || order.createdOn;
+//       const returnWindow = new Date(deliveredDate);
+//       returnWindow.setDate(returnWindow.getDate() + 7);
+//       return now <= returnWindow.getTime();
+//     });
+
+//     if (!allWithinReturnWindow) {
+//       console.log('Return window expired for some items:', order.orderItems.map(i => ({ productName: i.productName, deliveredAt: i.deliveredAt })));
+//       return res.status(400).json({ success: false, error: 'Return window has expired for some items' });
+//     }
+
+//     // Update all non-cancelled items to Return Request
+//     order.orderItems.forEach(item => {
+//       if (item.status === 'Delivered') {
+//         item.status = 'Return Request';
+//         item.returnReason = reason;
+//         item.returnDetails = details;
+//         item.returnRequestedAt = new Date();
+//       }
+//     });
+
+//     // Update order status
+//     order.status = 'Return Request';
+//     order.returnReason = reason;
+//     order.returnDetails = details;
+//     order.returnRequestedAt = new Date();
+
+//     await order.save();
+
+//     console.log('Return request submitted for entire order:', orderId);
+//     res.json({ 
+//       success: true, 
+//       message: 'Return request for entire order submitted successfully' 
+//     });
+    
+//   } catch (error) {
+//     console.error('Error submitting return request for order:', error.message, error.stack);
+//     res.status(500).json({ success: false, error: 'Failed to submit return request' });
+//   }
+// };
+
+
 const returnAllOrder = async (req, res) => {
   try {
     const user = req.session.user;
@@ -1155,6 +1155,63 @@ const returnAllOrder = async (req, res) => {
   }
 };
 
+
+//// orginal 
+
+// const cancelReturnSingleOrder = async (req, res) => {
+//   try {
+//     const user = req.session.user;
+//     const userId = user?._id || user?.id;
+//     const { orderId, productName } = req.params;
+
+//     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+//       return res.status(401).json({ success: false, error: 'Unauthorized' });
+//     }
+
+//     const order = await Order.findOne({ orderId, user: userId });
+//     if (!order) {
+//       return res.status(404).json({ success: false, error: 'Order not found' });
+//     }
+
+//     const decodedProductName = decodeURIComponent(productName);
+//     const item = order.orderItems.find(i => i.productName === decodedProductName);
+    
+//     if (!item) {
+//       return res.status(404).json({ success: false, error: 'Item not found' });
+//     }
+
+//     if (item.status !== 'Return Request') {
+//       return res.status(400).json({ success: false, error: 'Can only cancel pending return requests' });
+//     }
+
+//     item.status = 'Delivered';
+//     item.returnReason = undefined;
+//     item.returnDetails = undefined;
+//     item.returnRequestedAt = undefined;
+
+//     const allReturnRequest = order.orderItems.every(i => i.status === 'Return Request' || i.status === 'Returned');
+//     if (!allReturnRequest) {
+//       order.status = 'Delivered';
+//       order.returnReason = undefined;
+//       order.returnDetails = undefined;
+//       order.returnRequestedAt = undefined;
+//     }
+
+//     await order.save();
+
+//     res.json({ 
+//       success: true, 
+//       message: `Return request for ${decodedProductName} cancelled successfully`
+//     });
+    
+//   } catch (error) {
+//     console.error('Error cancelling return request:', error);
+//     res.status(500).json({ success: false, error: 'Failed to cancel return request' });
+//   }
+// };
+
+
+
 const cancelReturnSingleOrder = async (req, res) => {
   try {
     const user = req.session.user;
@@ -1180,6 +1237,8 @@ const cancelReturnSingleOrder = async (req, res) => {
     if (item.status !== 'Return Request') {
       return res.status(400).json({ success: false, error: 'Can only cancel pending return requests' });
     }
+
+  
 
     item.status = 'Delivered';
     item.returnReason = undefined;
@@ -1207,6 +1266,54 @@ const cancelReturnSingleOrder = async (req, res) => {
   }
 };
 
+//// orginal 
+// const cancelReturnAllOrder = async (req, res) => {
+//   try {
+//     const user = req.session.user;
+//     const userId = user?._id || user?.id;
+//     const { orderId } = req.params;
+
+//     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+//       return res.status(401).json({ success: false, error: 'Unauthorized' });
+//     }
+
+//     const order = await Order.findOne({ orderId, user: userId });
+//     if (!order) {
+//       return res.status(404).json({ success: false, error: 'Order not found' });
+//     }
+
+//     if (order.status !== 'Return Request') {
+//       return res.status(400).json({ success: false, error: 'Can only cancel pending return requests' });
+//     }
+
+//     order.orderItems.forEach(item => {
+//       if (item.status === 'Return Request') {
+//         item.status = 'Delivered';
+//         item.returnReason = undefined;
+//         item.returnDetails = undefined;
+//         item.returnRequestedAt = undefined;
+//       }
+//     });
+
+//     order.status = 'Delivered';
+//     order.returnReason = undefined;
+//     order.returnDetails = undefined;
+//     order.returnRequestedAt = undefined;
+
+//     await order.save();
+
+//     res.json({ 
+//       success: true, 
+//       message: 'Return request for entire order cancelled successfully' 
+//     });
+    
+//   } catch (error) {
+//     console.error('Error cancelling return request for order:', error);
+//     res.status(500).json({ success: false, error: 'Failed to cancel return request' });
+//   }
+// };
+
+
 
 const cancelReturnAllOrder = async (req, res) => {
   try {
@@ -1226,6 +1333,8 @@ const cancelReturnAllOrder = async (req, res) => {
     if (order.status !== 'Return Request') {
       return res.status(400).json({ success: false, error: 'Can only cancel pending return requests' });
     }
+
+   
 
     order.orderItems.forEach(item => {
       if (item.status === 'Return Request') {

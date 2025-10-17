@@ -76,7 +76,7 @@
         background-color: #f9f9f9;
     }
 
-    .cart-item.out-of-stock-item {
+    .cart-item.unavailable-item {
         background-color: #fff5f5;
         opacity: 0.8;
     }
@@ -96,7 +96,7 @@
         object-fit: cover;
     }
 
-    .out-of-stock-overlay {
+    .unavailable-overlay {
         position: absolute;
         top: 0;
         left: 0;
@@ -152,7 +152,7 @@
         color: #ffc107;
     }
 
-    .stock-info.out-of-stock {
+    .stock-info.unavailable {
         color: #dc3545;
     }
 
@@ -310,7 +310,7 @@
         font-weight: 600;
     }
 
-    .out-of-stock-notice {
+    .unavailable-notice {
         background: #fff3cd;
         border: 1px solid #ffc107;
         border-radius: 6px;
@@ -318,6 +318,16 @@
         margin-bottom: 15px;
         font-size: 0.9rem;
         color: #856404;
+    }
+
+    .blocked-notice {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        color: #721c24;
     }
 
     .checkout-button {
@@ -455,21 +465,23 @@
     
       <div class="cart-items-section">
         <% 
-        let outOfStockCount = 0;
         cartItems.forEach(item => {
-      
-          const actualStock = item.variant?.stock !== undefined ? item.variant.stock : (item.productId?.stock || 0);
-          const isOutOfStock = actualStock <= 0;
-          if (isOutOfStock) outOfStockCount++;
+          const isOutOfStock = item.isOutOfStock;
+          const isBlocked = item.isBlocked;
+          const isUnavailable = isOutOfStock || isBlocked;
           const maxQtyPerOrder = 5;
-       
-          const availableQty = isOutOfStock ? 0 : Math.min(actualStock, maxQtyPerOrder);
+          const availableQty = item.availableQty;
         %>
-          <div class="cart-item <%= isOutOfStock ? 'out-of-stock-item' : '' %>" data-out-of-stock="<%= isOutOfStock %>">
+          <div class="cart-item <%= isUnavailable ? 'unavailable-item' : '' %>" 
+               data-unavailable="<%= isUnavailable %>"
+               data-out-of-stock="<%= isOutOfStock %>"
+               data-blocked="<%= isBlocked %>"
+               data-block-reason="<%= item.blockReason || '' %>"
+               data-product-name="<%= item.productId.productName || 'Unknown Product' %>">
             <!-- Product Image -->
             <div class="product-image-wrapper">
               <% if (item.productId && item.productId.images && item.productId.images.length > 0) { %>
-                <img src="<%= item.productId && item.productId.images && item.productId.images[0] ? item.productId.images[0] : 'https://via.placeholder.com/350?text=No+Image' %>" alt="<%= item.productId && item.productId.productName ? item.productId.productName : 'Unknown Product' %>" class="product-image" loading="lazy"> 
+                <img src="<%= item.productId.images[0] %>" 
                      alt="<%= item.productId.productName || 'Product' %>"
                      class="product-image"
                      onerror="this.onerror=null; this.src='https://via.placeholder.com/120x120?text=No+Image'">
@@ -479,8 +491,10 @@
                      class="product-image">
               <% } %>
               
-              <% if (isOutOfStock) { %>
-                <div class="out-of-stock-overlay">OUT OF STOCK</div>
+              <% if (isBlocked) { %>
+                <div class="unavailable-overlay">TEMPORARILY BLOCKED</div>
+              <% } else if (isOutOfStock) { %>
+                <div class="unavailable-overlay">OUT OF STOCK</div>
               <% } %>
             </div>
 
@@ -494,8 +508,12 @@
                 <% } %>
               </div>
               
-              <% if (isOutOfStock) { %>
-                <span class="stock-info out-of-stock">
+              <% if (isBlocked) { %>
+                <span class="stock-info unavailable">
+                  <i class="fas fa-ban"></i> Temporarily Blocked
+                </span>
+              <% } else if (isOutOfStock) { %>
+                <span class="stock-info unavailable">
                   <i class="fas fa-times-circle"></i> Out of Stock
                 </span>
               <% } else if (item.productId.stock <= 5) { %>
@@ -509,15 +527,15 @@
               <% } %>
 
               <div class="price-info">
-                <span class="current-price">₹<%= (item.variant?.salePrice || item.price).toLocaleString() %></span>
-                <% if (item.variant?.regularPrice && item.variant.salePrice < item.variant.regularPrice) { %>
+                <span class="current-price">₹<%= (item.variant.salePrice || item.price).toLocaleString() %></span>
+                <% if (item.variant.regularPrice && item.variant.salePrice < item.variant.regularPrice) { %>
                   <span class="original-price">₹<%= item.variant.regularPrice.toLocaleString() %></span>
                 <% } %>
               </div>
 
               <div class="quantity-control">
                 <button 
-                  <%= isOutOfStock || item.quantity <= 1 ? 'disabled' : '' %> 
+                  <%= isUnavailable || item.quantity <= 1 ? 'disabled' : '' %> 
                   id="minus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
                   onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', -1, <%= availableQty %>, <%= item.quantity %>)">
                   -
@@ -529,16 +547,16 @@
                   min="1" 
                   max="<%= availableQty %>"
                   readonly
-                  <%= isOutOfStock ? 'disabled' : '' %>>
+                  <%= isUnavailable ? 'disabled' : '' %>>
                 <button 
-                  <%= isOutOfStock || item.quantity >= availableQty ? 'disabled' : '' %> 
+                  <%= isUnavailable || item.quantity >= availableQty ? 'disabled' : '' %> 
                   id="plus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
                   onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', 1, <%= availableQty %>, <%= item.quantity %>)">
                   +
                 </button>
               </div>
               
-              <% if (!isOutOfStock && item.quantity >= maxQtyPerOrder) { %>
+              <% if (!isUnavailable && item.quantity >= maxQtyPerOrder) { %>
                 <small style="color: #856404; font-size: 0.8rem;">
                   <i class="fas fa-info-circle"></i> Maximum <%= maxQtyPerOrder %> items per order
                 </small>
@@ -548,10 +566,10 @@
             <!-- Item Actions -->
             <div class="item-actions">
               <div class="item-total">
-                ₹<%= ((item.variant?.salePrice || item.price) * item.quantity).toLocaleString() %>
+                ₹<%= ((item.variant.salePrice || item.price) * item.quantity).toLocaleString() %>
               </div>
               <div class="action-buttons">
-                <% if (isOutOfStock) { %>
+                <% if (isOutOfStock && !isBlocked) { %>
                   <button class="wishlist-button" 
                           onclick="moveToWishlist('<%= item.productId._id %>', '<%= item.variant.size %>')">
                     <i class="fas fa-heart"></i> Wishlist
@@ -572,9 +590,16 @@
         <h3>Cart Total</h3>
         
         <% if (outOfStockCount > 0) { %>
-          <div class="out-of-stock-notice">
+          <div class="unavailable-notice">
             <i class="fas fa-exclamation-triangle"></i>
             <strong><%= outOfStockCount %></strong> product<%= outOfStockCount > 1 ? 's are' : ' is' %> out of stock
+          </div>
+        <% } %>
+
+        <% if (blockedCount > 0) { %>
+          <div class="blocked-notice">
+            <i class="fas fa-ban"></i>
+            <strong><%= blockedCount %></strong> product<%= blockedCount > 1 ? 's are' : ' is' %> temporarily blocked by admin
           </div>
         <% } %>
         
@@ -593,7 +618,7 @@
           <span class="summary-value">₹<%= totalPrice.toLocaleString() %></span>
         </div>
 
-        <button id="checkout-button" href="/checkout" class="checkout-button" onclick="proceedToCheckout()">
+        <button id="checkout-button" class="checkout-button" onclick="proceedToCheckout()">
           Proceed to checkout
         </button>
       </div>
@@ -823,13 +848,33 @@
 
   // Proceed to Checkout
   function proceedToCheckout() {
-    const outOfStockItems = document.querySelectorAll('.cart-item[data-out-of-stock="true"]');
+    const unavailableItems = document.querySelectorAll('.cart-item[data-unavailable="true"]');
     
-    if (outOfStockItems.length > 0) {
+    if (unavailableItems.length > 0) {
+      let htmlMessage = 'Please remove the following items before proceeding to checkout:<br><br>';
+      const outOfStockList = [];
+      const blockedList = [];
+
+      unavailableItems.forEach(item => {
+        if (item.dataset.blocked === 'true') {
+          blockedList.push(item.dataset.blockReason);
+        } else {
+          outOfStockList.push(`Product "${item.dataset.productName}" is out of stock`);
+        }
+      });
+
+      if (outOfStockList.length > 0) {
+        htmlMessage += '<strong>Out of Stock Items:</strong><br>' + outOfStockList.join('<br>') + '<br><br>';
+      }
+
+      if (blockedList.length > 0) {
+        htmlMessage += '<strong>Blocked Items:</strong><br>' + blockedList.join('<br>') + '<br><br>';
+      }
+
       Swal.fire({
-        icon: 'error',
-        title: 'Cannot Proceed',
-        html: `<strong>${outOfStockItems.length}</strong> product${outOfStockItems.length > 1 ? 's are' : ' is'} out of stock.<br><br>Please remove out of stock items or move them to wishlist before proceeding to checkout.`,
+        icon: 'warning',
+        title: 'Unavailable Items in Cart',
+        html: htmlMessage,
         confirmButtonColor: '#dc3545',
         confirmButtonText: 'Got it'
       });
@@ -841,11 +886,11 @@
 
   // Page load checks
   document.addEventListener('DOMContentLoaded', () => {
-    const outOfStockItems = document.querySelectorAll('.cart-item[data-out-of-stock="true"]');
+    const unavailableItems = document.querySelectorAll('.cart-item[data-unavailable="true"]');
     const checkoutButton = document.getElementById('checkout-button');
     
-    if (outOfStockItems.length > 0 && checkoutButton) {
-      checkoutButton.style.opacity = '0.7';
+    if (unavailableItems.length > 0 && checkoutButton) {
+      checkoutButton.disabled = true;
     }
   });
 </script>
