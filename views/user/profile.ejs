@@ -1,4 +1,3 @@
-
 <%- include("../partials/user/header.ejs") %>
 <head>
   <title>My Account - <%= user.name %></title>
@@ -402,6 +401,77 @@
             border-bottom: 2px solid #e2e8f0;
         }
 
+        /* ========== ALERT MESSAGES ========== */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        /* ========== GOOGLE AUTH ALERT ========== */
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .alert-info-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-info-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-info-text {
+            flex: 1;
+        }
+
+        .alert-info-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: #1e40af;
+        }
+
+        .alert-info-message {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+
+        .alert-info a {
+            color: #1e40af;
+            font-weight: 600;
+            text-decoration: underline;
+            transition: color 0.3s;
+        }
+
+        .alert-info a:hover {
+            color: #0c2340;
+        }
+
         /* ========== BUTTON ========== */
         .button-group {
             display: flex;
@@ -446,26 +516,6 @@
 
         .cancel-btn:hover {
             background: #f7fafc;
-        }
-
-        /* ========== ALERT MESSAGES ========== */
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
         }
 
         /* ========== RESPONSIVE DESIGN ========== */
@@ -605,6 +655,15 @@
                 flex-direction: column;
                 gap: 15px;
             }
+
+            .alert-info-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .alert-info-icon {
+                margin-top: 0;
+            }
         }
 
         @media (max-width: 480px) {
@@ -635,12 +694,23 @@
                 padding: 10px 15px;
                 font-size: 13px;
             }
+
+            .alert-info {
+                padding: 15px;
+            }
+
+            .alert-info-title {
+                font-size: 14px;
+            }
+
+            .alert-info-message {
+                font-size: 13px;
+            }
         }
     </style>
 
 </head>
 <body>
-
 
   <section class="profile-section">
     <div class="container">
@@ -670,9 +740,6 @@
     <img src="/images/default-profile.png" alt="Default Picture">
   <% } %>
 </div>
-
-              
-             
             </div>
             <div class="profile-name"><%= user.name %></div>
           </div>
@@ -752,58 +819,84 @@
   </div>
 </div>
 
+<!-- SECURITY TAB CONTENT -->
 <div class="tab-content" id="security-tab">
-  <!-- Change Password -->
-  <div class="security-section">
-    <h3 class="section-subtitle">Change Password</h3>
-    <form id="passwordForm">
-      <div class="form-grid">
-        <div class="form-group full-width">
-          <label class="form-label">Current Password</label>
-          <input type="password" name="currentPassword" class="form-input" placeholder="Enter current password" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">New Password</label>
-          <input type="password" name="newPassword" class="form-input" placeholder="Enter new password" required minlength="6">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Confirm Password</label>
-          <input type="password" name="confirmPassword" class="form-input" placeholder="Confirm new password" required minlength="6">
+  
+  <!-- Check if user is authenticated via Google OAuth -->
+  <% const isGoogleOAuthUser = user.authProvider === 'google' || user.googleId; %>
+  
+  <% if (isGoogleOAuthUser) { %>
+    <!-- GOOGLE OAUTH USER MESSAGE -->
+    <div class="alert-info">
+      <div class="alert-info-content">
+        <div class="alert-info-icon">🔒</div>
+        <div class="alert-info-text">
+          <div class="alert-info-title">Google Account Linked</div>
+          <div class="alert-info-message">
+            Your account is connected to Google. You cannot change your password and email address through this portal. 
+            <br><br>
+            To change your password or email, please visit your <strong>Google Account settings</strong>.
+          </div>
+          <a href="https://myaccount.google.com/security" target="_blank">Go to Google Account Security →</a>
         </div>
       </div>
+    </div>
+  <% } else { %>
+    <!-- REGULAR USER - SHOW FORMS -->
+    
+    <!-- Change Password -->
+    <div class="security-section">
+      <h3 class="section-subtitle">Change Password</h3>
+      <form id="passwordForm">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Current Password</label>
+            <input type="password" name="currentPassword" class="form-input" placeholder="Enter current password" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input type="password" name="newPassword" class="form-input" placeholder="Enter new password" required minlength="6">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" name="confirmPassword" class="form-input" placeholder="Confirm new password" required minlength="6">
+          </div>
+        </div>
 
-      <div class="button-group">
-        <button type="button" class="cancel-btn" onclick="document.getElementById('passwordForm').reset()">Cancel</button>
-        <button type="submit" class="update-btn">Change Password</button>
-      </div>
-    </form>
-  </div>
+        <div class="button-group">
+          <button type="button" class="cancel-btn" onclick="document.getElementById('passwordForm').reset()">Cancel</button>
+          <button type="submit" class="update-btn">Change Password</button>
+        </div>
+      </form>
+    </div>
 
-  <!-- Change Email -->
-  <div class="security-section" style="margin-top: 40px;">
-    <h3 class="section-subtitle">Change Email Address</h3>
-    <form id="emailForm">
-      <div class="form-grid">
-        <div class="form-group full-width">
-          <label class="form-label">Current Email</label>
-          <input type="email" class="form-input" value="<%= user.email %>" disabled>
+    <!-- Change Email -->
+    <div class="security-section" style="margin-top: 40px;">
+      <h3 class="section-subtitle">Change Email Address</h3>
+      <form id="emailForm">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Current Email</label>
+            <input type="email" class="form-input" value="<%= user.email %>" disabled>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">New Email Address</label>
+            <input type="email" name="newEmail" id="newEmail" class="form-input" placeholder="Enter new email address" required>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" name="password" id="emailPassword" class="form-input" placeholder="Enter your password" required>
+          </div>
         </div>
-        <div class="form-group full-width">
-          <label class="form-label">New Email Address</label>
-          <input type="email" name="newEmail" id="newEmail" class="form-input" placeholder="Enter new email address" required>
-        </div>
-        <div class="form-group full-width">
-          <label class="form-label">Confirm Password</label>
-          <input type="password" name="password" id="emailPassword" class="form-input" placeholder="Enter your password" required>
-        </div>
-      </div>
 
-      <div class="button-group">
-        <button type="button" class="cancel-btn" onclick="document.getElementById('emailForm').reset()">Cancel</button>
-        <button type="button" id="sendOtpBtn" class="update-btn">Send OTP</button>
-      </div>
-    </form>
-  </div>
+        <div class="button-group">
+          <button type="button" class="cancel-btn" onclick="document.getElementById('emailForm').reset()">Cancel</button>
+          <button type="button" id="sendOtpBtn" class="update-btn">Send OTP</button>
+        </div>
+      </form>
+    </div>
+  <% } %>
+
 </div>
 
           </div>
@@ -870,7 +963,7 @@
       return regex.test(email);
     }
 
-    document.getElementById("passwordForm").addEventListener("submit", async e => {
+    document.getElementById("passwordForm")?.addEventListener("submit", async e => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const body = Object.fromEntries(formData.entries());
@@ -918,7 +1011,7 @@
       }
     });
 
-    document.getElementById("sendOtpBtn").addEventListener("click", async () => {
+    document.getElementById("sendOtpBtn")?.addEventListener("click", async () => {
       const newEmail = document.getElementById("newEmail").value.trim();
       const password = document.getElementById("emailPassword").value.trim();
 
@@ -965,6 +1058,4 @@
 </body>
 <%- include("../partials/user/footer.ejs") %>
 
-
-
-
+</document_content>

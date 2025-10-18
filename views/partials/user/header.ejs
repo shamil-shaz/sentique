@@ -19,7 +19,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px ;
+    padding: 10px;
     border-bottom: 1px solid #ccc;
     position: relative;
     z-index: 500;
@@ -54,10 +54,49 @@ nav.nav-links a.active {
     color: black;
     font-size: 18px;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .nav-icons a:hover {
     transform: scale(1.2);
     transition: transform 0.2s;
+}
+
+/* Notification Badge */
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    border: 2px solid white;
+    animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+.notification-badge.show {
+    display: flex !important;
+}
+
+.notification-badge.hide {
+    display: none !important;
 }
 
 /* Dropdown for user */
@@ -121,6 +160,12 @@ nav.nav-links a.active {
     nav.nav-links { display: none; }
     .hamburger { display: block; }
     .nav-icons { margin-top: 10px; width: 100%; justify-content: flex-end; gap: 15px; }
+    
+    .notification-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
 }
 </style>
 
@@ -146,8 +191,17 @@ nav.nav-links a.active {
     </nav>
 
     <div class="nav-icons">
-          <a href="/wishlist" title="Wishlist"><i class="fa fa-heart"></i></a>
-    <a href="/cart" title="Cart"><i class="fa fa-shopping-cart"></i></a>
+        <!-- Wishlist with Badge -->
+        <a href="/wishlist" title="Wishlist" id="wishlistLink">
+            <i class="fa fa-heart"></i>
+            <span class="notification-badge hide" id="wishlistBadge">0</span>
+        </a>
+
+        <!-- Cart with Badge -->
+        <a href="/cart" title="Cart" id="cartLink">
+            <i class="fa fa-shopping-cart"></i>
+            <span class="notification-badge hide" id="cartBadge">0</span>
+        </a>
 
         <% if (user) { %>
         <div class="dropdown">
@@ -177,11 +231,127 @@ nav.nav-links a.active {
     </nav>
 </header>
 
+
+
 <script>
+// Hamburger Menu
 const hamburger = document.getElementById("hamburger");
 const mobileNav = document.getElementById("mobileNav");
 
-hamburger.addEventListener("click", () => {
+hamburger && hamburger.addEventListener("click", () => {
     mobileNav.style.display = mobileNav.style.display === "flex" ? "none" : "flex";
 });
+
+// ========== DEBUGGING FUNCTIONS ==========
+function debugLog(message, data = null) {
+    console.log(`[BADGE DEBUG] ${message}`, data || '');
+}
+
+// ========== BADGE UPDATE FUNCTIONS ==========
+function updateBadges() {
+    debugLog('Updating badges...');
+    updateCartBadge();
+    updateWishlistBadge();
+}
+
+function updateCartBadge() {
+    debugLog('Fetching cart count...');
+    
+    fetch('/cart/count')
+        .then(res => {
+            debugLog('Cart API response status:', res.status);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            debugLog('Cart API response data:', data);
+            
+            const count = data.count || 0;
+            debugLog('Cart count:', count);
+            
+            const badge = document.getElementById('cartBadge');
+            if (!badge) {
+                console.error('[ERROR] Cart badge element not found');
+                return;
+            }
+            
+            if (count > 0) {
+                const displayCount = count > 9 ? '9+' : count;
+                badge.textContent = displayCount;
+                badge.classList.remove('hide');
+                badge.classList.add('show');
+                debugLog('Cart badge updated - Count:', displayCount);
+            } else {
+                badge.classList.remove('show');
+                badge.classList.add('hide');
+                debugLog('Cart badge hidden - Count is 0');
+            }
+        })
+        .catch(err => {
+            console.error('[ERROR] Error fetching cart count:', err);
+            debugLog('Cart fetch failed:', err.message);
+        });
+}
+
+function updateWishlistBadge() {
+    debugLog('Fetching wishlist count...');
+    
+    fetch('/wishlist/count')
+        .then(res => {
+            debugLog('Wishlist API response status:', res.status);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            debugLog('Wishlist API response data:', data);
+            
+            const count = data.count || 0;
+            debugLog('Wishlist count:', count);
+            
+            const badge = document.getElementById('wishlistBadge');
+            if (!badge) {
+                console.error('[ERROR] Wishlist badge element not found');
+                return;
+            }
+            
+            if (count > 0) {
+                const displayCount = count > 9 ? '9+' : count;
+                badge.textContent = displayCount;
+                badge.classList.remove('hide');
+                badge.classList.add('show');
+                debugLog('Wishlist badge updated - Count:', displayCount);
+            } else {
+                badge.classList.remove('show');
+                badge.classList.add('hide');
+                debugLog('Wishlist badge hidden - Count is 0');
+            }
+        })
+        .catch(err => {
+            console.error('[ERROR] Error fetching wishlist count:', err);
+            debugLog('Wishlist fetch failed:', err.message);
+        });
+}
+
+// Update badges on page load
+document.addEventListener('DOMContentLoaded', () => {
+    debugLog('DOM loaded - initializing badges');
+    updateBadges();
+});
+
+// Update badges periodically (every 5 seconds)
+setInterval(updateBadges, 1000);
+
+// Update badges when returning to tab
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        debugLog('Page became visible - updating badges');
+        updateBadges();
+    }
+});
+
+debugLog('Badge script loaded successfully');
 </script>

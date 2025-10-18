@@ -4,85 +4,13 @@ const Product = require('../../models/productSchema');
 
 
 
-// const getCartPage = async (req, res) => {
-//   try {
-//     const userId = req.session.user?.id;
-//     const cart = await Cart.findOne({ userId }).populate({
-//       path: 'items.productId',
-//       populate: [
-//         { path: 'brand', select: 'brandName' },
-//         { path: 'category', select: 'name' }
-//       ]
-//     });
-
-//     if (!cart || cart.items.length === 0) {
-//       return res.render("cart", { cartItems: [], totalPrice: 0 });
-//     }
-
-//     let totalPrice = 0;
-//     let outOfStockCount = 0;
-    
-//     const cartItems = cart.items.map((item) => {
-//       const product = item.productId;
-      
-   
-//       const variant = product.variants.find(v => v.size === item.variantSize);
-      
-   
-//       const variantStock = variant ? variant.stock : 0;
-//       const productStock = product.stock || 0;
-      
-   
-//       const actualStock = variantStock !== undefined ? variantStock : productStock;
-      
-//       const salePrice = variant ? (variant.salePrice || variant.regularPrice) : item.price;
-//       const regularPrice = variant ? variant.regularPrice : null;
-
-//       const itemTotal = salePrice * item.quantity;
-      
-   
-//       if (actualStock > 0) {
-//         totalPrice += itemTotal;
-//       } else {
-//         outOfStockCount++;
-//       }
-
-//       return {
-//         productId: {
-//           ...product.toObject(),
-//           stock: actualStock  
-//         },
-//         variant: variant ? {
-//           size: variant.size,
-//           salePrice: variant.salePrice,
-//           regularPrice: variant.regularPrice,
-//           stock: variantStock
-//         } : {},
-//         quantity: item.quantity,
-//         price: item.price,
-//         itemTotal,
-//       };
-//     });
-
-//     res.render("cart", { 
-//       cartItems, 
-//       totalPrice,
-//       outOfStockCount 
-//     });
-//   } catch (err) {
-//     console.error('Cart page error:', err);
-//     res.redirect("/pageNotFound");
-//   }
-// };
-
-
 const getCartPage = async (req, res) => {
   try {
     const userId = req.session.user?.id;
     const cart = await Cart.findOne({ userId }).populate({
       path: 'items.productId',
       populate: [
-        { path: 'brand', select: 'brandName isListed' },
+        { path: 'brand', select: 'brandName isBlocked' },
         { path: 'category', select: 'name isListed' }
       ]
     });
@@ -92,7 +20,8 @@ const getCartPage = async (req, res) => {
         cartItems: [], 
         totalPrice: 0,
         outOfStockCount: 0,
-        blockedCount: 0
+        blockedCount: 0,
+        blockedProducts: []
       });
     }
 
@@ -100,30 +29,27 @@ const getCartPage = async (req, res) => {
     let outOfStockCount = 0;
     let blockedCount = 0;
     const cartItems = [];
+    const blockedProducts = [];
 
     cart.items.forEach((item) => {
       const product = item.productId;
-      
-      // Safely check if product exists
       if (!product) {
-        return; // Skip if product doesn't exist
+        return; 
       }
-
-      // Check if product, category, or brand is unlisted
-      const isProductUnlisted = product.isListed === false;
-      const isCategoryUnlisted = product.category?.isListed === false;
-      const isBrandUnlisted = product.brand?.isListed === false;
-      const isBlocked = isProductUnlisted || isCategoryUnlisted || isBrandUnlisted;
       
-      // Determine block reason
-      let blockReason = null;
-      if (isProductUnlisted) {
-        blockReason = `Product "${product.productName}" has been temporarily blocked by admin`;
-      } else if (isCategoryUnlisted) {
-        blockReason = `Category "${product.category?.name}" has been temporarily blocked by admin`;
-      } else if (isBrandUnlisted) {
-        blockReason = `Brand "${product.brand?.brandName}" has been temporarily blocked by admin`;
-      }
+      const isProductUnlisted = product.isBlocked === true;
+      const isCategoryUnlisted = product.category?.isListed === false;
+      const isBrandUnlisted = product.brand?.isBlocked === true;
+      const isBlocked = isProductUnlisted || isCategoryUnlisted || isBrandUnlisted;
+  
+     let blockReason = null;
+if (isProductUnlisted) {
+  blockReason = `Product "${product.productName}" has been temporarily blocked by admin`;
+} else if (isCategoryUnlisted) {
+  blockReason = `Category "${product.category?.name}" has been temporarily blocked by admin`;
+} else if (isBrandUnlisted) {
+  blockReason = `Brand "${product.brand?.brandName}" has been temporarily blocked by admin`;
+}
 
       const variant = product.variants?.find(v => v.size === item.variantSize);
       const variantStock = variant ? variant.stock : 0;
@@ -135,26 +61,26 @@ const getCartPage = async (req, res) => {
       const regularPrice = variant ? variant.regularPrice : null;
       const itemTotal = salePrice * item.quantity;
 
-      // Get product images safely
       const images = product.productImage && product.productImage.length > 0 
         ? product.productImage 
         : (product.images && product.images.length > 0 
           ? product.images 
           : []);
-
-      // Only add to total if not blocked and in stock
+     
       if (!isBlocked && !isOutOfStock) {
         totalPrice += itemTotal;
       }
-
-      // Count unavailable
+      
       if (isBlocked) {
         blockedCount++;
+        blockedProducts.push({
+          productName: product.productName,
+          reason: blockReason
+        });
       } else if (isOutOfStock) {
         outOfStockCount++;
       }
-
-      // Add to cartItems regardless, with flags
+    
       cartItems.push({
         productId: {
           _id: product._id,
@@ -179,12 +105,12 @@ const getCartPage = async (req, res) => {
       });
     });
 
-    // Prepare response data
     const responseData = {
       cartItems: cartItems, 
-      totalPrice: Math.round(totalPrice * 100) / 100, // Round to 2 decimals
+      totalPrice: Math.round(totalPrice * 100) / 100, 
       outOfStockCount,
-      blockedCount
+      blockedCount,
+      blockedProducts 
     };
 
     res.render("cart", responseData);
@@ -238,17 +164,36 @@ const addToCart = async (req, res) => {
             cart = new Cart({ userId, items: [] });
         }
 
-       
         cart.items = cart.items.filter(item => item.variantSize != null && item.price != null);
 
         const existingItem = cart.items.find(
             (item) => item.productId.toString() === productId && item.variantSize === Number(variantSize)
         );
-
+        
         if (existingItem) {
-            existingItem.quantity += Number(quantity);
+            const newTotal = existingItem.quantity + Number(quantity);
+         
+            if (newTotal > 5) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Cannot add more items. You already have ${existingItem.quantity} item(s) of ${variantSize}ML in cart. Maximum 5 allowed per variant.`,
+                    currentQuantity: existingItem.quantity,
+                    canAdd: 5 - existingItem.quantity
+                });
+            }
+            
+            existingItem.quantity = newTotal;
             existingItem.price = price;
         } else {
+            
+            if (Number(quantity) > 5) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Cannot add more than 5 items at a time per variant',
+                    canAdd: 5
+                });
+            }
+            
             cart.items.push({
                 productId,
                 variantSize: Number(variantSize),
@@ -259,14 +204,16 @@ const addToCart = async (req, res) => {
 
         await cart.save();
         console.log('Cart updated:', cart.items);
-        res.json({ success: true, message: 'Product added to cart' });
+        res.json({ 
+            success: true, 
+            message: 'Product added to cart',
+            currentQuantity: existingItem ? existingItem.quantity : Number(quantity)
+        });
     } catch (err) {
         console.error('Add to cart error:', err);
         res.status(500).json({ success: false, message: 'Server error', error: err.message });
     }
 };
-
-
 
 const removeFromCart = async (req, res) => {
   try {
@@ -369,8 +316,6 @@ const updateCart = async (req, res) => {
   }
 };
 
-
-// Add this endpoint to your checkout controller
 const checkoutBlockedItems = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -378,8 +323,6 @@ const checkoutBlockedItems = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ success: false, error: 'Please login first' });
     }
-
-    // Fetch cart with populated product, category, and brand info
     const cart = await Cart.findOne({ userId }).populate({
       path: 'items.productId',
       populate: [
@@ -393,19 +336,15 @@ const checkoutBlockedItems = async (req, res) => {
     }
 
     const blockedItems = [];
-
-    // Check each cart item for blocked status
     cart.items.forEach((item) => {
       const product = item.productId;
       
       if (!product) return;
-
-      // Check if product, category, or brand is unlisted
+     
       const isProductUnlisted = product.isListed === false;
       const isCategoryUnlisted = product.category?.isListed === false;
       const isBrandUnlisted = product.brand?.isListed === false;
-
-      // Determine block reason
+     
       let blockReason = null;
       if (isProductUnlisted) {
         blockReason = `Product "${product.productName}" has been temporarily blocked by admin`;
@@ -414,8 +353,7 @@ const checkoutBlockedItems = async (req, res) => {
       } else if (isBrandUnlisted) {
         blockReason = `Brand "${product.brand?.brandName}" has been temporarily blocked by admin`;
       }
-
-      // If blocked, add to blockedItems array
+     
       if (blockReason) {
         blockedItems.push({
           productId: product._id,
@@ -441,6 +379,72 @@ const checkoutBlockedItems = async (req, res) => {
   }
 };
 
+const checkCartQuantity = async (req, res) => {
+  try {
+    const userId = req.session.user?.id || req.session.user?._id;
+    const { productId } = req.body;
+
+    if (!userId) {
+      return res.json({ quantity: 0 }); 
+    }
+
+    if (!productId) {
+      return res.status(400).json({ error: 'Product ID required' });
+    }
+   
+    const cart = await Cart.findOne({ userId });
+    
+    if (!cart) {
+      return res.json({ quantity: 0 }); 
+    }
+
+    const cartItem = cart.items.find(item => item.productId.toString() === productId);
+    if (!cartItem) {
+      return res.json({ quantity: 0 }); 
+    }
+   
+    const alreadyInCart = cartItem.quantity;
+    const canStillAdd = 5 - alreadyInCart;
+
+    return res.json({ 
+      quantity: alreadyInCart,
+      canAdd: canStillAdd,
+      maxAllowed: 5
+    }); 
+  } catch (error) {
+    console.error('Cart check error:', error);
+    res.status(500).json({ error: 'Error checking cart' });
+  }
+};
+
+const getCartCount = async (req, res) => {
+  try {
+    const userId = req.session.user?._id || req.session.user?.id;
+    
+    if (!userId) {
+      console.log('[Cart Count] No user ID found');
+      return res.json({ count: 0 });
+    }
+    
+    const cart = await Cart.findOne({ userId: userId });
+    
+    console.log('[Cart Count] Cart document:', cart);
+
+    let count = 0;
+    if (cart && Array.isArray(cart.items)) {
+      count = cart.items.length;
+   
+    } else {
+      console.log('[Cart Count] No cart or items array found');
+    }
+  
+    return res.json({ count, success: true });
+  } catch (err) {
+    console.error('[Cart Count ERROR]:', err.message);
+    return res.json({ count: 0, error: err.message });
+  }
+};
+
 
 
 module.exports = {
@@ -448,7 +452,10 @@ module.exports = {
     addToCart,
     removeFromCart,
     updateCart,
-    checkoutBlockedItems
+    checkoutBlockedItems,
+    checkCartQuantity,
+    getCartCount
+    
 
     
 };

@@ -8,6 +8,8 @@ const sharp = require("sharp");
 const mongoose = require("mongoose");
 const { cloudinary } = require('../../config/cloudinary');
 
+
+
 const getProductAddPage = async (req, res) => {
   try {
     const category = await Category.find({ isListed: true });
@@ -25,8 +27,6 @@ const getProductAddPage = async (req, res) => {
   }
 };
 
-
-
 const addProducts = async (req, res) => {
   try {
     const data = req.body;
@@ -40,7 +40,6 @@ const addProducts = async (req, res) => {
       variantCount: Array.isArray(data.variantSize) ? data.variantSize.length : 1
     });
 
-    // Validate required fields
     if (!data.productName?.trim()) throw new Error("Product name is required");
     if (data.productName.trim().length < 3) throw new Error("Product name must be at least 3 characters");
     if (!data.description?.trim()) throw new Error("Short description is required");
@@ -50,7 +49,6 @@ const addProducts = async (req, res) => {
     if (!data.brand) throw new Error("Brand is required");
     if (!data.category) throw new Error("Category is required");
 
-    // Check for duplicate product name (case-insensitive)
     const existingProduct = await Product.findOne({
       productName: { $regex: `^${data.productName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
     });
@@ -59,13 +57,11 @@ const addProducts = async (req, res) => {
       throw new Error("Product name already exists");
     }
 
-    // Validate brand and category
     const brandObj = await Brand.findById(data.brand);
     const categoryObj = await Category.findById(data.category);
     if (!brandObj) throw new Error("Invalid brand");
     if (!categoryObj) throw new Error("Invalid category");
 
-    // Validate images
     if (!data.croppedImages || data.croppedImages.length === 0) throw new Error("At least 2 images are required");
     const validImages = data.croppedImages.filter(img => img);
     if (validImages.length < 2) throw new Error("At least 2 images are required");
@@ -80,7 +76,6 @@ const addProducts = async (req, res) => {
       images.push(upload.secure_url);
     }
 
-    // Validate variants
     if (!data.variantSize || !data.variantStock || !data.variantRegularPrice || !data.variantSalePrice) {
       throw new Error("At least one variant is required");
     }
@@ -99,7 +94,6 @@ const addProducts = async (req, res) => {
       salePrice: Number(salePrices[i])
     }));
 
-    // Validate variant data
     for (const variant of variants) {
       if (variant.size <= 0) throw new Error("Size must be positive");
       if (variant.stock < 0) throw new Error("Stock cannot be negative");
@@ -108,7 +102,6 @@ const addProducts = async (req, res) => {
       if (variant.salePrice > variant.regularPrice) throw new Error("Sale price must be ≤ regular price");
     }
 
-    // Create product
     const product = new Product({
       productName: data.productName.trim(),
       description: data.description.trim(),
@@ -125,24 +118,20 @@ const addProducts = async (req, res) => {
     console.log('Product added:', data.productName.trim());
     req.flash("success", "Product added successfully!");
 
-    // Check if request expects JSON (from fetch)
     if (req.get('Accept').includes('application/json')) {
       return res.status(201).json({ message: "Product added successfully" });
     }
     res.redirect("/admin/products");
-
   } catch (error) {
     console.error("Add product error:", error.message);
     req.flash("error", error.message);
 
-    // Check if request expects JSON (from fetch)
     if (req.get('Accept').includes('application/json')) {
       return res.status(400).json({ error: error.message });
     }
     res.redirect("/admin/addProducts");
   }
 };
-
 
 const getAllProducts = async (req, res) => {
   try {
@@ -155,7 +144,6 @@ const getAllProducts = async (req, res) => {
 
     const query = {};
 
-   
     if (search) {
       query.$or = [
         { productName: { $regex: search, $options: "i" } },
@@ -163,7 +151,6 @@ const getAllProducts = async (req, res) => {
       ];
     }
 
-    
     if (selectedCategory) {
       const category = mongoose.Types.ObjectId.isValid(selectedCategory)
         ? await Category.findOne({ _id: selectedCategory, isListed: true })
@@ -173,7 +160,6 @@ const getAllProducts = async (req, res) => {
       else query.category = null;
     }
 
- 
     if (selectedBrand) {
       const brand = mongoose.Types.ObjectId.isValid(selectedBrand)
         ? await Brand.findOne({ _id: selectedBrand, isBlocked: false })
@@ -189,12 +175,10 @@ const getAllProducts = async (req, res) => {
       else query.brand = null;
     }
 
-    
     if (selectedVariant) {
       query["variants.size"] = selectedVariant;
     }
 
-   
     const [productData, count, categories, brands] = await Promise.all([
       Product.find(query)
         .populate("category", "name")
@@ -203,9 +187,7 @@ const getAllProducts = async (req, res) => {
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
-
       Product.countDocuments(query),
-
       Category.find({ isListed: true }).lean(),
       Brand.find({ isBlocked: false }).lean()
     ]);
@@ -258,7 +240,6 @@ const addProductOffer = async (req, res) => {
     }
 
     res.json({ status: true });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: false, message: "Internal Server Error" });
@@ -295,7 +276,6 @@ const toggleProductStatus = async (req, res) => {
       return res.json({ success: false, message: "Invalid product ID" });
     }
 
-    
     const isBlocked = String(block).trim().toLowerCase() === "true";
 
     const product = await Product.findByIdAndUpdate(
@@ -366,189 +346,6 @@ const getEditProductPage = async (req, res) => {
   }
 };
 
-
-
-
-// const updateProduct = async (req, res) => {
-//   try {
-//     const {
-//       productName,
-//       description,
-//       Longdescription,
-//       brand,
-//       category,
-//       deletedImages,
-//       variantSize,
-//       variantStock,
-//       variantRegularPrice,
-//       variantSalePrice,
-//       productOffer,
-//       productImagesBase64
-//     } = req.body;
-
-//     const productId = req.params.id;
-//     if (!mongoose.Types.ObjectId.isValid(productId)) {
-//       req.flash("error", "Invalid Product ID");
-//       return res.redirect("/admin/products");
-//     }
-
-//     const product = await Product.findById(productId);
-//     if (!product) {
-//       req.flash("error", "Product not found");
-//       return res.redirect("/admin/products");
-//     }
-
-    
-//     if (!productName?.trim() || !description?.trim() || !Longdescription?.trim() || !brand || !category) {
-//       req.flash("error", "All fields are required!");
-//       return res.redirect(`/admin/edit-product/${productId}`);
-//     }
-
-    
-//     const originalName = product.productName;
-//     const newName = productName.trim();
-//     if (newName !== originalName) {
-//       const existing = await Product.findOne({ productName: { $regex: `^${newName}$`, $options: 'i' }, _id: { $ne: productId } });
-//       if (existing) {
-//         req.flash("error", "Product name already exists");
-//         return res.redirect(`/admin/edit-product/${productId}`);
-//       }
-//     }
-
-//     product.productName = newName;
-//     product.description = description.trim();
-//     product.Longdescription = Longdescription.trim();
-
-   
-//     if (!mongoose.Types.ObjectId.isValid(brand)) {
-//       req.flash("error", "Invalid Brand");
-//       return res.redirect(`/admin/edit-product/${productId}`);
-//     }
-//     const brandExists = await Brand.findById(brand);
-//     if (!brandExists) {
-//       req.flash("error", "Brand not found");
-//       return res.redirect(`/admin/edit-product/${productId}`);
-//     }
-//     product.brand = brand;
-
-
-//     if (!mongoose.Types.ObjectId.isValid(category)) {
-//       req.flash("error", "Invalid Category");
-//       return res.redirect(`/admin/edit-product/${productId}`);
-//     }
-//     const categoryExists = await Category.findById(category);
-//     if (!categoryExists) {
-//       req.flash("error", "Category not found");
-//       return res.redirect(`/admin/edit-product/${productId}`);
-//     }
-//     product.category = category;
-
- 
-//     const sizeArr = Array.isArray(variantSize) ? variantSize : [variantSize];
-//     const stockArr = Array.isArray(variantStock) ? variantStock : [variantStock];
-//     const rPriceArr = Array.isArray(variantRegularPrice) ? variantRegularPrice : [variantRegularPrice];
-//     const sPriceArr = Array.isArray(variantSalePrice) ? variantSalePrice : [variantSalePrice];
-
-//     const newVariants = [];
-//     for (let i = 0; i < sizeArr.length; i++) {
-//       const sizeVal = Number(sizeArr[i]);
-//       const stockVal = Number(stockArr[i]) || 0;
-//       const rPriceVal = Number(rPriceArr[i]) || 1;
-//       const sPriceVal = Number(sPriceArr[i]) || 0;
-
-//       if (sizeVal <= 0) continue;
-//       if (stockVal < 0) stockVal = 0;
-
-//       const finalSalePrice = sPriceVal >= rPriceVal ? rPriceVal - 0.01 : sPriceVal;
-
-//       newVariants.push({
-//         size: sizeVal,
-//         stock: stockVal,
-//         regularPrice: rPriceVal,
-//         salePrice: finalSalePrice < 0 ? 0 : finalSalePrice
-//       });
-//     }
-
-//     if (newVariants.length === 0) {
-//       req.flash("error", "At least one valid variant is required.");
-//       return res.redirect(`/admin/edit-product/${productId}`);
-//     }
-//     product.variants = newVariants;
-
-   
-//     let deletedIndexesArr = [];
-//     if (deletedImages) {
-//       deletedIndexesArr = deletedImages.split(",").map(i => Number(i));
-//     }
-
-//     if (product.images && product.images.length && deletedIndexesArr.length) {
-//       const imagesToDelete = product.images.filter((img, idx) => deletedIndexesArr.includes(idx));
-//       for (const url of imagesToDelete) {
-//         try {
-//           const parts = url.split("/");
-//           const filename = parts[parts.length - 1];
-//           const publicId = `products/${filename.split(".")[0]}`;
-//           await cloudinary.uploader.destroy(publicId);
-//         } catch (err) {
-//           console.error("Failed to delete image from Cloudinary:", err);
-//         }
-//       }
-//       product.images = product.images.filter((img, idx) => !deletedIndexesArr.includes(idx));
-//     }
-
-   
-//     if (productImagesBase64) {
-//       const imagesArr = Array.isArray(productImagesBase64) ? productImagesBase64 : [productImagesBase64];
-//       for (const base64 of imagesArr) {
-//         try {
-//           const result = await cloudinary.uploader.upload(base64, { folder: "products" });
-//           product.images.push(result.secure_url);
-//         } catch (err) {
-//           console.error("Failed to upload image to Cloudinary:", err);
-//           req.flash("error", "Failed to upload one or more images.");
-//           return res.redirect(`/admin/edit-product/${productId}`);
-//         }
-//       }
-//     }
-
-   
-//     if (product.images.length < 1) {
-//       req.flash("error", "At least one product image is required.");
-//       return res.redirect(`/admin/edit-product/${productId}`);
-//     }
-//     if (product.images.length > 4) {
-//       req.flash("error", "Maximum 4 images allowed.");
-//       return res.redirect(`/admin/edit-product/${productId}`);
-//     }
-
-  
-//     let offer = Number(productOffer) || 0;
-//     if (offer < 0 || offer > 100) offer = 0;
-//     product.productOffer = offer;
-
-   
-//     product.slug = product.productName
-//       .toLowerCase()
-//       .replace(/[^\w\s-]/g, '')
-//       .replace(/[\s_-]+/g, '-')
-//       .replace(/^-+|-+$/g, '');
-
-    
-//     product.status = product.variants.some(v => v.stock > 0) ? "Available" : "Out of stock";
-//     product.updatedAt = new Date();
-
-//     await product.save();
-
-//     req.flash('success', 'Product updated successfully!');
-//     res.redirect('/admin/products');
-//   } catch (err) {
-//     console.error("Update product error:", err);
-//     req.flash('error', err.message || 'Something went wrong!');
-//     res.redirect(`/admin/edit-product/${req.params.id}`);
-//   }
-// };
-
-
 const updateProduct = async (req, res) => {
   try {
     const {
@@ -578,19 +375,17 @@ const updateProduct = async (req, res) => {
       return res.redirect("/admin/products");
     }
 
-    // Validate required fields
     if (!productName?.trim() || !description?.trim() || !longDescription?.trim() || !brand || !category) {
       req.flash("error", "All fields are required!");
       return res.redirect(`/admin/edit-product/${productId}`);
     }
 
-    // Check for duplicate product name
     const originalName = product.productName;
     const newName = productName.trim();
     if (newName !== originalName) {
-      const existing = await Product.findOne({ 
-        productName: { $regex: `^${newName}$`, $options: 'i' }, 
-        _id: { $ne: productId } 
+      const existing = await Product.findOne({
+        productName: { $regex: `^${newName}$`, $options: 'i' },
+        _id: { $ne: productId }
       });
       if (existing) {
         req.flash("error", "Product name already exists");
@@ -602,7 +397,6 @@ const updateProduct = async (req, res) => {
     product.description = description.trim();
     product.longDescription = longDescription.trim();
 
-    // Validate brand
     if (!mongoose.Types.ObjectId.isValid(brand)) {
       req.flash("error", "Invalid Brand");
       return res.redirect(`/admin/edit-product/${productId}`);
@@ -614,7 +408,6 @@ const updateProduct = async (req, res) => {
     }
     product.brand = brand;
 
-    // Validate category
     if (!mongoose.Types.ObjectId.isValid(category)) {
       req.flash("error", "Invalid Category");
       return res.redirect(`/admin/edit-product/${productId}`);
@@ -626,7 +419,6 @@ const updateProduct = async (req, res) => {
     }
     product.category = category;
 
-    // Process variants
     const sizeArr = Array.isArray(variantSize) ? variantSize : [variantSize];
     const stockArr = Array.isArray(variantStock) ? variantStock : [variantStock];
     const rPriceArr = Array.isArray(variantRegularPrice) ? variantRegularPrice : [variantRegularPrice];
@@ -635,12 +427,12 @@ const updateProduct = async (req, res) => {
     const newVariants = [];
     for (let i = 0; i < sizeArr.length; i++) {
       const sizeVal = Number(sizeArr[i]);
-      let stockVal = Number(stockArr[i]) || 0; // Changed from const to let
+      let stockVal = Number(stockArr[i]) || 0;
       const rPriceVal = Number(rPriceArr[i]) || 1;
       const sPriceVal = Number(sPriceArr[i]) || 0;
 
       if (sizeVal <= 0) continue;
-      if (stockVal < 0) stockVal = 0; // Now this works
+      if (stockVal < 0) stockVal = 0;
 
       const finalSalePrice = sPriceVal >= rPriceVal ? rPriceVal - 0.01 : sPriceVal;
 
@@ -658,7 +450,6 @@ const updateProduct = async (req, res) => {
     }
     product.variants = newVariants;
 
-    // Handle deleted images
     let deletedIndexesArr = [];
     if (deletedImages) {
       deletedIndexesArr = deletedImages.split(",").map(i => Number(i));
@@ -679,7 +470,6 @@ const updateProduct = async (req, res) => {
       product.images = product.images.filter((img, idx) => !deletedIndexesArr.includes(idx));
     }
 
-    // Upload new images (base64)
     if (productImagesBase64) {
       const imagesArr = Array.isArray(productImagesBase64) ? productImagesBase64 : [productImagesBase64];
       for (const base64 of imagesArr) {
@@ -694,7 +484,6 @@ const updateProduct = async (req, res) => {
       }
     }
 
-    // Validate final image count
     if (product.images.length < 1) {
       req.flash("error", "At least one product image is required.");
       return res.redirect(`/admin/edit-product/${productId}`);
@@ -704,19 +493,16 @@ const updateProduct = async (req, res) => {
       return res.redirect(`/admin/edit-product/${productId}`);
     }
 
-    // Handle product offer
     let offer = Number(productOffer) || 0;
     if (offer < 0 || offer > 100) offer = 0;
     product.productOffer = offer;
 
-    // Generate slug
     product.slug = product.productName
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/[\s_-]+/g, '-')
       .replace(/^-+|-+$/g, '');
 
-    // Update status
     product.status = product.variants.some(v => v.stock > 0) ? "Available" : "Out of stock";
     product.updatedAt = new Date();
 
@@ -742,6 +528,7 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+
 module.exports = {
   getProductAddPage,
   addProducts,
@@ -751,5 +538,5 @@ module.exports = {
   toggleProductStatus,
   getEditProductPage,
   updateProduct,
-  deleteProduct,
+  deleteProduct
 };

@@ -35,9 +35,6 @@ const loadLandingPage = async (req, res) => {
   }
 };
 
-
-
-
 const loadHomepage = async (req, res) => {
   try {
     const sessionUser = req.session.user;
@@ -108,8 +105,6 @@ const loadHomepage = async (req, res) => {
     return res.status(500).send("Server error");
   }
 };
-
-
 
 const loadSignup = async (req, res) => {
   try {
@@ -249,14 +244,22 @@ const verifyOtp = async (req, res) => {
       });
 
       await newUser.save();
+
+      req.session.user = {
+  _id: newUser._id,
+  id: newUser._id,
+  name: newUser.name,
+  email: newUser.email,
+  phone: newUser.phone
+};
   
       req.session.userOtp = null;
       req.session.userData = null;
-       console.log(" OTP verified - sending redirect to /login");
+       console.log(" OTP verified - sending redirect to /home");
 
        return res.status(200).json({
          success: true,
-         redirect: "/login",
+         redirect: "/home",
      });
 
     } else {
@@ -307,7 +310,6 @@ const resendOtp = async (req, res) => {
         });
     }
 };
-
 
 
 const loadLogin = async (req, res) => {
@@ -384,7 +386,6 @@ const logout = async (req, res) => {
     return res.redirect('/pageNotFound');
   }
 };
-
 
 
 const loadShopingPage = async (req, res) => {
@@ -515,8 +516,6 @@ const loadShopingPage = async (req, res) => {
 };
 
 
-
-
 const loadProductDetails = async (req, res) => {
   try {
     const productId = req.params.id || req.query.id;
@@ -524,7 +523,6 @@ const loadProductDetails = async (req, res) => {
     if (!productId) {
       return res.redirect("/shopPage");
     }
-
   
     const product = await Product.findOne({
       _id: productId,
@@ -566,8 +564,6 @@ const relatedProducts = await Product.find({
     res.redirect("/shopPage");
   }
 };
-
-
 
 
 

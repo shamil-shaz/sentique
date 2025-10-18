@@ -3,6 +3,7 @@ const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
 const Brand = require("../../models/brandSchema");
 const mongoose = require("mongoose");
+const Wishlist=require('../../models/wishlistSchema')
 
 const loadZodiacPage = async (req, res) => {
   try {
@@ -13,10 +14,8 @@ const loadZodiacPage = async (req, res) => {
     });
 
     if (!sentiqueBrand) return res.status(404).send("Sentique brand not found");
-
     
     const categories = await Category.find({ isListed: true }).lean();
-
     
     const products = await Product.find({
       brand: sentiqueBrand._id,
@@ -50,19 +49,15 @@ const getZodiacProducts = async (req, res) => {
       isBlocked: false,
     });
     if (!sentiqueBrand) return res.json({ success: true, products: [] });
-
     
     const categories = await Category.find({ isListed: true }).lean();
-
 
     const query = {
       brand: sentiqueBrand._id,
       isBlocked: false,
     };
-
    
     if (search) query.productName = { $regex: search, $options: "i" };
-
  
     const categoryFilters = categoryFilter ? categoryFilter.split(',') : [];
     if (categoryFilters.length > 0) {
@@ -130,8 +125,7 @@ const getZodiacProducts = async (req, res) => {
     else if (effectiveSort === "price-high") sortOption.salePrice = -1;
     else if (effectiveSort === "name") sortOption.productName = 1;
     else sortOption.createdAt = -1;
-
-    // Fetch products with populated category & brand
+   
     const products = await Product.find(query)
       .populate({ path: "category", match: { isListed: true }, select: "name" })
       .populate({ path: "brand", match: { isBlocked: false }, select: "brandName" })
@@ -144,6 +138,7 @@ const getZodiacProducts = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 module.exports = {
   loadZodiacPage,

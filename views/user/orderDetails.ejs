@@ -1757,33 +1757,40 @@ body {
             });
         }
 
-        function downloadInvoice() {
-            const orderId = "<%= orderId %>";
-            fetch(`/orders/${orderId}/invoice`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-            })
-            .then(res => res.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Invoice_${orderId}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(error => {
-                console.error('Error downloading invoice:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while downloading the invoice. Please try again.',
-                    confirmButtonColor: '#ff6b35',
-                });
-            });
-        }
+       function downloadInvoice() {
+  const orderId = "<%= orderId %>";
+  fetch(`/orders/${orderId}/invoice`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  .then(res => {
+    if (!res.ok) {
+      return res.json().then(data => {
+        throw new Error(data.error);
+      });
+    }
+    return res.blob();
+  })
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Invoice_${orderId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  })
+  .catch(error => {
+    console.error('Error downloading invoice:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'Invoice can only be downloaded when all items are delivered, cancelled, or returned.',
+      confirmButtonColor: '#ff6b35',
+    });
+  });
+}
 
         function continueShopping() {
             window.location.href = '/shopPage';

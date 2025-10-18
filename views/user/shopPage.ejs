@@ -553,7 +553,7 @@
 
 <!-- Search Bar -->
 <div class="shop-search-bar">
-  <form method="GET" action="/shopPage" class="shop-search-form">
+  <form method="GET" action="/shopPage" class="shop-search-form" id="shopSearchForm">
     <input 
       type="text" 
       id="shopSearchInput"
@@ -566,7 +566,7 @@
       <i class="fa fa-search"></i>
     </button>
 
-   
+    <!-- Reset/Clear Button -->
     <% if (search && search.trim() !== "") { %>
       <button type="button" class="shop-reset-btn" onclick="resetSearch()">
         <i class="fa fa-times"></i>
@@ -574,6 +574,7 @@
     <% } %>
   </form>
 </div>
+
 
 
 <div class="site-wrapper">
@@ -758,9 +759,7 @@
                     <a href="javascript:void(0);" class="wishlist-icon" data-id="<%= product._id %>" title="Add to Wishlist">
                       <i class="fa fa-heart"></i>
                     </a>
-                    <a href="/cart/add/<%= product._id %>" title="Add to Cart">
-                      <i class="fa fa-shopping-cart"></i>
-                    </a>
+                    
                   </div>
 
               </div>
@@ -822,6 +821,7 @@
 </div>
 
 <script>
+  // Filter Toggle
   (function(){
     const toggleBtn = document.getElementById('toggleFilters');
     const filters = document.getElementById('filters');
@@ -841,94 +841,90 @@
       overlay.classList.remove('show');
       toggleBtn.innerHTML = '<i class="fa fa-filter"></i> Filters';
     });
+  })();
 
-    // Clear filters function
-    window.clearFilters = function() {
-      const form = document.getElementById('filterForm');
-      const inputs = form.querySelectorAll('input[type="checkbox"], input[type="radio"]');
-      inputs.forEach(input => {
-        if (input.name === 'priceRange' && input.value === '') {
-          input.checked = true;
-        } else {
-          input.checked = false;
-        }
-      });
-    };
- // })();
+  // Clear filters function
+  window.clearFilters = function() {
+    const form = document.getElementById('filterForm');
+    const inputs = form.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+    inputs.forEach(input => {
+      if (input.name === 'priceRange' && input.value === '') {
+        input.checked = true;
+      } else {
+        input.checked = false;
+      }
+    });
+  };
 
+  // Reset search function
   function resetSearch() {
-  const input = document.getElementById("shopSearchInput");
-  input.value = "";
-  window.location.href = "/shopPage";
-}
+    const input = document.getElementById("shopSearchInput");
+    input.value = "";
+    window.location.href = "/shopPage";
+  }
 
- document.addEventListener('click', async (e) => {
-        if (e.target.closest('.wishlist-icon')) {
-          e.preventDefault();
-          const icon = e.target.closest('.wishlist-icon');
-          const productId = icon.dataset.id;
-          console.log('Adding to wishlist, productId:', productId); // Debug
+  // Wishlist functionality
+  document.addEventListener('click', async (e) => {
+    if (e.target.closest('.wishlist-icon')) {
+      e.preventDefault();
+      const icon = e.target.closest('.wishlist-icon');
+      const productId = icon.dataset.id;
+      console.log('Adding to wishlist, productId:', productId);
 
-          if (!productId || productId.length !== 24) {
-            console.error('Invalid productId:', productId);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Invalid product ID',
-              confirmButtonColor: '#667eea'
-            });
-            return;
-          }
+      if (!productId || productId.length !== 24) {
+        console.error('Invalid productId:', productId);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Invalid product ID',
+          confirmButtonColor: '#667eea'
+        });
+        return;
+      }
 
-          try {
-            const res = await fetch('/wishlist/add', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ productId })
-            });
+      try {
+        const res = await fetch('/wishlist/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId })
+        });
 
-            console.log('Wishlist add response status:', res.status); // Debug
-            const data = await res.json();
-            console.log('Wishlist add response data:', data); // Debug
+        console.log('Wishlist add response status:', res.status);
+        const data = await res.json();
+        console.log('Wishlist add response data:', data);
 
-            if (data.success) {
-              icon.querySelector('i').style.color = 'red';
-              Swal.fire({
-                icon: 'success',
-                title: 'Added to Wishlist!',
-                text: 'Product added to your wishlist.',
-                confirmButtonColor: '#667eea',
-                timer: 2000,
-                showConfirmButton: false
-              }).then(() => {
-                // Optional: Redirect to wishlist page
-                // window.location.href = '/wishlist';
-              });
-            } else {
-              Swal.fire({
-                icon: 'info',
-                title: 'Already in Wishlist',
-                text: data.message || 'This product is already in your wishlist.',
-                confirmButtonColor: '#667eea',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            }
-          } catch (err) {
-            console.error('Wishlist add error:', err.message, err.stack); // Debug
-            Swal.fire({
-              icon: 'error',
-              title: 'Server Error',
-              text: 'Failed to add to wishlist. Please try again.',
-              confirmButtonColor: '#667eea'
-            });
-          }
+        if (data.success) {
+          icon.querySelector('i').style.color = 'red';
+          Swal.fire({
+            icon: 'success',
+            title: 'Added to Wishlist!',
+            text: 'Product added to your wishlist.',
+            confirmButtonColor: '#667eea',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'info',
+            title: 'Already in Wishlist',
+            text: data.message || 'This product is already in your wishlist.',
+            confirmButtonColor: '#667eea',
+            timer: 2000,
+            showConfirmButton: false
+          });
         }
-      });
-    })();
-
+      } catch (err) {
+        console.error('Wishlist add error:', err.message, err.stack);
+        Swal.fire({
+          icon: 'error',
+          title: 'Server Error',
+          text: 'Failed to add to wishlist. Please try again.',
+          confirmButtonColor: '#667eea'
+        });
+      }
+    }
+  });
 </script>
-
 </body>
 
 

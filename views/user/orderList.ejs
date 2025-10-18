@@ -373,7 +373,7 @@
             transform: translateX(4px);
         }
 
-        /* Products Container - NEW */
+        /* Products Container */
         .order-products {
             padding: 20px 28px;
         }
@@ -520,7 +520,7 @@
             font-weight: bold;
         }
 
-        /* Order Footer - NEW */
+        /* Order Footer */
         .order-footer {
             background: #f8f9fa;
             padding: 16px 28px;
@@ -585,30 +585,6 @@
             box-shadow: 0 4px 12px rgba(44, 62, 80, 0.4);
         }
 
-        .btn-secondary {
-            background: white;
-            color: #d4af37;
-            border: 2px solid #d4af37;
-        }
-
-        .btn-secondary:hover {
-            background: #d4af37;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .btn-cancel {
-            background: white;
-            color: #dc3545;
-            border: 2px solid #dc3545;
-        }
-
-        .btn-cancel:hover {
-            background: #dc3545;
-            color: white;
-            transform: translateY(-2px);
-        }
-
         /* Empty State */
         .empty-state {
             background: white;
@@ -657,6 +633,80 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* Pagination Styles */
+        .pagination-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 32px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pagination-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 8px;
+            border: 1px solid #dee2e6;
+            background-color: #fff;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn:hover:not(.disabled):not(.active) {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .pagination-btn.active {
+            background-color: #d4af37;
+            border-color: #d4af37;
+            color: white;
+            cursor: default;
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f8f9fa;
+        }
+
+        .pagination-dots {
+            padding: 0 4px;
+            color: #6c757d;
+        }
+
+        .pagination-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .pagination-separator {
+            color: #dee2e6;
         }
 
         /* Responsive Design */
@@ -764,6 +814,23 @@
                 justify-content: center;
                 width: 100%;
             }
+
+            .pagination-info {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .pagination-separator {
+                display: none;
+            }
+
+            .pagination-btn {
+                min-width: 36px;
+                height: 36px;
+                font-size: 13px;
+                padding: 0 6px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -782,6 +849,7 @@
         }
     </style>
 </head>
+
 <body>
     <%- include('../../views/partials/user/header') %>
     <div class="container">
@@ -803,37 +871,36 @@
         </div>
 
         <!-- Stats Bar -->
-<!-- Stats Bar -->
-<div class="stats-bar">
-    <div class="stat-card">
-        <div class="stat-icon total">📦</div>
-        <div class="stat-content">
-            <h3>Total Items</h3>
-            <p><%= itemStats.totalItems %></p>
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-icon total">📦</div>
+                <div class="stat-content">
+                    <h3>Total Items</h3>
+                    <p><%= itemStats.totalItems %></p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon processing">⏳</div>
+                <div class="stat-content">
+                    <h3>Processing</h3>
+                    <p><%= itemStats.processing %></p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon delivered">✓</div>
+                <div class="stat-content">
+                    <h3>Delivered</h3>
+                    <p><%= itemStats.delivered %></p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amount">💰</div>
+                <div class="stat-content">
+                    <h3>Total Spent</h3>
+                    <p>₹<%= itemStats.totalSpent.toLocaleString() %></p>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon processing">⏳</div>
-        <div class="stat-content">
-            <h3>Processing</h3>
-            <p><%= itemStats.processing %></p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon delivered">✓</div>
-        <div class="stat-content">
-            <h3>Delivered</h3>
-            <p><%= itemStats.delivered %></p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon amount">💰</div>
-        <div class="stat-content">
-            <h3>Total Spent</h3>
-            <p>₹<%= itemStats.totalSpent.toLocaleString() %></p>
-        </div>
-    </div>
-</div>
 
         <!-- Controls Bar -->
         <div class="controls-bar">
@@ -974,8 +1041,6 @@
                                     <span class="total-label">Order Total:</span>
                                     <span class="total-amount">₹<%= order.total.toLocaleString() %></span>
                                 </div>
-                                
-                          
                             </div>
                         </div>
                     <% }); %>
@@ -989,6 +1054,66 @@
                 <% } %>
             </div>
         </div>
+
+        <!-- Pagination Container -->
+        <% if (totalPages > 1) { %>
+            <div class="pagination-container">
+                <div class="pagination">
+                    <!-- Previous Button -->
+                    <% if (currentPage > 1) { %>
+                        <a href="?page=1" class="pagination-btn pagination-first" title="First Page">«</a>
+                        <a href="?page=<%= currentPage - 1 %>" class="pagination-btn pagination-prev" title="Previous Page">‹</a>
+                    <% } else { %>
+                        <span class="pagination-btn pagination-first disabled">«</span>
+                        <span class="pagination-btn pagination-prev disabled">‹</span>
+                    <% } %>
+
+                    <!-- Page Numbers -->
+                    <% 
+                        let startPage = Math.max(1, currentPage - 2);
+                        let endPage = Math.min(totalPages, currentPage + 2);
+                    %>
+                    
+                    <% if (startPage > 1) { %>
+                        <a href="?page=1" class="pagination-btn">1</a>
+                        <% if (startPage > 2) { %>
+                            <span class="pagination-dots">...</span>
+                        <% } %>
+                    <% } %>
+
+                    <% for (let i = startPage; i <= endPage; i++) { %>
+                        <% if (i === currentPage) { %>
+                            <span class="pagination-btn active"><%= i %></span>
+                        <% } else { %>
+                            <a href="?page=<%= i %>" class="pagination-btn"><%= i %></a>
+                        <% } %>
+                    <% } %>
+
+                    <% if (endPage < totalPages) { %>
+                        <% if (endPage < totalPages - 1) { %>
+                            <span class="pagination-dots">...</span>
+                        <% } %>
+                        <a href="?page=<%= totalPages %>" class="pagination-btn"><%= totalPages %></a>
+                    <% } %>
+
+                    <!-- Next Button -->
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %>" class="pagination-btn pagination-next" title="Next Page">›</a>
+                        <a href="?page=<%= totalPages %>" class="pagination-btn pagination-last" title="Last Page">»</a>
+                    <% } else { %>
+                        <span class="pagination-btn pagination-next disabled">›</span>
+                        <span class="pagination-btn pagination-last disabled">»</span>
+                    <% } %>
+                </div>
+
+                <!-- Page Info -->
+                <div class="pagination-info">
+                    <span>Page <strong><%= currentPage %></strong> of <strong><%= totalPages %></strong></span>
+                    <span class="pagination-separator">|</span>
+                    <span>Showing <strong><%= Math.min(ordersPerPage, totalOrders - (currentPage - 1) * ordersPerPage) %></strong> of <strong><%= totalOrders %></strong> orders</span>
+                </div>
+            </div>
+        <% } %>
 
         <!-- Loading Spinner -->
         <div class="loading-spinner" id="loadingSpinner">

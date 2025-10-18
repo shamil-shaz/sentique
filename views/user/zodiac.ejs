@@ -1,4 +1,5 @@
-
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 
   <title>Sentique - Zodiac Signature Perfumes</title>
   <style>
@@ -727,9 +728,7 @@
                           <button class="action-btn wishlist-btn" onclick="toggleWishlist('<%= product._id %>')" title="Add to Wishlist">
                             <i class="fa fa-heart"></i>
                           </button>
-                          <button class="action-btn cart-btn" onclick="addToCart('<%= product._id %>')" title="Add to Cart">
-                            <i class="fa fa-shopping-cart"></i>
-                          </button>
+                          
                         </div>
                       </div>
                       <div class="product-info">                       
@@ -924,9 +923,7 @@
               <button class="action-btn wishlist-btn" onclick="toggleWishlist('${product._id}')" title="Add to Wishlist">
                 <i class="fa fa-heart"></i>
               </button>
-              <button class="action-btn cart-btn" onclick="addToCart('${product._id}')" title="Add to Cart">
-                <i class="fa fa-shopping-cart"></i>
-              </button>
+              
             </div>
           </div>
           <div class="product-info">
@@ -1047,54 +1044,145 @@
       filterOverlay.classList.remove('show');
     });
 
+
+
+
     // ---------- Wishlist & Cart Functions ----------
-    function toggleWishlist(productId) {
-      const btn = event.currentTarget;
-      btn.classList.toggle('active');
-      
-      // Add your wishlist logic here
-      console.log('Toggle wishlist for product:', productId);
-    }
-
-    function addToCart(productId) {
-      const btn = event.currentTarget;
+function toggleWishlist(productId) {
+  const btn = event.currentTarget;
+  
+  // Make API call to add/remove from wishlist
+  fetch('/wishlist/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      // Product was added to wishlist
       btn.classList.add('active');
-      setTimeout(() => btn.classList.remove('active'), 300);
-      console.log('Add to cart product:', productId);
-    }
-
-    // ---------- Clear (cancel) search UI logic ----------
-    function toggleClearButton() {
-      if (!clearBtn || !searchInput) return;
-      const hasText = searchInput.value.trim().length > 0;
-      clearBtn.style.display = hasText ? 'block' : 'none';
-    }
-
-    // Clear button click
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        toggleClearButton();
-        fetchAndRender();
-        searchInput.focus();
+      
+      // Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'Added to Wishlist!',
+        text: 'Product added to your wishlist.',
+        confirmButtonColor: '#d4af37',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } else {
+      // Product already in wishlist
+      btn.classList.add('active');
+      
+      Swal.fire({
+        icon: 'info',
+        title: 'Already in Wishlist',
+        text: data.message || 'This product is already in your wishlist.',
+        confirmButtonColor: '#d4af37',
+        timer: 1500,
+        showConfirmButton: false
       });
     }
+  })
+  .catch(err => {
+    console.error('Wishlist error:', err);
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to add to wishlist. Please try again.',
+      confirmButtonColor: '#d4af37'
+    });
+  });
+}
 
-    // show/hide clear button as user types
-    if (searchInput) {
-      searchInput.addEventListener('input', toggleClearButton);
-      // support pressing Escape to clear
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          if (clearBtn) clearBtn.click();
-        }
+function addToCart(productId) {
+  const btn = event.currentTarget;
+  btn.classList.add('active');
+  setTimeout(() => btn.classList.remove('active'), 300);
+  console.log('Add to cart product:', productId);
+}
+// ---------- Wishlist Function (SINGLE VERSION - NO DUPLICATES) ----------
+function toggleWishlist(productId) {
+  const btn = event.currentTarget;
+  
+  fetch('/wishlist/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      btn.classList.add('active');
+      Swal.fire({
+        icon: 'success',
+        title: 'Added to Wishlist!',
+        text: 'Product added to your wishlist.',
+        confirmButtonColor: '#d4af37',
+        timer: 1500,
+        showConfirmButton: false
       });
-      // initial toggle on page load (if server rendered search value exists)
-      toggleClearButton();
+    } else {
+      btn.classList.add('active');
+      Swal.fire({
+        icon: 'info',
+        title: 'Already in Wishlist',
+        text: data.message || 'This product is already in your wishlist.',
+        confirmButtonColor: '#d4af37',
+        timer: 1500,
+        showConfirmButton: false
+      });
     }
+  })
+  .catch(err => {
+    console.error('Wishlist error:', err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to add to wishlist. Please try again.',
+      confirmButtonColor: '#d4af37'
+    });
+  });
+}
 
-    // ---------- Initial Load ----------
-    renderProducts(initialProducts);
+function addToCart(productId) {
+  const btn = event.currentTarget;
+  btn.classList.add('active');
+  setTimeout(() => btn.classList.remove('active'), 300);
+  console.log('Add to cart product:', productId);
+}
+
+// ---------- Clear Search Button Logic ----------
+function toggleClearButton() {
+  if (!clearBtn || !searchInput) return;
+  const hasText = searchInput.value.trim().length > 0;
+  clearBtn.style.display = hasText ? 'block' : 'none';
+}
+
+if (clearBtn) {
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    toggleClearButton();
+    fetchAndRender();
+    searchInput.focus();
+  });
+}
+
+if (searchInput) {
+  searchInput.addEventListener('input', toggleClearButton);
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (clearBtn) clearBtn.click();
+    }
+  });
+  toggleClearButton();
+}
+
+// ---------- Initial Load ----------
+renderProducts(initialProducts);
   </script>
 </body>
-</html>
+

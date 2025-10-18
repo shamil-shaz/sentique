@@ -1,213 +1,7 @@
 
-
-// const mongoose = require('mongoose');
-// const Wallet = require('../../models/walletSchema');
-// const User = require('../../models/userSchema');
-
-// const getWalletPage = async (req, res) => {
-//   try {
-//     const user = req.session.user;
-//     const userId = user?._id || user?.id;
-
-//     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-//       return res.redirect('/login');
-//     }
-
-//     let wallet = await Wallet.findOne({ user: userId }).lean();
-//     if (!wallet) {
-//       wallet = await new Wallet({ user: userId }).save();
-//     }
-
-//     const userData = await User.findById(userId).lean();
-
-//     // Pagination logic - 5 transactions per page
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = 5;
-//     const startIndex = (page - 1) * limit;
-//     const endIndex = page * limit;
-
-//     const allTransactions = wallet.transactions || [];
-//     const totalTransactions = allTransactions.length;
-//     const totalPages = Math.ceil(totalTransactions / limit) || 1;
-
-//     // Reverse transactions to show latest first, then paginate
-//     const reversedTransactions = [...allTransactions].reverse();
-    
-//     const paginatedTransactions = reversedTransactions
-//       .slice(startIndex, endIndex)
-//       .map((t, index) => {
-//         // Extract reason from description
-//         const reason = extractReason(t.description);
-        
-//         return {
-//           serialNo: startIndex + index + 1, // Sequential serial number
-//           id: t._id.toString(),
-//           type: t.type,
-//           amount: parseFloat(t.amount).toFixed(2),
-//           date: new Date(t.date).toLocaleDateString('en-IN', {
-//             day: '2-digit',
-//             month: '2-digit',
-//             year: 'numeric',
-//           }),
-//           time: new Date(t.date).toLocaleTimeString('en-IN', {
-//             hour: '2-digit',
-//             minute: '2-digit',
-//           }),
-//           description: t.description,
-//           reason: reason,
-//           productName: t.productName || 'N/A',
-//           productId: t.productId || 'N/A',
-//           orderId: t.orderId || 'N/A',
-//         };
-//       });
-
-//     // Calculate statistics
-//     const walletData = {
-//       balance: parseFloat(wallet.balance || 0).toFixed(2),
-//       totalCredits: allTransactions
-//         .filter((t) => t.type === 'credit')
-//         .reduce((a, t) => a + t.amount, 0)
-//         .toFixed(2) || '0.00',
-//       totalDebits: allTransactions
-//         .filter((t) => t.type === 'debit')
-//         .reduce((a, t) => a + t.amount, 0)
-//         .toFixed(2) || '0.00',
-//       monthlyTotal: allTransactions
-//         .filter((t) => new Date(t.date).getMonth() === new Date().getMonth())
-//         .reduce((a, t) => a + (t.type === 'credit' ? t.amount : -t.amount), 0)
-//         .toFixed(2) || '0.00',
-//       transactionCount: allTransactions.length,
-//     };
-
-//     res.render('wallet', {
-//       customerName: userData.name || 'Guest',
-//       walletData,
-//       transactions: paginatedTransactions,
-//       currentPage: page,
-//       totalPages,
-//       totalTransactions,
-//     });
-//   } catch (error) {
-//     console.error('Error fetching wallet page:', error);
-//     res.redirect('/pageNotFound');
-//   }
-// };
-
-// const getWalletData = async (req, res) => {
-//   try {
-//     const userId = req.session.user?._id || req.session.user?.id;
-
-//     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-//       return res.status(401).json({ error: 'Unauthorized' });
-//     }
-
-//     let wallet = await Wallet.findOne({ user: userId }).lean();
-//     if (!wallet) {
-//       wallet = await new Wallet({ user: userId }).save();
-//     }
-
-//     const allTransactions = wallet.transactions || [];
-//     const walletData = {
-//       balance: parseFloat(wallet.balance || 0).toFixed(2),
-//       totalCredits: allTransactions
-//         .filter((t) => t.type === 'credit')
-//         .reduce((a, t) => a + t.amount, 0)
-//         .toFixed(2) || '0.00',
-//       totalDebits: allTransactions
-//         .filter((t) => t.type === 'debit')
-//         .reduce((a, t) => a + t.amount, 0)
-//         .toFixed(2) || '0.00',
-//       monthlyTotal: allTransactions
-//         .filter((t) => new Date(t.date).getMonth() === new Date().getMonth())
-//         .reduce((a, t) => a + (t.type === 'credit' ? t.amount : -t.amount), 0)
-//         .toFixed(2) || '0.00',
-//       transactionCount: allTransactions.length,
-//       totalPages: Math.ceil(allTransactions.length / 5) || 1,
-//     };
-
-//     res.json(walletData);
-//   } catch (error) {
-//     console.error('Error fetching wallet data:', error);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// };
-
-// const getPaginatedTransactions = async (req, res) => {
-//   try {
-//     const userId = req.session.user?._id || req.session.user?.id;
-//     const page = parseInt(req.query.page) || 1;
-//     const filter = req.query.filter || 'all';
-//     const limit = 5;
-
-//     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-//       return res.status(401).json({ error: 'Unauthorized' });
-//     }
-
-//     const wallet = await Wallet.findOne({ user: userId }).lean();
-//     if (!wallet) {
-//       return res.json({ transactions: [], totalPages: 1, totalTransactions: 0 });
-//     }
-
-//     let transactions = wallet.transactions || [];
-    
-//     if (filter !== 'all') {
-//       transactions = transactions.filter((t) => t.type === filter);
-//     }
-
-//     const totalTransactions = transactions.length;
-//     const totalPages = Math.ceil(transactions.length / limit) || 1;
-
-//     // Reverse to show latest first
-//     const reversedTransactions = [...transactions].reverse();
-//     const startIndex = (page - 1) * limit;
-    
-//     const paginatedTransactions = reversedTransactions
-//       .slice(startIndex, startIndex + limit)
-//       .map((t, index) => ({
-//         serialNo: startIndex + index + 1, // Sequential serial number
-//         id: t._id.toString(),
-//         type: t.type,
-//         amount: parseFloat(t.amount).toFixed(2),
-//         date: new Date(t.date).toLocaleDateString('en-IN', {
-//           day: '2-digit',
-//           month: '2-digit',
-//           year: 'numeric',
-//         }),
-//         time: new Date(t.date).toLocaleTimeString('en-IN', {
-//           hour: '2-digit',
-//           minute: '2-digit',
-//         }),
-//         description: t.description,
-//         reason: t.description || 'N/A',
-//         productName: t.productName || 'N/A',
-//         productId: t.productId || 'N/A',
-//         orderId: t.orderId || 'N/A',
-//       }));
-
-//     res.json({
-//       transactions: paginatedTransactions,
-//       totalPages,
-//       totalTransactions,
-//       currentFilter: filter,
-//     });
-//   } catch (error) {
-//     console.error('Error fetching transactions:', error);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// };
-
-// module.exports = {
-//   getWalletPage,
-//   getWalletData,
-//   getPaginatedTransactions,
-// };
-
-
-
 const mongoose = require('mongoose');
 const Wallet = require('../../models/walletSchema');
 const User = require('../../models/userSchema');
-
 
 
 const getWalletPage = async (req, res) => {
@@ -227,8 +21,7 @@ const getWalletPage = async (req, res) => {
     }
 
     const userData = await User.findById(userId).lean();
-
-    // Pagination logic - 5 transactions per page
+  
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const startIndex = (page - 1) * limit;
@@ -238,13 +31,12 @@ const getWalletPage = async (req, res) => {
     const totalTransactions = allTransactions.length;
     const totalPages = Math.ceil(totalTransactions / limit) || 1;
 
-    // Reverse transactions to show latest first, then paginate
     const reversedTransactions = [...allTransactions].reverse();
     
     const paginatedTransactions = reversedTransactions
       .slice(startIndex, endIndex)
       .map((t, index) => {
-        console.log('Transaction:', t); // Debug log
+        console.log('Transaction:', t); 
         return {
           serialNo: startIndex + index + 1,
           id: t._id.toString(),
@@ -260,13 +52,13 @@ const getWalletPage = async (req, res) => {
             minute: '2-digit',
           }),
           description: t.description,
-          reason: t.description || 'N/A', // Use description for Reason column
+          reason: t.description || 'N/A', 
           orderId: t.orderId || 'N/A',
           productName: t.productName || 'N/A',
         };
       });
 
-    // Calculate statistics
+ 
     const walletData = {
       balance: parseFloat(wallet.balance || 0).toFixed(2),
       totalCredits: allTransactions

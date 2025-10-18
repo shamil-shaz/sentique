@@ -14,6 +14,8 @@ const orderController=require('../controllers/user/orderController')
 const walletController=require('../controllers/user/walletController')
 const invoiceController=require('../controllers/user/invoiceController.js')
 
+
+
 const multer = require("multer");
 
 
@@ -39,7 +41,7 @@ router.get('/verify-otp', userController.loadVerifyOtpPage);
 router.post('/verify-otp', userController.verifyOtp);
 router.post('/resend-otp', userController.resendOtp);
 
-// Profile Management
+// -------Profile Management---------
 router.get('/forgot-password', profileController.loadForgotPassword);
 router.post('/forgot-password-valid', profileController.handleForgotPassword);
 router.get('/forgotPassword-otp', profileController.loadForgotPageOtp);
@@ -94,31 +96,21 @@ router.get('/api/zodiac-products', checkBlockedUser, userAuth, userProductContro
 
 
 
-
-// ---Profile Routes
+// -----Profile Routes----------
 router.get("/profile", checkBlockedUser, userAuth, profileController.userProfile);
 
 
-// ---Password Change Flow
+// ---Password Change Flow------
 router.post("/profile/change-password-init", userAuth, profileController.initChangePassword);
 
-// Email Change Flow
+// -----------Email Change Flow--------
 router.post("/profile/change-email-init", userAuth, profileController.sendEmailOtp);
 
-// // OTP verification page (change-password or other OTP flows)
- router.get("/profile/change-email-otp", userAuth, profileController.loadOtpVerifyPage);
-// router.post("/profile/change-email-otp", userAuth, profileController.verifyOtp);
-// router.post("/profile/resend-profile-otp", userAuth, profileController.resendProfileOtp);
+// // ------OTP verification page (change-password or other OTP flows)-----
 
-
-// OTP verification page for any type (email/password)
-//router.get("/profile/otp-verify", userAuth, profileController.loadOtpVerifyPage);
-
-
+router.get("/profile/change-email-otp", userAuth, profileController.loadOtpVerifyPage);
 router.post("/profile/otp-verify", userAuth, profileController.verifyOtp);
 router.post("/profile/resend-otp", userAuth, profileController.resendProfileOtp);
-
-
 
 router.get('/profile-edit', userAuth, profileController.loadEditProfile);
 router.post("/update-profile", userAuth, upload.single("image"), profileController.updateProfile);
@@ -128,28 +120,29 @@ router.post("/addresses/add", userAuth, addressController.addAddress);
 router.get('/addresses/edit-address/:id', userAuth, addressController.getEditAddress);
 router.get('/profile/order-list',userAuth,orderController.getOrderList)
 
-//----- Update address
+//----- Update address----
 router.post("/addresses/edit", userAuth, addressController.editAddress);
 router.delete("/addresses/delete/:id", userAuth, addressController.deleteAddress);
 router.get("/addresses/list", userAuth, addressController.getAddressesJSON);
 
-////----- whish List 
+////----- whish List ------
 router.get("/wishlist", userAuth, wishlistController.loadWishlist);
 router.post("/wishlist/add", userAuth, wishlistController.addToWishlist);
 router.delete("/wishlist/remove/:id", userAuth, wishlistController.removeFromWishlist);
 router.post("/wishlist/move-all-to-cart", userAuth, wishlistController.moveAllToCart);
+router.get('/wishlist/count', userAuth, wishlistController.getWishlistCount);
 
-
-//// -----cart
-
- router.get('/cart',userAuth,cartController.getCartPage)
+//// -----cart-------
+ 
+router.get('/cart',userAuth,cartController.getCartPage)
 router.post('/cart/add',userAuth, cartController.addToCart);
- router.delete('/cart/remove/:productId',userAuth, cartController.removeFromCart);
-//router.post('/cart/remove/:productId/:variantSize', userAuth, cartController.removeFromCart);
+router.delete('/cart/remove/:productId',userAuth, cartController.removeFromCart);
 router.put('/cart/update', userAuth, cartController.updateCart);
+router.post('/check',checkBlockedUser,userAuth,cartController. checkCartQuantity);
+router.get('/cart/count', userAuth,cartController.getCartCount);
 
 
-////----------------- checkout
+////----------------- checkout-----------
 
 router.get('/checkout', userAuth, checkoutController.getCheckoutPage);
 router.get('/addresses/addresses-edit/:id', userAuth, checkoutController.getAddressForEdit);
@@ -158,7 +151,7 @@ router.post('/checkout/edit-address/:id', userAuth, checkoutController.editAddre
 router.post('/order/place', userAuth, checkoutController.placeOrder);
 
 
-//// ----------------------order
+//// ----------------------order-----------
 
 router.get("/orderSuccess",userAuth,orderController.getOrderSuccess)
 router.get('/orderDetails/:orderId', userAuth, orderController.getOrderDetails);
@@ -178,16 +171,8 @@ router.get('/orders/:orderId/invoice', userAuth,invoiceController.generateInvoic
 
 ////-------wallet----
 
-// Add these routes to your user routes file
 
 router.get('/profile/wallet', userAuth, walletController.getWalletPage);
-
-// // Add these two new routes for API calls
-// router.get('/api/wallet/data', userAuth, walletController.getWalletData);
-// router.get('/api/wallet/transactions', userAuth, walletController.getPaginatedTransactions);
-
-
-// API routes
 router.get('/api/wallet/data', userAuth,walletController. getWalletData);
 router.get('/api/wallet/transactions', userAuth,walletController. getPaginatedTransactions);
 router.post('/api/wallet/test-transaction', userAuth, walletController.addTestTransaction);

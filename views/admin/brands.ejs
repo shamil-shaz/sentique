@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Brand Management</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -398,7 +393,8 @@
       }
     }
   </style>
-</head>
+
+
 <body>
 
 <%- include("../partials/admin/header.ejs") %>
@@ -623,7 +619,7 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    // Event delegation for action buttons
+    
     document.querySelector("tbody").addEventListener("click", function(e) {
       if(e.target && e.target.classList.contains("confirm-action")) {
         e.preventDefault();

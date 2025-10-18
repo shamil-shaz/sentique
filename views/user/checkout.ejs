@@ -1,14 +1,14 @@
 
 <%- include('../../views/partials/user/header') %>
 
-<html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap'>
-  <link rel="stylesheet" href="/css/checkout.css">
+ 
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/js/checkout.js" defer></script>
@@ -1503,7 +1503,7 @@ body {
                           <div class="out-of-stock">⚠️ OUT OF STOCK</div>
                         <% } %>
                       </div>
-                      <div class="item-price">$<%= Math.round(itemPrice).toLocaleString() %></div>
+                      <div class="item-price">₹<%= Math.round(itemPrice).toLocaleString() %></div>
                     </div>
                   <% }) %>
                 <% } else { %>
@@ -1537,7 +1537,7 @@ body {
               <div class="price-breakup">
                 <div class="price-row">
                   <span>Subtotal</span>
-                  <span>$<%= (subtotal || 0).toLocaleString() %></span>
+                  <span>₹<%= (subtotal || 0).toLocaleString() %></span>
                 </div>
                 <div class="price-row free">
                   <span>Shipping</span>
@@ -1545,11 +1545,11 @@ body {
                 </div>
                 <div class="price-row discount" id="discountRow">
                   <span>Discount</span>
-                  <span>-$<%= (discount || 0).toLocaleString() %></span>
+                  <span>-₹<%= (discount || 0).toLocaleString() %></span>
                 </div>
                 <div class="total-row">
                   <span>Total</span>
-                  <span class="total-amount" id="totalAmount">$<%= (total || 0).toLocaleString() %></span>
+                  <span class="total-amount" id="totalAmount">₹<%= (total || 0).toLocaleString() %></span>
                 </div>
               </div>
 
@@ -1663,6 +1663,137 @@ body {
   <script>
 
 
+// Comprehensive client-side validation
+const validateAddressForm = (payload) => {
+  const errors = {};
+
+  // Address Type validation
+  if (!payload.addressType || !['Home', 'Work', 'Other'].includes(payload.addressType)) {
+    errors.type = 'Please select a valid address type';
+  }
+
+  // Name validation
+  if (!payload.name) {
+    errors.name = 'Full name is required';
+  } else if (payload.name.length < 3) {
+    errors.name = 'Full name must be at least 3 characters';
+  }
+
+  // Phone validation
+  if (!payload.phone) {
+    errors.phone = 'Phone number is required';
+  } else if (!/^\d{10}$/.test(payload.phone)) {
+    errors.phone = 'Phone number must be exactly 10 digits';
+  }
+
+  // House Name validation
+  if (!payload.houseName) {
+    errors.houseName = 'House/Building name is required';
+  } else if (payload.houseName.length < 2) {
+    errors.houseName = 'House/Building name must be at least 2 characters';
+  }
+
+  // Landmark validation
+  if (!payload.landmark) {
+    errors.landmark = 'Landmark is required';
+  } else if (payload.landmark.length < 3) {
+    errors.landmark = 'Landmark must be at least 3 characters';
+  }
+
+  // Alternative Phone validation (optional)
+  if (payload.altPhone && payload.altPhone.length > 0) {
+    if (!/^\d{10}$/.test(payload.altPhone)) {
+      errors.altPhone = 'Alternative phone must be exactly 10 digits';
+    }
+  }
+
+  // Nationality validation - ONLY LETTERS AND SPACES
+  if (!payload.nationality) {
+    errors.nationality = 'Nationality is required';
+  } else if (payload.nationality.length < 2) {
+    errors.nationality = 'Nationality must be at least 2 characters';
+  } else if (!/^[a-zA-Z\s]+$/.test(payload.nationality)) {
+    errors.nationality = 'Nationality can only contain letters and spaces';
+  }
+
+  // City validation
+  if (!payload.city) {
+    errors.city = 'City is required';
+  } else if (payload.city.length < 2) {
+    errors.city = 'City must be at least 2 characters';
+  }
+
+  // State validation - ONLY LETTERS AND SPACES
+  if (!payload.state) {
+    errors.state = 'State is required';
+  } else if (payload.state.length < 2) {
+    errors.state = 'State must be at least 2 characters';
+  } else if (!/^[a-zA-Z\s]+$/.test(payload.state)) {
+    errors.state = 'State can only contain letters and spaces';
+  }
+
+  // ZIP/Pincode validation
+  if (!payload.pincode) {
+    errors.zip = 'ZIP code is required';
+  } else if (!/^\d{6}$/.test(payload.pincode)) {
+    errors.zip = 'ZIP code must be exactly 6 digits';
+  } else {
+    const pincodeStr = payload.pincode;
+    
+    // Check if all digits are same
+    if (/^(\d)\1{5}$/.test(pincodeStr)) {
+      errors.zip = 'ZIP code cannot contain all same digits';
+    }
+    
+    // Check if sequential
+    let isSequential = true;
+    for (let i = 1; i < 6; i++) {
+      if (parseInt(pincodeStr[i]) - parseInt(pincodeStr[i - 1]) !== 1) {
+        isSequential = false;
+        break;
+      }
+    }
+    if (isSequential) {
+      errors.zip = 'ZIP code cannot be sequential digits like 123456';
+    }
+    
+    // Check if reverse sequential
+    let isReverseSequential = true;
+    for (let i = 1; i < 6; i++) {
+      if (parseInt(pincodeStr[i - 1]) - parseInt(pincodeStr[i]) !== 1) {
+        isReverseSequential = false;
+        break;
+      }
+    }
+    if (isReverseSequential) {
+      errors.zip = 'ZIP code cannot be reverse sequential like 654321';
+    }
+  }
+
+  return errors;
+};
+
+// Show error messages
+const showErrorMessages = (errors) => {
+  document.querySelectorAll('.error-message').forEach(err => {
+    err.classList.remove('show');
+  });
+
+  Object.keys(errors).forEach(field => {
+    const errorElement = document.getElementById(`${field}Error`);
+    if (errorElement) {
+      errorElement.textContent = errors[field];
+      errorElement.classList.add('show');
+    }
+  });
+};
+
+// Clear error messages
+const clearErrorMessages = () => {
+  document.querySelectorAll('.error-message').forEach(err => {
+    err.classList.remove('show');
+  });
+};
 
 const paymentMethods = {
   'card': { icon: '💳', label: 'Debit Card / Credit Card' },
@@ -1718,8 +1849,10 @@ function openModal(id = null) {
   const submitBtn = document.getElementById('submitBtn');
   const form = document.getElementById('addressForm');
 
+  clearErrorMessages();
+  form.reset();
+
   if (!id) {
-    form.reset();
     document.getElementById('editId').value = '';
     modalTitle.textContent = 'Add New Address';
     submitBtn.textContent = 'Save Address';
@@ -1729,12 +1862,12 @@ function openModal(id = null) {
     fetchAddress(id);
   }
 
-  document.querySelectorAll('.error-message').forEach(err => err.classList.remove('show'));
   modal.classList.add('show');
 }
 
 function closeModal() {
   document.getElementById('addressModal').classList.remove('show');
+  clearErrorMessages();
 }
 
 async function fetchAddress(id) {
@@ -1831,9 +1964,8 @@ async function saveAddress(e) {
   e.preventDefault();
   const submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
+  const originalText = submitBtn.textContent;
   submitBtn.textContent = 'Saving...';
-
-  document.querySelectorAll('.error-message').forEach(err => err.classList.remove('show'));
 
   const editId = document.getElementById('editId').value;
   const payload = {
@@ -1851,61 +1983,26 @@ async function saveAddress(e) {
     isDefault: document.getElementById('setDefault').checked
   };
 
-  if (editId) payload.id = editId;
+  // Validate form using comprehensive validation
+  const errors = validateAddressForm(payload);
 
-  let isValid = true;
-  if (!payload.addressType) {
-    document.getElementById('typeError').classList.add('show');
-    isValid = false;
-  }
-  if (payload.name.length < 3) {
-    document.getElementById('nameError').classList.add('show');
-    isValid = false;
-  }
-  if (!/^\d{10}$/.test(payload.phone)) {
-    document.getElementById('phoneError').classList.add('show');
-    isValid = false;
-  }
-  if (payload.houseName.length < 2) {
-    document.getElementById('houseNameError').classList.add('show');
-    isValid = false;
-  }
-  if (payload.landmark.length < 3) {
-    document.getElementById('landmarkError').classList.add('show');
-    isValid = false;
-  }
-  if (payload.altPhone && !/^\d{10}$/.test(payload.altPhone)) {
-    document.getElementById('altPhoneError').classList.add('show');
-    isValid = false;
-  }
-  if (payload.nationality.length < 2) {
-    document.getElementById('nationalityError').classList.add('show');
-    isValid = false;
-  }
-  if (!payload.city) {
-    document.getElementById('cityError').classList.add('show');
-    isValid = false;
-  }
-  if (!payload.state) {
-    document.getElementById('stateError').classList.add('show');
-    isValid = false;
-  }
-  if (!/^\d{6}$/.test(payload.pincode)) {
-    document.getElementById('zipError').classList.add('show');
-    isValid = false;
-  }
-
-  if (!isValid) {
+  if (Object.keys(errors).length > 0) {
+    showErrorMessages(errors);
     submitBtn.disabled = false;
-    submitBtn.textContent = editId ? 'Update Address' : 'Save Address';
+    submitBtn.textContent = originalText;
+    
     Swal.fire({
       icon: 'error',
-      title: 'Invalid Input!',
-      text: 'Please correct the errors in the form',
+      title: 'Validation Error!',
+      text: 'Please fix the errors highlighted in the form',
       confirmButtonColor: '#22c55e'
     });
     return;
   }
+
+  clearErrorMessages();
+
+  if (editId) payload.id = editId;
 
   const url = editId ? `/checkout/edit-address/${editId}` : '/checkout/add-address';
 
@@ -1928,12 +2025,23 @@ async function saveAddress(e) {
       closeModal();
       setTimeout(() => window.location.reload(), 2000);
     } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: data.message || 'Failed to save address',
-        confirmButtonColor: '#22c55e'
-      });
+      if (data.errors && Array.isArray(data.errors)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Validation Error!',
+          html: '<ul style="text-align: left;">' + 
+                data.errors.map(err => `<li>${err}</li>`).join('') + 
+                '</ul>',
+          confirmButtonColor: '#22c55e'
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: data.message || 'Failed to save address',
+          confirmButtonColor: '#22c55e'
+        });
+      }
     }
   } catch (err) {
     console.error('Save address error:', err);
@@ -1945,9 +2053,16 @@ async function saveAddress(e) {
     });
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = editId ? 'Update Address' : 'Save Address';
+    submitBtn.textContent = originalText;
   }
 }
+
+// Close modal when clicking outside
+document.getElementById('addressModal')?.addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeModal();
+  }
+});
 
 const applyBtn = document.getElementById('applyBtn');
 const couponInput = document.getElementById('couponInput');
@@ -1958,7 +2073,7 @@ let discount = parseFloat('<%= discount || 0 %>');
 let total = parseFloat('<%= total || 0 %>');
 let subtotal = parseFloat('<%= subtotal || 0 %>');
 
-applyBtn.addEventListener('click', async () => {
+applyBtn?.addEventListener('click', async () => {
   const couponCode = couponInput.value.trim();
   if (!couponCode) {
     Swal.fire({
@@ -2011,7 +2126,7 @@ applyBtn.addEventListener('click', async () => {
   }
 });
 
-document.getElementById('place-order-btn').addEventListener('click', async () => {
+document.getElementById('place-order-btn')?.addEventListener('click', async () => {
   const outOfStockItems = document.querySelectorAll('.out-of-stock-item');
 
   if (outOfStockItems.length > 0) {
@@ -2090,7 +2205,6 @@ document.getElementById('place-order-btn').addEventListener('click', async () =>
         html: `
           <div style="text-align: center; margin-bottom: 10px;">
             <strong>Thank you for your order!</strong><br>
-           
           </div>
           <div class="swal2-order-animation" id="orderAnimation">
             <span class="default">Processing Order</span>
@@ -2146,7 +2260,6 @@ document.getElementById('place-order-btn').addEventListener('click', async () =>
     });
   }
 });
-
   </script>
 </body>
 

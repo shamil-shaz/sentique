@@ -197,7 +197,7 @@ function validateOTPForm(event) {
         showConfirmButton: false,
         timer: 1500
       }).then(() => {
-        window.location.href = response.redirectUrl || '/login';
+        window.location.href = response.redirectUrl || '/home';
       });
     } else {
       Swal.fire({

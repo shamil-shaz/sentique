@@ -450,6 +450,43 @@
             font-size: 1.1rem;
         }
     }
+
+    .blocked-notice {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #721c24;
+    line-height: 1.6;
+  }
+
+  .blocked-notice i {
+    color: #721c24;
+    margin-right: 5px;
+  }
+
+  .blocked-notice strong {
+    font-weight: 700;
+    color: #721c24;
+  }
+
+  .blocked-notice div strong {
+    display: block;
+  }
+
+  /* Responsive */
+  @media (max-width: 576px) {
+    .blocked-notice {
+      padding: 12px;
+      font-size: 0.85rem;
+    }
+
+    .blocked-notice div {
+      gap: 8px;
+    }
+  }
 </style>
 
 <div class="cart-page">
@@ -491,11 +528,25 @@
                      class="product-image">
               <% } %>
               
-              <% if (isBlocked) { %>
-                <div class="unavailable-overlay">TEMPORARILY BLOCKED</div>
-              <% } else if (isOutOfStock) { %>
-                <div class="unavailable-overlay">OUT OF STOCK</div>
-              <% } %>
+             <% if (isBlocked) { %>
+  <div class="unavailable-overlay">
+    <% if (item.blockReason) { %>
+      <% if (item.blockReason.indexOf('Product') !== -1) { %>
+        PRODUCT BLOCKED
+      <% } else if (item.blockReason.indexOf('Brand') !== -1) { %>
+        BRAND BLOCKED
+      <% } else if (item.blockReason.indexOf('Category') !== -1) { %>
+        CATEGORY BLOCKED
+      <% } else { %>
+        TEMPORARILY BLOCKED
+      <% } %>
+    <% } else { %>
+      TEMPORARILY BLOCKED
+    <% } %>
+  </div>
+<% } else if (isOutOfStock) { %>
+  <div class="unavailable-overlay">OUT OF STOCK</div>
+<% } %>
             </div>
 
             <!-- Product Details -->
@@ -508,10 +559,19 @@
                 <% } %>
               </div>
               
-              <% if (isBlocked) { %>
-                <span class="stock-info unavailable">
-                  <i class="fas fa-ban"></i> Temporarily Blocked
-                </span>
+             <% if (isBlocked) { %>
+  <span class="stock-info unavailable">
+    <i class="fas fa-ban"></i> 
+    <% if (item.blockReason && item.blockReason.includes('Product')) { %>
+      Product Blocked by Admin
+    <% } else if (item.blockReason && item.blockReason.includes('Brand')) { %>
+      Brand Blocked by Admin
+    <% } else if (item.blockReason && item.blockReason.includes('Category')) { %>
+      Category Blocked by Admin
+    <% } else { %>
+      Temporarily Blocked
+    <% } %>
+  </span>
               <% } else if (isOutOfStock) { %>
                 <span class="stock-info unavailable">
                   <i class="fas fa-times-circle"></i> Out of Stock
@@ -596,12 +656,28 @@
           </div>
         <% } %>
 
-        <% if (blockedCount > 0) { %>
-          <div class="blocked-notice">
-            <i class="fas fa-ban"></i>
+        <% if (blockedCount > 0 && blockedProducts && blockedProducts.length > 0) { %>
+    <div class="blocked-notice">
+      <div style="display: flex; align-items: flex-start; gap: 10px;">
+        <i class="fas fa-ban" style="margin-top: 2px; flex-shrink: 0;"></i>
+        <div style="flex: 1;">
+          <strong style="display: block; margin-bottom: 8px;">
             <strong><%= blockedCount %></strong> product<%= blockedCount > 1 ? 's are' : ' is' %> temporarily blocked by admin
+          </strong>
+          <div style="font-size: 0.85rem; line-height: 1.6;">
+            <% blockedProducts.forEach((product, index) => { %>
+              <div style="margin-bottom: 5px;">
+                • <%= product.reason %>
+              </div>
+            <% }); %>
           </div>
-        <% } %>
+          <div style="margin-top: 10px; font-size: 0.85rem; color: #721c24; font-weight: 500;">
+            ⚠️ Please remove these items before proceeding to checkout
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
         
         <div class="summary-row">
           <span class="summary-label">Subtotal:</span>
@@ -715,7 +791,7 @@
           timer: 1000,
           showConfirmButton: false
         }).then(() => {
-          location.reload();
+          
         });
       } else {
         Swal.fire({
