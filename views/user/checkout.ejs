@@ -1193,6 +1193,327 @@ body {
   animation: lines 10s ease forwards;
 }
 
+.blocked-alert-container {
+  margin-bottom: 24px;
+  animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.blocked-alert-card {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  border: 2px solid #ef4444;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);
+  overflow: hidden;
+  position: relative;
+}
+
+.blocked-alert-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+/* Header Section */
+.blocked-alert-header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.alert-icon-wrapper {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fecaca;
+}
+
+.alert-icon {
+  width: 24px;
+  height: 24px;
+  color: #dc2626;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.alert-text {
+  flex: 1;
+}
+
+.alert-title {
+  margin: 0 0 4px 0;
+  color: #991b1b;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.alert-subtitle {
+  margin: 0;
+  color: #7f1d1d;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* Items Container */
+.blocked-items-container {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #fecaca;
+}
+
+.blocked-items-header {
+  margin-bottom: 12px;
+}
+
+.items-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7f1d1d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.blocked-items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blocked-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fef2f2;
+  border-radius: 8px;
+  border-left: 3px solid #ef4444;
+  transition: all 0.2s ease;
+}
+
+.blocked-item:hover {
+  background: #fee2e2;
+  transform: translateX(4px);
+}
+
+.item-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 13px;
+}
+
+.item-reason {
+  font-size: 12px;
+  color: #7f1d1d;
+  background: #fecaca;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.item-icon {
+  width: 20px;
+  height: 20px;
+  color: #10b981;
+  flex-shrink: 0;
+  opacity: 0;
+  animation: checkSlideIn 0.5s ease forwards;
+}
+
+@keyframes checkSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Action Section */
+.blocked-alert-actions {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #fecaca;
+}
+
+.action-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.info-icon {
+  width: 18px;
+  height: 18px;
+  color: #dc2626;
+  flex-shrink: 0;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.action-message span {
+  font-size: 13px;
+  color: #7f1d1d;
+  font-weight: 500;
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.action-button:hover {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .blocked-alert-card {
+    padding: 16px;
+  }
+
+  .blocked-alert-header {
+    gap: 12px;
+  }
+
+  .alert-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .alert-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .alert-title {
+    font-size: 16px;
+  }
+
+  .blocked-items-list {
+    gap: 8px;
+  }
+
+  .blocked-item {
+    padding: 10px;
+  }
+
+  .blocked-alert-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .blocked-alert-card {
+    padding: 12px;
+  }
+
+  .alert-title {
+    font-size: 14px;
+  }
+
+  .alert-subtitle {
+    font-size: 12px;
+  }
+
+  .item-name {
+    font-size: 12px;
+  }
+
+  .item-reason {
+    font-size: 11px;
+  }
+}
+
 @keyframes truck {
   10%, 30% {
     transform: translateX(-164px);
@@ -1466,6 +1787,66 @@ body {
       </div>
 
       <div class="right-column">
+        <% if (blockedProducts && blockedProducts.length > 0) { %>
+<div class="blocked-alert-container">
+  <div class="blocked-alert-card">
+    <!-- Header with icon and title -->
+    <div class="blocked-alert-header">
+      <div class="alert-icon-wrapper">
+        <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path>
+        </svg>
+      </div>
+      <div class="alert-text">
+        <h3 class="alert-title">Order Cannot Be Placed</h3>
+        <p class="alert-subtitle">
+          <%= blockedProducts.length %> <%= blockedProducts.length === 1 ? 'item' : 'items' %> 
+          unavailable for checkout
+        </p>
+      </div>
+    </div>
+
+    <!-- Blocked items list -->
+    <div class="blocked-items-container">
+      <div class="blocked-items-header">
+        <span class="items-label">Blocked Products:</span>
+      </div>
+      <ul class="blocked-items-list">
+        <% blockedProducts.forEach((product, index) => { %>
+          <li class="blocked-item">
+            <div class="item-indicator"><%= index + 1 %></div>
+            <div class="item-content">
+              <span class="item-name"><%= product.name %></span>
+              <span class="item-reason"><%= product.reason %></span>
+            </div>
+            <svg class="item-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path>
+            </svg>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
+
+    <!-- Action section -->
+    <div class="blocked-alert-actions">
+      <div class="action-message">
+        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Remove blocked items from your cart to proceed</span>
+      </div>
+      <a href="/cart" class="action-button">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+        </svg>
+        Return to Cart
+      </a>
+    </div>
+  </div>
+</div>
+<% } %>
         <div class="summary-sticky">
           <div class="section-card">
             <div class="section-header">
@@ -1657,6 +2038,8 @@ body {
       </form>
     </div>
   </div>
+
+
 
 
 
@@ -2260,7 +2643,13 @@ document.getElementById('place-order-btn')?.addEventListener('click', async () =
     });
   }
 });
+
+
+
+
   </script>
+
+
 </body>
 
 </html>

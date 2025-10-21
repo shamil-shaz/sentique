@@ -93,120 +93,92 @@ const getOrderSuccess = async (req, res) => {
   }
 };
 
-
 const cancelSingleOrder = async (req, res) => {
   try {
     const user = req.session.user;
     const userId = user?._id || user?.id;
-    const { orderId, productName } = req.params;
+    const { orderId, itemIndex, variantSize } = req.params;
     const { reason, details } = req.body;
 
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    
     const order = await Order.findOne({ orderId, user: userId });
-    
     if (!order) {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    if (order.status === 'Delivered' || order.status === 'Cancelled') {
-      return res.status(400).json({ success: false, error: 'Order cannot be cancelled' });
-    }
    
-    const decodedProductName = decodeURIComponent(productName);
-    const item = order.orderItems.find(i => i.productName === decodedProductName);
+    const idx = parseInt(itemIndex);
+    if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
+      return res.status(404).json({ success: false, error: 'Invalid item index' });
+    }
+
+    const item = order.orderItems[idx];
     
-    if (!item) {
-      return res.status(404).json({ success: false, error: 'Item not found' });
+  
+    if (String(item.variantSize) !== String(variantSize)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: `Variant mismatch. Expected ${item.variantSize}ml, got ${variantSize}ml` 
+      });
     }
 
     if (item.status === 'Cancelled') {
       return res.status(400).json({ success: false, error: 'Item already cancelled' });
     }
 
-   
-    if (item.status === 'Shipped' || item.status === 'OutForDelivery' || 
-        item.status === 'Out for Delivery' || item.status === 'Delivered') {
+    if (['Shipped', 'OutForDelivery', 'Out for Delivery', 'Delivered'].includes(item.status)) {
       return res.status(400).json({ success: false, error: 'Cannot cancel item that is already shipped or delivered' });
     }
-   
 
     let quantityToRestore = item.quantity || 1;
     
     try {
-      
       const productId = item.product?._id || item.product || item.productId;
       
       if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
-        console.error('ERROR: Invalid product ID:', productId);
         throw new Error('Invalid product ID in order');
       }
 
-      console.log(`🔍 Looking for product: ${productId}`);
       const product = await Product.findById(productId);
-      
       if (!product) {
-        console.error(`❌ Product not found: ${productId}`);
         throw new Error('Product not found in database');
       }
-      const variantSizeFromOrder = String(item.variantSize); 
 
-      console.log(` Restoring - Product: ${product.productName}, Size: ${variantSizeFromOrder}ml, Quantity: ${quantityToRestore}`);
-      console.log(` Available variants: ${product.variants.map(v => `${v.size}ml(${v.stock})`).join(', ')}`);
+      const variantSizeFromOrder = String(item.variantSize);
 
       if (variantSizeFromOrder && product.variants && Array.isArray(product.variants)) {
-        
-        const variantIndex = product.variants.findIndex(v => 
-          String(v.size) === variantSizeFromOrder
-        );
-
-        console.log(`🔎 Variant index found: ${variantIndex}`);
+        const variantIndex = product.variants.findIndex(v => String(v.size) === variantSizeFromOrder);
 
         if (variantIndex !== -1) {
           const oldStock = product.variants[variantIndex].stock;
           const newStock = oldStock + quantityToRestore;
           
-          console.log(` Stock update: ${oldStock} + ${quantityToRestore} = ${newStock}`);
-          
-         
-          const updateResult = await Product.updateOne(
+          await Product.updateOne(
             { _id: productId },
             { $set: { [`variants.${variantIndex}.stock`]: newStock } }
           );
-          
-          console.log(` Database update result:`, updateResult);
-          
-          if (updateResult.modifiedCount === 0) {
-            console.warn(' No documents were modified');
-          }
         } else {
-          console.error(` Variant ${variantSizeFromOrder}ml not found`);
-          console.error(` Available: ${product.variants.map(v => v.size).join(', ')}`);
           throw new Error(`Variant size ${variantSizeFromOrder}ml not found`);
         }
       } else {
-        console.error(' No variant size information');
         throw new Error('Variant size information missing');
       }
     } catch (stockError) {
-      console.error(` Stock restoration error:`, stockError.message);
-      throw stockError; 
+      console.error('Stock restoration error:', stockError.message);
+      throw stockError;
     }
    
-    
     item.status = 'Cancelled';
     item.cancelReason = reason;
     item.cancelDetails = details;
     item.cancelledAt = new Date();
 
-   
     order.finalAmount -= item.total;
     if (order.finalAmount < 0) order.finalAmount = 0;
 
-   
     const allCancelled = order.orderItems.every(i => i.status === 'Cancelled');
     if (allCancelled) {
       order.status = 'Cancelled';
@@ -217,17 +189,14 @@ const cancelSingleOrder = async (req, res) => {
 
     await order.save();
 
-    console.log(` Item cancelled: ${decodedProductName}`);
-    
     res.json({ 
       success: true, 
-      message: `Item ${decodedProductName} cancelled successfully. ${quantityToRestore} quantity restored to stock.`,
+      message: `Item (${variantSize}ml) cancelled successfully. ${quantityToRestore} quantity restored to stock.`,
       allCancelled: allCancelled
     });
     
   } catch (error) {
-    console.error(' Error cancelling item:', error.message);
-    console.error('📍 Full error:', error);
+    console.error('Error cancelling item:', error.message);
     res.status(500).json({ success: false, error: `Failed to cancel item: ${error.message}` });
   }
 };
@@ -377,147 +346,11 @@ const cancelAllOrder = async (req, res) => {
   }
 };
 
-const getOrderList = async (req, res) => {
-  try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
-
-    if (!user || !userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      console.log('Redirecting to /login due to invalid user or userId:', { user, userId });
-      return res.redirect('/login');
-    }
-
- 
-    const userData = await User.findById(userId).lean();
-    if (!userData) {
-      console.log('User not found in database:', userId);
-      return res.redirect('/login');
-    }
-    
-    const orders = await Order.find({ user: userId })
-      .populate('orderItems.product')
-      .sort({ createdOn: -1 })
-      .lean();
-
-    const itemStats = {
-      totalItems: 0,
-      processing: 0,
-      delivered: 0,
-      totalSpent: 0
-    };
-
-    orders.forEach(order => {
-      order.orderItems.forEach(item => {
-        const quantity = item.quantity || 1;
-        const itemStatus = (item.status || order.status || 'Pending').toLowerCase();
-        console.log(`Item: ${item.productName || 'Unknown'}, Status: ${itemStatus}, Quantity: ${quantity}, Price: ${item.total || item.price || 0}`);
-        itemStats.totalItems += quantity;
-        if (itemStatus === 'processing') {
-          itemStats.processing += quantity;
-        } else if (itemStatus === 'delivered') {
-          itemStats.delivered += quantity;
-        }
-      
-        if (itemStatus !== 'cancelled') {
-          itemStats.totalSpent += (item.total || item.price || 0) * quantity;
-        }
-      });
-    });
-
-    
-    const formattedOrders = orders.map((order) => {
-     
-      const deliveredDate = order.deliveredAt || order.createdOn;
-      const returnDate = new Date(deliveredDate);
-      returnDate.setDate(returnDate.getDate() + 7); 
-      const isReturnEligible = order.orderItems.some(
-        item => item.status === 'Delivered' && Date.now() <= returnDate
-      );
-     
-      const isNew = (Date.now() - new Date(order.createdOn).getTime()) < (7 * 24 * 60 * 60 * 1000);
-      
-      const deliveryAddress = order.deliveryAddress
-        ? `${order.deliveryAddress.name}, ${order.deliveryAddress.houseName}, ${order.deliveryAddress.city}, ${order.deliveryAddress.state} - ${order.deliveryAddress.pincode}`
-        : userData.name || 'N/A';
-
-   
-      const items = order.orderItems.map((item) => ({
-        productName: item.productName || item.product?.productName || 'Product',
-        productVariant: item.variantSize ? `${item.variantSize}ml` : 'Standard',
-        quantity: item.quantity || 1,
-        price: item.price || 0,
-        status: item.status || order.status || 'Pending',
-        returnEligible: item.status === 'Delivered' && Date.now() <= returnDate,
-        returnDate: item.status === 'Delivered' ? returnDate : null,
-        isNew: isNew,
-        product: {
-          images: item.product?.images || ['/placeholder.jpg']
-        }
-      }));
-
-      return {
-        orderId: order.orderId || order._id.toString(),
-        date: order.createdOn,
-        status: order.status || 'Pending',
-        total: order.finalAmount || 0,
-        shipTo: deliveryAddress,
-        returnEligible: isReturnEligible,
-        returnDate: isReturnEligible ? returnDate : null,
-        isNew: isNew,
-        items: items
-      };
-    });
-
-    console.log('Item stats:', itemStats);
-    console.log('Formatted orders:', JSON.stringify(formattedOrders.map(o => ({
-      orderId: o.orderId,
-      status: o.status,
-      items: o.items.map(i => ({ productName: i.productName, status: i.status, price: i.price }))
-    })), null, 2));
-
-    const ordersPerPage = 5;
-    const totalOrders = formattedOrders.length;
-    const totalPages = Math.ceil(totalOrders / ordersPerPage);
-    const currentPage = Math.max(1, parseInt(req.query.page) || 1);
-    const startIndex = (currentPage - 1) * ordersPerPage;
-    const paginatedOrders = formattedOrders.slice(startIndex, startIndex + ordersPerPage);
-
-    res.render('orderList', {
-      customerName: userData.name || 'Guest',
-      user: userData,
-      orders: paginatedOrders,
-      itemStats: itemStats,
-      totalOrders: totalOrders,
-      totalPages: totalPages,
-      currentPage: currentPage,
-      ordersPerPage: ordersPerPage,
-      success: req.flash('success'),
-    });
-  } catch (error) {
-    console.error('Error fetching orders:', error.message, error.stack);
-    res.status(500).render('orderList', {
-      customerName: 'Guest',
-      user: null,
-      orders: [],
-      itemStats: { totalItems: 0, processing: 0, delivered: 0, totalSpent: 0 },
-      totalOrders: 0,
-      totalPages: 0,
-      currentPage: 1,
-      ordersPerPage: 5,
-      error: 'Failed to load orders',
-      success: req.flash('success'),
-    });
-  }
-};
-
 const getOrderDetails = async (req, res) => {
   try {
     const user = req.session.user;
-    console.log('Session user in getOrderDetails:', user);
-
     const userId = user?._id || user?.id;
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-      console.log('Redirecting to /login due to invalid user or userId');
       return res.redirect('/login');
     }
 
@@ -527,12 +360,9 @@ const getOrderDetails = async (req, res) => {
       .lean();
 
     if (!latestOrder) {
-      console.log('No order found for user:', userId, 'with orderId:', orderId);
       return res.redirect('/pageNotFound');
     }
 
-    console.log('Latest order items:', JSON.stringify(latestOrder.orderItems, null, 2));
-   
     const formattedDate = latestOrder.createdOn
       ? new Date(latestOrder.createdOn).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
       : 'N/A';
@@ -545,8 +375,9 @@ const getOrderDetails = async (req, res) => {
       pincode: 'N/A',
       phone: 'N/A',
     };
- 
-    const formattedItems = latestOrder.orderItems.map(item => {
+
+    // MAP WITH INDEX - THIS IS KEY
+    const formattedItems = latestOrder.orderItems.map((item, index) => {
       let itemStatus = item.status || 'Placed';
       if (itemStatus === 'Active') {
         itemStatus = latestOrder.status || 'Placed';
@@ -578,13 +409,16 @@ const getOrderDetails = async (req, res) => {
       };
 
       return {
+        itemIndex: index, // CRITICAL: Array index as unique identifier
+        productId: item.product?._id,
         productName: item.productName || item.product?.name || 'Unknown Product',
         variantSize: item.variantSize ? `${item.variantSize}ml` : 'N/A',
+        variantSizeRaw: item.variantSize || null, // Raw value for passing to backend
         quantity: item.quantity || 1,
         price: item.price ? `₹${item.price.toFixed(2)}` : 'N/A',
         total: item.total ? `₹${item.total.toFixed(2)}` : 'N/A',
         status: itemStatus,
-        isReturnEligible: isItemReturnEligible,
+        isReturnEligible: isItemReturnEligible && !isReturnRejected,
         returnRejected: isReturnRejected, 
         returnRejectionReason: item.returnRejectionReason || 'Return request was not approved', 
         image: item.product?.images?.[0]
@@ -600,7 +434,6 @@ const getOrderDetails = async (req, res) => {
       item => ['Placed', 'Confirmed', 'Processing', 'Active'].includes(item.status)
     );
 
-   
     const isShippedOrOut = formattedItems.some(
       item => item.status === 'Shipped' || item.status === 'OutForDelivery'
     );
@@ -629,13 +462,6 @@ const getOrderDetails = async (req, res) => {
         .map(item => item.status)
     )].sort((a, b) => statusPriority[a] - statusPriority[b]);
 
-    console.log('Active statuses:', activeStatuses);
-    console.log('Formatted items:', JSON.stringify(formattedItems.map(item => ({
-      productName: item.productName,
-      status: item.status,
-      returnRejected: item.returnRejected
-    })), null, 2));
-
     res.render('orderDetails', {
       orderId: latestOrder.orderId || latestOrder._id,
       status: activeStatuses.join(', '),
@@ -662,43 +488,45 @@ const returnSingleOrder = async (req, res) => {
   try {
     const user = req.session.user;
     const userId = user?._id || user?.id;
-    const { orderId, productName } = req.params;
+    const { orderId, itemIndex, variantSize } = req.params;
     const { reason, details } = req.body;
 
-    console.log('Return single order request:', { orderId, productName, reason, details });
-
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-      console.log('Unauthorized: Invalid user or userId');
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
     const order = await Order.findOne({ orderId, user: userId });
     if (!order) {
-      console.log('Order not found:', { orderId, userId });
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    const decodedProductName = decodeURIComponent(productName);
-    const item = order.orderItems.find(i => i.productName === decodedProductName);
-    
-    if (!item) {
-      console.log('Item not found:', decodedProductName);
-      return res.status(404).json({ success: false, error: 'Item not found' });
+    const idx = parseInt(itemIndex);
+    if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
+      return res.status(404).json({ success: false, error: 'Invalid item index' });
     }
-   
+
+    const item = order.orderItems[idx];
+    
+    // CRITICAL: Verify variant matches
+    if (String(item.variantSize) !== String(variantSize)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: `Variant mismatch. Cannot process return.` 
+      });
+    }
+
     if (item.status !== 'Delivered') {
-      console.log('Item not eligible for return:', { productName: decodedProductName, status: item.status });
       return res.status(400).json({ success: false, error: 'Return can only be requested for delivered items' });
     }
+
     const deliveredDate = item.deliveredAt || order.deliveredAt || order.createdOn;
     const returnWindow = new Date(deliveredDate);
     returnWindow.setDate(returnWindow.getDate() + 7);
+    
     if (Date.now() > returnWindow.getTime()) {
-      console.log('Return window expired for item:', { productName: decodedProductName, deliveredDate, returnWindow });
       return res.status(400).json({ success: false, error: 'Return window has expired' });
     }
 
-  
     item.status = 'Return Request';
     item.returnReason = reason;
     item.returnDetails = details;
@@ -716,14 +544,13 @@ const returnSingleOrder = async (req, res) => {
 
     await order.save();
 
-    console.log('Return request submitted for item:', decodedProductName);
     res.json({ 
       success: true, 
-      message: `Return request for ${decodedProductName} submitted successfully`
+      message: `Return request for ${item.productName} (${variantSize}ml) submitted successfully`
     });
     
   } catch (error) {
-    console.error('Error submitting return request:', error.message, error.stack);
+    console.error('Error submitting return request:', error.message);
     res.status(500).json({ success: false, error: 'Failed to submit return request' });
   }
 };
@@ -800,12 +627,11 @@ const returnAllOrder = async (req, res) => {
   }
 };
 
-
 const cancelReturnSingleOrder = async (req, res) => {
   try {
     const user = req.session.user;
     const userId = user?._id || user?.id;
-    const { orderId, productName } = req.params;
+    const { orderId, itemIndex, variantSize } = req.params;
 
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
@@ -816,18 +642,24 @@ const cancelReturnSingleOrder = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    const decodedProductName = decodeURIComponent(productName);
-    const item = order.orderItems.find(i => i.productName === decodedProductName);
+    const idx = parseInt(itemIndex);
+    if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
+      return res.status(404).json({ success: false, error: 'Invalid item index' });
+    }
+
+    const item = order.orderItems[idx];
     
-    if (!item) {
-      return res.status(404).json({ success: false, error: 'Item not found' });
+    // CRITICAL: Verify variant matches
+    if (String(item.variantSize) !== String(variantSize)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Variant mismatch. Cannot cancel return.' 
+      });
     }
 
     if (item.status !== 'Return Request') {
       return res.status(400).json({ success: false, error: 'Can only cancel pending return requests' });
     }
-
-  
 
     item.status = 'Delivered';
     item.returnReason = undefined;
@@ -846,7 +678,7 @@ const cancelReturnSingleOrder = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: `Return request for ${decodedProductName} cancelled successfully`
+      message: `Return request for ${item.productName} (${variantSize}ml) cancelled successfully`
     });
     
   } catch (error) {
@@ -1029,6 +861,139 @@ const updateItemStatusRoute = async (req, res) => {
   } catch (error) {
     console.error('Error updating status:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const getOrderList = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userId = user?._id || user?.id;
+
+    if (!user || !userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      console.log('Redirecting to /login due to invalid user or userId:', { user, userId });
+      return res.redirect('/login');
+    }
+
+ 
+    const userData = await User.findById(userId).lean();
+    if (!userData) {
+      console.log('User not found in database:', userId);
+      return res.redirect('/login');
+    }
+    
+    const orders = await Order.find({ user: userId })
+      .populate('orderItems.product')
+      .sort({ createdOn: -1 })
+      .lean();
+
+    const itemStats = {
+      totalItems: 0,
+      processing: 0,
+      delivered: 0,
+      totalSpent: 0
+    };
+
+    orders.forEach(order => {
+      order.orderItems.forEach(item => {
+        const quantity = item.quantity || 1;
+        const itemStatus = (item.status || order.status || 'Pending').toLowerCase();
+        console.log(`Item: ${item.productName || 'Unknown'}, Status: ${itemStatus}, Quantity: ${quantity}, Price: ${item.total || item.price || 0}`);
+        itemStats.totalItems += quantity;
+        if (itemStatus === 'processing') {
+          itemStats.processing += quantity;
+        } else if (itemStatus === 'delivered') {
+          itemStats.delivered += quantity;
+        }
+      
+        if (itemStatus !== 'cancelled') {
+          itemStats.totalSpent += (item.total || item.price || 0) * quantity;
+        }
+      });
+    });
+
+    
+    const formattedOrders = orders.map((order) => {
+     
+      const deliveredDate = order.deliveredAt || order.createdOn;
+      const returnDate = new Date(deliveredDate);
+      returnDate.setDate(returnDate.getDate() + 7); 
+      const isReturnEligible = order.orderItems.some(
+        item => item.status === 'Delivered' && Date.now() <= returnDate
+      );
+     
+      const isNew = (Date.now() - new Date(order.createdOn).getTime()) < (7 * 24 * 60 * 60 * 1000);
+      
+      const deliveryAddress = order.deliveryAddress
+        ? `${order.deliveryAddress.name}, ${order.deliveryAddress.houseName}, ${order.deliveryAddress.city}, ${order.deliveryAddress.state} - ${order.deliveryAddress.pincode}`
+        : userData.name || 'N/A';
+
+   
+      const items = order.orderItems.map((item) => ({
+        productName: item.productName || item.product?.productName || 'Product',
+        productVariant: item.variantSize ? `${item.variantSize}ml` : 'Standard',
+        quantity: item.quantity || 1,
+        price: item.price || 0,
+        status: item.status || order.status || 'Pending',
+        returnEligible: item.status === 'Delivered' && Date.now() <= returnDate,
+        returnDate: item.status === 'Delivered' ? returnDate : null,
+        isNew: isNew,
+        product: {
+          images: item.product?.images || ['/placeholder.jpg']
+        }
+      }));
+
+      return {
+        orderId: order.orderId || order._id.toString(),
+        date: order.createdOn,
+        status: order.status || 'Pending',
+        total: order.finalAmount || 0,
+        shipTo: deliveryAddress,
+        returnEligible: isReturnEligible,
+        returnDate: isReturnEligible ? returnDate : null,
+        isNew: isNew,
+        items: items
+      };
+    });
+
+    console.log('Item stats:', itemStats);
+    console.log('Formatted orders:', JSON.stringify(formattedOrders.map(o => ({
+      orderId: o.orderId,
+      status: o.status,
+      items: o.items.map(i => ({ productName: i.productName, status: i.status, price: i.price }))
+    })), null, 2));
+
+    const ordersPerPage = 5;
+    const totalOrders = formattedOrders.length;
+    const totalPages = Math.ceil(totalOrders / ordersPerPage);
+    const currentPage = Math.max(1, parseInt(req.query.page) || 1);
+    const startIndex = (currentPage - 1) * ordersPerPage;
+    const paginatedOrders = formattedOrders.slice(startIndex, startIndex + ordersPerPage);
+
+    res.render('orderList', {
+      customerName: userData.name || 'Guest',
+      user: userData,
+      orders: paginatedOrders,
+      itemStats: itemStats,
+      totalOrders: totalOrders,
+      totalPages: totalPages,
+      currentPage: currentPage,
+      ordersPerPage: ordersPerPage,
+      success: req.flash('success'),
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error.message, error.stack);
+    res.status(500).render('orderList', {
+      customerName: 'Guest',
+      user: null,
+      orders: [],
+      itemStats: { totalItems: 0, processing: 0, delivered: 0, totalSpent: 0 },
+      totalOrders: 0,
+      totalPages: 0,
+      currentPage: 1,
+      ordersPerPage: 5,
+      error: 'Failed to load orders',
+      success: req.flash('success'),
+    });
   }
 };
 

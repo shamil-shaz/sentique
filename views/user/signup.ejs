@@ -639,6 +639,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 <script>
   // Form elements
   const form = document.getElementById('signup-form');
@@ -731,69 +733,87 @@
   }
 
   // Real-time validation
-  fullName.addEventListener('blur', () => {
-    validateField(fullName, error1, val => val.length >= 3, 'Full name must be at least 3 characters');
+ // Real-time validation
+fullName.addEventListener('blur', () => {
+  validateField(
+    fullName, 
+    error1, 
+    val => val.length >= 3 && val.length <= 20, 
+    val => val.length < 3 
+      ? 'Full name must be at least 3 characters' 
+      : 'Full name cannot exceed 20 characters'
+  );
+});
+
+phone.addEventListener('blur', () => {
+  validateField(phone, error2, val => /^[0-9]{10}$/.test(val), 'Enter a valid 10-digit phone number');
+});
+
+email.addEventListener('blur', () => {
+  validateField(email, error3, val => /^\S+@\S+\.\S+$/.test(val), 'Enter a valid email address');
+});
+
+confirmPassword.addEventListener('blur', () => {
+  validateField(confirmPassword, error6, val => val === password.value, 'Passwords do not match');
+});
+
+// Clear error states on input
+[fullName, phone, email, password, confirmPassword].forEach(input => {
+  input.addEventListener('input', () => {
+    const formGroup = input.parentElement.parentElement;
+    if (formGroup.classList.contains('error')) {
+      formGroup.classList.remove('error');
+    }
+  });
+});
+
+function validateFields() {
+  let valid = true;
+
+  // Reset all errors
+  [error1, error2, error3, error5, error6].forEach(err => err.innerHTML = "");
+  document.querySelectorAll('.form-group').forEach(group => {
+    group.classList.remove('error', 'success');
   });
 
-  phone.addEventListener('blur', () => {
-    validateField(phone, error2, val => /^[0-9]{10}$/.test(val), 'Enter a valid 10-digit phone number');
-  });
+  // Full Name - Updated validation
+  const nameVal = fullName.value.trim();
+  const nameError = nameVal.length < 3 
+    ? 'Full name must be at least 3 characters'
+    : nameVal.length > 20
+    ? 'Full name cannot exceed 20 characters'
+    : null;
 
-  email.addEventListener('blur', () => {
-    validateField(email, error3, val => /^\S+@\S+\.\S+$/.test(val), 'Enter a valid email address');
-  });
-
-  confirmPassword.addEventListener('blur', () => {
-    validateField(confirmPassword, error6, val => val === password.value, 'Passwords do not match');
-  });
-
-  // Clear error states on input
-  [fullName, phone, email, password, confirmPassword].forEach(input => {
-    input.addEventListener('input', () => {
-      const formGroup = input.parentElement.parentElement;
-      if (formGroup.classList.contains('error')) {
-        formGroup.classList.remove('error');
-      }
-    });
-  });
-
-  function validateFields() {
-    let valid = true;
-
-    // Reset all errors
-    [error1, error2, error3, error5, error6].forEach(err => err.innerHTML = "");
-    document.querySelectorAll('.form-group').forEach(group => {
-      group.classList.remove('error', 'success');
-    });
-
-    // Full Name
-    if (!validateField(fullName, error1, val => val.length >= 3, 'Full name must be at least 3 characters')) {
-      valid = false;
-    }
-
-    // Phone
-    if (!validateField(phone, error2, val => /^[0-9]{10}$/.test(val), 'Enter a valid 10-digit phone number')) {
-      valid = false;
-    }
-
-    // Email
-    if (!validateField(email, error3, val => /^\S+@\S+\.\S+$/.test(val), 'Enter a valid email address')) {
-      valid = false;
-    }
-
-    // Password
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
-    if (!validateField(password, error5, val => strongPasswordRegex.test(val), 'Password must be at least 6 characters with uppercase, lowercase, number, and symbol')) {
-      valid = false;
-    }
-
-    // Confirm Password
-    if (!validateField(confirmPassword, error6, val => val === password.value, 'Passwords do not match')) {
-      valid = false;
-    }
-
-    return valid;
+  if (nameError) {
+    validateField(fullName, error1, () => false, nameError);
+    valid = false;
+  } else {
+    validateField(fullName, error1, () => true, '');
   }
+
+  // Phone
+  if (!validateField(phone, error2, val => /^[0-9]{10}$/.test(val), 'Enter a valid 10-digit phone number')) {
+    valid = false;
+  }
+
+  // Email
+  if (!validateField(email, error3, val => /^\S+@\S+\.\S+$/.test(val), 'Enter a valid email address')) {
+    valid = false;
+  }
+
+  // Password
+  const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
+  if (!validateField(password, error5, val => strongPasswordRegex.test(val), 'Password must be at least 6 characters with uppercase, lowercase, number, and symbol')) {
+    valid = false;
+  }
+
+  // Confirm Password
+  if (!validateField(confirmPassword, error6, val => val === password.value, 'Passwords do not match')) {
+    valid = false;
+  }
+
+  return valid;
+}
 
   async function checkEmailExists(emailVal) {
     try {

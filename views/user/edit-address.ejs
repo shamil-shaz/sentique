@@ -411,6 +411,7 @@
 </head>
 
 <body>
+    <body>
     <div class="main-content">
         <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'address' }) %>
 
@@ -447,7 +448,9 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">👤 Full Name</label>
-                            <input type="text" class="form-input" name="name" id="name" value="<%= address.name %>" placeholder="Enter full name" required minlength="3">
+                            <input type="text" class="form-input" name="name" id="name" value="<%= address.name %>" placeholder="Enter full name" required minlength="3" maxlength="20">
+                            <small style="color: #666; font-size: 12px; margin-top: 5px;">Max 20 characters</small>
+                            <div id="nameError" style="color: #dc2626; font-size: 12px; margin-top: 5px;"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">📱 Phone Number</label>
@@ -474,28 +477,60 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">☎️ Alternative Number <span style="font-size: 12px; color: #718096; font-weight: 500;">(Optional)</span></label>
-                            <input type="tel" class="form-input" name="altPhone" id="altPhone" value="<%= address.altPhone || '' %>" placeholder="Enter 10 digit number (optional)">
+                            <input type="tel" class="form-input" name="altPhone" id="altPhone" value="<%= address.altPhone || '' %>" placeholder="Enter 10 digit number (optional)" pattern="[0-9]{10}">
                         </div>
                         <div class="form-group">
                             <label class="form-label">🌍 Nationality</label>
-                            <input type="text" class="form-input" name="nationality" id="nationality" value="<%= address.nationality %>" placeholder="Enter nationality" required minlength="2">
+                            <input type="text" class="form-input" name="nationality" id="nationality" value="Indian" placeholder="Nationality" required readonly style="background-color: #f3f4f6; cursor: not-allowed;">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">🏙️ City</label>
-                            <input type="text" class="form-input" name="city" id="city" value="<%= address.city %>" placeholder="Enter city" required>
+                            <input type="text" class="form-input" name="city" id="city" value="<%= address.city %>" placeholder="Enter city" required minlength="2">
                         </div>
                         <div class="form-group">
                             <label class="form-label">🗺️ State</label>
-                            <input type="text" class="form-input" name="state" id="state" value="<%= address.state %>" placeholder="Enter state" required>
+                            <select class="form-select" name="state" id="state" required>
+                                <option value="" disabled>Select state</option>
+                                <option value="Andhra Pradesh" <%= address.state === 'Andhra Pradesh' ? 'selected' : '' %>>Andhra Pradesh</option>
+                                <option value="Arunachal Pradesh" <%= address.state === 'Arunachal Pradesh' ? 'selected' : '' %>>Arunachal Pradesh</option>
+                                <option value="Assam" <%= address.state === 'Assam' ? 'selected' : '' %>>Assam</option>
+                                <option value="Bihar" <%= address.state === 'Bihar' ? 'selected' : '' %>>Bihar</option>
+                                <option value="Chhattisgarh" <%= address.state === 'Chhattisgarh' ? 'selected' : '' %>>Chhattisgarh</option>
+                                <option value="Goa" <%= address.state === 'Goa' ? 'selected' : '' %>>Goa</option>
+                                <option value="Gujarat" <%= address.state === 'Gujarat' ? 'selected' : '' %>>Gujarat</option>
+                                <option value="Haryana" <%= address.state === 'Haryana' ? 'selected' : '' %>>Haryana</option>
+                                <option value="Himachal Pradesh" <%= address.state === 'Himachal Pradesh' ? 'selected' : '' %>>Himachal Pradesh</option>
+                                <option value="Jharkhand" <%= address.state === 'Jharkhand' ? 'selected' : '' %>>Jharkhand</option>
+                                <option value="Karnataka" <%= address.state === 'Karnataka' ? 'selected' : '' %>>Karnataka</option>
+                                <option value="Kerala" <%= address.state === 'Kerala' ? 'selected' : '' %>>Kerala</option>
+                                <option value="Madhya Pradesh" <%= address.state === 'Madhya Pradesh' ? 'selected' : '' %>>Madhya Pradesh</option>
+                                <option value="Maharashtra" <%= address.state === 'Maharashtra' ? 'selected' : '' %>>Maharashtra</option>
+                                <option value="Manipur" <%= address.state === 'Manipur' ? 'selected' : '' %>>Manipur</option>
+                                <option value="Meghalaya" <%= address.state === 'Meghalaya' ? 'selected' : '' %>>Meghalaya</option>
+                                <option value="Mizoram" <%= address.state === 'Mizoram' ? 'selected' : '' %>>Mizoram</option>
+                                <option value="Nagaland" <%= address.state === 'Nagaland' ? 'selected' : '' %>>Nagaland</option>
+                                <option value="Odisha" <%= address.state === 'Odisha' ? 'selected' : '' %>>Odisha</option>
+                                <option value="Punjab" <%= address.state === 'Punjab' ? 'selected' : '' %>>Punjab</option>
+                                <option value="Rajasthan" <%= address.state === 'Rajasthan' ? 'selected' : '' %>>Rajasthan</option>
+                                <option value="Sikkim" <%= address.state === 'Sikkim' ? 'selected' : '' %>>Sikkim</option>
+                                <option value="Tamil Nadu" <%= address.state === 'Tamil Nadu' ? 'selected' : '' %>>Tamil Nadu</option>
+                                <option value="Telangana" <%= address.state === 'Telangana' ? 'selected' : '' %>>Telangana</option>
+                                <option value="Tripura" <%= address.state === 'Tripura' ? 'selected' : '' %>>Tripura</option>
+                                <option value="Uttar Pradesh" <%= address.state === 'Uttar Pradesh' ? 'selected' : '' %>>Uttar Pradesh</option>
+                                <option value="Uttarakhand" <%= address.state === 'Uttarakhand' ? 'selected' : '' %>>Uttarakhand</option>
+                                <option value="West Bengal" <%= address.state === 'West Bengal' ? 'selected' : '' %>>West Bengal</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">📮 ZIP Code</label>
-                        <input type="text" class="form-input" name="pincode" id="zip" value="<%= address.pincode %>" placeholder="Enter ZIP code" required>
+                        <input type="text" class="form-input" name="pincode" id="zip" value="<%= address.pincode %>" placeholder="Enter 6-digit PIN code" required pattern="[0-9]{6}" maxlength="6">
+                        <small style="color: #666; font-size: 12px; margin-top: 5px;">Valid 6-digit code (not 123456, 654321, or 111111)</small>
+                        <div id="zipError" style="color: #dc2626; font-size: 12px; margin-top: 5px;"></div>
                     </div>
 
                     <div class="form-group">
@@ -523,6 +558,69 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        const nameInput = document.getElementById('name');
+        const zipInput = document.getElementById('zip');
+        const nameError = document.getElementById('nameError');
+        const zipError = document.getElementById('zipError');
+
+        // Name validation - max 20 characters
+        nameInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 20) {
+                nameError.textContent = 'Name cannot exceed 20 characters';
+                e.target.value = e.target.value.substring(0, 20);
+            } else if (e.target.value.length < 3 && e.target.value.length > 0) {
+                nameError.textContent = 'Name must be at least 3 characters';
+            } else {
+                nameError.textContent = '';
+            }
+        });
+
+        // ZIP code validation only
+        zipInput.addEventListener('blur', (e) => {
+            const pincode = e.target.value.trim();
+            zipError.textContent = '';
+            
+            if (!pincode) return;
+
+            // Validate format
+            if (!/^\d{6}$/.test(pincode)) {
+                zipError.textContent = 'PIN code must be exactly 6 digits';
+                return;
+            }
+
+            // Check for all same digits
+            if (/^(\d)\1{5}$/.test(pincode)) {
+                zipError.textContent = 'PIN code cannot have all same digits (e.g., 111111)';
+                return;
+            }
+
+            // Check if sequential
+            let isSequential = true;
+            for (let i = 1; i < 6; i++) {
+                if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
+                    isSequential = false;
+                    break;
+                }
+            }
+            if (isSequential) {
+                zipError.textContent = 'PIN code cannot be sequential (e.g., 123456)';
+                return;
+            }
+
+            // Check if reverse sequential
+            let isReverseSequential = true;
+            for (let i = 1; i < 6; i++) {
+                if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
+                    isReverseSequential = false;
+                    break;
+                }
+            }
+            if (isReverseSequential) {
+                zipError.textContent = 'PIN code cannot be reverse sequential (e.g., 654321)';
+                return;
+            }
+        });
+
         async function updateAddress(e) {
             e.preventDefault();
 
@@ -530,7 +628,7 @@
             const loadingOverlay = document.getElementById('loadingOverlay');
             
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Updating...';
+            submitBtn.innerHTML = 'Updating...';
             loadingOverlay.classList.add('show');
 
             const addressId = document.getElementById('addressId').value;
@@ -543,21 +641,28 @@
                 buildingNumber: document.getElementById('buildingNumber').value.trim(),
                 landmark: document.getElementById('landmark').value.trim(),
                 altPhone: document.getElementById('altPhone').value.trim(),
-                nationality: document.getElementById('nationality').value.trim(),
+                nationality: 'Indian',
                 city: document.getElementById('city').value.trim(),
                 state: document.getElementById('state').value.trim(),
                 pincode: document.getElementById('zip').value.trim(),
                 isDefault: document.getElementById('setDefault').checked
             };
 
+            // Validate ZIP code format on submit
+            const pincodeValidation = validatePincode(payload.pincode);
+            if (!pincodeValidation.valid) {
+                resetButton();
+                return showError('Invalid ZIP Code', pincodeValidation.message);
+            }
+
             // Client-side validation
             if (!payload.addressType || !['Home', 'Work', 'Other'].includes(payload.addressType)) {
                 resetButton();
                 return showError('Invalid Input', 'Please select a valid address type (Home, Work, Other)');
             }
-            if (payload.name.length < 3) {
+            if (payload.name.length < 3 || payload.name.length > 20) {
                 resetButton();
-                return showError('Invalid Name', 'Name must be at least 3 characters long');
+                return showError('Invalid Name', 'Name must be between 3 and 20 characters');
             }
             if (!/^\d{10}$/.test(payload.phone)) {
                 resetButton();
@@ -574,10 +679,6 @@
             if (payload.altPhone && !/^\d{10}$/.test(payload.altPhone)) {
                 resetButton();
                 return showError('Invalid Alternative Number', 'Alternative number must be exactly 10 digits');
-            }
-            if (payload.nationality.length < 2) {
-                resetButton();
-                return showError('Invalid Nationality', 'Nationality must be at least 2 characters');
             }
             if (!payload.city || !payload.state || !payload.pincode) {
                 resetButton();
@@ -614,11 +715,45 @@
             }
         }
 
+        function validatePincode(pincode) {
+            if (!/^\d{6}$/.test(pincode)) {
+                return { valid: false, message: 'PIN code must be exactly 6 digits' };
+            }
+
+            if (/^(\d)\1{5}$/.test(pincode)) {
+                return { valid: false, message: 'PIN code cannot have all same digits (e.g., 111111)' };
+            }
+
+            let isSequential = true;
+            for (let i = 1; i < 6; i++) {
+                if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
+                    isSequential = false;
+                    break;
+                }
+            }
+            if (isSequential) {
+                return { valid: false, message: 'PIN code cannot be sequential (e.g., 123456)' };
+            }
+
+            let isReverseSequential = true;
+            for (let i = 1; i < 6; i++) {
+                if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
+                    isReverseSequential = false;
+                    break;
+                }
+            }
+            if (isReverseSequential) {
+                return { valid: false, message: 'PIN code cannot be reverse sequential (e.g., 654321)' };
+            }
+
+            return { valid: true, message: 'Valid PIN code' };
+        }
+
         function resetButton() {
             const submitBtn = document.getElementById('submitBtn');
             const loadingOverlay = document.getElementById('loadingOverlay');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '💾 Update Address';
+            submitBtn.innerHTML = 'Update Address';
             loadingOverlay.classList.remove('show');
         }
 

@@ -625,9 +625,10 @@
 
             <!-- Item Actions -->
             <div class="item-actions">
-              <div class="item-total">
-                ₹<%= ((item.variant.salePrice || item.price) * item.quantity).toLocaleString() %>
-              </div>
+            <div class="item-total" id="subtotal-<%= item.productId._id %>-<%= item.variant.size %>">
+  ₹<%= ((item.variant.salePrice || item.price) * item.quantity).toLocaleString() %>
+</div>
+
               <div class="action-buttons">
                 <% if (isOutOfStock && !isBlocked) { %>
                   <button class="wishlist-button" 
@@ -680,19 +681,20 @@
   <% } %>
         
         <div class="summary-row">
-          <span class="summary-label">Subtotal:</span>
-          <span class="summary-value">₹<%= totalPrice.toLocaleString() %></span>
-        </div>
+  <span class="summary-label">Subtotal:</span>
+  <span class="summary-value" id="cart-subtotal">₹<%= totalPrice.toLocaleString() %></span>
+</div>
 
-        <div class="summary-row">
-          <span class="summary-label">Shipping:</span>
-          <span class="summary-value">Free</span>
-        </div>
+<div class="summary-row">
+  <span class="summary-label">Shipping:</span>
+  <span class="summary-value">Free</span>
+</div>
 
-        <div class="summary-row">
-          <span class="summary-label">Total:</span>
-          <span class="summary-value">₹<%= totalPrice.toLocaleString() %></span>
-        </div>
+<div class="summary-row">
+  <span class="summary-label">Total:</span>
+  <span class="summary-value" id="cart-total">₹<%= totalPrice.toLocaleString() %></span>
+</div>
+
 
         <button id="checkout-button" class="checkout-button" onclick="proceedToCheckout()">
           Proceed to checkout
@@ -716,7 +718,7 @@
 <script>
   const MAX_QTY_PER_ORDER = 5;
 
-  // Quantity change
+ 
   function changeQuantity(productId, variantSize, change, maxAvailable, currentQty) {
     const input = document.getElementById(`qty-${productId}-${variantSize}`);
     const plusBtn = document.getElementById(`plus-btn-${productId}-${variantSize}`);
@@ -765,53 +767,68 @@
   }
 
   // Update Cart
-  function updateCart(productId, variantSize) {
-    const quantity = parseInt(document.getElementById(`qty-${productId}-${variantSize}`).value);
-    
-    Swal.fire({
-      title: 'Updating...',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
+ function updateCart(productId, variantSize) {
+  const quantity = parseInt(document.getElementById(`qty-${productId}-${variantSize}`).value);
 
-    fetch('/cart/update', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, variantSize, quantity })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Updated',
-          text: 'Cart updated successfully',
-          timer: 1000,
-          showConfirmButton: false
-        }).then(() => {
-          
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: data.message || 'Failed to update cart',
-          confirmButtonColor: '#dc3545'
-        });
-      }
-    })
-    .catch(err => {
-      console.error('Update cart error:', err);
+  // Show loading
+  Swal.fire({
+    title: 'Updating...',
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  fetch('/cart/update', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId, variantSize, quantity })
+  })
+  .then(res => res.json())
+  .then(data => {
+    Swal.close(); // ✅ Close the loading alert
+
+    if (data.success) {
+    const subtotalEl = document.getElementById(`subtotal-${productId}-${variantSize}`);
+if (subtotalEl) {
+  subtotalEl.textContent = `₹${data.updatedItem.subtotal.toLocaleString()}`;
+}
+
+   const subtotalContainer = document.getElementById('cart-subtotal');
+const totalContainer = document.getElementById('cart-total');
+
+if (subtotalContainer && totalContainer) {
+  subtotalContainer.textContent = `₹${data.cartTotal.toLocaleString()}`;
+  totalContainer.textContent = `₹${data.cartTotal.toLocaleString()}`;
+}
+
+      // ✅ Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'Updated',
+        text: 'Cart updated successfully!',
+        timer: 1000,
+        showConfirmButton: false
+      });
+
+    } else {
       Swal.fire({
         icon: 'error',
-        title: 'Server Error',
-        text: 'Failed to update cart. Please try again.',
+        title: 'Error',
+        text: data.message || 'Failed to update cart',
         confirmButtonColor: '#dc3545'
       });
+    }
+  })
+  .catch(err => {
+    console.error('Update cart error:', err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Failed to update cart. Please try again.',
+      confirmButtonColor: '#dc3545'
     });
-  }
+  });
+}
+
 
   // Remove from Cart
   function removeFromCart(productId, variantSize) {

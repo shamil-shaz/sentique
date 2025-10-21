@@ -1,3 +1,5 @@
+<!-- FRONTEND - Updated OTP Verification Page -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OTP Verification</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
 
   <style>
     * {
@@ -63,6 +64,12 @@
     .countdown {
       font-size: 14px;
       margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    .countdown.expired {
+      color: #dc2626;
+      font-weight: 600;
     }
 
     .btn-group {
@@ -83,22 +90,35 @@
     .verify {
       background-color: #28a745;
       color: white;
+      transition: 0.3s;
+    }
+
+    .verify:hover:not(:disabled) {
+      background-color: #218838;
+    }
+
+    .verify:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
 
     .resend {
-  background-color: #007bff;
-  color: white;
-  transition: 0.3s;
-  opacity: 1;
-  cursor: pointer;
-}
+      background-color: #007bff;
+      color: white;
+      transition: 0.3s;
+      opacity: 1;
+      cursor: pointer;
+    }
 
-.resend:disabled {
-  opacity: 0.5;      
-  cursor: not-allowed; 
-  background-color: #007bff; 
-}
+    .resend:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
 
+    .resend:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: #007bff;
+    }
 
     .back-login {
       display: block;
@@ -113,8 +133,6 @@
       }
     }
   </style>
-
-
 </head>
 <body>
 
@@ -129,154 +147,200 @@
       <div class="countdown" id="countdown">0 : 57 seconds remaining</div>
 
       <div class="btn-group">
-          <button type="button" id="resendBtn" class="btn resend" onclick="resendOTP()" disabled>
-            Resend OTP
-          </button>
-        <button type="submit" class="btn verify">Verify</button>
+        <button type="button" id="resendBtn" class="btn resend" onclick="resendOTP()" disabled>
+          Resend OTP
+        </button>
+        <button type="submit" id="verifyBtn" class="btn verify">Verify</button>
       </div>
 
       <a href="/login" class="back-login">Back to Login</a>
     </div>
   </form>
 
-  
-<script>
-let seconds = 57;
-const countdownEl = document.getElementById('countdown');
-const resendBtn = document.getElementById("resendBtn");
-const otpInput = document.getElementById("otpInput");
-let timer;
+  <script>
+    let seconds = 57;
+    const countdownEl = document.getElementById('countdown');
+    const resendBtn = document.getElementById("resendBtn");
+    const verifyBtn = document.getElementById("verifyBtn");
+    const otpInput = document.getElementById("otpInput");
+    let timer;
+    let otpExpired = false;
 
+    function startTimer() {
+      resendBtn.disabled = true;
+      verifyBtn.disabled = false;
+      otpInput.disabled = false;
+      otpExpired = false;
+      countdownEl.classList.remove('expired');
 
-function startTimer() {
-  resendBtn.disabled = true; 
-  otpInput.disabled = false; 
+      timer = setInterval(() => {
+        let displaySeconds = seconds < 10 ? "0" + seconds : seconds;
+        countdownEl.textContent = `0 : ${displaySeconds} seconds remaining`;
+        seconds--;
 
-  timer = setInterval(() => {
-    let displaySeconds = seconds < 10 ? "0" + seconds : seconds;
-    countdownEl.textContent = `0 : ${displaySeconds} seconds remaining`;
-    seconds--;
+        if (seconds < 0) {
+          clearInterval(timer);
+          countdownEl.textContent = "OTP expired. Please resend.";
+          countdownEl.classList.add('expired');
+          otpInput.disabled = true;
+          verifyBtn.disabled = true;
+          resendBtn.disabled = false;
+          otpExpired = true;
+        }
+      }, 1000);
+    }
 
-    if (seconds < 0) {
+    startTimer();
+
+    function validateOTPForm(event) {
+      event.preventDefault();
+
+      // CHECK IF OTP IS EXPIRED
+      if (otpExpired) {
+        Swal.fire({
+          icon: 'error',
+          title: 'OTP Expired',
+          text: 'Your OTP has expired. Please request a new OTP.',
+          confirmButtonColor: '#007bff'
+        });
+        return false;
+      }
+
+      const otp = otpInput.value.trim();
+      const errorEl = document.getElementById('errorMessage');
+      const isValid = /^\d{4}$|^\d{6}$/.test(otp);
+
+      if (!isValid) {
+        errorEl.style.display = 'block';
+        return false;
+      } else {
+        errorEl.style.display = 'none';
+      }
+
+      // Show loading
+      Swal.fire({
+        title: 'Verifying OTP...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp: otp })
+      })
+      .then(res => res.json())
+      .then(response => {
+        Swal.close();
+
+        if (response.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'OTP Verified!',
+            text: 'Welcome! Redirecting...',
+            showConfirmButton: false,
+            timer: 1500
+          }).then(() => {
+            window.location.href = response.redirectUrl || '/home';
+          });
+        } else {
+          // Check if error is about expired OTP
+          if (response.message.toLowerCase().includes('expired')) {
+            Swal.fire({
+              icon: 'error',
+              title: 'OTP Expired',
+              text: response.message,
+              confirmButtonColor: '#007bff'
+            });
+            otpExpired = true;
+            otpInput.disabled = true;
+            verifyBtn.disabled = true;
+            countdownEl.textContent = "OTP expired. Please resend.";
+            countdownEl.classList.add('expired');
+            resendBtn.disabled = false;
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid OTP',
+              text: response.message,
+              confirmButtonColor: '#007bff'
+            });
+          }
+        }
+      })
+      .catch(() => {
+        Swal.close();
+        Swal.fire({
+          icon: 'error',
+          title: 'Server Error',
+          text: 'Please try again later.',
+          confirmButtonColor: '#007bff'
+        });
+      });
+
+      return false;
+    }
+
+    function resendOTP() {
+      resendBtn.disabled = true;
+      otpInput.disabled = false;
+      verifyBtn.disabled = false;
+
       clearInterval(timer);
-      countdownEl.textContent = "OTP expired. Please resend.";
-      otpInput.disabled = true;
-      resendBtn.disabled = false; 
+      seconds = 57;
+      countdownEl.textContent = `0 : ${seconds} seconds remaining`;
+      countdownEl.classList.remove('expired');
+      otpExpired = false;
+      otpInput.value = '';
+      startTimer();
+
+      Swal.fire({
+        title: 'Sending OTP...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      fetch('/resend-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        Swal.close();
+
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'OTP Resent',
+            text: 'A new OTP has been sent to your email.',
+            showConfirmButton: false,
+            timer: 1200,
+            confirmButtonColor: '#007bff'
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'An error occurred while resending OTP. Please try again.',
+            confirmButtonColor: '#007bff'
+          });
+          resendBtn.disabled = false;
+        }
+      })
+      .catch(() => {
+        Swal.close();
+        Swal.fire({
+          icon: 'error',
+          title: 'Server Error',
+          text: 'Please try again later.',
+          confirmButtonColor: '#007bff'
+        });
+        resendBtn.disabled = false;
+      });
+
+      return false;
     }
-  }, 1000);
-}
-
-
-startTimer();
-
-
-function validateOTPForm(event) {
-  event.preventDefault();
-  const otp = otpInput.value.trim();
-  const errorEl = document.getElementById('errorMessage');
-  const isValid = /^\d{4}$|^\d{6}$/.test(otp);
-
-  if (!isValid) {
-    errorEl.style.display = 'block';
-    return false;
-  } else {
-    errorEl.style.display = 'none';
-  }
-
-  fetch('/verify-otp', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ otp: otp })
-  })
-  .then(res => res.json())
-  .then(response => {
-    if (response.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'OTP Verified!',
-        showConfirmButton: false,
-        timer: 1500
-      }).then(() => {
-        window.location.href = response.redirectUrl || '/home';
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Invalid OTP',
-        text: response.message
-      });
-    }
-  })
-  .catch(() => {
-    Swal.fire({
-      icon: 'error',
-      title: 'Server Error',
-      text: 'Please try again later.'
-    });
-  });
-
-  return false;
-}
-
-
-function resendOTP() {
-  
-  resendBtn.disabled = true;
-  otpInput.disabled = false; 
-
-
-  clearInterval(timer);
-  seconds = 57;
-  countdownEl.textContent = `0 : ${seconds} seconds remaining`;
-  startTimer();
-
- 
-  Swal.fire({
-    title: 'Sending OTP...',
-    allowOutsideClick: false,
-    didOpen: () => Swal.showLoading()
-  });
-
- 
-  fetch('/resend-otp', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(res => res.json())
-  .then(data => {
-    Swal.close(); 
-
-    if (data.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'OTP Resent',
-        text: 'A new OTP has been sent to your email.',
-        showConfirmButton: false,
-        timer: 1200
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'An error occurred while resending OTP. Please try again.'
-      });
-      resendBtn.disabled = false; 
-    }
-  })
-  .catch(() => {
-    Swal.close();
-    Swal.fire({
-      icon: 'error',
-      title: 'Server Error',
-      text: 'Please try again later.'
-    });
-    resendBtn.disabled = false;
-  });
-
-  return false;
-}
-</script>
-
+  </script>
 
 </body>
 </html>

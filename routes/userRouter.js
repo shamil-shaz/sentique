@@ -157,13 +157,10 @@ router.post('/order/place', userAuth, checkoutController.placeOrder);
 router.get("/orderSuccess",userAuth,orderController.getOrderSuccess)
 router.get('/orderDetails/:orderId', userAuth, orderController.getOrderDetails);
 router.post('/orders/:orderId/cancel', userAuth, orderController.cancelAllOrder);
-router.post('/orders/:orderId/items/:productName/cancel', userAuth, orderController.cancelSingleOrder);
-
-
-//router.get('/orders/:orderId', orderController.getOrderDetails);
-router.post('/orders/:orderId/items/:productName/return', userAuth,orderController.returnSingleOrder);
+router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel', userAuth, orderController.cancelSingleOrder);
+router.post('/orders/:orderId/items/:itemIndex/:variantSize/return', userAuth, orderController.returnSingleOrder);
 router.post('/orders/:orderId/return',userAuth, orderController.returnAllOrder);
-router.post('/orders/:orderId/items/:productName/cancel-return', userAuth,orderController.cancelReturnSingleOrder);
+router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel-return', userAuth, orderController.cancelReturnSingleOrder);
 router.post('/orders/:orderId/cancel-return',userAuth, orderController.cancelReturnAllOrder);
 router.post('/orders/:orderId/items/:productName/status', orderController.updateItemStatusRoute);
 

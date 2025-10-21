@@ -136,6 +136,57 @@ const handleForgotPassword = async (req, res) => {
   }
 };
 
+// const loadForgotPageOtp = async (req, res) => {
+//   try {
+//     if (!req.session.forgotOtp || !req.session.forgotEmail) {
+//       return res.redirect("/forgot-password");
+//     }
+//     res.render("forgotPassword-otp", { message: "" });
+//   } catch (err) {
+//     console.error("Error loading forgotPasswor-otp:", err);
+//     res.status(500).send("Server Error");
+//   }
+// };
+
+// const verifyForgotOtp = async (req, res) => {
+//   try {
+//      const enterdOtp = req.body.otp;
+//      if(enterdOtp==req.session.forgotOtp){
+//         res.json({success:true,redirectUrl:"/reset-password"})
+//      }else{
+//         res.json({success:false,message:"Invalid OTP"})
+//      }
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: "An error occurred while verifying OTP." });
+//   }
+// }
+
+// const resendOtp = async (req, res) => {
+//     try{
+
+//          const otp= generateOtp();
+//          req.session.forgotOtp=otp;
+//          const email=req.session.forgotEmail;
+//          console.log("Resend OTP email:", email);
+
+//          const emailSent=await sendVerificationEmail(email,otp);
+//          if(emailSent){
+//             console.log(" Resend OTP :", otp);
+//             res.status(200).json({success:true,message:"OTP resent successfully"})
+//          }
+
+//     }catch(error){
+
+//         console.error("Error resending OTP:", error);
+//         res.status(500).json({success:false,message:"Error resending OTP. Please try again later."})
+
+//     }
+// }
+
+// Backend - Updated Controllers
+
+const OTP_EXPIRY_TIME = 60000; // 60 seconds in milliseconds (adjust as needed)
+
 const loadForgotPageOtp = async (req, res) => {
   try {
     if (!req.session.forgotOtp || !req.session.forgotEmail) {
@@ -143,45 +194,104 @@ const loadForgotPageOtp = async (req, res) => {
     }
     res.render("forgotPassword-otp", { message: "" });
   } catch (err) {
-    console.error("Error loading forgotPasswor-otp:", err);
+    console.error("Error loading forgotPassword-otp:", err);
     res.status(500).send("Server Error");
   }
 };
 
 const verifyForgotOtp = async (req, res) => {
   try {
-     const enterdOtp = req.body.otp;
-     if(enterdOtp==req.session.forgotOtp){
-        res.json({success:true,redirectUrl:"/reset-password"})
-     }else{
-        res.json({success:false,message:"Invalid OTP"})
-     }
+    const enteredOtp = req.body.otp;
+
+    // Check if OTP exists in session
+    if (!req.session.forgotOtp) {
+      return res.json({ success: false, message: "OTP not found. Please request a new OTP." });
+    }
+
+    // Check if OTP has expired
+    const currentTime = Date.now();
+    const otpGeneratedTime = req.session.forgotOtpTime;
+    const timeDifference = currentTime - otpGeneratedTime;
+
+    if (timeDifference > OTP_EXPIRY_TIME) {
+      // OTP has expired
+      delete req.session.forgotOtp;
+      delete req.session.forgotOtpTime;
+      return res.json({ success: false, message: "OTP has expired. Please request a new OTP." });
+    }
+
+    // Verify OTP
+    if (enteredOtp == req.session.forgotOtp) {
+      // Clear OTP from session after successful verification
+      delete req.session.forgotOtp;
+      delete req.session.forgotOtpTime;
+      res.json({ success: true, redirectUrl: "/reset-password" });
+    } else {
+      res.json({ success: false, message: "Invalid OTP. Please try again." });
+    }
   } catch (error) {
+    console.error("Error verifying OTP:", error);
     res.status(500).json({ success: false, message: "An error occurred while verifying OTP." });
   }
-}
+};
 
 const resendOtp = async (req, res) => {
-    try{
+  try {
+    const otp = generateOtp();
+    const email = req.session.forgotEmail;
+    
+    // Store OTP with timestamp
+    req.session.forgotOtp = otp;
+    req.session.forgotOtpTime = Date.now(); // Store current time
+    
+    console.log("Resend OTP email:", email);
 
-         const otp= generateOtp();
-         req.session.forgotOtp=otp;
-         const email=req.session.forgotEmail;
-         console.log("Resend OTP email:", email);
-
-         const emailSent=await sendVerificationEmail(email,otp);
-         if(emailSent){
-            console.log(" Resend OTP :", otp);
-            res.status(200).json({success:true,message:"OTP resent successfully"})
-         }
-
-    }catch(error){
-
-        console.error("Error resending OTP:", error);
-        res.status(500).json({success:false,message:"Error resending OTP. Please try again later."})
-
+    const emailSent = await sendVerificationEmail(email, otp);
+    
+    if (emailSent) {
+      console.log("Resend OTP:", otp);
+      res.status(200).json({ success: true, message: "OTP resent successfully" });
+    } else {
+      res.status(500).json({ success: false, message: "Failed to send email. Please try again." });
     }
-}
+  } catch (error) {
+    console.error("Error resending OTP:", error);
+    res.status(500).json({ success: false, message: "Error resending OTP. Please try again later." });
+  }
+};
+
+// Also update your initial forgot password function to store timestamp:
+const sendForgotPasswordOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Verify email exists in database
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "Email not found" });
+    }
+
+    const otp = generateOtp();
+    
+    // Store OTP and timestamp in session
+    req.session.forgotEmail = email;
+    req.session.forgotOtp = otp;
+    req.session.forgotOtpTime = Date.now(); // Store timestamp when OTP is generated
+    
+    console.log("Generated OTP:", otp);
+
+    const emailSent = await sendVerificationEmail(email, otp);
+    
+    if (emailSent) {
+      res.json({ success: true, message: "OTP sent to email", redirectUrl: "/forgot-password-otp" });
+    } else {
+      res.status(500).json({ success: false, message: "Failed to send OTP email" });
+    }
+  } catch (error) {
+    console.error("Error sending forgot password OTP:", error);
+    res.status(500).json({ success: false, message: "Error sending OTP. Please try again later." });
+  }
+};
 
 const loadResetPasswordPage=async(req,res)=>{
     try {
@@ -316,17 +426,105 @@ const initChangePassword = async (req, res) => {
   }
 };
 
+// const loadOtpVerifyPage = (req, res) => {
+//   const { type } = req.query;
+//   const otpData = req.session.otpData;
+//    console.log(type)
+
+//   if (!otpData || otpData.type !== type || Date.now() > otpData.expiry) {
+//     req.flash("error", "Invalid or expired OTP session");
+//     return res.redirect("/profile");
+//   }
+
+//   res.render("change-email-otp", { type, token: otpData.token, message: "" });
+// };
+
+// const verifyOtp = async (req, res) => {
+//   try {
+//     const { otp, type, token } = req.body;
+//     const otpData = req.session.otpData;
+
+//     if (!otpData || otpData.type !== type || otpData.token !== token) {
+//       return res.json({ success: false, message: "Invalid OTP session or token" });
+//     }
+
+//     if (Date.now() > otpData.expiry) {
+//       return res.json({ success: false, message: "OTP expired" });
+//     }
+
+//     if (String(otp) !== String(otpData.otp)) {
+//       return res.json({ success: false, message: "Incorrect OTP" });
+//     }
+
+  
+//     if (type === "change-email") {
+//       await User.findByIdAndUpdate(req.session.user.id, { email: otpData.newEmail });
+//     } else if (type === "change-password") {
+//       const hashed = await bcrypt.hash(otpData.newPassword, 10);
+//       await User.findByIdAndUpdate(req.session.user.id, { password: hashed });
+//     }
+    
+//     delete req.session.otpData;
+
+//     res.json({ success: true, redirectUrl: "/profile", message: "Update successful" });
+//   } catch (err) {
+//     console.error("verifyOtp error:", err);
+//     res.json({ success: false, message: "Error verifying OTP" });
+//   }
+// };
+
+// const resendProfileOtp = async (req, res) => {
+//   try {
+//     const otpData = req.session.otpData;
+//     if (!otpData) return res.json({ success: false, message: "No OTP session found" });
+
+//     const otp = generateOtp();
+//     otpData.otp = otp;
+//     otpData.expiry = Date.now() + 3 * 60 * 1000; 
+
+//     const emailSent = await sendVerificationEmail(
+//       otpData.type === "change-password" ? otpData.email : otpData.newEmail,
+//       otp,
+//       `OTP for ${otpData.type === "change-password" ? "Password Change" : "Email Change"}`
+//     );
+
+//     if (!emailSent) return res.json({ success: false, message: "Failed to resend OTP" });
+
+//     res.json({ success: true, message: "OTP resent successfully", token: otpData.token, type: otpData.type });
+//   } catch (err) {
+//     console.error("resendOtp error:", err);
+//     res.json({ success: false, message: "Error resending OTP" });
+//   }
+// };
+
+
+
 const loadOtpVerifyPage = (req, res) => {
   const { type } = req.query;
   const otpData = req.session.otpData;
-   console.log(type)
+  
+  console.log("Loading OTP page for type:", type);
 
-  if (!otpData || otpData.type !== type || Date.now() > otpData.expiry) {
-    req.flash("error", "Invalid or expired OTP session");
+  // Check if OTP session exists and matches the type
+  if (!otpData || otpData.type !== type) {
+    req.flash("error", "Invalid OTP session");
     return res.redirect("/profile");
   }
 
-  res.render("change-email-otp", { type, token: otpData.token, message: "" });
+  // Check if OTP is already expired
+  if (Date.now() > otpData.expiry) {
+    delete req.session.otpData;
+    req.flash("error", "OTP has expired. Please request a new one.");
+    return res.redirect("/profile");
+  }
+
+  // PASS expiryTime to template
+  res.render("change-email-otp", {
+    type,
+    token: otpData.token,
+    message: "",
+    expiryTime: otpData.expiry  // ADD THIS LINE
+  });
 };
 
 const verifyOtp = async (req, res) => {
@@ -334,56 +532,133 @@ const verifyOtp = async (req, res) => {
     const { otp, type, token } = req.body;
     const otpData = req.session.otpData;
 
+    console.log("Verifying OTP - Type:", type);
+
+    // Check if session exists
     if (!otpData || otpData.type !== type || otpData.token !== token) {
-      return res.json({ success: false, message: "Invalid OTP session or token" });
+      return res.json({
+        success: false,
+        message: "Invalid OTP session or token"
+      });
     }
 
-    if (Date.now() > otpData.expiry) {
-      return res.json({ success: false, message: "OTP expired" });
+    // CHECK IF OTP IS EXPIRED
+    const currentTime = Date.now();
+    if (currentTime > otpData.expiry) {
+      console.warn("OTP expired");
+      delete req.session.otpData;
+      return res.json({
+        success: false,
+        message: "OTP has expired. Please request a new OTP."
+      });
     }
 
+    // Check if OTP matches
     if (String(otp) !== String(otpData.otp)) {
-      return res.json({ success: false, message: "Incorrect OTP" });
+      console.warn("OTP mismatch");
+      return res.json({
+        success: false,
+        message: "Incorrect OTP. Please try again."
+      });
     }
 
-  
-    if (type === "change-email") {
-      await User.findByIdAndUpdate(req.session.user.id, { email: otpData.newEmail });
-    } else if (type === "change-password") {
-      const hashed = await bcrypt.hash(otpData.newPassword, 10);
-      await User.findByIdAndUpdate(req.session.user.id, { password: hashed });
-    }
-    
-    delete req.session.otpData;
+    // OTP is valid - proceed with update
+    console.log("OTP verified successfully");
 
-    res.json({ success: true, redirectUrl: "/profile", message: "Update successful" });
+    try {
+      if (type === "change-email") {
+        await User.findByIdAndUpdate(req.session.user.id, {
+          email: otpData.newEmail
+        });
+        console.log("Email updated successfully");
+      } else if (type === "change-password") {
+        const hashed = await bcrypt.hash(otpData.newPassword, 10);
+        await User.findByIdAndUpdate(req.session.user.id, {
+          password: hashed
+        });
+        console.log("Password updated successfully");
+      }
+
+      // Clear OTP data
+      delete req.session.otpData;
+
+      return res.json({
+        success: true,
+        redirectUrl: "/profile",
+        message: "Update successful"
+      });
+    } catch (updateError) {
+      console.error("Error updating user:", updateError);
+      return res.json({
+        success: false,
+        message: "Error updating profile. Please try again."
+      });
+    }
   } catch (err) {
     console.error("verifyOtp error:", err);
-    res.json({ success: false, message: "Error verifying OTP" });
+    return res.json({
+      success: false,
+      message: "Error verifying OTP"
+    });
   }
 };
 
 const resendProfileOtp = async (req, res) => {
   try {
+    const { type } = req.body;
     const otpData = req.session.otpData;
-    if (!otpData) return res.json({ success: false, message: "No OTP session found" });
 
+    if (!otpData || otpData.type !== type) {
+      return res.json({
+        success: false,
+        message: "No OTP session found"
+      });
+    }
+
+    // Generate new OTP
     const otp = generateOtp();
+    const newExpiry = Date.now() + 1 * 60 * 1000; // 3 minutes
+
     otpData.otp = otp;
-    otpData.expiry = Date.now() + 3 * 60 * 1000; 
+    otpData.expiry = newExpiry;
 
-    const emailSent = await sendVerificationEmail(
-      otpData.type === "change-password" ? otpData.email : otpData.newEmail,
-      otp,
-      `OTP for ${otpData.type === "change-password" ? "Password Change" : "Email Change"}`
-    );
+    console.log("New OTP generated for type:", type);
 
-    if (!emailSent) return res.json({ success: false, message: "Failed to resend OTP" });
+    // Determine email and subject
+    let emailAddress, emailSubject;
 
-    res.json({ success: true, message: "OTP resent successfully", token: otpData.token, type: otpData.type });
+    if (type === "change-email") {
+      emailAddress = otpData.newEmail;
+      emailSubject = "OTP for Email Change";
+    } else if (type === "change-password") {
+      emailAddress = otpData.email;
+      emailSubject = "OTP for Password Change";
+    }
+
+    const emailSent = await sendVerificationEmail(emailAddress, otp, emailSubject);
+
+    if (!emailSent) {
+      return res.json({
+        success: false,
+        message: "Failed to resend OTP. Please try again."
+      });
+    }
+
+    console.log("OTP resent successfully");
+
+    return res.json({
+      success: true,
+      message: "OTP resent successfully",
+      token: otpData.token,
+      type: otpData.type,
+      expiryTime: newExpiry  // SEND NEW EXPIRY TIME TO FRONTEND
+    });
   } catch (err) {
     console.error("resendOtp error:", err);
-    res.json({ success: false, message: "Error resending OTP" });
+    return res.json({
+      success: false,
+      message: "Error resending OTP"
+    });
   }
 };
 

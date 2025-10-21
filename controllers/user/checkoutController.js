@@ -6,6 +6,135 @@ const Product = require('../../models/productSchema');
 const User = require('../../models/userSchema');
 const Order=require('../../models/orderSchema')
 
+// const getCheckoutPage = async (req, res) => {
+//     try {
+//         console.log('Session data:', req.session);
+//         console.log('User in session:', req.session.user);
+      
+//         const userId = req.session.user?._id || req.session.user?.id;
+//         console.log('Checkout - userId:', userId, 'isValid:', mongoose.Types.ObjectId.isValid(userId));
+
+//         if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+//             console.warn('Invalid or missing userId in session');
+//             req.flash('error_msg', 'Please login first');
+//             return res.redirect('/login');
+//         }
+
+//         const user = await User.findById(userId);
+//         if (!user) {
+//             console.warn('User not found for userId:', userId);
+//             req.flash('error_msg', 'User not found. Please login again.');
+//             return res.redirect('/login');
+//         }
+
+//         const cart = await Cart.findOne({ userId }).populate({
+//             path: 'items.productId',
+//             select: 'productName images price salePrice variants stock isActive'
+//         });
+
+//         if (!cart || cart.items.length === 0) {
+//             req.flash('error_msg', 'Your cart is empty');
+//             return res.redirect('/cart');
+//         }
+//         console.log('Cart:', JSON.stringify(cart, null, 2));
+
+//         const cartItems = cart.items
+//             .map(item => {
+//                 const product = item.productId;
+
+//                 if (!product) {
+//                     console.warn(`Skipping missing product for item: ${item._id}`);
+//                     return null;
+//                 }     
+//                 console.log(`Product: ${product.productName}, isActive: ${product.isActive}, Variant Size: ${item.variantSize}`);
+
+//                 const variant = product.variants?.find(v => v.size === item.variantSize) || {};
+               
+//                 let actualStock = 0;
+//                 if (variant && typeof variant.stock === 'number') {
+//                     actualStock = variant.stock;
+//                 } else if (typeof product.stock === 'number') {
+//                     actualStock = product.stock;
+//                 }
+//                 if (isNaN(actualStock)) {
+//                     actualStock = 0;
+//                 }
+
+//                 console.log(`Product: ${product.productName}, Variant Stock: ${variant.stock}, Product Stock: ${product.stock}, Actual Stock: ${actualStock}`);
+
+//                 return {
+//                     _id: item._id,
+//                     productId: {
+//                         _id: product._id,
+//                         productName: product.productName || 'Unknown Product',
+//                         images: product.images?.length ? product.images : ['default.jpg'],
+//                         price: product.price || 0,
+//                         salePrice: product.salePrice || 0,
+//                         stock: actualStock,
+//                         isActive: product.isActive || false
+//                     },
+//                     variant: {
+//                         size: variant.size || item.variantSize || 'N/A',
+//                         price: variant.price || product.price || 0,
+//                         salePrice: variant.salePrice || product.salePrice || 0,
+//                         stock: actualStock
+//                     },
+//                     quantity: item.quantity,
+//                     price: item.price || (variant.salePrice || variant.price || product.salePrice || product.price || 0)
+//                 };
+//             })
+//             .filter(item => item !== null);
+
+//         console.log('Cart Items:', JSON.stringify(cartItems, null, 2));
+
+//         const outOfStockItems = cartItems.filter(item => item.variant.stock <= 0 || item.productId.stock <= 0);
+//         if (outOfStockItems.length > 0) {
+//             console.log('Out of stock items:', outOfStockItems.map(item => ({
+//                 name: item.productId.productName,
+//                 variantStock: item.variant.stock,
+//                 productStock: item.productId.stock
+//             })));
+//         }
+
+//         const subtotal = cartItems.reduce((sum, item) => {
+//             const price = item.variant?.salePrice || item.variant?.price || item.price || 0;
+//             return sum + (price * item.quantity);
+//         }, 0);
+
+//         const userAddress = await Address.findOne({ userId });
+//         const addresses = userAddress ? userAddress.address.filter(addr => addr && addr._id) : [];
+
+//         console.log('Checkout data:', {
+//             userId,
+//             totalItems: cartItems.length,
+//             outOfStockCount: outOfStockItems.length,
+//             addressesCount: addresses.length,
+//             subtotal
+//         });
+
+//         const discount = 0; 
+//         const total = subtotal - discount;
+
+//         res.render('checkout', {
+//             cartItems,
+//             addresses,
+//             subtotal: Math.round(subtotal),
+//             discount: Math.round(discount),
+//             total: Math.round(total),
+//             success_msg: req.flash('success_msg'),
+//             error_msg: req.flash('error_msg')
+//         });
+//     } catch (err) {
+//         console.error('Get checkout error:', err);
+//         req.flash('error_msg', 'Server error. Please try again.');
+//         res.redirect('/cart');
+//     }
+// };
+
+
+// Updated getCheckoutPage function with blocking logic
+
+
 const getCheckoutPage = async (req, res) => {
     try {
         console.log('Session data:', req.session);
@@ -29,107 +158,179 @@ const getCheckoutPage = async (req, res) => {
 
         const cart = await Cart.findOne({ userId }).populate({
             path: 'items.productId',
-            select: 'productName images price salePrice variants stock isActive'
+            select: 'productName images price salePrice variants stock isBlocked brand category',
+            populate: [
+                { path: 'brand', select: 'isBlocked brandName' },
+                { path: 'category', select: 'isListed categoryName' }
+            ]
         });
 
         if (!cart || cart.items.length === 0) {
             req.flash('error_msg', 'Your cart is empty');
             return res.redirect('/cart');
         }
-        console.log('Cart:', JSON.stringify(cart, null, 2));
+        console.log('Cart loaded with', cart.items.length, 'items');
 
-        const cartItems = cart.items
-            .map(item => {
-                const product = item.productId;
+        // Track blocked and valid products
+        const blockedProducts = [];
+        const validCartItems = [];
 
-                if (!product) {
-                    console.warn(`Skipping missing product for item: ${item._id}`);
-                    return null;
-                }     
-                console.log(`Product: ${product.productName}, isActive: ${product.isActive}, Variant Size: ${item.variantSize}`);
+        // Process each cart item
+        cart.items.forEach(item => {
+            const product = item.productId;
 
-                const variant = product.variants?.find(v => v.size === item.variantSize) || {};
-               
-                let actualStock = 0;
-                if (variant && typeof variant.stock === 'number') {
-                    actualStock = variant.stock;
-                } else if (typeof product.stock === 'number') {
-                    actualStock = product.stock;
-                }
-                if (isNaN(actualStock)) {
-                    actualStock = 0;
-                }
+            // Check 1: Product doesn't exist
+            if (!product) {
+                console.warn(`Skipping missing product for item: ${item._id}`);
+                blockedProducts.push({
+                    name: 'Unknown Product',
+                    reason: 'Product no longer exists'
+                });
+                return;
+            }
 
-                console.log(`Product: ${product.productName}, Variant Stock: ${variant.stock}, Product Stock: ${product.stock}, Actual Stock: ${actualStock}`);
+            // Check 2: Product is blocked by admin
+            if (product.isBlocked === true) {
+                console.warn(`Product blocked: ${product.productName}`);
+                blockedProducts.push({
+                    name: product.productName,
+                    reason: 'This product has been blocked by admin'
+                });
+                return;
+            }
 
-                return {
-                    _id: item._id,
-                    productId: {
-                        _id: product._id,
-                        productName: product.productName || 'Unknown Product',
-                        images: product.images?.length ? product.images : ['default.jpg'],
-                        price: product.price || 0,
-                        salePrice: product.salePrice || 0,
-                        stock: actualStock,
-                        isActive: product.isActive || false
-                    },
-                    variant: {
-                        size: variant.size || item.variantSize || 'N/A',
-                        price: variant.price || product.price || 0,
-                        salePrice: variant.salePrice || product.salePrice || 0,
-                        stock: actualStock
-                    },
-                    quantity: item.quantity,
-                    price: item.price || (variant.salePrice || variant.price || product.salePrice || product.price || 0)
-                };
-            })
-            .filter(item => item !== null);
+            // Check 3: Brand is blocked
+            if (product.brand && product.brand.isBlocked === true) {
+                console.warn(`Brand blocked for product: ${product.productName}`);
+                blockedProducts.push({
+                    name: product.productName,
+                    reason: 'Brand has been blocked by admin'
+                });
+                return;
+            }
 
-        console.log('Cart Items:', JSON.stringify(cartItems, null, 2));
+            // Check 4: Category is not listed
+            if (product.category && product.category.isListed === false) {
+                console.warn(`Category blocked for product: ${product.productName}`);
+                blockedProducts.push({
+                    name: product.productName,
+                    reason: 'Product category has been delisted by admin'
+                });
+                return;
+            }
 
-        const outOfStockItems = cartItems.filter(item => item.variant.stock <= 0 || item.productId.stock <= 0);
-        if (outOfStockItems.length > 0) {
-            console.log('Out of stock items:', outOfStockItems.map(item => ({
-                name: item.productId.productName,
-                variantStock: item.variant.stock,
-                productStock: item.productId.stock
-            })));
+            // Product is valid - process it
+            console.log(`✓ Product valid: ${product.productName}`);
+
+            const variant = product.variants?.find(v => v.size === item.variantSize) || {};
+           
+            let actualStock = 0;
+            if (variant && typeof variant.stock === 'number') {
+                actualStock = variant.stock;
+            } else if (typeof product.stock === 'number') {
+                actualStock = product.stock;
+            }
+            if (isNaN(actualStock)) {
+                actualStock = 0;
+            }
+
+            const cartItem = {
+                _id: item._id,
+                productId: {
+                    _id: product._id,
+                    productName: product.productName || 'Unknown Product',
+                    images: product.images?.length ? product.images : ['default.jpg'],
+                    price: product.price || 0,
+                    salePrice: product.salePrice || 0,
+                    stock: actualStock,
+                    isBlocked: product.isBlocked || false
+                },
+                variant: {
+                    size: variant.size || item.variantSize || 'N/A',
+                    price: variant.price || product.price || 0,
+                    salePrice: variant.salePrice || product.salePrice || 0,
+                    stock: actualStock
+                },
+                quantity: item.quantity,
+                price: item.price || (variant.salePrice || variant.price || product.salePrice || product.price || 0)
+            };
+
+            validCartItems.push(cartItem);
+        });
+
+        console.log('Summary:', {
+            totalInCart: cart.items.length,
+            blockedCount: blockedProducts.length,
+            validCount: validCartItems.length
+        });
+
+        // If blocked products exist, render checkout WITH blocked alert
+        if (blockedProducts.length > 0) {
+            console.log('Rendering checkout with blocked products alert:', blockedProducts);
+            return res.render('checkout', {
+                cartItems: validCartItems,
+                addresses: [],
+                subtotal: 0,
+                discount: 0,
+                total: 0,
+                blockedProducts: blockedProducts,
+                success_msg: [],
+                error_msg: ['Some products in your cart have been blocked or delisted']
+            });
         }
 
-        const subtotal = cartItems.reduce((sum, item) => {
+        // If no valid items after filtering
+        if (validCartItems.length === 0) {
+            req.flash('error_msg', 'Your cart contains no valid products');
+            return res.redirect('/cart');
+        }
+
+        // Check for out of stock items
+        const outOfStockItems = validCartItems.filter(item => item.variant.stock <= 0 || item.productId.stock <= 0);
+        if (outOfStockItems.length > 0) {
+            console.log('Out of stock items:', outOfStockItems.map(item => item.productId.productName));
+        }
+
+        // Calculate subtotal
+        const subtotal = validCartItems.reduce((sum, item) => {
             const price = item.variant?.salePrice || item.variant?.price || item.price || 0;
             return sum + (price * item.quantity);
         }, 0);
 
+        // Get user addresses
         const userAddress = await Address.findOne({ userId });
         const addresses = userAddress ? userAddress.address.filter(addr => addr && addr._id) : [];
 
         console.log('Checkout data:', {
             userId,
-            totalItems: cartItems.length,
+            validItems: validCartItems.length,
             outOfStockCount: outOfStockItems.length,
-            addressesCount: addresses.length,
+            addressCount: addresses.length,
             subtotal
         });
 
         const discount = 0; 
         const total = subtotal - discount;
 
+        // Render checkout page with all valid data
         res.render('checkout', {
-            cartItems,
+            cartItems: validCartItems,
             addresses,
             subtotal: Math.round(subtotal),
             discount: Math.round(discount),
             total: Math.round(total),
+            blockedProducts: [],
             success_msg: req.flash('success_msg'),
             error_msg: req.flash('error_msg')
         });
+
     } catch (err) {
         console.error('Get checkout error:', err);
         req.flash('error_msg', 'Server error. Please try again.');
         res.redirect('/cart');
     }
 };
+
 
 const getAddressForEdit = async (req, res) => {
     try {
@@ -683,11 +884,10 @@ const placeOrder = async (req, res) => {
 };
 
 
-// Comprehensive validation helper function
+
 const validateAddressInput = (data) => {
   const errors = [];
 
-  // Trim all string inputs
   const trimmedData = {};
   Object.keys(data).forEach(key => {
     if (typeof data[key] === 'string') {
@@ -805,7 +1005,7 @@ const validateAddressInput = (data) => {
   return errors;
 };
 
-// Add Address Controller
+
 const addAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -817,7 +1017,7 @@ const addAddress = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid user ID' });
     }
 
-    // Validate all inputs
+    
     const validationErrors = validateAddressInput({
       addressType,
       name,
@@ -881,7 +1081,6 @@ const addAddress = async (req, res) => {
   }
 };
 
-// Edit Address Controller
 const editAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -964,7 +1163,6 @@ const editAddress = async (req, res) => {
 };
 
 
-  validateAddressInput
 
 module.exports = { 
     getCheckoutPage, 

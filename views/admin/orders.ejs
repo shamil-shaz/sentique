@@ -970,386 +970,393 @@
 
 
     <script>
-        // Data from backend
-        let ordersDatabase = <%- JSON.stringify(orders) %>;
-        let filteredOrders = [...ordersDatabase];
-        let currentFilter = 'all';
-        let currentPage = 1;
-        const itemsPerPage = 10;
+   // ============================================
+// UPDATED ADMIN PANEL JAVASCRIPT
+// ============================================
 
-        // Initialize
-        function init() {
-            updateStats();
-            applyFiltersAndSort();
-            attachEventListeners();
-        }
+// Data from backend
+let ordersDatabase = <%- JSON.stringify(orders) %>;
+let filteredOrders = [...ordersDatabase];
+let currentFilter = 'all';
+let currentPage = 1;
+const itemsPerPage = 10;
 
-        // Update statistics
-        function updateStats() {
-            const stats = {
-                total: ordersDatabase.length,
-                delivered: ordersDatabase.filter(o => o.status === 'Delivered').length,
-                processing: ordersDatabase.filter(o => o.status === 'Processing').length,
-                outfordelivery: ordersDatabase.filter(o => o.status === 'OutForDelivery').length,
-                cancelled: ordersDatabase.filter(o => o.status === 'Cancelled').length
-            };
+// Initialize
+function init() {
+    updateStats();
+    applyFiltersAndSort();
+    attachEventListeners();
+}
 
-            document.getElementById('totalOrders').textContent = stats.total;
-            document.getElementById('deliveredOrders').textContent = stats.delivered;
-            document.getElementById('processingOrders').textContent = stats.processing;
-            document.getElementById('outForDeliveryOrders').textContent = stats.outfordelivery;
-            document.getElementById('cancelledOrders').textContent = stats.cancelled;
-        }
+// Update statistics
+function updateStats() {
+    const stats = {
+        total: ordersDatabase.length,
+        delivered: ordersDatabase.filter(o => o.status === 'Delivered').length,
+        processing: ordersDatabase.filter(o => o.status === 'Processing').length,
+        outfordelivery: ordersDatabase.filter(o => o.status === 'OutForDelivery').length,
+        cancelled: ordersDatabase.filter(o => o.status === 'Cancelled').length
+    };
 
-        // Render table
-        function renderTable(orders) {
-            const tbody = document.getElementById('orderTableBody');
-            
-            if (orders.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <div class="empty-icon"><i class="fas fa-search"></i></div>
-                                <h3>No orders found</h3>
-                                <p>Try adjusting your filters or search criteria</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                document.getElementById('paginationInfo').textContent = 'Showing 0 of 0 orders';
-                document.getElementById('pagination').innerHTML = '';
-                return;
-            }
+    document.getElementById('totalOrders').textContent = stats.total;
+    document.getElementById('deliveredOrders').textContent = stats.delivered;
+    document.getElementById('processingOrders').textContent = stats.processing;
+    document.getElementById('outForDeliveryOrders').textContent = stats.outfordelivery;
+    document.getElementById('cancelledOrders').textContent = stats.cancelled;
+}
 
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const paginatedOrders = orders.slice(start, end);
-
-            tbody.innerHTML = paginatedOrders.map(order => {
-                const firstLetter = order.name.charAt(0).toUpperCase();
-                const productsHtml = order.products.slice(0, 3).map((p, idx) => `
-                    <div class="product-item">
-                        <img src="${p.image || 'https://via.placeholder.com/80x80?text=No+Image'}" alt="${p.product}" class="product-image">
-                        <div class="product-info">
-                            <div class="product-name">${p.product}</div>
-                            <div class="product-meta">
-                                ${p.variant} • Qty: ${p.quantity} • ₹${p.price.toFixed(2)}
-                            </div>
-                        </div>
-                        <span class="status-badge status-${p.status}">${p.status}</span>
+// Render table
+function renderTable(orders) {
+    const tbody = document.getElementById('orderTableBody');
+    
+    if (orders.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-search"></i></div>
+                        <h3>No orders found</h3>
+                        <p>Try adjusting your filters or search criteria</p>
                     </div>
-                `).join('');
+                </td>
+            </tr>
+        `;
+        document.getElementById('paginationInfo').textContent = 'Showing 0 of 0 orders';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+    }
 
-                const moreProducts = order.products.length > 3 
-                    ? `<div style="text-align: center; margin-top: 8px; color: #3b82f6; font-size: 12px; font-weight: 600;">
-                        +${order.products.length - 3} more products
-                       </div>` 
-                    : '';
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const paginatedOrders = orders.slice(start, end);
 
-                return `
-                    <tr>
-                        <td><span class="order-id">#${order.id}</span></td>
-                        <td>
-                            <div class="customer-info">
-                                <div class="customer-avatar">${firstLetter}</div>
-                                <div class="customer-details">
-                                    <h4>${order.name}</h4>
-                                    <p>${order.address.split(',')[0]}</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="products-list">
-                                ${productsHtml}
-                                ${moreProducts}
-                            </div>
-                        </td>
-                        <td>${formatDate(order.date)}</td>
-                        <td style="font-weight: 700; color: #1e293b;">₹${order.totalAmount.toFixed(2)}</td>
-                        <td><span class="status-badge status-${order.status}">${order.status}</span></td>
-                        <td>
-                            <button class="view-btn" onclick="viewOrder('${order.id}')">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+    tbody.innerHTML = paginatedOrders.map(order => {
+        const firstLetter = order.name.charAt(0).toUpperCase();
+        const productsHtml = order.products.slice(0, 3).map((p, idx) => `
+            <div class="product-item">
+                <img src="${p.image || 'https://via.placeholder.com/80x80?text=No+Image'}" alt="${p.product}" class="product-image">
+                <div class="product-info">
+                    <div class="product-name">${p.product}</div>
+                    <div class="product-meta">
+                        ${p.variant} • Qty: ${p.quantity} • ₹${p.price.toFixed(2)}
+                    </div>
+                </div>
+                <span class="status-badge status-${p.status}">${p.status}</span>
+            </div>
+        `).join('');
 
-            updatePaginationInfo(orders.length, start, end);
-            renderPagination(orders.length);
+        const moreProducts = order.products.length > 3 
+            ? `<div style="text-align: center; margin-top: 8px; color: #3b82f6; font-size: 12px; font-weight: 600;">
+                +${order.products.length - 3} more products
+               </div>` 
+            : '';
+
+        return `
+            <tr>
+                <td><span class="order-id">#${order.id}</span></td>
+                <td>
+                    <div class="customer-info">
+                        <div class="customer-avatar">${firstLetter}</div>
+                        <div class="customer-details">
+                            <h4>${order.name}</h4>
+                            <p>${order.address.split(',')[0]}</p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="products-list">
+                        ${productsHtml}
+                        ${moreProducts}
+                    </div>
+                </td>
+                <td>${formatDate(order.date)}</td>
+                <td style="font-weight: 700; color: #1e293b;">₹${order.totalAmount.toFixed(2)}</td>
+                <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                <td>
+                    <button class="view-btn" onclick="viewOrder('${order.id}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    updatePaginationInfo(orders.length, start, end);
+    renderPagination(orders.length);
+}
+
+// Update pagination info
+function updatePaginationInfo(total, start, end) {
+    const showing = Math.min(end, total);
+    document.getElementById('paginationInfo').textContent = 
+        `Showing ${start + 1}-${showing} of ${total} orders`;
+}
+
+// Render pagination
+function renderPagination(totalItems) {
+    const pagination = document.getElementById('pagination');
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+
+    let html = `
+        <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    `;
+
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage < maxVisible - 1) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    if (startPage > 1) {
+        html += `<button onclick="changePage(1)">1</button>`;
+        if (startPage > 2) html += `<button disabled>...</button>`;
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += `<button disabled>...</button>`;
+        html += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+    }
+
+    html += `
+        <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    `;
+
+    pagination.innerHTML = html;
+}
+
+// Change page
+function changePage(page) {
+    currentPage = page;
+    renderTable(filteredOrders);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric' 
+    });
+}
+
+// Apply filters and sort
+function applyFiltersAndSort() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    
+    filteredOrders = ordersDatabase.filter(order => {
+        const matchesFilter = currentFilter === 'all' || order.status === currentFilter;
+        const matchesSearch = !searchTerm || 
+            order.id.toLowerCase().includes(searchTerm) ||
+            order.name.toLowerCase().includes(searchTerm) ||
+            order.address.toLowerCase().includes(searchTerm) ||
+            order.products.some(p => p.product.toLowerCase().includes(searchTerm));
+        
+        return matchesFilter && matchesSearch;
+    });
+
+    const sortValue = document.getElementById('sortSelect').value;
+    sortOrders(sortValue);
+}
+
+// Sort orders
+function sortOrders(sortType) {
+    const [field, direction] = sortType.split('-');
+    
+    filteredOrders.sort((a, b) => {
+        let comparison = 0;
+        
+        if (field === 'date') {
+            comparison = new Date(a.date) - new Date(b.date);
+        } else if (field === 'amount') {
+            comparison = a.totalAmount - b.totalAmount;
         }
+        
+        return direction === 'asc' ? comparison : -comparison;
+    });
+    
+    currentPage = 1;
+    renderTable(filteredOrders);
+}
 
-        // Update pagination info
-        function updatePaginationInfo(total, start, end) {
-            const showing = Math.min(end, total);
-            document.getElementById('paginationInfo').textContent = 
-                `Showing ${start + 1}-${showing} of ${total} orders`;
-        }
-
-        // Render pagination
-        function renderPagination(totalItems) {
-            const pagination = document.getElementById('pagination');
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-            
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
-                return;
-            }
-
-            let html = `
-                <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            `;
-
-            const maxVisible = 5;
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-
-            if (endPage - startPage < maxVisible - 1) {
-                startPage = Math.max(1, endPage - maxVisible + 1);
-            }
-
-            if (startPage > 1) {
-                html += `<button onclick="changePage(1)">1</button>`;
-                if (startPage > 2) html += `<button disabled>...</button>`;
-            }
-
-            for (let i = startPage; i <= endPage; i++) {
-                html += `<button class="${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-            }
-
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) html += `<button disabled>...</button>`;
-                html += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
-            }
-
-            html += `
-                <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            `;
-
-            pagination.innerHTML = html;
-        }
-
-        // Change page
-        function changePage(page) {
-            currentPage = page;
-            renderTable(filteredOrders);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Format date
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-IN', { 
-                day: '2-digit', 
-                month: 'short', 
-                year: 'numeric' 
-            });
-        }
-
-        // Apply filters and sort
-        function applyFiltersAndSort() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            
-            filteredOrders = ordersDatabase.filter(order => {
-                const matchesFilter = currentFilter === 'all' || order.status === currentFilter;
-                const matchesSearch = !searchTerm || 
-                    order.id.toLowerCase().includes(searchTerm) ||
-                    order.name.toLowerCase().includes(searchTerm) ||
-                    order.address.toLowerCase().includes(searchTerm) ||
-                    order.products.some(p => p.product.toLowerCase().includes(searchTerm));
-                
-                return matchesFilter && matchesSearch;
-            });
-
-            const sortValue = document.getElementById('sortSelect').value;
-            sortOrders(sortValue);
-        }
-
-        // Sort orders
-        function sortOrders(sortType) {
-            const [field, direction] = sortType.split('-');
-            
-            filteredOrders.sort((a, b) => {
-                let comparison = 0;
-                
-                if (field === 'date') {
-                    comparison = new Date(a.date) - new Date(b.date);
-                } else if (field === 'amount') {
-                    comparison = a.totalAmount - b.totalAmount;
-                }
-                
-                return direction === 'asc' ? comparison : -comparison;
-            });
-            
+// Attach event listeners
+function attachEventListeners() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
             currentPage = 1;
-            renderTable(filteredOrders);
-        }
+            applyFiltersAndSort();
+        });
+    });
 
-        // Attach event listeners
-        function attachEventListeners() {
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFilter = this.dataset.filter;
-                    currentPage = 1;
-                    applyFiltersAndSort();
-                });
-            });
+    document.getElementById('searchInput').addEventListener('input', function() {
+        currentPage = 1;
+        applyFiltersAndSort();
+    });
 
-            document.getElementById('searchInput').addEventListener('input', function() {
-                currentPage = 1;
-                applyFiltersAndSort();
-            });
+    document.getElementById('sortSelect').addEventListener('change', function() {
+        sortOrders(this.value);
+    });
+}
 
-            document.getElementById('sortSelect').addEventListener('change', function() {
-                sortOrders(this.value);
-            });
-        }
+// View order details
+function viewOrder(orderId) {
+    const order = ordersDatabase.find(o => o.id === orderId);
+    if (!order) return;
 
-        // View order details
-        function viewOrder(orderId) {
-            const order = ordersDatabase.find(o => o.id === orderId);
-            if (!order) return;
-
-            const modalBody = document.getElementById('orderModalBody');
-            
-            const cancellationHtml = order.cancellationRequest ? `
-                <div class="modal-section">
-                    <div class="cancellation-card">
-                        <div class="cancellation-header">
-                            <div class="cancellation-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div>
-                                <h4 style="margin: 0;">Cancellation Request</h4>
-                                <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">
-                                    Status: ${order.cancellationRequest.status.toUpperCase()}
-                                </p>
-                            </div>
-                        </div>
-                        <div style="margin-top: 12px;">
-                            <div class="detail-label">Reason</div>
-                            <div class="detail-value" style="color: #64748b; font-weight: 500;">
-                                ${order.cancellationRequest.reason}
-                            </div>
-                        </div>
+    const modalBody = document.getElementById('orderModalBody');
+    
+    const cancellationHtml = order.cancellationRequest ? `
+        <div class="modal-section">
+            <div class="cancellation-card">
+                <div class="cancellation-header">
+                    <div class="cancellation-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0;">Cancellation Request</h4>
+                        <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">
+                            Status: ${order.cancellationRequest.status.toUpperCase()}
+                        </p>
                     </div>
                 </div>
-            ` : '';
-
-            modalBody.innerHTML = `
-                ${cancellationHtml}
-                
-                <div class="modal-section">
-                    <h3><i class="fas fa-info-circle"></i> Order Information</h3>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <div class="detail-label">Order ID</div>
-                            <div class="detail-value">#${order.id}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Order Date</div>
-                            <div class="detail-value">${formatDate(order.date)}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Status</div>
-                            <div class="detail-value">
-                                <span class="status-badge status-${order.status}">${order.status}</span>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Payment Method</div>
-                            <div class="detail-value">${order.paymentMethod}</div>
-                        </div>
+                <div style="margin-top: 12px;">
+                    <div class="detail-label">Reason</div>
+                    <div class="detail-value" style="color: #64748b; font-weight: 500;">
+                        ${order.cancellationRequest.reason}
                     </div>
                 </div>
+            </div>
+        </div>
+    ` : '';
 
-                <div class="modal-section">
-                    <h3><i class="fas fa-user"></i> Customer Details</h3>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <div class="detail-label">Name</div>
-                            <div class="detail-value">${order.name}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value" style="font-size: 12px;">${order.email}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">${order.phone}</div>
-                        </div>
-                        <div class="detail-item" style="grid-column: 1 / -1;">
-                            <div class="detail-label">Delivery Address</div>
-                            <div class="detail-value" style="font-size: 13px; line-height: 1.6;">
-                                ${order.address}
-                            </div>
-                        </div>
+    modalBody.innerHTML = `
+        ${cancellationHtml}
+        
+        <div class="modal-section">
+            <h3><i class="fas fa-info-circle"></i> Order Information</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Order ID</div>
+                    <div class="detail-value">#${order.id}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Order Date</div>
+                    <div class="detail-value">${formatDate(order.date)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="status-badge status-${order.status}">${order.status}</span>
                     </div>
                 </div>
+                <div class="detail-item">
+                    <div class="detail-label">Payment Method</div>
+                    <div class="detail-value">${order.paymentMethod}</div>
+                </div>
+            </div>
+        </div>
 
-                <div class="modal-section">
-                    <h3><i class="fas fa-box"></i> Products (${order.products.length})</h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        ${order.products.map((product, idx) => `
-                            <div class="product-item">
-                                <img src="${product.image || 'https://via.placeholder.com/80x80?text=No+Image'}" alt="${product.product}" class="product-image">
-                                <div class="product-info">
-                                    <div class="product-name">${idx + 1}. ${product.product}</div>
-                                    <div class="product-meta">
-                                        Variant: ${product.variant} | Quantity: ${product.quantity} | Price: ₹${product.price.toFixed(2)}
-                                    </div>
-                                </div>
-                                ${product.status === 'Cancelled' ? `
-                                    <span class="status-badge status-${product.status}">${product.status}</span>
-                                ` : `
-                                    <select class="status-select" onchange="handleStatusChange('${order.id}', '${product.productId}', this.value)" ${product.status === 'Cancelled' ? 'disabled' : ''}>
-                                        <option value="Processing" ${product.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                                        <option value="Shipped" ${product.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                                        <option value="OutForDelivery" ${product.status === 'OutForDelivery' ? 'selected' : ''}>Out for Delivery</option>
-                                        <option value="Delivered" ${product.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                    </select>
-                                `}
-                            </div>
-                        `).join('')}
+        <div class="modal-section">
+            <h3><i class="fas fa-user"></i> Customer Details</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Name</div>
+                    <div class="detail-value">${order.name}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value" style="font-size: 12px;">${order.email}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Phone</div>
+                    <div class="detail-value">${order.phone}</div>
+                </div>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <div class="detail-label">Delivery Address</div>
+                    <div class="detail-value" style="font-size: 13px; line-height: 1.6;">
+                        ${order.address}
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="modal-section">
-                    <h3><i class="fas fa-receipt"></i> Payment Summary</h3>
-                    <div class="detail-item">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
-                            <span style="color: #64748b;">Subtotal</span>
-                            <span style="font-weight: 600;">₹${(order.totalAmount + order.discount).toFixed(2)}</span>
-                        </div>
-                        ${order.discount > 0 ? `
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #22c55e;">
-                                <span>Discount ${order.couponApplied ? '('+order.couponApplied+')' : ''}</span>
-                                <span style="font-weight: 600;">-₹${order.discount.toFixed(2)}</span>
+        <div class="modal-section">
+            <h3><i class="fas fa-box"></i> Products (${order.products.length})</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${order.products.map((product, idx) => `
+                    <div class="product-item">
+                        <img src="${product.image || 'https://via.placeholder.com/80x80?text=No+Image'}" alt="${product.product}" class="product-image">
+                        <div class="product-info">
+                            <div class="product-name">${idx + 1}. ${product.product}</div>
+                            <div class="product-meta">
+                                Variant: ${product.variant} | Quantity: ${product.quantity} | Price: ₹${product.price.toFixed(2)}
                             </div>
-                        ` : ''}
-                        <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 2px solid #1e293b;">
-                            <span style="font-size: 16px; font-weight: 700;">Total Amount</span>
-                            <span style="font-size: 18px; font-weight: 700; color: #3b82f6;">₹${order.totalAmount.toFixed(2)}</span>
                         </div>
+                        ${product.status === 'Cancelled' ? `
+                            <span class="status-badge status-${product.status}">${product.status}</span>
+                        ` : `
+                            <select class="status-select" 
+                                onchange="handleStatusChange('${order.id}', ${idx}, '${product.variant}', this.value)" 
+                                ${product.status === 'Cancelled' ? 'disabled' : ''}>
+                                <option value="Processing" ${product.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                <option value="Shipped" ${product.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="OutForDelivery" ${product.status === 'OutForDelivery' ? 'selected' : ''}>Out for Delivery</option>
+                                <option value="Delivered" ${product.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            </select>
+                        `}
                     </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3><i class="fas fa-receipt"></i> Payment Summary</h3>
+            <div class="detail-item">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+                    <span style="color: #64748b;">Subtotal</span>
+                    <span style="font-weight: 600;">₹${(order.totalAmount + order.discount).toFixed(2)}</span>
                 </div>
-            `;
+                ${order.discount > 0 ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #22c55e;">
+                        <span>Discount ${order.couponApplied ? '('+order.couponApplied+')' : ''}</span>
+                        <span style="font-weight: 600;">-₹${order.discount.toFixed(2)}</span>
+                    </div>
+                ` : ''}
+                <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 2px solid #1e293b;">
+                    <span style="font-size: 16px; font-weight: 700;">Total Amount</span>
+                    <span style="font-size: 18px; font-weight: 700; color: #3b82f6;">₹${order.totalAmount.toFixed(2)}</span>
+                </div>
+            </div>
+        </div>
+    `;
 
-            document.getElementById('orderModal').style.display = 'block';
-        }
+    document.getElementById('orderModal').style.display = 'block';
+}
 
-        // Handle status change
-       // Handle status change
-async function handleStatusChange(orderId, productId, newStatus) {
-    // Prevent setting status to Cancelled
+// UPDATED: Handle status change with itemIndex and variantSize
+async function handleStatusChange(orderId, itemIndex, variantSize, newStatus) {
+    // Extract variant size number
+    const variantSizeNumber = variantSize.replace('ml', '');
+    
     if (newStatus === 'Cancelled') {
         Swal.fire({
             icon: 'error',
@@ -1360,14 +1367,12 @@ async function handleStatusChange(orderId, productId, newStatus) {
         return;
     }
 
-    // Fetch the current order and product status
     const order = ordersDatabase.find(o => o.id === orderId);
     if (!order) return;
 
-    const product = order.products.find(p => p.productId === productId);
+    const product = order.products[itemIndex];
     if (!product) return;
 
-    // Define status priority
     const statusPriority = {
         'Placed': 1,
         'Confirmed': 2,
@@ -1380,7 +1385,6 @@ async function handleStatusChange(orderId, productId, newStatus) {
         'Returned': 9
     };
 
-    // Check if new status is a past status
     const currentPriority = statusPriority[product.status] || 0;
     const newPriority = statusPriority[newStatus] || 0;
 
@@ -1388,59 +1392,65 @@ async function handleStatusChange(orderId, productId, newStatus) {
         Swal.fire({
             icon: 'error',
             title: 'Invalid Action',
-            text: `Cannot change status from "${product.status}" to "${newStatus}". Status can only be updated to a future state.`,
+            text: `Cannot change status from "${product.status}" to "${newStatus}". Status can only move forward.`,
             confirmButtonColor: '#3b82f6'
         });
-        // Reset the select to the current status
+        // Reset select to current status
         const selectElement = event.target;
         selectElement.value = product.status;
         return;
     }
 
     try {
-        const response = await fetch('/admin/orders/update-product-status', {
+        // CRITICAL: Send itemIndex and variantSize instead of productId
+        const response = await fetch(`/admin/orders/${orderId}/items/${itemIndex}/${variantSizeNumber}/status`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ orderId, productId, status: newStatus })
+            body: JSON.stringify({ status: newStatus })
         });
 
         const data = await response.json();
         
         if (data.success) {
-            // Update ordersDatabase
-            const order = ordersDatabase.find(o => o.id === orderId);
-            if (order) {
-                const product = order.products.find(p => p.productId === productId);
-                if (product) {
-                    product.status = newStatus;
-                }
-                // Update overall order status
-                const allCancelled = order.products.every(p => p.status === 'Cancelled');
-                const allDelivered = order.products.every(p => p.status === 'Delivered');
-                order.status = allCancelled ? 'Cancelled' : allDelivered ? 'Delivered' : 'Processing';
+            // Update local data
+            const orderData = ordersDatabase.find(o => o.id === orderId);
+            if (orderData && orderData.products[itemIndex]) {
+                orderData.products[itemIndex].status = newStatus;
             }
-            // Update filteredOrders
+
+            // Update overall order status
+            const allStatuses = orderData.products.map(p => p.status);
+            orderData.status = allStatuses.every(s => s === 'Delivered') ? 'Delivered' :
+                allStatuses.every(s => s === 'Cancelled') ? 'Cancelled' :
+                allStatuses.includes('OutForDelivery') ? 'OutForDelivery' :
+                allStatuses.includes('Shipped') ? 'Shipped' :
+                allStatuses.includes('Processing') ? 'Processing' :
+                'Pending';
+
             filteredOrders = [...ordersDatabase];
             applyFiltersAndSort();
+            
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
-                text: 'Product status updated successfully',
+                text: `${product.product} (${variantSize}) status updated to ${newStatus}`,
                 confirmButtonColor: '#3b82f6',
                 timer: 1500,
                 showConfirmButton: false
             });
-            // Refresh the modal to reflect the updated status
+            
             viewOrder(orderId);
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: data.message,
+                text: data.message || 'Failed to update status',
                 confirmButtonColor: '#3b82f6'
             });
+            // Reset select
+            event.target.value = product.status;
         }
     } catch (error) {
         console.error('Error updating status:', error);
@@ -1450,107 +1460,174 @@ async function handleStatusChange(orderId, productId, newStatus) {
             text: 'An error occurred. Please try again.',
             confirmButtonColor: '#3b82f6'
         });
+        event.target.value = product.status;
     }
 }
 
-        // Modal functions
-        function closeOrderModal() {
-            document.getElementById('orderModal').style.display = 'none';
-        }
-
-        function openRequestModal() {
-            document.getElementById('requestModal').style.display = 'block';
-        }
-
-        function closeRequestModal() {
-            document.getElementById('requestModal').style.display = 'none';
-        }
-
-// Update the handleRequest function - REPLACE the existing one
-async function handleRequest(requestId, action, requestType, productId = null) {
-  const orderId = requestId; // requestId is actually the orderId
-
-  const confirmText = productId
-    ? `Are you sure you want to ${action} this return request for this product?`
-    : `Are you sure you want to ${action} the full order return request?`;
-
-  const confirmed = await Swal.fire({
-    title: 'Confirm Action',
-    text: confirmText,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, proceed'
-  });
-
-  if (!confirmed.isConfirmed) return;
-
-  try {
-    // Fix the endpoint paths - remove '/admin' prefix
-    const endpoint = requestType === 'return'
-      ? `/admin/orders/${action === 'approve' ? 'approve-return' : 'reject-return'}`
-      : `/admin/orders/${action === 'approve' ? 'approve-cancellation' : 'reject-cancellation'}`;
-
-    const body = { orderId };
-    if (productId) body.productId = productId;
-
-    console.log('Sending request:', { endpoint, body }); // Debug log
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: data.message,
-        timer: 1500,
-        showConfirmButton: false
-      });
-
-      // Reload to show updated data
-      setTimeout(() => location.reload(), 1500);
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: data.error || data.message || 'Operation failed',
-        confirmButtonColor: '#3b82f6'
-      });
-    }
-  } catch (error) {
-    console.error('Error handling request:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'An error occurred. Please try again.',
-      confirmButtonColor: '#3b82f6'
-    });
-  }
+// Modal functions
+function closeOrderModal() {
+    document.getElementById('orderModal').style.display = 'none';
 }
 
+function openRequestModal() {
+    document.getElementById('requestModal').style.display = 'block';
+}
 
-        // Close modals on outside click
-        window.onclick = function(event) {
-            const orderModal = document.getElementById('orderModal');
-            const requestModal = document.getElementById('requestModal');
-            
-            if (event.target === orderModal) {
-                closeOrderModal();
+function closeRequestModal() {
+    document.getElementById('requestModal').style.display = 'none';
+}
+
+// Close modals on outside click
+window.onclick = function(event) {
+    const orderModal = document.getElementById('orderModal');
+    const requestModal = document.getElementById('requestModal');
+    
+    if (event.target === orderModal) {
+        closeOrderModal();
+    }
+    if (event.target === requestModal) {
+        closeRequestModal();
+    }
+}
+// Handle return request (approve/reject)
+// Handle return request (approve/reject)
+async function handleRequest(orderId, action, type, productId) {
+    try {
+        console.log('handleRequest called:', { orderId, action, type, productId });
+        
+        // Determine if it's a full order or specific item
+        const isFullOrder = productId === null || productId === 'null' || productId === undefined;
+        
+        // Build URL and payload
+        let url, method, body;
+        
+        if (action === 'approve') {
+            if (isFullOrder) {
+                // Full order approval - needs special route
+                // Since your backend expects itemIndex in URL, we'll use 'all' as placeholder
+                url = `/admin/orders/${orderId}/items/all/all/approve-return`;
+                method = 'POST';
+                body = JSON.stringify({ 
+                    orderId: orderId,
+                    itemIndex: 'all'
+                });
+            } else {
+                // Individual item approval - extract itemIndex and variantSize
+                const order = ordersDatabase.find(o => o.id === orderId);
+                if (!order) {
+                    throw new Error('Order not found in local database');
+                }
+                
+                // Find the item by productId
+                const itemIndex = order.products.findIndex(p => p.productId === productId);
+                if (itemIndex === -1) {
+                    throw new Error('Product not found in order. ProductId: ' + productId);
+                }
+                
+                const variantSize = order.products[itemIndex].variant.replace('ml', '');
+                
+                url = `/admin/orders/${orderId}/items/${itemIndex}/${variantSize}/approve-return`;
+                method = 'POST';
+                body = JSON.stringify({
+                    orderId: orderId,
+                    itemIndex: itemIndex,
+                    variantSize: variantSize
+                });
             }
-            if (event.target === requestModal) {
-                closeRequestModal();
+        } else if (action === 'reject') {
+            if (isFullOrder) {
+                // Full order rejection - needs special route
+                url = `/admin/orders/${orderId}/items/all/all/reject-return`;
+                method = 'POST';
+                body = JSON.stringify({ 
+                    orderId: orderId,
+                    itemIndex: 'all',
+                    reason: 'Return request rejected by admin'
+                });
+            } else {
+                // Individual item rejection
+                const order = ordersDatabase.find(o => o.id === orderId);
+                if (!order) {
+                    throw new Error('Order not found in local database');
+                }
+                
+                const itemIndex = order.products.findIndex(p => p.productId === productId);
+                if (itemIndex === -1) {
+                    throw new Error('Product not found in order. ProductId: ' + productId);
+                }
+                
+                const variantSize = order.products[itemIndex].variant.replace('ml', '');
+                
+                url = `/admin/orders/${orderId}/items/${itemIndex}/${variantSize}/reject-return`;
+                method = 'POST';
+                body = JSON.stringify({
+                    orderId: orderId,
+                    itemIndex: itemIndex,
+                    variantSize: variantSize,
+                    reason: 'Return request rejected by admin'
+                });
             }
         }
 
-        // Initialize on load
-        init();
+        console.log('Sending request to:', url);
+        console.log('Request body:', body);
+
+        // Send request
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: body
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers.get('content-type'));
+
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response received:', text.substring(0, 200));
+            throw new Error('Server returned non-JSON response. Check if route exists and you are logged in as admin.');
+        }
+
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: data.message || `Return ${action}ed successfully`,
+                confirmButtonColor: '#3b82f6',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                // Reload page to refresh data
+                window.location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.error || data.message || `Failed to ${action} return`,
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+    } catch (error) {
+        console.error(`Error ${action}ing return:`, error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'An error occurred. Please try again.',
+            confirmButtonColor: '#3b82f6'
+        });
+    }
+}
+
+// Initialize on load
+init();
     </script>
 
 

@@ -280,41 +280,49 @@ const updateCart = async (req, res) => {
       return res.json({ success: false, message: 'Invalid quantity' });
     }
 
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId }).populate('items.productId');
     if (!cart) {
       return res.json({ success: false, message: 'Cart not found' });
     }
 
     const varSize = Number(variantSize);
-    const item = cart.items.find(item => item.productId.toString() === productId && item.variantSize === varSize);
+    const item = cart.items.find(
+      item => item.productId._id.toString() === productId && item.variantSize === varSize
+    );
     if (!item) {
       return res.json({ success: false, message: 'Item not found in cart' });
     }
 
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.json({ success: false, message: 'Product not found' });
-    }
-
+    const product = item.productId;
     const variant = product.variants.find(v => v.size === varSize);
-    let stock = product.stock;
-    if (variant && variant.stock !== undefined) {
-      stock = variant.stock; 
-    }
+    const stock = variant?.stock ?? product.stock;
+
     if (stock < quantity) {
       return res.json({ success: false, message: `Only ${stock} items in stock` });
     }
 
+
     item.quantity = quantity;
     item.price = variant ? (variant.salePrice || variant.regularPrice) : (product.salePrice || product.price);
+    const itemSubtotal = item.quantity * item.price;
+
     await cart.save();
 
-    res.json({ success: true, message: 'Cart updated' });
+   
+    const cartTotal = cart.items.reduce((sum, i) => sum + i.quantity * i.price, 0);
+    res.json({
+      success: true,
+      message: 'Cart updated successfully',
+      updatedItem: { productId, variantSize, subtotal: itemSubtotal },
+      cartTotal
+    });
+
   } catch (err) {
-    console.error('Update cart error:', err.message, err.stack);
+    console.error('Update cart error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 
 const checkoutBlockedItems = async (req, res) => {
   try {
