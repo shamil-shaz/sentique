@@ -224,7 +224,6 @@ const moveAllToCart = async (req, res) => {
   }
 };
 
-
 const getWishlistCount = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user?.id;
@@ -235,22 +234,14 @@ const getWishlistCount = async (req, res) => {
     }
     
     const wishlist = await Wishlist.findOne({ userId: userId });
-    let count = 0;
-    if (wishlist && Array.isArray(wishlist.products)) {
-      count = wishlist.products.length;
-     
-    } else {
-      console.log('[Wishlist Count] No wishlist or products array found');
-    }
-
-
+    const count = wishlist?.products?.length || 0;
+    
     return res.json({ count, success: true });
   } catch (err) {
     console.error('[Wishlist Count ERROR]:', err.message);
     return res.json({ count: 0, error: err.message });
   }
 };
-
 module.exports = {
   loadWishlist,
   addToWishlist,

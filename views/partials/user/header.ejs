@@ -249,109 +249,74 @@ function debugLog(message, data = null) {
 
 // ========== BADGE UPDATE FUNCTIONS ==========
 function updateBadges() {
-    debugLog('Updating badges...');
     updateCartBadge();
     updateWishlistBadge();
 }
 
 function updateCartBadge() {
-    debugLog('Fetching cart count...');
-    
     fetch('/cart/count')
-        .then(res => {
-            debugLog('Cart API response status:', res.status);
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-        })
+        .then(res => res.ok ? res.json() : Promise.reject(res.status))
         .then(data => {
-            debugLog('Cart API response data:', data);
-            
             const count = data.count || 0;
-            debugLog('Cart count:', count);
-            
             const badge = document.getElementById('cartBadge');
-            if (!badge) {
-                console.error('[ERROR] Cart badge element not found');
-                return;
-            }
             
-            if (count > 0) {
-                const displayCount = count > 9 ? '9+' : count;
-                badge.textContent = displayCount;
-                badge.classList.remove('hide');
-                badge.classList.add('show');
-                debugLog('Cart badge updated - Count:', displayCount);
-            } else {
-                badge.classList.remove('show');
-                badge.classList.add('hide');
-                debugLog('Cart badge hidden - Count is 0');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.classList.remove('hide');
+                    badge.classList.add('show');
+                } else {
+                    badge.classList.remove('show');
+                    badge.classList.add('hide');
+                }
             }
         })
-        .catch(err => {
-            console.error('[ERROR] Error fetching cart count:', err);
-            debugLog('Cart fetch failed:', err.message);
-        });
+        .catch(err => console.error('[Cart Badge ERROR]:', err));
 }
 
 function updateWishlistBadge() {
-    debugLog('Fetching wishlist count...');
-    
     fetch('/wishlist/count')
-        .then(res => {
-            debugLog('Wishlist API response status:', res.status);
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-        })
+        .then(res => res.ok ? res.json() : Promise.reject(res.status))
         .then(data => {
-            debugLog('Wishlist API response data:', data);
-            
             const count = data.count || 0;
-            debugLog('Wishlist count:', count);
-            
             const badge = document.getElementById('wishlistBadge');
-            if (!badge) {
-                console.error('[ERROR] Wishlist badge element not found');
-                return;
-            }
             
-            if (count > 0) {
-                const displayCount = count > 9 ? '9+' : count;
-                badge.textContent = displayCount;
-                badge.classList.remove('hide');
-                badge.classList.add('show');
-                debugLog('Wishlist badge updated - Count:', displayCount);
-            } else {
-                badge.classList.remove('show');
-                badge.classList.add('hide');
-                debugLog('Wishlist badge hidden - Count is 0');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.classList.remove('hide');
+                    badge.classList.add('show');
+                } else {
+                    badge.classList.remove('show');
+                    badge.classList.add('hide');
+                }
             }
         })
-        .catch(err => {
-            console.error('[ERROR] Error fetching wishlist count:', err);
-            debugLog('Wishlist fetch failed:', err.message);
-        });
+        .catch(err => console.error('[Wishlist Badge ERROR]:', err));
 }
 
-// Update badges on page load
-document.addEventListener('DOMContentLoaded', () => {
-    debugLog('DOM loaded - initializing badges');
-    updateBadges();
-});
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', updateBadges);
 
-// Update badges periodically (every 5 seconds)
-setInterval(updateBadges, 1000);
+// Call these functions after cart/wishlist modifications
+function addToCart(productId) {
+    // Your add to cart logic...
+    // Then update badge:
+    updateCartBadge();
+}
 
-// Update badges when returning to tab
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-        debugLog('Page became visible - updating badges');
-        updateBadges();
-    }
-});
+function removeFromCart(itemId) {
+    // Your remove logic...
+    updateCartBadge();
+}
 
-debugLog('Badge script loaded successfully');
+function addToWishlist(productId) {
+    // Your add logic...
+    updateWishlistBadge();
+}
+
+function removeFromWishlist(productId) {
+    // Your remove logic...
+    updateWishlistBadge();
+}
 </script>

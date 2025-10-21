@@ -543,15 +543,15 @@
                 </td>
                 <td>
                   <% if (category.isListed) { %>
-                    <form action="/admin/listCategory" method="get" class="list-toggle-form">
-                      <input type="hidden" name="id" value="<%= category._id %>">
-                      <button type="button" class="btn btn-danger list-toggle-btn" style="width:70px" data-action="unlist">Unlist</button>
-                    </form>
+                    <form class="list-toggle-form">
+  <input type="hidden" name="categoryId" value="<%= category._id %>">
+  <button type="button" class="btn btn-danger list-toggle-btn" style="width:70px" data-action="unlist">Unlist</button>
+</form>
                   <% } else { %>
-                    <form action="/admin/unlistCategory" method="get" class="list-toggle-form">
-                      <input type="hidden" name="id" value="<%= category._id %>">
-                      <button type="button" class="btn btn-success list-toggle-btn" style="width:70px" data-action="list">List</button>
-                    </form>
+                 <form class="list-toggle-form">
+  <input type="hidden" name="categoryId" value="<%= category._id %>">
+  <button type="button" class="btn btn-success list-toggle-btn" style="width:70px" data-action="list">List</button>
+</form>
                   <% } %>
                 </td>
                 <td>
@@ -636,337 +636,420 @@
   </div>
 
   <script>
-    let selectedImage = null;
+  let selectedImage = null;
 
-    // Modal functions
-    function openModal() {
-      document.getElementById('categoryModal').style.display = 'block';
-      document.body.style.overflow = 'hidden';
+  // Modal functions
+  function openModal() {
+    document.getElementById('categoryModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('categoryModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    resetForm();
+  }
+
+  function resetForm() {
+    document.getElementById('categoryForm').reset();
+    removeImage();
+    clearErrorMessages();
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('categoryModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  }
+
+  document.getElementById('categoryImage').addEventListener('change', handleImageSelect);
+
+  function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        displayErrorMessage('image-error', 'File size should be less than 5MB');
+        return;
+      }
+
+      if (!file.type.match('image.*')) {
+        displayErrorMessage('image-error', 'Please select a valid image file');
+        return;
+      }
+
+      selectedImage = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('removeImageBtn').style.display = 'inline-block';
+        document.querySelector('.upload-text').textContent = 'Image selected: ' + file.name;
+      };
+      reader.readAsDataURL(file);
+      clearErrorMessage('image-error');
+    }
+  }
+
+  function removeImage() {
+    selectedImage = null;
+    document.getElementById('categoryImage').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('removeImageBtn').style.display = 'none';
+    document.querySelector('.upload-text').textContent = 'Click to upload image or drag and drop';
+  }
+
+  const uploadContainer = document.querySelector('.image-upload-container');
+
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadContainer.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    uploadContainer.addEventListener(eventName, highlight, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    uploadContainer.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight(e) {
+    uploadContainer.classList.add('dragover');
+  }
+
+  function unhighlight(e) {
+    uploadContainer.classList.remove('dragover');
+  }
+
+  uploadContainer.addEventListener('drop', handleDrop, false);
+
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length > 0) {
+      document.getElementById('categoryImage').files = files;
+      handleImageSelect({ target: { files: files } });
+    }
+  }
+
+  function submitForm() {
+    const form = document.getElementById('categoryForm');
+    const event = new Event('submit');
+    form.dispatchEvent(event);
+  }
+
+  document.getElementById("categoryForm").addEventListener("submit", handleFormSubmit);
+
+  function handleFormSubmit(event) {
+    event.preventDefault();
+    if (!validateForm()) return;
+
+    const formData = new FormData();
+    const categoryName = document.getElementById("categoryName").value.trim();
+    const description = document.getElementById("categoryDesc").value.trim();
+    formData.append('name', categoryName);
+    formData.append('description', description);
+    if (selectedImage) {
+      formData.append('image', selectedImage);
     }
 
-    function closeModal() {
-      document.getElementById('categoryModal').style.display = 'none';
-      document.body.style.overflow = 'auto';
-      resetForm();
-    }
-
-    function resetForm() {
-      document.getElementById('categoryForm').reset();
-      removeImage();
-      clearErrorMessages();
-    }
-
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-      const modal = document.getElementById('categoryModal');
-      if (event.target === modal) {
+    fetch('/admin/addCategory', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: data.message || 'Category added successfully!',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
         closeModal();
-      }
-    }
-
-    // Image upload functionality
-    document.getElementById('categoryImage').addEventListener('change', handleImageSelect);
-
-    function handleImageSelect(event) {
-      const file = event.target.files[0];
-      if (file) {
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-          displayErrorMessage('image-error', 'File size should be less than 5MB');
-          return;
-        }
-
-        if (!file.type.match('image.*')) {
-          displayErrorMessage('image-error', 'Please select a valid image file');
-          return;
-        }
-
-        selectedImage = file;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const preview = document.getElementById('imagePreview');
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-          document.getElementById('removeImageBtn').style.display = 'inline-block';
-          document.querySelector('.upload-text').textContent = 'Image selected: ' + file.name;
-        };
-        reader.readAsDataURL(file);
-        clearErrorMessage('image-error');
-      }
-    }
-
-    function removeImage() {
-      selectedImage = null;
-      document.getElementById('categoryImage').value = '';
-      document.getElementById('imagePreview').style.display = 'none';
-      document.getElementById('removeImageBtn').style.display = 'none';
-      document.querySelector('.upload-text').textContent = 'Click to upload image or drag and drop';
-    }
-
-    // Drag and drop functionality
-    const uploadContainer = document.querySelector('.image-upload-container');
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      uploadContainer.addEventListener(eventName, preventDefaults, false);
+        window.location.reload();
+      });
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Failed to add category'
+      });
     });
+  }
 
-    function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
+  function validateForm() {
+    clearErrorMessages();
+    const name = document.getElementById("categoryName").value.trim();
+    const description = document.getElementById("categoryDesc").value.trim();
+    let isValid = true;
+
+    if (name === "") {
+      displayErrorMessage("name-error", "Please enter a name");
+      isValid = false;
     }
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-      uploadContainer.addEventListener(eventName, highlight, false);
+    if (description === "") {
+      displayErrorMessage("description-error", "Please enter a description");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function displayErrorMessage(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.innerText = message;
+    errorElement.style.display = "block";
+  }
+
+  function clearErrorMessage(elementId) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.innerText = "";
+    errorElement.style.display = "none";
+  }
+
+  function clearErrorMessages() {
+    const errorElements = document.getElementsByClassName("error-message");
+    Array.from(errorElements).forEach(el => {
+      el.innerText = "";
+      el.style.display = "none";
     });
+  }
 
-    ['dragleave', 'drop'].forEach(eventName => {
-      uploadContainer.addEventListener(eventName, unhighlight, false);
-    });
-
-    function highlight(e) {
-      uploadContainer.classList.add('dragover');
-    }
-
-    function unhighlight(e) {
-      uploadContainer.classList.remove('dragover');
-    }
-
-    uploadContainer.addEventListener('drop', handleDrop, false);
-
-    function handleDrop(e) {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      
-      if (files.length > 0) {
-        document.getElementById('categoryImage').files = files;
-        handleImageSelect({ target: { files: files } });
+ // ADD OFFER - FIXED
+async function addOffer(categoryId) {
+  const { value: amount } = await Swal.fire({
+    title: "Offer in percentage",
+    input: "number",
+    inputLabel: "Percentage",
+    inputPlaceholder: "%",
+    inputAttributes: { 
+      min: 0, 
+      max: 99,  // Changed from 100 to 99
+      step: 1
+    },
+    inputValidator: (value) => {
+      if (!value) {
+        return 'Please enter a percentage'
+      }
+      const num = parseInt(value)
+      if (num < 0 || num > 99) {
+        return 'Percentage must be between 0 and 99'
       }
     }
+  });
 
-    // Form submission
-    function submitForm() {
-      const form = document.getElementById('categoryForm');
-      const event = new Event('submit');
-      form.dispatchEvent(event);
-    }
+  if (amount) {
+    try {
+      Swal.fire({
+        title: "Adding offer...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
 
-    document.getElementById("categoryForm").addEventListener("submit", handleFormSubmit);
+      const response = await fetch("/admin/addCategoryOffer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          percentage: parseInt(amount), 
+          categoryId 
+        })
+      });
 
-    function handleFormSubmit(event) {
-      event.preventDefault();
-      if (!validateForm()) return;
+      const data = await response.json();
 
-      const formData = new FormData();
-      const categoryName = document.getElementById("categoryName").value.trim();
-      const description = document.getElementById("categoryDesc").value.trim();
-      formData.append('name', categoryName);
-      formData.append('description', description);
-      if (selectedImage) {
-        formData.append('image', selectedImage);
-      }
-
-      console.log('Submitting category:', { name: categoryName, description, hasImage: !!selectedImage });
-
-      fetch('/admin/addCategory', {
-        method: 'POST',
-        headers: {
-          'CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
-        },
-        body: formData
-      })
-      .then(response => {
-        console.log('Response status:', response.status); // Debug
-        if (!response.ok) {
-          return response.json().then(err => { throw new Error(err.error || 'Unknown error'); });
-        }
-        return response.json();
-      })
-      .then(data => {
+      if (data.status === true) {
         Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: data.message || 'Category added successfully!',
+          icon: "success",
+          title: "Success!",
+          text: data.message || "Offer added successfully",
           showConfirmButton: false,
           timer: 1500
         }).then(() => {
-          closeModal();
-          window.location.reload();
+          // Force refresh to show updated prices
+          window.location.href = window.location.href;
         });
-      })
-      .catch(error => {
-        console.error('Error adding category:', error.message);
-        if (error.message === "Category already exists") {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops!',
-            text: 'This category name already exists!'
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: `Failed to add category: ${error.message}`
-          });
-        }
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Failed to add offer"
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "An error occurred"
       });
     }
+  }
+}
 
-    function validateForm() {
-      clearErrorMessages();
-      const name = document.getElementById("categoryName").value.trim();
-      const description = document.getElementById("categoryDesc").value.trim();
-      let isValid = true;
-
-      if (name === "") {
-        displayErrorMessage("name-error", "Please enter a name");
-        isValid = false;
-      } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-        displayErrorMessage("name-error", "Category name should only contain letters");
-        isValid = false;
-      }
-
-      if (description === "") {
-        displayErrorMessage("description-error", "Please enter a description");
-        isValid = false;
-      }
-
-      return isValid;
-    }
-
-    function displayErrorMessage(elementId, message) {
-      const errorElement = document.getElementById(elementId);
-      errorElement.innerText = message;
-      errorElement.style.display = "block";
-    }
-
-    function clearErrorMessage(elementId) {
-      const errorElement = document.getElementById(elementId);
-      errorElement.innerText = "";
-      errorElement.style.display = "none";
-    }
-
-    function clearErrorMessages() {
-      const errorElements = document.getElementsByClassName("error-message");
-      Array.from(errorElements).forEach(el => {
-        el.innerText = "";
-        el.style.display = "none";
-      });
-    }
-
-    // Offer functions
-    async function addOffer(categoryId) {
-      const { value: amount } = await Swal.fire({
-        title: "Offer in percentage",
-        input: "number",
-        inputLabel: "Percentage",
-        inputPlaceholder: "%",
-        inputAttributes: { min: 0, max: 100 }
-      });
-
-      if (amount) {
-        try {
-          const response = await fetch("/admin/addCategoryOffer", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || ''
-            },
-            body: JSON.stringify({ percentage: amount, categoryId })
-          });
-
-          const data = await response.json();
-
-          if (response.ok && data.status === true) {
-            Swal.fire("Offer added", "The offer has been added", "success").then(() => location.reload());
-          } else {
-            Swal.fire("Failed", data.message || "Adding offer failed", "error");
-          }
-        } catch (error) {
-          console.error('Error adding offer:', error);
-          Swal.fire("Error", "An error occurred while adding the offer", "error");
-        }
-      }
-    }
-
-    async function removeOffer(categoryId) {
+// REMOVE OFFER - FIXED
+async function removeOffer(categoryId) {
+  Swal.fire({
+    title: "Remove Offer?",
+    text: "Are you sure?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#dc2626",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, remove it!"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
       try {
+        Swal.fire({
+          title: "Removing offer...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
         const response = await fetch("/admin/removeCategoryOffer", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || ''
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ categoryId })
         });
 
         const data = await response.json();
 
-        if (response.ok && data.status === true) {
-          Swal.fire("Offer removed", "The offer has been removed", "success").then(() => location.reload());
+        if (data.status === true) {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: data.message || "Offer removed successfully",
+            showConfirmButton: false,
+            timer: 1500
+          }).then(() => {
+            // Force refresh to show updated prices
+            window.location.href = window.location.href;
+          });
         } else {
-          Swal.fire("Failed", data.message || "Removing offer failed", "error");
+          Swal.fire({
+            icon: "error",
+            title: "Failed!",
+            text: data.message || "Failed to remove offer"
+          });
         }
       } catch (error) {
-        console.error('Error removing offer:', error);
-        Swal.fire("Error", "An error occurred while removing the offer", "error");
-      }
-    }
-
-    // Description modal functions
-    function viewDescription(description) {
-      document.getElementById('descriptionContent').textContent = description;
-      document.getElementById('descriptionModal').style.display = 'block';
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeDescriptionModal() {
-      document.getElementById('descriptionModal').style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }
-
-    // Close description modal when clicking outside
-    document.getElementById('descriptionModal').onclick = function(event) {
-      if (event.target === this) {
-        closeDescriptionModal();
-      }
-    }
-
-    // SweetAlert confirmation for List/Unlist
-    document.querySelectorAll('.list-toggle-btn').forEach(button => {
-      button.addEventListener('click', function () {
-        const form = this.closest('form');
-        const action = this.dataset.action;
-
+        console.error('Error:', error);
         Swal.fire({
-          title: `Are you sure you want to ${action} this category?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: `Yes, ${action} it!`
-        }).then((result) => {
-          if (result.isConfirmed) {
-            form.submit();
-          }
+          icon: "error",
+          title: "Error!",
+          text: "An error occurred"
         });
+      }
+    }
+  });
+}
+
+  // VIEW DESCRIPTION
+  function viewDescription(description) {
+    document.getElementById('descriptionContent').textContent = description;
+    document.getElementById('descriptionModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDescriptionModal() {
+    document.getElementById('descriptionModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+
+  document.getElementById('descriptionModal').onclick = function(event) {
+    if (event.target === this) {
+      closeDescriptionModal();
+    }
+  }
+
+  // LIST/UNLIST - FIXED
+  document.querySelectorAll('.list-toggle-btn').forEach(button => {
+    button.addEventListener('click', async function (e) {
+      e.preventDefault();
+
+      const form = this.closest('form');
+      const categoryId = form.querySelector('input[name="categoryId"]').value;
+      const action = this.dataset.action;
+      const endpoint = action === 'list' ? '/admin/listCategory' : '/admin/unlistCategory';
+
+      Swal.fire({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} Category?`,
+        text: `Are you sure?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: action === 'list' ? '#10b981' : '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: `Yes, ${action} it!`
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            Swal.fire({
+              title: `${action.charAt(0).toUpperCase() + action.slice(1)}ing...`,
+              allowOutsideClick: false,
+              didOpen: () => Swal.showLoading()
+            });
+
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ categoryId })
+            });
+
+            const data = await response.json();
+
+            if (data.status === true) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message || `Category ${action}ed successfully!`,
+                showConfirmButton: false,
+                timer: 1500
+              }).then(() => location.reload());
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Failed!',
+                text: data.message || `Failed to ${action} category`
+              });
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: `An error occurred`
+            });
+          }
+        }
       });
     });
+  });
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const edited = urlParams.get('edited');
+  const urlParams = new URLSearchParams(window.location.search);
+  const edited = urlParams.get('edited');
 
-    if (edited === 'true') {
-      Swal.fire({
-        icon: 'success',
-        title: 'Category Updated!',
-        text: 'The category was updated successfully.',
-        showConfirmButton: false,
-        timer: 1500
-      }).then(() => {
-        const url = new URL(window.location);
-        url.searchParams.delete('edited');
-        window.history.replaceState({}, document.title, url);
-      });
-    }
-  </script>
+  if (edited === 'true') {
+    Swal.fire({
+      icon: 'success',
+      title: 'Category Updated!',
+      text: 'The category was updated successfully.',
+      showConfirmButton: false,
+      timer: 1500
+    }).then(() => {
+      const url = new URL(window.location);
+      url.searchParams.delete('edited');
+      window.history.replaceState({}, document.title, url);
+    });
+  }
+</script>
 </body>
 </html>

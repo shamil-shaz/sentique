@@ -775,6 +775,12 @@
                 <span>🎟️</span> Coupons
               </a>
             </div>
+             <div class="menu-section">
+      <div class="menu-title">Security</div>
+      <a href="/profile/privacy-security" class="menu-item">
+        <span>🔒</span> Privacy & Security
+      </a>
+    </div>
           </div>
         </aside>
 
@@ -784,7 +790,7 @@
               <h2 class="card-title">Account Settings</h2>
               <div class="tab-group">
                 <div class="tab active" data-tab="profile">Personal Information</div>
-                <div class="tab" data-tab="security">Security</div>
+                
               </div>
             </div>
 
@@ -819,85 +825,7 @@
   </div>
 </div>
 
-<!-- SECURITY TAB CONTENT -->
-<div class="tab-content" id="security-tab">
-  
-  <!-- Check if user is authenticated via Google OAuth -->
-  <% const isGoogleOAuthUser = user.authProvider === 'google' || user.googleId; %>
-  
-  <% if (isGoogleOAuthUser) { %>
-    <!-- GOOGLE OAUTH USER MESSAGE -->
-    <div class="alert-info">
-      <div class="alert-info-content">
-        <div class="alert-info-icon">🔒</div>
-        <div class="alert-info-text">
-          <div class="alert-info-title">Google Account Linked</div>
-          <div class="alert-info-message">
-            Your account is connected to Google. You cannot change your password and email address through this portal. 
-            <br><br>
-            To change your password or email, please visit your <strong>Google Account settings</strong>.
-          </div>
-          <a href="https://myaccount.google.com/security" target="_blank">Go to Google Account Security →</a>
-        </div>
-      </div>
-    </div>
-  <% } else { %>
-    <!-- REGULAR USER - SHOW FORMS -->
-    
-    <!-- Change Password -->
-    <div class="security-section">
-      <h3 class="section-subtitle">Change Password</h3>
-      <form id="passwordForm">
-        <div class="form-grid">
-          <div class="form-group full-width">
-            <label class="form-label">Current Password</label>
-            <input type="password" name="currentPassword" class="form-input" placeholder="Enter current password" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">New Password</label>
-            <input type="password" name="newPassword" class="form-input" placeholder="Enter new password" required minlength="6">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Confirm Password</label>
-            <input type="password" name="confirmPassword" class="form-input" placeholder="Confirm new password" required minlength="6">
-          </div>
-        </div>
 
-        <div class="button-group">
-          <button type="button" class="cancel-btn" onclick="document.getElementById('passwordForm').reset()">Cancel</button>
-          <button type="submit" class="update-btn">Change Password</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Change Email -->
-    <div class="security-section" style="margin-top: 40px;">
-      <h3 class="section-subtitle">Change Email Address</h3>
-      <form id="emailForm">
-        <div class="form-grid">
-          <div class="form-group full-width">
-            <label class="form-label">Current Email</label>
-            <input type="email" class="form-input" value="<%= user.email %>" disabled>
-          </div>
-          <div class="form-group full-width">
-            <label class="form-label">New Email Address</label>
-            <input type="email" name="newEmail" id="newEmail" class="form-input" placeholder="Enter new email address" required>
-          </div>
-          <div class="form-group full-width">
-            <label class="form-label">Confirm Password</label>
-            <input type="password" name="password" id="emailPassword" class="form-input" placeholder="Enter your password" required>
-          </div>
-        </div>
-
-        <div class="button-group">
-          <button type="button" class="cancel-btn" onclick="document.getElementById('emailForm').reset()">Cancel</button>
-          <button type="button" id="sendOtpBtn" class="update-btn">Send OTP</button>
-        </div>
-      </form>
-    </div>
-  <% } %>
-
-</div>
 
           </div>
         </main>

@@ -88,11 +88,11 @@ router.post('/login', userController.login);
 router.get('/logout', checkBlockedUser, userAuth, userController.logout);
 
 router.get('/', userController.loadLandingPage);
-router.get("/home", checkBlockedUser, userAuth, userController.loadHomepage);
-router.get("/shopPage", checkBlockedUser, userAuth, userController.loadShopingPage);
-router.get("/productDetails", checkBlockedUser, userAuth, userController.loadProductDetails);
-router.get('/zodiac', checkBlockedUser, userAuth, userProductController.loadZodiacPage);
-router.get('/api/zodiac-products', checkBlockedUser, userAuth, userProductController.getZodiacProducts);
+router.get("/home", checkBlockedUser, userController.loadHomepage);
+router.get("/shopPage", checkBlockedUser,  userController.loadShopingPage);
+router.get("/productDetails", checkBlockedUser, userController.loadProductDetails);
+router.get('/zodiac', checkBlockedUser,  userProductController.loadZodiacPage);
+router.get('/api/zodiac-products', checkBlockedUser,  userProductController.getZodiacProducts);
 
 
 
@@ -119,6 +119,7 @@ router.get("/profile/address", userAuth, addressController.getAddresses);
 router.post("/addresses/add", userAuth, addressController.addAddress);
 router.get('/addresses/edit-address/:id', userAuth, addressController.getEditAddress);
 router.get('/profile/order-list',userAuth,orderController.getOrderList)
+router.get('/profile/privacy-security', userAuth, profileController.getSecurityPage);
 
 //----- Update address----
 router.post("/addresses/edit", userAuth, addressController.editAddress);
@@ -127,7 +128,7 @@ router.get("/addresses/list", userAuth, addressController.getAddressesJSON);
 
 ////----- whish List ------
 router.get("/wishlist", userAuth, wishlistController.loadWishlist);
-router.post("/wishlist/add", userAuth, wishlistController.addToWishlist);
+router.post("/wishlist/add", wishlistController.addToWishlist);
 router.delete("/wishlist/remove/:id", userAuth, wishlistController.removeFromWishlist);
 router.post("/wishlist/move-all-to-cart", userAuth, wishlistController.moveAllToCart);
 router.get('/wishlist/count', userAuth, wishlistController.getWishlistCount);
@@ -135,7 +136,7 @@ router.get('/wishlist/count', userAuth, wishlistController.getWishlistCount);
 //// -----cart-------
  
 router.get('/cart',userAuth,cartController.getCartPage)
-router.post('/cart/add',userAuth, cartController.addToCart);
+router.post('/cart/add', cartController.addToCart);
 router.delete('/cart/remove/:productId',userAuth, cartController.removeFromCart);
 router.put('/cart/update', userAuth, cartController.updateCart);
 router.post('/check',checkBlockedUser,userAuth,cartController. checkCartQuantity);

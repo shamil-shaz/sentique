@@ -214,9 +214,16 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+
 const addProductOffer = async (req, res) => {
   try {
     const { productId, percentage } = req.body;
+    const percentNum = parseInt(percentage);
+    
+    if (percentNum < 0 || percentNum > 99) {
+      return res.json({ status: false, message: "Offer percentage must be between 0 and 99" });
+    }
+
     const findProduct = await Product.findOne({ _id: productId });
 
     if (!findProduct) {
@@ -225,21 +232,30 @@ const addProductOffer = async (req, res) => {
 
     const findCategory = await Category.findOne({ _id: findProduct.category });
 
-    if (findCategory?.categoryOffer > percentage) {
+    if (findCategory?.categoryOffer > percentNum) {
       return res.json({ status: false, message: "This product's category already has a better offer" });
     }
 
-    findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
-    findProduct.productOffer = parseInt(percentage);
+    
+    const updatedVariants = findProduct.variants.map(variant => ({
+      ...variant.toObject(),
+      salePrice: variant.regularPrice - Math.floor(variant.regularPrice * (percentNum / 100))
+    }));
 
-    await findProduct.save();
+    
+    await Product.updateOne(
+      { _id: productId },
+      {
+        $set: {
+          variants: updatedVariants,
+          productOffer: percentNum
+        }
+      }
+    );
 
-    if (findCategory) {
-      findCategory.categoryOffer = 0;
-      await findCategory.save();
-    }
+    //console.log(`Product offer added: ${productId} - ${percentNum}%`);
 
-    res.json({ status: true });
+    res.json({ status: true, message: "Product offer added successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: false, message: "Internal Server Error" });
@@ -255,12 +271,26 @@ const removeProductOffer = async (req, res) => {
       return res.json({ status: false, message: "Product not found" });
     }
 
-    findProduct.salePrice = findProduct.regularPrice;
-    findProduct.productOffer = 0;
+    
+    const updatedVariants = findProduct.variants.map(variant => ({
+      ...variant.toObject(),
+      salePrice: variant.regularPrice
+    }));
 
-    await findProduct.save();
+   
+    await Product.updateOne(
+      { _id: productId },
+      {
+        $set: {
+          variants: updatedVariants,
+          productOffer: 0
+        }
+      }
+    );
 
-    res.json({ status: true });
+    console.log(`Product offer removed: ${productId}`);
+
+    res.json({ status: true, message: "Product offer removed successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: false, message: "Internal Server Error" });

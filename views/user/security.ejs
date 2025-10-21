@@ -1,0 +1,753 @@
+<!-- views/user/security.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy & Security</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #f0f3f7 100%);
+            min-height: 100vh;
+        }
+
+        .profile-page {
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 35px 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar-left {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f4f8;
+        }
+
+        .profile-avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 45px;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            overflow: hidden;
+            border: 4px solid white;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .menu-section {
+            margin-bottom: 28px;
+        }
+
+        .menu-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #a0aec0;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 1.2px;
+        }
+
+        .menu-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #4a5568;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #f7fafc;
+            color: #667eea;
+            transform: translateX(5px);
+            border-left-color: #667eea;
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+            font-weight: 600;
+            border-left-color: #667eea;
+        }
+
+        .content {
+            max-width: 850px;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        .security-section {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .section-subtitle {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-subtitle::before {
+            content: '';
+            width: 4px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .section-description {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-input {
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            background: #fafbff;
+        }
+
+        .form-input:disabled {
+            background-color: #f7fafc;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .form-input.error {
+            border-color: #e53e3e;
+            background-color: #fff5f5;
+        }
+
+        .error-message {
+            font-size: 13px;
+            color: #e53e3e;
+            margin-top: 6px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .password-strength {
+            display: none;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .password-strength.show {
+            display: block;
+        }
+
+        .password-strength.weak {
+            background-color: #fff5f5;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+        }
+
+        .password-strength.medium {
+            background-color: #fffaf0;
+            color: #c05621;
+            border: 1px solid #fbd38d;
+        }
+
+        .password-strength.strong {
+            background-color: #f0fff4;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .requirement-list {
+            font-size: 12px;
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .requirement.met {
+            color: #22543d;
+        }
+
+        .requirement.unmet {
+            color: #742a2a;
+        }
+
+        .requirement-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .requirement.met .requirement-dot {
+            background-color: #48bb78;
+        }
+
+        .requirement.unmet .requirement-dot {
+            background-color: #e53e3e;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .cancel-btn {
+            padding: 12px 28px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #4a5568;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .cancel-btn:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+
+        .update-btn {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .update-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-left: 5px solid #667eea;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .alert-info-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .alert-info-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .alert-info-message {
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .alert-info a {
+            display: inline-block;
+            padding: 10px 18px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .alert-info a:hover {
+            background: #764ba2;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .cancel-btn, .update-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../partials/user/header.ejs") %>
+
+    <section class="profile-page">
+        <div class="container">
+            <div class="main-content">
+                <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'security' }) %>
+
+                <main class="content">
+                    <div class="page-header">
+                        <h1 class="page-title">🔒 Privacy & Security</h1>
+                        <p class="page-subtitle">Manage your account security settings and change your password or email address</p>
+                    </div>
+
+                    <% const isGoogleOAuthUser = user && (user.authProvider === 'google' || user.googleId); %>
+                    
+                    <% if (isGoogleOAuthUser) { %>
+                        <div class="security-section">
+                            <div class="alert-info">
+                                <div class="alert-info-icon">🔒</div>
+                                <div class="alert-info-title">Google Account Linked</div>
+                                <div class="alert-info-message">
+                                    Your account is connected to your Google account. For security reasons, <strong>you cannot change your password and email address through this portal</strong>. 
+                                    <br><br>
+                                    All security settings including password and email changes must be managed through your <strong>Google Account settings</strong>.
+                                </div>
+                                <a href="https://myaccount.google.com/security" target="_blank">🔐 Go to Google Account Security</a>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <!-- CHANGE PASSWORD SECTION -->
+                        <div class="security-section">
+                            <h3 class="section-subtitle">Change Password</h3>
+                            <p class="section-description">Create a strong password to keep your account secure</p>
+                            <form id="passwordForm">
+                                <div class="form-grid">
+                                    <div class="form-group full-width">
+                                        <label class="form-label">🔑 Current Password</label>
+                                        <input type="password" name="currentPassword" class="form-input" placeholder="Enter your current password" required>
+                                        <div class="error-message" id="currentPasswordError"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">✨ New Password</label>
+                                        <input type="password" name="newPassword" id="newPassword" class="form-input" placeholder="Create a new password" required>
+                                        <div class="error-message" id="newPasswordError"></div>
+                                        <div class="password-strength" id="passwordStrength">
+                                            <div id="strengthText"></div>
+                                            <div class="requirement-list">
+                                                <div class="requirement unmet" id="req-length"><span class="requirement-dot"></span><span>6+ chars</span></div>
+                                                <div class="requirement unmet" id="req-uppercase"><span class="requirement-dot"></span><span>Uppercase</span></div>
+                                                <div class="requirement unmet" id="req-lowercase"><span class="requirement-dot"></span><span>Lowercase</span></div>
+                                                <div class="requirement unmet" id="req-number"><span class="requirement-dot"></span><span>Number</span></div>
+                                                <div class="requirement unmet" id="req-special"><span class="requirement-dot"></span><span>Special char</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">✓ Confirm Password</label>
+                                        <input type="password" name="confirmPassword" id="confirmPassword" class="form-input" placeholder="Confirm your new password" required>
+                                        <div class="error-message" id="confirmPasswordError"></div>
+                                    </div>
+                                </div>
+
+                                <div class="button-group">
+                                    <button type="button" class="cancel-btn" onclick="resetPasswordForm()">Cancel</button>
+                                    <button type="submit" class="update-btn">Update Password</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- CHANGE EMAIL SECTION -->
+                        <div class="security-section">
+                            <h3 class="section-subtitle">Change Email Address</h3>
+                            <p class="section-description">Update your email address for account recovery and notifications</p>
+                            <form id="emailForm">
+                                <div class="form-grid">
+                                    <div class="form-group full-width">
+                                        <label class="form-label">📧 Current Email</label>
+                                        <input type="email" class="form-input" value="<%= user.email %>" disabled>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label">📮 New Email Address</label>
+                                        <input type="email" name="newEmail" id="newEmail" class="form-input" placeholder="Enter your new email address" required>
+                                        <div class="error-message" id="newEmailError"></div>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label">🔑 Confirm Password</label>
+                                        <input type="password" name="password" id="emailPassword" class="form-input" placeholder="Enter your password for verification" required>
+                                        <div class="error-message" id="emailPasswordError"></div>
+                                    </div>
+                                </div>
+
+                                <div class="button-group">
+                                    <button type="button" class="cancel-btn" onclick="resetEmailForm()">Cancel</button>
+                                    <button type="button" id="sendOtpBtn" class="update-btn">Send Verification Code</button>
+                                </div>
+                            </form>
+                        </div>
+                    <% } %>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function clearPasswordErrors() {
+            document.querySelectorAll('#passwordForm .error-message').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+            document.querySelectorAll('#passwordForm .form-input').forEach(el => {
+                el.classList.remove('error');
+            });
+            document.getElementById('passwordStrength').classList.remove('show');
+        }
+
+        function clearEmailErrors() {
+            document.querySelectorAll('#emailForm .error-message').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+            document.querySelectorAll('#emailForm .form-input').forEach(el => {
+                el.classList.remove('error');
+            });
+        }
+
+        function resetPasswordForm() {
+            document.getElementById('passwordForm').reset();
+            clearPasswordErrors();
+        }
+
+        function resetEmailForm() {
+            document.getElementById('emailForm').reset();
+            clearEmailErrors();
+        }
+
+        function showPasswordError(fieldName, message) {
+            const errorEl = document.getElementById(`${fieldName}Error`);
+            const inputEl = document.querySelector(`[name="${fieldName}"]`) || document.getElementById(fieldName);
+            if (errorEl && inputEl) {
+                errorEl.textContent = message;
+                errorEl.classList.add('show');
+                inputEl.classList.add('error');
+            }
+        }
+
+        function showEmailError(fieldName, message) {
+            const errorEl = document.getElementById(`${fieldName}Error`);
+            const inputEl = document.getElementById(fieldName);
+            if (errorEl && inputEl) {
+                errorEl.textContent = message;
+                errorEl.classList.add('show');
+                inputEl.classList.add('error');
+            }
+        }
+
+        function checkPasswordRequirements(password) {
+            const requirements = {
+                length: password.length >= 6,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /\d/.test(password),
+                special: /[\W_]/.test(password)
+            };
+
+            document.getElementById('req-length').className = requirements.length ? 'requirement met' : 'requirement unmet';
+            document.getElementById('req-uppercase').className = requirements.uppercase ? 'requirement met' : 'requirement unmet';
+            document.getElementById('req-lowercase').className = requirements.lowercase ? 'requirement met' : 'requirement unmet';
+            document.getElementById('req-number').className = requirements.number ? 'requirement met' : 'requirement unmet';
+            document.getElementById('req-special').className = requirements.special ? 'requirement met' : 'requirement unmet';
+
+            const allMet = Object.values(requirements).every(val => val === true);
+            const allCount = Object.values(requirements).filter(val => val === true).length;
+
+            const strengthEl = document.getElementById('strengthText');
+            const strengthContainer = document.getElementById('passwordStrength');
+
+            if (password.length === 0) {
+                strengthContainer.classList.remove('show');
+            } else {
+                strengthContainer.classList.add('show');
+                if (allMet) {
+                    strengthEl.textContent = '✓ Strong Password';
+                    strengthContainer.className = 'password-strength show strong';
+                } else if (allCount >= 3) {
+                    strengthEl.textContent = '⚠ Medium Password';
+                    strengthContainer.className = 'password-strength show medium';
+                } else {
+                    strengthEl.textContent = '✕ Weak Password';
+                    strengthContainer.className = 'password-strength show weak';
+                }
+            }
+
+            return requirements;
+        }
+
+        document.getElementById('newPassword')?.addEventListener('input', (e) => {
+            checkPasswordRequirements(e.target.value);
+        });
+
+        document.getElementById("passwordForm")?.addEventListener("submit", async e => {
+            e.preventDefault();
+            clearPasswordErrors();
+
+            const currentPassword = document.querySelector('[name="currentPassword"]').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+            let isValid = true;
+
+            if (!currentPassword) {
+                showPasswordError('currentPassword', '⚠ Current password is required');
+                isValid = false;
+            }
+
+            if (!newPassword) {
+                showPasswordError('newPassword', '⚠ New password is required');
+                isValid = false;
+            } else {
+                const requirements = checkPasswordRequirements(newPassword);
+                if (!requirements.length) {
+                    showPasswordError('newPassword', '⚠ Password must be at least 6 characters');
+                    isValid = false;
+                } else if (!requirements.uppercase) {
+                    showPasswordError('newPassword', '⚠ Must contain uppercase letter');
+                    isValid = false;
+                } else if (!requirements.lowercase) {
+                    showPasswordError('newPassword', '⚠ Must contain lowercase letter');
+                    isValid = false;
+                } else if (!requirements.number) {
+                    showPasswordError('newPassword', '⚠ Must contain a number');
+                    isValid = false;
+                } else if (!requirements.special) {
+                    showPasswordError('newPassword', '⚠ Must contain special character (!@#$%^&*)');
+                    isValid = false;
+                }
+            }
+
+            if (!confirmPassword) {
+                showPasswordError('confirmPassword', '⚠ Please confirm your password');
+                isValid = false;
+            } else if (newPassword !== confirmPassword) {
+                showPasswordError('confirmPassword', '⚠ Passwords do not match');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            try {
+                Swal.fire({ title: "Processing...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                const res = await fetch("/profile/change-password-init", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+                });
+                Swal.close();
+
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({ 
+                        icon: "success", 
+                        title: "OTP Sent", 
+                        text: data.message, 
+                        timer: 1500 
+                    }).then(() => {
+                        window.location.href = `/profile/change-email-otp?type=${data.type}&token=${data.token}`;
+                    });
+                } else {
+                    showPasswordError('currentPassword', data.message || 'Password change failed');
+                    Swal.fire({ icon: "error", title: "Error", text: data.message });
+                }
+            } catch (err) {
+                Swal.fire({ icon: "error", title: "Error", text: err.message });
+            }
+        });
+
+        document.getElementById("sendOtpBtn")?.addEventListener("click", async () => {
+            clearEmailErrors();
+
+            const newEmail = document.getElementById("newEmail").value.trim();
+            const password = document.getElementById("emailPassword").value.trim();
+
+            let isValid = true;
+
+            if (!newEmail) {
+                showEmailError('newEmail', '⚠ New email is required');
+                isValid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+                showEmailError('newEmail', '⚠ Invalid email address');
+                isValid = false;
+            }
+
+            if (!password) {
+                showEmailError('emailPassword', '⚠ Password is required for verification');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            try {
+                Swal.fire({ title: "Sending OTP...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                const res = await fetch("/profile/change-email-init", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ newEmail, password }),
+                });
+                Swal.close();
+
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({ 
+                        icon: "success", 
+                        title: "OTP Sent", 
+                        text: data.message, 
+                        timer: 1500 
+                    }).then(() => {
+                        window.location.href = `/profile/change-email-otp?type=${data.type}&token=${data.token}`;
+                    });
+                } else {
+                    showEmailError('emailPassword', data.message || 'Failed to send OTP');
+                    Swal.fire({ icon: "error", title: "Error", text: data.message });
+                }
+            } catch (err) {
+                Swal.fire({ icon: "error", title: "Error", text: err.message });
+            }
+        });
+    </script>
+
+    <%- include("../partials/user/footer.ejs") %>
+</body>
+</html>

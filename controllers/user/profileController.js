@@ -448,6 +448,31 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const getSecurityPage = async (req, res) => {
+  try {
+    const userId = req.session.user?.id || req.session.user?._id;
+    
+    if (!userId) {
+      return res.redirect('/login');
+    }
+
+    // Fetch user from database to get latest data
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.redirect('/pageNotFound');
+    }
+
+    res.render('security', {
+      user: user,
+      activePage: 'security'
+    });
+  } catch (error) {
+    console.error('Security page error:', error);
+    res.redirect('/pageNotFound');
+  }
+};
+
 
 module.exports = {
   loadForgotPassword,
@@ -467,5 +492,6 @@ module.exports = {
   verifyOtp,
   resendProfileOtp,
   loadEditProfile,
-  updateProfile
+  updateProfile,
+  getSecurityPage
 };

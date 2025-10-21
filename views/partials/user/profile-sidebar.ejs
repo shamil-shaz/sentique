@@ -160,7 +160,7 @@
     }
 }
 </style>
-
+<!-- Updated Sidebar - Replace the Security Section -->
 <aside class="sidebar">
   <div class="sidebar-left">
     <div class="profile-avatar-container">
@@ -173,7 +173,6 @@
       </div>
     </div>
     <div class="profile-name"><%= user && user.name ? user.name : 'Guest' %></div>
-
   </div>
 
   <div class="sidebar-menu">
@@ -205,6 +204,12 @@
       </a>
       <a href="/coupons" class="menu-item <%= activePage === 'coupons' ? 'active' : '' %>">
         <span>🎟️</span> Coupons
+      </a>
+    </div>
+    <div class="menu-section">
+      <div class="menu-title">Security</div>
+      <a href="/profile/privacy-security" class="menu-item <%= activePage === 'security' ? 'active' : '' %>">
+        <span>🔒</span> Privacy & Security
       </a>
     </div>
   </div>

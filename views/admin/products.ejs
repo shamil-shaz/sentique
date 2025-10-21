@@ -843,9 +843,9 @@
   async function addOffer(productId) {
     const { value: percent } = await Swal.fire({
       title: '<strong><i class="fas fa-tags"></i> Add Product Offer</strong>',
-      html: '<p style="color:#64748b; font-size:14px; margin-top:10px;">Enter the discount percentage (1-100)</p>',
+      html: '<p style="color:#64748b; font-size:14px; margin-top:10px;">Enter the discount percentage (1-99)</p>',
       input: 'number',
-      inputAttributes: { min: 1, max: 100, step: 1 },
+      inputAttributes: { min: 1, max: 99, step: 1 },
       showCancelButton: true,
       confirmButtonText: '<i class="fas fa-check"></i> Apply Offer',
       confirmButtonColor: '#10b981',

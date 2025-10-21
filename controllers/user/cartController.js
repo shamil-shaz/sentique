@@ -427,17 +427,8 @@ const getCartCount = async (req, res) => {
     }
     
     const cart = await Cart.findOne({ userId: userId });
+    const count = cart?.items?.length || 0;
     
-    console.log('[Cart Count] Cart document:', cart);
-
-    let count = 0;
-    if (cart && Array.isArray(cart.items)) {
-      count = cart.items.length;
-   
-    } else {
-      console.log('[Cart Count] No cart or items array found');
-    }
-  
     return res.json({ count, success: true });
   } catch (err) {
     console.error('[Cart Count ERROR]:', err.message);
