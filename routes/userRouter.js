@@ -120,11 +120,15 @@ router.post("/addresses/add", userAuth, addressController.addAddress);
 router.get('/addresses/edit-address/:id', userAuth, addressController.getEditAddress);
 router.get('/profile/order-list',userAuth,orderController.getOrderList)
 router.get('/profile/privacy-security', userAuth, profileController.getSecurityPage);
+router.get("/addresses/list", userAuth, addressController.getAddressesJSON);
+
+//router.get("/get-location/:pincode", addressController.getLocationByPincode);
+router.get("/addresses/get-location/:pincode", addressController.getLocationByPincode);
 
 //----- Update address----
 router.post("/addresses/edit", userAuth, addressController.editAddress);
 router.delete("/addresses/delete/:id", userAuth, addressController.deleteAddress);
-router.get("/addresses/list", userAuth, addressController.getAddressesJSON);
+
 
 ////----- whish List ------
 router.get("/wishlist", userAuth, wishlistController.loadWishlist);

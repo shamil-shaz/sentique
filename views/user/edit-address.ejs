@@ -1,7 +1,9 @@
 <%- include("../partials/user/header.ejs") %>
 
+
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
             margin: 0;
@@ -163,6 +165,25 @@
             gap: 22px;
         }
 
+        .error-text, .success-text, .small-text {
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .error-text {
+            color: #dc2626;
+            display: none;
+        }
+
+        .success-text {
+            color: #059669;
+            display: none;
+        }
+
+        .small-text {
+            color: #718096;
+        }
+
         .checkbox-group {
             display: flex;
             align-items: center;
@@ -249,44 +270,7 @@
             transform: translateY(-2px);
         }
 
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .loading-overlay.show {
-            display: flex;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
@@ -308,7 +292,7 @@
             }
         }
 
-        @keyframes fadeInUp {
+        @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
@@ -319,32 +303,9 @@
             }
         }
 
-        /* RESPONSIVE DESIGN */
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 250px 1fr;
-                gap: 25px;
-            }
-        }
-
         @media (max-width: 868px) {
             .main-content {
                 grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .back-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .edit-form-container {
-                padding: 35px 28px;
             }
 
             .form-row {
@@ -357,18 +318,6 @@
         }
 
         @media (max-width: 640px) {
-            .main-content {
-                padding: 25px 15px;
-            }
-
-            .page-header {
-                padding: 25px;
-            }
-
-            .page-header-left h1 {
-                font-size: 26px;
-            }
-
             .edit-form-container {
                 padding: 30px 20px;
             }
@@ -377,121 +326,102 @@
                 font-size: 22px;
             }
         }
-
-        @media (max-width: 480px) {
-            .page-header-left h1 {
-                font-size: 22px;
-            }
-
-            .back-btn {
-                font-size: 14px;
-                padding: 12px 24px;
-            }
-        }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
-        }
     </style>
 </head>
 
 <body>
-    <body>
     <div class="main-content">
         <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'address' }) %>
 
         <div class="edit-content">
             <div class="page-header">
                 <div class="page-header-left">
-                    <h1>✏️ Edit Address</h1>
+                    <h1>Edit Address</h1>
                     <p>Update your address details</p>
                 </div>
                 <a href="/profile/address" class="back-btn">
-                    ← Back to Addresses
+                    Back to Addresses
                 </a>
             </div>
 
             <div class="edit-form-container">
                 <div class="form-header">
-                    <h2>📝 Address Information</h2>
+                    <h2>Address Information</h2>
                     <p>Modify the fields you want to update</p>
                 </div>
 
                 <form id="editAddressForm" onsubmit="updateAddress(event)">
                     <input type="hidden" id="addressId" value="<%= address._id %>">
 
+                    <!-- Address Type -->
                     <div class="form-group">
-                        <label class="form-label">🏷️ Address Type</label>
+                        <label class="form-label">Address Type *</label>
                         <select class="form-select" name="addressType" id="type" required>
                             <option value="" disabled>Select address type</option>
-                            <option value="Home" <%= address.addressType === 'Home' ? 'selected' : '' %>>🏠 Home</option>
-                            <option value="Work" <%= address.addressType === 'Work' ? 'selected' : '' %>>🏢 Work</option>
-                            <option value="Other" <%= address.addressType === 'Other' ? 'selected' : '' %>>📦 Other</option>
+                            <option value="Home" <%= address.addressType === 'Home' ? 'selected' : '' %>>Home</option>
+                            <option value="Work" <%= address.addressType === 'Work' ? 'selected' : '' %>>Work</option>
+                            <option value="Other" <%= address.addressType === 'Other' ? 'selected' : '' %>>Other</option>
                         </select>
+                        <div class="error-text" id="typeError"></div>
                     </div>
 
+                    <!-- Name & Phone -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">👤 Full Name</label>
-                            <input type="text" class="form-input" name="name" id="name" value="<%= address.name %>" placeholder="Enter full name" required minlength="3" maxlength="20">
-                            <small style="color: #666; font-size: 12px; margin-top: 5px;">Max 20 characters</small>
-                            <div id="nameError" style="color: #dc2626; font-size: 12px; margin-top: 5px;"></div>
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-input" name="name" id="name" value="<%= address.name %>" placeholder="Enter full name" required>
+                            <div class="small-text">Letters and spaces only, 3-50 characters</div>
+                            <div class="error-text" id="nameError"></div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">📱 Phone Number</label>
-                            <input type="tel" class="form-input" name="phone" id="phone" value="<%= address.phone %>" placeholder="Enter 10 digit number" required pattern="[0-9]{10}">
+                            <label class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-input" name="phone" id="phone" value="<%= address.phone %>" placeholder="10 digit number" required maxlength="10">
+                            <div class="error-text" id="phoneError"></div>
                         </div>
                     </div>
 
+                    <!-- House & Building -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">🏠 House/Building Name</label>
-                            <input type="text" class="form-input" name="houseName" id="houseName" value="<%= address.houseName %>" placeholder="Enter house/building name" required minlength="2">
+                            <label class="form-label">House/Building Name *</label>
+                            <input type="text" class="form-input" name="houseName" id="houseName" value="<%= address.houseName %>" placeholder="Enter house/building name" required>
+                            <div class="error-text" id="houseError"></div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">🔢 Building Number <span style="font-size: 12px; color: #718096; font-weight: 500;">(Optional)</span></label>
-                            <input type="text" class="form-input" name="buildingNumber" id="buildingNumber" value="<%= address.buildingNumber || '' %>" placeholder="Enter building number (optional)">
+                            <label class="form-label">Building Number</label>
+                            <input type="text" class="form-input" name="buildingNumber" id="buildingNumber" value="<%= address.buildingNumber || '' %>" placeholder="Optional">
                         </div>
                     </div>
 
+                    <!-- Landmark -->
                     <div class="form-group">
-                        <label class="form-label">🏘️ Landmark</label>
-                        <textarea class="form-textarea" name="landmark" id="landmark" placeholder="Nearby landmark or reference" required minlength="3"><%= address.landmark %></textarea>
+                        <label class="form-label">Landmark *</label>
+                        <textarea class="form-textarea" name="landmark" id="landmark" placeholder="Nearby landmark or reference" required><%= address.landmark %></textarea>
+                        <div class="error-text" id="landmarkError"></div>
                     </div>
 
+                    <!-- Alt Phone & Nationality -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">☎️ Alternative Number <span style="font-size: 12px; color: #718096; font-weight: 500;">(Optional)</span></label>
-                            <input type="tel" class="form-input" name="altPhone" id="altPhone" value="<%= address.altPhone || '' %>" placeholder="Enter 10 digit number (optional)" pattern="[0-9]{10}">
+                            <label class="form-label">Alternative Number</label>
+                            <input type="tel" class="form-input" name="altPhone" id="altPhone" value="<%= address.altPhone || '' %>" placeholder="10 digit number (optional)" maxlength="10">
+                            <div class="error-text" id="altPhoneError"></div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">🌍 Nationality</label>
-                            <input type="text" class="form-input" name="nationality" id="nationality" value="Indian" placeholder="Nationality" required readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                            <label class="form-label">Nationality *</label>
+                            <input type="text" class="form-input" name="nationality" id="nationality" value="Indian" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
                         </div>
                     </div>
 
+                    <!-- City & State -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">🏙️ City</label>
-                            <input type="text" class="form-input" name="city" id="city" value="<%= address.city %>" placeholder="Enter city" required minlength="2">
+                            <label class="form-label">City *</label>
+                            <input type="text" class="form-input" name="city" id="city" value="<%= address.city %>" placeholder="Enter city" required>
+                            <div class="error-text" id="cityError"></div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">🗺️ State</label>
+                            <label class="form-label">State *</label>
                             <select class="form-select" name="state" id="state" required>
                                 <option value="" disabled>Select state</option>
                                 <option value="Andhra Pradesh" <%= address.state === 'Andhra Pradesh' ? 'selected' : '' %>>Andhra Pradesh</option>
@@ -523,78 +453,137 @@
                                 <option value="Uttarakhand" <%= address.state === 'Uttarakhand' ? 'selected' : '' %>>Uttarakhand</option>
                                 <option value="West Bengal" <%= address.state === 'West Bengal' ? 'selected' : '' %>>West Bengal</option>
                             </select>
+                            <div class="error-text" id="stateError"></div>
                         </div>
                     </div>
 
+                    <!-- PIN Code -->
                     <div class="form-group">
-                        <label class="form-label">📮 ZIP Code</label>
-                        <input type="text" class="form-input" name="pincode" id="zip" value="<%= address.pincode %>" placeholder="Enter 6-digit PIN code" required pattern="[0-9]{6}" maxlength="6">
-                        <small style="color: #666; font-size: 12px; margin-top: 5px;">Valid 6-digit code (not 123456, 654321, or 111111)</small>
-                        <div id="zipError" style="color: #dc2626; font-size: 12px; margin-top: 5px;"></div>
+                        <label class="form-label">PIN Code *</label>
+                        <input type="text" class="form-input" name="pincode" id="zip" value="<%= address.pincode %>" placeholder="Enter 6-digit PIN code" required maxlength="6">
+                        <div class="small-text">6 digits (not 123456, 654321, or 111111)</div>
+                        <div class="error-text" id="zipError"></div>
                     </div>
 
+                    <!-- Default Address -->
                     <div class="form-group">
                         <div class="checkbox-group">
                             <input type="checkbox" id="setDefault" name="isDefault" <%= address.isDefault ? 'checked' : '' %>>
-                            <label for="setDefault">⭐ Set as default address</label>
+                            <label for="setDefault">Set as default address</label>
                         </div>
                     </div>
 
+                    <!-- Form Actions -->
                     <div class="form-actions">
                         <a href="/profile/address" class="form-btn btn-cancel">Cancel</a>
-                        <button type="submit" class="form-btn btn-submit" id="submitBtn">
-                            💾 Update Address
-                        </button>
+                        <button type="submit" class="form-btn btn-submit" id="submitBtn">Update Address</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const nameInput = document.getElementById('name');
-        const zipInput = document.getElementById('zip');
-        const nameError = document.getElementById('nameError');
-        const zipError = document.getElementById('zipError');
+        const errors = {
+            name: document.getElementById('nameError'),
+            phone: document.getElementById('phoneError'),
+            altPhone: document.getElementById('altPhoneError'),
+            house: document.getElementById('houseError'),
+            landmark: document.getElementById('landmarkError'),
+            zip: document.getElementById('zipError'),
+            city: document.getElementById('cityError'),
+            state: document.getElementById('stateError'),
+            type: document.getElementById('typeError')
+        };
 
-        // Name validation - max 20 characters
-        nameInput.addEventListener('input', (e) => {
-            if (e.target.value.length > 20) {
-                nameError.textContent = 'Name cannot exceed 20 characters';
-                e.target.value = e.target.value.substring(0, 20);
-            } else if (e.target.value.length < 3 && e.target.value.length > 0) {
-                nameError.textContent = 'Name must be at least 3 characters';
-            } else {
-                nameError.textContent = '';
+        // Name validation
+        document.getElementById('name').addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            errors.name.style.display = 'none';
+
+            if (val.length > 0) {
+                if (!/^[a-zA-Z\s]+$/.test(val)) {
+                    errors.name.textContent = 'Name can only contain letters and spaces';
+                    errors.name.style.display = 'block';
+                } else if (val.length < 3) {
+                    errors.name.textContent = 'Name must be at least 3 characters';
+                    errors.name.style.display = 'block';
+                } else if (val.length > 50) {
+                    errors.name.textContent = 'Name cannot exceed 50 characters';
+                    errors.name.style.display = 'block';
+                    e.target.value = val.substring(0, 50);
+                }
             }
         });
 
-        // ZIP code validation only
-        zipInput.addEventListener('blur', (e) => {
+        // Phone validation
+        document.getElementById('phone').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+            errors.phone.style.display = 'none';
+
+            if (e.target.value.length > 0 && e.target.value.length !== 10) {
+                errors.phone.textContent = 'Phone number must be exactly 10 digits';
+                errors.phone.style.display = 'block';
+            }
+        });
+
+        // Alt phone validation
+        document.getElementById('altPhone').addEventListener('blur', (e) => {
+            const val = e.target.value.trim();
+            errors.altPhone.style.display = 'none';
+
+            if (val.length > 0) {
+                if (!/^\d{10}$/.test(val)) {
+                    errors.altPhone.textContent = 'Alternative phone must be exactly 10 digits';
+                    errors.altPhone.style.display = 'block';
+                } else if (val === document.getElementById('phone').value.trim()) {
+                    errors.altPhone.textContent = 'Cannot be same as main phone number';
+                    errors.altPhone.style.display = 'block';
+                }
+            }
+        });
+
+        // House validation
+        document.getElementById('houseName').addEventListener('blur', (e) => {
+            const val = e.target.value.trim();
+            errors.house.style.display = 'none';
+
+            if (val.length > 0 && val.length < 2) {
+                errors.house.textContent = 'House/Building name must be at least 2 characters';
+                errors.house.style.display = 'block';
+            }
+        });
+
+        // Landmark validation
+        document.getElementById('landmark').addEventListener('blur', (e) => {
+            const val = e.target.value.trim();
+            errors.landmark.style.display = 'none';
+
+            if (val.length > 0 && val.length < 3) {
+                errors.landmark.textContent = 'Landmark must be at least 3 characters';
+                errors.landmark.style.display = 'block';
+            }
+        });
+
+        // PIN code validation with real API fetch
+        document.getElementById('zip').addEventListener('blur', async (e) => {
             const pincode = e.target.value.trim();
-            zipError.textContent = '';
-            
+            errors.zip.style.display = 'none';
+
             if (!pincode) return;
 
-            // Validate format
             if (!/^\d{6}$/.test(pincode)) {
-                zipError.textContent = 'PIN code must be exactly 6 digits';
+                errors.zip.textContent = 'PIN code must be exactly 6 digits';
+                errors.zip.style.display = 'block';
                 return;
             }
 
-            // Check for all same digits
             if (/^(\d)\1{5}$/.test(pincode)) {
-                zipError.textContent = 'PIN code cannot have all same digits (e.g., 111111)';
+                errors.zip.textContent = 'PIN code cannot have all same digits';
+                errors.zip.style.display = 'block';
                 return;
             }
 
-            // Check if sequential
             let isSequential = true;
             for (let i = 1; i < 6; i++) {
                 if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
@@ -603,11 +592,11 @@
                 }
             }
             if (isSequential) {
-                zipError.textContent = 'PIN code cannot be sequential (e.g., 123456)';
+                errors.zip.textContent = 'PIN code cannot be sequential';
+                errors.zip.style.display = 'block';
                 return;
             }
 
-            // Check if reverse sequential
             let isReverseSequential = true;
             for (let i = 1; i < 6; i++) {
                 if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
@@ -616,74 +605,150 @@
                 }
             }
             if (isReverseSequential) {
-                zipError.textContent = 'PIN code cannot be reverse sequential (e.g., 654321)';
+                errors.zip.textContent = 'PIN code cannot be reverse sequential';
+                errors.zip.style.display = 'block';
                 return;
+            }
+
+            // Fetch location from API
+            try {
+                console.log('Fetching location for PIN:', pincode);
+                const res = await fetch(`/addresses/get-location/${pincode}`);
+                const data = await res.json();
+                console.log('API Response:', data);
+
+                if (data.success) {
+                    document.getElementById('city').value = data.city || '';
+                    
+                    let found = false;
+                    const stateSelect = document.getElementById('state');
+                    for (let option of stateSelect.options) {
+                        if (option.value.toLowerCase() === (data.state || '').toLowerCase()) {
+                            option.selected = true;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) stateSelect.selectedIndex = 0;
+
+                    console.log('Location found:', data.city, data.state);
+                } else {
+                    errors.zip.textContent = data.message || 'Invalid PIN code';
+                    errors.zip.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Error fetching location:', err);
+                errors.zip.textContent = 'Error fetching location data';
+                errors.zip.style.display = 'block';
             }
         });
 
+        // Input filtering
+        document.getElementById('phone').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+        });
+
+        document.getElementById('altPhone').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+        });
+
+        document.getElementById('zip').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
+        });
+
+        // Form submission
         async function updateAddress(e) {
             e.preventDefault();
 
-            const submitBtn = document.getElementById('submitBtn');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Updating...';
-            loadingOverlay.classList.add('show');
+            Object.values(errors).forEach(el => el.style.display = 'none');
 
-            const addressId = document.getElementById('addressId').value;
+            const addressType = document.getElementById('type').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const houseName = document.getElementById('houseName').value.trim();
+            const landmark = document.getElementById('landmark').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const state = document.getElementById('state').value.trim();
+            const pincode = document.getElementById('zip').value.trim();
+            const altPhone = document.getElementById('altPhone').value.trim();
+
+            let hasErrors = false;
+
+            if (!addressType) {
+                errors.type.textContent = 'Please select address type';
+                errors.type.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (!name || name.length < 3 || name.length > 50 || !/^[a-zA-Z\s]+$/.test(name)) {
+                errors.name.textContent = 'Name: 3-50 letters/spaces only';
+                errors.name.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (!phone || phone.length !== 10) {
+                errors.phone.textContent = 'Phone must be exactly 10 digits';
+                errors.phone.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (!houseName || houseName.length < 2) {
+                errors.house.textContent = 'House name: min 2 characters';
+                errors.house.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (!landmark || landmark.length < 3) {
+                errors.landmark.textContent = 'Landmark: min 3 characters';
+                errors.landmark.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (!city) {
+                errors.city.textContent = 'City is required';
+                errors.city.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (!state) {
+                errors.state.textContent = 'State is required';
+                errors.state.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (!pincode || pincode.length !== 6) {
+                errors.zip.textContent = 'Valid 6-digit PIN code required';
+                errors.zip.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (altPhone && (altPhone.length !== 10 || !/^\d{10}$/.test(altPhone))) {
+                errors.altPhone.textContent = 'Alt phone must be 10 digits';
+                errors.altPhone.style.display = 'block';
+                hasErrors = true;
+            }
+
+            if (hasErrors) return;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+
             const payload = {
-                id: addressId,
-                addressType: document.getElementById('type').value.trim(),
-                name: document.getElementById('name').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                houseName: document.getElementById('houseName').value.trim(),
+                id: document.getElementById('addressId').value,
+                addressType,
+                name,
+                phone,
+                houseName,
                 buildingNumber: document.getElementById('buildingNumber').value.trim(),
-                landmark: document.getElementById('landmark').value.trim(),
-                altPhone: document.getElementById('altPhone').value.trim(),
+                landmark,
+                altPhone,
                 nationality: 'Indian',
-                city: document.getElementById('city').value.trim(),
-                state: document.getElementById('state').value.trim(),
-                pincode: document.getElementById('zip').value.trim(),
+                city,
+                state,
+                pincode,
                 isDefault: document.getElementById('setDefault').checked
             };
-
-            // Validate ZIP code format on submit
-            const pincodeValidation = validatePincode(payload.pincode);
-            if (!pincodeValidation.valid) {
-                resetButton();
-                return showError('Invalid ZIP Code', pincodeValidation.message);
-            }
-
-            // Client-side validation
-            if (!payload.addressType || !['Home', 'Work', 'Other'].includes(payload.addressType)) {
-                resetButton();
-                return showError('Invalid Input', 'Please select a valid address type (Home, Work, Other)');
-            }
-            if (payload.name.length < 3 || payload.name.length > 20) {
-                resetButton();
-                return showError('Invalid Name', 'Name must be between 3 and 20 characters');
-            }
-            if (!/^\d{10}$/.test(payload.phone)) {
-                resetButton();
-                return showError('Invalid Phone', 'Phone number must be exactly 10 digits');
-            }
-            if (payload.houseName.length < 2) {
-                resetButton();
-                return showError('Invalid House Name', 'House/Building name must be at least 2 characters');
-            }
-            if (payload.landmark.length < 3) {
-                resetButton();
-                return showError('Invalid Landmark', 'Landmark must be at least 3 characters');
-            }
-            if (payload.altPhone && !/^\d{10}$/.test(payload.altPhone)) {
-                resetButton();
-                return showError('Invalid Alternative Number', 'Alternative number must be exactly 10 digits');
-            }
-            if (!payload.city || !payload.state || !payload.pincode) {
-                resetButton();
-                return showError('Missing Information', 'City, state, and ZIP code are required');
-            }
 
             try {
                 const res = await fetch('/addresses/edit', {
@@ -700,70 +765,31 @@
                         title: 'Success!',
                         text: data.message || 'Address updated successfully',
                         confirmButtonColor: '#667eea',
-                        timer: 2000,
-                        showConfirmButton: false
+                        confirmButtonText: 'OK'
                     });
                     window.location.href = '/profile/address';
                 } else {
-                    resetButton();
-                    showError('Error', data.message || 'Failed to update address');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Failed to update address',
+                        confirmButtonColor: '#667eea',
+                        confirmButtonText: 'OK'
+                    });
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Update Address';
                 }
             } catch (err) {
                 console.error('Update error:', err);
-                resetButton();
-                showError('Server Error', 'Failed to update address. Please try again.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Network Error',
+                    text: 'Failed to update address',
+                    confirmButtonColor: '#667eea'
+                });
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Update Address';
             }
-        }
-
-        function validatePincode(pincode) {
-            if (!/^\d{6}$/.test(pincode)) {
-                return { valid: false, message: 'PIN code must be exactly 6 digits' };
-            }
-
-            if (/^(\d)\1{5}$/.test(pincode)) {
-                return { valid: false, message: 'PIN code cannot have all same digits (e.g., 111111)' };
-            }
-
-            let isSequential = true;
-            for (let i = 1; i < 6; i++) {
-                if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
-                    isSequential = false;
-                    break;
-                }
-            }
-            if (isSequential) {
-                return { valid: false, message: 'PIN code cannot be sequential (e.g., 123456)' };
-            }
-
-            let isReverseSequential = true;
-            for (let i = 1; i < 6; i++) {
-                if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
-                    isReverseSequential = false;
-                    break;
-                }
-            }
-            if (isReverseSequential) {
-                return { valid: false, message: 'PIN code cannot be reverse sequential (e.g., 654321)' };
-            }
-
-            return { valid: true, message: 'Valid PIN code' };
-        }
-
-        function resetButton() {
-            const submitBtn = document.getElementById('submitBtn');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Update Address';
-            loadingOverlay.classList.remove('show');
-        }
-
-        function showError(title, text) {
-            Swal.fire({
-                icon: 'error',
-                title: title,
-                text: text,
-                confirmButtonColor: '#667eea'
-            });
         }
     </script>
 

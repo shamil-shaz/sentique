@@ -1630,6 +1630,7 @@ body {
 
 
   </style>
+
 </head>
 
 
@@ -2045,8 +2046,7 @@ body {
 
   <script>
 
-
-// Comprehensive client-side validation
+    // Comprehensive address validation with PIN code and real email validation
 const validateAddressForm = (payload) => {
   const errors = {};
 
@@ -2055,105 +2055,126 @@ const validateAddressForm = (payload) => {
     errors.type = 'Please select a valid address type';
   }
 
-  // Name validation
+  // Name validation - letters and spaces only, 3-50 chars
   if (!payload.name) {
     errors.name = 'Full name is required';
-  } else if (payload.name.length < 3) {
-    errors.name = 'Full name must be at least 3 characters';
+  } else {
+    const name = payload.name.trim();
+    if (name.length < 3) {
+      errors.name = 'Full name must be at least 3 characters';
+    } else if (name.length > 50) {
+      errors.name = 'Full name cannot exceed 50 characters';
+    } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+      errors.name = 'Full name can only contain letters and spaces';
+    }
   }
 
-  // Phone validation
+  // Phone validation - exactly 10 digits
   if (!payload.phone) {
     errors.phone = 'Phone number is required';
   } else if (!/^\d{10}$/.test(payload.phone)) {
     errors.phone = 'Phone number must be exactly 10 digits';
   }
 
-  // House Name validation
+  // House Name validation - min 2 chars
   if (!payload.houseName) {
     errors.houseName = 'House/Building name is required';
   } else if (payload.houseName.length < 2) {
     errors.houseName = 'House/Building name must be at least 2 characters';
   }
 
-  // Landmark validation
+  // Landmark validation - min 3 chars
   if (!payload.landmark) {
     errors.landmark = 'Landmark is required';
   } else if (payload.landmark.length < 3) {
     errors.landmark = 'Landmark must be at least 3 characters';
   }
 
-  // Alternative Phone validation (optional)
+  // Alternative Phone validation (optional but validate if provided)
   if (payload.altPhone && payload.altPhone.length > 0) {
     if (!/^\d{10}$/.test(payload.altPhone)) {
       errors.altPhone = 'Alternative phone must be exactly 10 digits';
+    } else if (payload.altPhone === payload.phone) {
+      errors.altPhone = 'Cannot be same as main phone number';
     }
   }
 
-  // Nationality validation - ONLY LETTERS AND SPACES
+  // Nationality validation - must be India
   if (!payload.nationality) {
     errors.nationality = 'Nationality is required';
-  } else if (payload.nationality.length < 2) {
-    errors.nationality = 'Nationality must be at least 2 characters';
-  } else if (!/^[a-zA-Z\s]+$/.test(payload.nationality)) {
-    errors.nationality = 'Nationality can only contain letters and spaces';
+  } else if (payload.nationality.trim() !== 'India') {
+    errors.nationality = 'Only India is available';
   }
 
-  // City validation
+  // City validation - min 2 chars
   if (!payload.city) {
     errors.city = 'City is required';
   } else if (payload.city.length < 2) {
     errors.city = 'City must be at least 2 characters';
   }
 
-  // State validation - ONLY LETTERS AND SPACES
+  // State validation - must be from predefined list
   if (!payload.state) {
     errors.state = 'State is required';
-  } else if (payload.state.length < 2) {
-    errors.state = 'State must be at least 2 characters';
-  } else if (!/^[a-zA-Z\s]+$/.test(payload.state)) {
-    errors.state = 'State can only contain letters and spaces';
+  } else {
+    const validStates = [
+      'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+      'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+      'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+      'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+      'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+      'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+    ];
+    if (!validStates.includes(payload.state)) {
+      errors.state = 'Please select a valid state';
+    }
   }
 
-  // ZIP/Pincode validation
+  // PIN code validation
   if (!payload.pincode) {
-    errors.zip = 'ZIP code is required';
+    errors.zip = 'PIN code is required';
   } else if (!/^\d{6}$/.test(payload.pincode)) {
-    errors.zip = 'ZIP code must be exactly 6 digits';
+    errors.zip = 'PIN code must be exactly 6 digits';
   } else {
-    const pincodeStr = payload.pincode;
+    const pincode = payload.pincode;
     
-    // Check if all digits are same
-    if (/^(\d)\1{5}$/.test(pincodeStr)) {
-      errors.zip = 'ZIP code cannot contain all same digits';
+    // Check if all digits are the same
+    if (/^(\d)\1{5}$/.test(pincode)) {
+      errors.zip = 'PIN code cannot have all same digits (e.g., 111111)';
     }
     
     // Check if sequential
     let isSequential = true;
     for (let i = 1; i < 6; i++) {
-      if (parseInt(pincodeStr[i]) - parseInt(pincodeStr[i - 1]) !== 1) {
+      if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
         isSequential = false;
         break;
       }
     }
     if (isSequential) {
-      errors.zip = 'ZIP code cannot be sequential digits like 123456';
+      errors.zip = 'PIN code cannot be sequential (e.g., 123456)';
     }
     
     // Check if reverse sequential
     let isReverseSequential = true;
     for (let i = 1; i < 6; i++) {
-      if (parseInt(pincodeStr[i - 1]) - parseInt(pincodeStr[i]) !== 1) {
+      if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
         isReverseSequential = false;
         break;
       }
     }
     if (isReverseSequential) {
-      errors.zip = 'ZIP code cannot be reverse sequential like 654321';
+      errors.zip = 'PIN code cannot be reverse sequential (e.g., 654321)';
     }
   }
 
   return errors;
+};
+
+// Real email validation (RFC 5322 simplified)
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim());
 };
 
 // Show error messages
@@ -2177,6 +2198,215 @@ const clearErrorMessages = () => {
     err.classList.remove('show');
   });
 };
+
+// Update existing saveAddress function with enhanced validation
+async function saveAddress(e) {
+  e.preventDefault();
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'Saving...';
+
+  const editId = document.getElementById('editId').value;
+  const payload = {
+    addressType: document.getElementById('type').value.trim(),
+    name: document.getElementById('name').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    houseName: document.getElementById('houseName').value.trim(),
+    buildingNumber: document.getElementById('buildingNumber').value.trim(),
+    landmark: document.getElementById('landmark').value.trim(),
+    altPhone: document.getElementById('altPhone').value.trim(),
+    nationality: 'India',
+    city: document.getElementById('city').value.trim(),
+    state: document.getElementById('state').value.trim(),
+    pincode: document.getElementById('zip').value.trim(),
+    isDefault: document.getElementById('setDefault').checked
+  };
+
+  // Validate form using comprehensive validation
+  const errors = validateAddressForm(payload);
+
+  if (Object.keys(errors).length > 0) {
+    showErrorMessages(errors);
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation Error!',
+      text: 'Please fix the errors highlighted in the form',
+      confirmButtonColor: '#22c55e'
+    });
+    return;
+  }
+
+  clearErrorMessages();
+
+  if (editId) payload.id = editId;
+
+  const url = editId ? `/checkout/edit-address/${editId}` : '/checkout/add-address';
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: `Address ${editId ? 'updated' : 'added'} successfully`,
+        confirmButtonColor: '#22c55e',
+        confirmButtonText: 'OK'
+      });
+      closeModal();
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      if (data.errors && Array.isArray(data.errors)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Validation Error!',
+          html: '<ul style="text-align: left;">' + 
+                data.errors.map(err => `<li>${err}</li>`).join('') + 
+                '</ul>',
+          confirmButtonColor: '#22c55e'
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: data.message || 'Failed to save address',
+          confirmButtonColor: '#22c55e'
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Save address error:', err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error!',
+      text: 'Failed to save address. Please try again.',
+      confirmButtonColor: '#22c55e'
+    });
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+}
+
+// Real-time PIN code validation with API fetch
+document.getElementById('zip')?.addEventListener('blur', async (e) => {
+  const pincode = e.target.value.trim();
+  const zipError = document.getElementById('zipError');
+  
+  zipError.classList.remove('show');
+
+  if (!pincode) return;
+
+  if (!/^\d{6}$/.test(pincode)) {
+    zipError.textContent = 'PIN code must be exactly 6 digits';
+    zipError.classList.add('show');
+    return;
+  }
+
+  if (/^(\d)\1{5}$/.test(pincode)) {
+    zipError.textContent = 'PIN code cannot have all same digits';
+    zipError.classList.add('show');
+    return;
+  }
+
+  let isSequential = true;
+  for (let i = 1; i < 6; i++) {
+    if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
+      isSequential = false;
+      break;
+    }
+  }
+  if (isSequential) {
+    zipError.textContent = 'PIN code cannot be sequential';
+    zipError.classList.add('show');
+    return;
+  }
+
+  let isReverseSequential = true;
+  for (let i = 1; i < 6; i++) {
+    if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
+      isReverseSequential = false;
+      break;
+    }
+  }
+  if (isReverseSequential) {
+    zipError.textContent = 'PIN code cannot be reverse sequential';
+    zipError.classList.add('show');
+    return;
+  }
+
+  // Fetch real location from API
+  try {
+    const res = await fetch(`/addresses/get-location/${pincode}`);
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById('city').value = data.city || '';
+      
+      const stateSelect = document.getElementById('state');
+      let found = false;
+      for (let option of stateSelect.options) {
+        if (option.value.toLowerCase() === (data.state || '').toLowerCase()) {
+          option.selected = true;
+          found = true;
+          break;
+        }
+      }
+      if (!found) stateSelect.selectedIndex = 0;
+    } else {
+      zipError.textContent = data.message || 'Invalid PIN code';
+      zipError.classList.add('show');
+    }
+  } catch (err) {
+    console.error('Error fetching location:', err);
+    zipError.textContent = 'Error fetching location data';
+    zipError.classList.add('show');
+  }
+});
+
+// Input filtering
+document.getElementById('phone')?.addEventListener('input', (e) => {
+  e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+});
+
+document.getElementById('altPhone')?.addEventListener('input', (e) => {
+  e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+});
+
+document.getElementById('zip')?.addEventListener('input', (e) => {
+  e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
+});
+
+// Name input validation
+document.getElementById('name')?.addEventListener('input', (e) => {
+  const val = e.target.value.trim();
+  const nameError = document.getElementById('nameError');
+  nameError.classList.remove('show');
+
+  if (val.length > 0) {
+    if (!/^[a-zA-Z\s]+$/.test(val)) {
+      nameError.textContent = 'Name can only contain letters and spaces';
+      nameError.classList.add('show');
+    } else if (val.length < 3) {
+      nameError.textContent = 'Name must be at least 3 characters';
+      nameError.classList.add('show');
+    } else if (val.length > 50) {
+      nameError.textContent = 'Name cannot exceed 50 characters';
+      nameError.classList.add('show');
+      e.target.value = val.substring(0, 50);
+    }
+  }
+});
+
 
 const paymentMethods = {
   'card': { icon: '💳', label: 'Debit Card / Credit Card' },
@@ -2343,102 +2573,6 @@ async function deleteAddress(id) {
   }
 }
 
-async function saveAddress(e) {
-  e.preventDefault();
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.disabled = true;
-  const originalText = submitBtn.textContent;
-  submitBtn.textContent = 'Saving...';
-
-  const editId = document.getElementById('editId').value;
-  const payload = {
-    addressType: document.getElementById('type').value.trim(),
-    name: document.getElementById('name').value.trim(),
-    phone: document.getElementById('phone').value.trim(),
-    houseName: document.getElementById('houseName').value.trim(),
-    buildingNumber: document.getElementById('buildingNumber').value.trim(),
-    landmark: document.getElementById('landmark').value.trim(),
-    altPhone: document.getElementById('altPhone').value.trim(),
-    nationality: document.getElementById('nationality').value.trim(),
-    city: document.getElementById('city').value.trim(),
-    state: document.getElementById('state').value.trim(),
-    pincode: document.getElementById('zip').value.trim(),
-    isDefault: document.getElementById('setDefault').checked
-  };
-
-  // Validate form using comprehensive validation
-  const errors = validateAddressForm(payload);
-
-  if (Object.keys(errors).length > 0) {
-    showErrorMessages(errors);
-    submitBtn.disabled = false;
-    submitBtn.textContent = originalText;
-    
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation Error!',
-      text: 'Please fix the errors highlighted in the form',
-      confirmButtonColor: '#22c55e'
-    });
-    return;
-  }
-
-  clearErrorMessages();
-
-  if (editId) payload.id = editId;
-
-  const url = editId ? `/checkout/edit-address/${editId}` : '/checkout/add-address';
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: `Address ${editId ? 'updated' : 'added'} successfully`,
-        timer: 2000,
-        showConfirmButton: false
-      });
-      closeModal();
-      setTimeout(() => window.location.reload(), 2000);
-    } else {
-      if (data.errors && Array.isArray(data.errors)) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Validation Error!',
-          html: '<ul style="text-align: left;">' + 
-                data.errors.map(err => `<li>${err}</li>`).join('') + 
-                '</ul>',
-          confirmButtonColor: '#22c55e'
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: data.message || 'Failed to save address',
-          confirmButtonColor: '#22c55e'
-        });
-      }
-    }
-  } catch (err) {
-    console.error('Save address error:', err);
-    Swal.fire({
-      icon: 'error',
-      title: 'Server Error!',
-      text: 'Failed to save address. Please try again.',
-      confirmButtonColor: '#22c55e'
-    });
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = originalText;
-  }
-}
 
 // Close modal when clicking outside
 document.getElementById('addressModal')?.addEventListener('click', function(e) {
