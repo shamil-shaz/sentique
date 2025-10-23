@@ -870,111 +870,104 @@
                 <h2><i class="fas fa-bell"></i> Return Requests</h2>
                 <button class="close" onclick="closeRequestModal()">&times;</button>
             </div>
-            <div class="modal-body" id="requestModalBody">
-                <% if (returnRequests && returnRequests.length > 0) { %>
-                 <% returnRequests.forEach(function(request) { %>
-  <div class="cancellation-card" data-request-type="return" data-order-id="<%= request.id %>">
-    <div class="cancellation-header">
-      <div class="cancellation-icon">
-        <i class="fas fa-undo"></i>
-      </div>
-      <div>
-        <h3 style="margin: 0; font-size: 16px;">
-          Return Request #<%= request.id %>
-        </h3>
-        <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">
-          Customer: <%= request.customerName %>
-        </p>
-      </div>
-    </div>
-
-    <!-- Order-level reason -->
-    <div style="margin-top: 12px;">
-      <div class="detail-label">Order Level Reason (if any)</div>
-      <div class="detail-value" style="color: #64748b; font-weight: 500;">
-        <%= request.reason %>
-      </div>
-    </div>
-
-    <!-- Product-level returns -->
-    <div style="margin-top: 12px;">
-      <div class="detail-label">Products</div>
-      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
-       <% request.products.forEach(function(product, idx) { %>
-  <div class="product-item" data-product-id="<%= product.productId %>">
-    <img 
-      src="<%= product.image || 'https://via.placeholder.com/80x80?text=No+Image' %>" 
-      alt="<%= product.product %>" 
-      class="product-image"
-      style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #f8fafc;"
-    />
-    <div style="flex: 1; font-size: 13px; color: #475569;">
-      <strong><%= idx + 1 %>. <%= product.product %></strong><br>
-      <span style="font-size: 12px; color: #94a3b8;">
-        <%= product.variant %> • Qty: <%= product.quantity %>
-      </span>
-      <div style="margin-top: 4px;">
-        <div class="detail-label" style="font-size: 11px;">Reason</div>
-        <div class="detail-value" style="font-size: 12px; color: #64748b; font-weight: 500;">
-          <%= product.reason || 'N/A' %>
-        </div>
-      </div>
-    </div>
-
-            <!-- ✅ Individual Approve/Reject buttons -->
-            <div class="action-buttons" style="flex-direction: column; gap: 4px; margin-left: 12px;">
-              <button 
-                class="btn btn-approve" 
-                onclick="handleRequest('<%= request.id %>', 'approve', 'return', '<%= product.productId %>')">
-                <i class="fas fa-check"></i> Approve
-              </button>
-              <button 
-                class="btn btn-reject" 
-                onclick="handleRequest('<%= request.id %>', 'reject', 'return', '<%= product.productId %>')">
-                <i class="fas fa-times"></i> Reject
-              </button>
-            </div>
+           <div id="requestModalBody">
+  <% if (returnRequests && returnRequests.length > 0) { %>
+    <% returnRequests.forEach(function(request) { %>
+      <div class="cancellation-card" data-request-type="return" data-order-id="<%= request.id %>">
+        <div class="cancellation-header">
+          <div class="cancellation-icon">
+            <i class="fas fa-undo"></i>
           </div>
-        <% }); %>
-      </div>
-    </div>
-
-    <!-- ✅ Full order Approve/Reject -->
-    <div class="action-buttons" style="justify-content: center; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-      <button 
-        class="btn btn-approve" 
-        onclick="handleRequest('<%= request.id %>', 'approve', 'return', null)">
-        <i class="fas fa-check"></i> Approve Full Order Return
-      </button>
-      <button 
-        class="btn btn-reject" 
-        onclick="handleRequest('<%= request.id %>', 'reject', 'return', null)">
-        <i class="fas fa-times"></i> Reject Full Order Return
-      </button>
-    </div>
-  </div>
-<% }); %>
-
-                <% } else { %>
-                    <div class="empty-state">
-                        <div class="empty-icon"><i class="fas fa-check-circle"></i></div>
-                        <h3>No Pending Return Requests</h3>
-                        <p>All return requests have been processed</p>
-                    </div>
-                <% } %>
-            </div>
+          <div>
+            <h3 style="margin: 0; font-size: 16px;">
+              Return Request #<%= request.id %>
+            </h3>
+            <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">
+              Customer: <%= request.customerName %>
+            </p>
+          </div>
         </div>
-    </div>
 
+        <!-- Order-level reason -->
+        <div style="margin-top: 12px;">
+          <div class="detail-label">Order Level Reason (if any)</div>
+          <div class="detail-value" style="color: #64748b; font-weight: 500;">
+            <%= request.reason %>
+          </div>
+        </div>
+
+        <!-- Product-level returns -->
+        <div style="margin-top: 12px;">
+          <div class="detail-label">Products</div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+            <% request.products.forEach(function(product, idx) { %>
+              <div class="product-item" data-product-id="<%= product.productId %>">
+                <img 
+                  src="<%= product.image || 'https://via.placeholder.com/80x80?text=No+Image' %>" 
+                  alt="<%= product.product %>" 
+                  class="product-image"
+                  style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #f8fafc;"
+                />
+                <div style="flex: 1; font-size: 13px; color: #475569;">
+                  <strong><%= idx + 1 %>. <%= product.product %></strong><br>
+                  <span style="font-size: 12px; color: #94a3b8;">
+                    <%= product.variant %> • Qty: <%= product.quantity %>
+                  </span>
+                  <div style="margin-top: 4px;">
+                    <div class="detail-label" style="font-size: 11px;">Reason</div>
+                    <div class="detail-value" style="font-size: 12px; color: #64748b; font-weight: 500;">
+                      <%= product.reason || 'N/A' %>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ✅ FIXED: Include variant parameter -->
+                <div class="action-buttons" style="flex-direction: column; gap: 4px; margin-left: 12px;">
+                  <button 
+                    class="btn btn-approve" 
+                    onclick="handleRequest('<%= request.id %>', 'approve', 'return', '<%= product.productId %>', '<%= product.variant %>')">
+                    <i class="fas fa-check"></i> Approve
+                  </button>
+                  <button 
+                    class="btn btn-reject" 
+                    onclick="handleRequest('<%= request.id %>', 'reject', 'return', '<%= product.productId %>', '<%= product.variant %>')">
+                    <i class="fas fa-times"></i> Reject
+                  </button>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+
+        <!-- Full order Approve/Reject -->
+        <div class="action-buttons" style="justify-content: center; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+          <button 
+            class="btn btn-approve" 
+            onclick="handleRequest('<%= request.id %>', 'approve', 'return', null, null)">
+            <i class="fas fa-check"></i> Approve Full Order Return
+          </button>
+          <button 
+            class="btn btn-reject" 
+            onclick="handleRequest('<%= request.id %>', 'reject', 'return', null, null)">
+            <i class="fas fa-times"></i> Reject Full Order Return
+          </button>
+        </div>
+      </div>
+    <% }); %>
+
+  <% } else { %>
+    <div class="empty-state">
+      <div class="empty-icon"><i class="fas fa-check-circle"></i></div>
+      <h3>No Pending Return Requests</h3>
+      <p>All return requests have been processed</p>
+    </div>
+  <% } %>
+</div>
 
 
 
     <script>
-   // ============================================
-// UPDATED ADMIN PANEL JAVASCRIPT
-// ============================================
 
-// Data from backend
 let ordersDatabase = <%- JSON.stringify(orders) %>;
 let filteredOrders = [...ordersDatabase];
 let currentFilter = 'all';
@@ -1491,141 +1484,144 @@ window.onclick = function(event) {
 }
 // Handle return request (approve/reject)
 // Handle return request (approve/reject)
-async function handleRequest(orderId, action, type, productId) {
-    try {
-        console.log('handleRequest called:', { orderId, action, type, productId });
-        
-        // Determine if it's a full order or specific item
-        const isFullOrder = productId === null || productId === 'null' || productId === undefined;
-        
-        // Build URL and payload
-        let url, method, body;
-        
-        if (action === 'approve') {
-            if (isFullOrder) {
-                // Full order approval - needs special route
-                // Since your backend expects itemIndex in URL, we'll use 'all' as placeholder
-                url = `/admin/orders/${orderId}/items/all/all/approve-return`;
-                method = 'POST';
-                body = JSON.stringify({ 
-                    orderId: orderId,
-                    itemIndex: 'all'
-                });
-            } else {
-                // Individual item approval - extract itemIndex and variantSize
-                const order = ordersDatabase.find(o => o.id === orderId);
-                if (!order) {
-                    throw new Error('Order not found in local database');
-                }
-                
-                // Find the item by productId
-                const itemIndex = order.products.findIndex(p => p.productId === productId);
-                if (itemIndex === -1) {
-                    throw new Error('Product not found in order. ProductId: ' + productId);
-                }
-                
-                const variantSize = order.products[itemIndex].variant.replace('ml', '');
-                
-                url = `/admin/orders/${orderId}/items/${itemIndex}/${variantSize}/approve-return`;
-                method = 'POST';
-                body = JSON.stringify({
-                    orderId: orderId,
-                    itemIndex: itemIndex,
-                    variantSize: variantSize
-                });
-            }
-        } else if (action === 'reject') {
-            if (isFullOrder) {
-                // Full order rejection - needs special route
-                url = `/admin/orders/${orderId}/items/all/all/reject-return`;
-                method = 'POST';
-                body = JSON.stringify({ 
-                    orderId: orderId,
-                    itemIndex: 'all',
-                    reason: 'Return request rejected by admin'
-                });
-            } else {
-                // Individual item rejection
-                const order = ordersDatabase.find(o => o.id === orderId);
-                if (!order) {
-                    throw new Error('Order not found in local database');
-                }
-                
-                const itemIndex = order.products.findIndex(p => p.productId === productId);
-                if (itemIndex === -1) {
-                    throw new Error('Product not found in order. ProductId: ' + productId);
-                }
-                
-                const variantSize = order.products[itemIndex].variant.replace('ml', '');
-                
-                url = `/admin/orders/${orderId}/items/${itemIndex}/${variantSize}/reject-return`;
-                method = 'POST';
-                body = JSON.stringify({
-                    orderId: orderId,
-                    itemIndex: itemIndex,
-                    variantSize: variantSize,
-                    reason: 'Return request rejected by admin'
-                });
-            }
-        }
-
-        console.log('Sending request to:', url);
-        console.log('Request body:', body);
-
-        // Send request
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: body
+async function handleRequest(orderId, action, type, productId, variantSize) {
+  try {
+    console.log('handleRequest called:', { orderId, action, type, productId, variantSize });
+    
+    const isFullOrder = productId === null || productId === 'null' || productId === undefined;
+    
+    let url, method, body;
+    
+    if (action === 'approve') {
+      if (isFullOrder) {
+        url = `/admin/orders/${orderId}/items/all/all/approve-return`;
+        method = 'POST';
+        body = JSON.stringify({ 
+          orderId: orderId,
+          itemIndex: 'all'
         });
-
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers.get('content-type'));
-
-        // Check if response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            console.error('Non-JSON response received:', text.substring(0, 200));
-            throw new Error('Server returned non-JSON response. Check if route exists and you are logged in as admin.');
+      } else {
+        // ✅ FIX: Find by BOTH productId AND variantSize
+        const order = ordersDatabase.find(o => o.id === orderId);
+        if (!order) {
+          throw new Error('Order not found in local database');
         }
-
-        const data = await response.json();
-        console.log('Response data:', data);
-
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: data.message || `Return ${action}ed successfully`,
-                confirmButtonColor: '#3b82f6',
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                // Reload page to refresh data
-                window.location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.error || data.message || `Failed to ${action} return`,
-                confirmButtonColor: '#3b82f6'
-            });
-        }
-    } catch (error) {
-        console.error(`Error ${action}ing return:`, error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'An error occurred. Please try again.',
-            confirmButtonColor: '#3b82f6'
+        
+        // ✅ CRITICAL: Match both productId and variant size
+        const itemIndex = order.products.findIndex(p => {
+          const productMatch = p.productId === productId;
+          const variantMatch = variantSize && p.variant === variantSize;
+          console.log(`Checking item: productId=${p.productId}, variant=${p.variant}, match=${productMatch && variantMatch}`);
+          return productMatch && variantMatch;
         });
+        
+        if (itemIndex === -1) {
+          throw new Error(`Product not found with ID: ${productId} and variant: ${variantSize}`);
+        }
+        
+        const variantSizeNumber = variantSize.replace('ml', '');
+        
+        url = `/admin/orders/${orderId}/items/${itemIndex}/${variantSizeNumber}/approve-return`;
+        method = 'POST';
+        body = JSON.stringify({
+          orderId: orderId,
+          itemIndex: itemIndex,
+          variantSize: variantSizeNumber
+        });
+      }
+    } else if (action === 'reject') {
+      if (isFullOrder) {
+        url = `/admin/orders/${orderId}/items/all/all/reject-return`;
+        method = 'POST';
+        body = JSON.stringify({ 
+          orderId: orderId,
+          itemIndex: 'all',
+          reason: 'Return request rejected by admin'
+        });
+      } else {
+        // ✅ FIX: Find by BOTH productId AND variantSize
+        const order = ordersDatabase.find(o => o.id === orderId);
+        if (!order) {
+          throw new Error('Order not found in local database');
+        }
+        
+        // ✅ CRITICAL: Match both productId and variant size
+        const itemIndex = order.products.findIndex(p => {
+          const productMatch = p.productId === productId;
+          const variantMatch = variantSize && p.variant === variantSize;
+          console.log(`Checking item: productId=${p.productId}, variant=${p.variant}, match=${productMatch && variantMatch}`);
+          return productMatch && variantMatch;
+        });
+        
+        if (itemIndex === -1) {
+          throw new Error(`Product not found with ID: ${productId} and variant: ${variantSize}`);
+        }
+        
+        const variantSizeNumber = variantSize.replace('ml', '');
+        
+        url = `/admin/orders/${orderId}/items/${itemIndex}/${variantSizeNumber}/reject-return`;
+        method = 'POST';
+        body = JSON.stringify({
+          orderId: orderId,
+          itemIndex: itemIndex,
+          variantSize: variantSizeNumber,
+          reason: 'Return request rejected by admin'
+        });
+      }
     }
-}
 
+    console.log('Sending request to:', url);
+    console.log('Request body:', body);
+
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: body
+    });
+
+    console.log('Response status:', response.status);
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Non-JSON response received:', text.substring(0, 200));
+      throw new Error('Server returned non-JSON response. Check if route exists and you are logged in as admin.');
+    }
+
+    const data = await response.json();
+    console.log('Response data:', data);
+
+    if (data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: data.message || `Return ${action}ed successfully`,
+        confirmButtonColor: '#3b82f6',
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: data.error || data.message || `Failed to ${action} return`,
+        confirmButtonColor: '#3b82f6'
+      });
+    }
+  } catch (error) {
+    console.error(`Error ${action}ing return:`, error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'An error occurred. Please try again.',
+      confirmButtonColor: '#3b82f6'
+    });
+  }
+}
 // Initialize on load
 init();
     </script>

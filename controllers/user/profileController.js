@@ -185,7 +185,7 @@ const handleForgotPassword = async (req, res) => {
 
 // Backend - Updated Controllers
 
-const OTP_EXPIRY_TIME = 60000; // 60 seconds in milliseconds (adjust as needed)
+const OTP_EXPIRY_TIME = 60000; 
 
 const loadForgotPageOtp = async (req, res) => {
   try {
@@ -260,7 +260,6 @@ const resendOtp = async (req, res) => {
   }
 };
 
-// Also update your initial forgot password function to store timestamp:
 const sendForgotPasswordOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -768,5 +767,6 @@ module.exports = {
   resendProfileOtp,
   loadEditProfile,
   updateProfile,
-  getSecurityPage
+  getSecurityPage,
+  sendForgotPasswordOtp
 };

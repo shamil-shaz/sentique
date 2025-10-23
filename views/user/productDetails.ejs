@@ -225,7 +225,7 @@
     }
 
     .stock-available {
-      color: #27ae60;
+      color: #121313;
       font-weight: bold;
     }
 
@@ -761,112 +761,131 @@
     }
 
     // Variant Switching
-    function setupVariants() {
-      document.querySelectorAll('.variant-btn').forEach((btn, index) => {
-        btn.addEventListener('click', function() {
-          if (this.disabled) return;
-          
-          document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
+   function setupVariants() {
+  document.querySelectorAll('.variant-btn').forEach((btn, index) => {
+    btn.addEventListener('click', function() {
+      if (this.disabled) return;
+      
+      document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
 
-          const sale = parseFloat(this.getAttribute('data-sale')) || 0;
-          const regular = parseFloat(this.getAttribute('data-regular')) || 0;
-          const stock = parseInt(this.getAttribute('data-stock')) || 0;
-          const size = this.getAttribute('data-size');
+      const sale = parseFloat(this.getAttribute('data-sale')) || 0;
+      const regular = parseFloat(this.getAttribute('data-regular')) || 0;
+      const stock = parseInt(this.getAttribute('data-stock')) || 0;
+      const size = this.getAttribute('data-size');
 
-          selectedVariant = { sale, regular, stock, size };
-          document.getElementById('quantity').max = Math.min(stock, 5); 
-          document.getElementById('quantity').value = 1;
+      selectedVariant = { sale, regular, stock, size };
+      
+      // Maximum quantity = min of (stock, 5) minus what's already in cart
+      const maxQty = Math.min(stock, 5) - cartItemQuantity;
+      document.getElementById('quantity').max = Math.max(1, maxQty); 
+      document.getElementById('quantity').value = 1;
 
-          // Check cart quantity for THIS VARIANT specifically
-          checkCartQuantityForVariant(Number(size));
+      // Check cart quantity for THIS VARIANT specifically
+      checkCartQuantityForVariant(Number(size));
 
-          // Update price display
-          document.getElementById('salePrice').innerText = sale.toFixed(2);
-          
-          const priceSection = document.getElementById('priceSection');
-          if (regular > sale && sale > 0) {
-            const discount = ((regular - sale) / regular * 100).toFixed(0);
-            priceSection.innerHTML = `
-              ₹<span id="salePrice">${sale.toFixed(2)}</span>
-              <span style="text-decoration: line-through; color: #999; font-size: 1.2rem;">₹<span id="regularPrice">${regular.toFixed(2)}</span></span>
-              <span class="offer-percentage">${discount}% off</span>
-            `;
-          } else {
-            priceSection.innerHTML = `₹<span id="salePrice">${sale.toFixed(2)}</span>`;
-          }
-
-          // Update stock status
-          const outOfStockMsg = document.getElementById('outOfStockMessage');
-          const actionButtons = document.getElementById('actionButtons');
-          if (stock === 0) {
-            outOfStockMsg.style.display = 'block';
-            actionButtons.style.display = 'none';
-          } else {
-            outOfStockMsg.style.display = 'none';
-            actionButtons.style.display = 'flex';
-          }
-        });
-      });
-
-      // Select first variant by default
-      const firstVariantBtn = document.querySelector('.variant-btn:not(:disabled)');
-      if (firstVariantBtn) {
-        firstVariantBtn.click();
-        updateQuantityButtonStates();
+      // Update price display
+      document.getElementById('salePrice').innerText = sale.toFixed(2);
+      
+      const priceSection = document.getElementById('priceSection');
+      if (regular > sale && sale > 0) {
+        const discount = ((regular - sale) / regular * 100).toFixed(0);
+        priceSection.innerHTML = `
+          ₹<span id="salePrice">${sale.toFixed(2)}</span>
+          <span style="text-decoration: line-through; color: #999; font-size: 1.2rem;">₹<span id="regularPrice">${regular.toFixed(2)}</span></span>
+          <span class="offer-percentage">${discount}% off</span>
+        `;
+      } else {
+        priceSection.innerHTML = `₹<span id="salePrice">${sale.toFixed(2)}</span>`;
       }
-    }
 
-    // Check cart quantity for specific variant
-    async function checkCartQuantityForVariant(variantSize) {
-      try {
-        const response = await fetch('/cart/check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, variantSize })
-        });
-        const data = await response.json();
-        cartItemQuantity = data.quantity || 0;
-        updateQuantityButtonStates();
-      } catch (error) {
-        console.error('Error checking cart for variant:', error);
+      // Update stock status
+      const outOfStockMsg = document.getElementById('outOfStockMessage');
+      const actionButtons = document.getElementById('actionButtons');
+      if (stock === 0) {
+        outOfStockMsg.style.display = 'block';
+        actionButtons.style.display = 'none';
+      } else {
+        outOfStockMsg.style.display = 'none';
+        actionButtons.style.display = 'flex';
       }
-    }
+    });
+  });
+     const firstVariantBtn = document.querySelector('.variant-btn:not(:disabled)');
+  if (firstVariantBtn) {
+    firstVariantBtn.click();
+    updateQuantityButtonStates();
+  }
+}
+
+// Check cart quantity for specific variant
+async function checkCartQuantityForVariant(variantSize) {
+  try {
+    const response = await fetch('/cart/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, variantSize })
+    });
+    const data = await response.json();
+    cartItemQuantity = data.quantity || 0;
+    updateQuantityButtonStates(); // Update button states with new cart quantity
+  } catch (error) {
+    console.error('Error checking cart for variant:', error);
+  }
+}
 
     // Quantity Control
-    function changeQuantity(change) {
-      const quantityInput = document.getElementById('quantity');
-      let currentValue = parseInt(quantityInput.value) || 1;
-      let newValue = currentValue + change;
-      const maxAllowed = 5 - cartItemQuantity; // Max 5 total per variant including what's in cart
-      
-      if (newValue >= 1 && newValue <= maxAllowed) {
-        quantityInput.value = newValue;
-        updateQuantityButtonStates();
-      }
-    }
+function changeQuantity(change) {
+  const quantityInput = document.getElementById('quantity');
+  let currentValue = parseInt(quantityInput.value) || 1;
+  let newValue = currentValue + change;
+  
+  // Maximum allowed considering both stock and 5-item limit
+  const maxAllowed = Math.min(5, selectedVariant.stock) - cartItemQuantity;
+  
+  // Validate: cannot exceed stock or max allowed
+  if (newValue >= 1 && newValue <= maxAllowed && newValue <= selectedVariant.stock) {
+    quantityInput.value = newValue;
+    updateQuantityButtonStates();
+  }
+}
 
-    // Update quantity button states based on max 5 limit per variant and cart quantity
-    function updateQuantityButtonStates() {
-      const quantityInput = document.getElementById('quantity');
-      const currentValue = parseInt(quantityInput.value) || 1;
-      const qtyBtns = document.querySelectorAll('.qty-btn');
-      const maxAllowed = 5 - cartItemQuantity; // Max 5 per variant including cart
-      
-      // Disable minus button if quantity is 1
-      if (qtyBtns[0]) {
-        qtyBtns[0].disabled = currentValue <= 1;
-        qtyBtns[0].style.opacity = currentValue <= 1 ? '0.5' : '1';
-        qtyBtns[0].style.cursor = currentValue <= 1 ? 'not-allowed' : 'pointer';
-      }
-      
-      // Disable plus button if quantity reaches max allowed (5 - already in cart)
-      if (qtyBtns[1]) {
-        qtyBtns[1].disabled = currentValue >= maxAllowed;
-        qtyBtns[1].style.opacity = currentValue >= maxAllowed ? '0.5' : '1';
-        qtyBtns[1].style.cursor = currentValue >= maxAllowed ? 'not-allowed' : 'pointer';
-      }
-    }
+  function updateQuantityButtonStates() {
+  const quantityInput = document.getElementById('quantity');
+  const currentValue = parseInt(quantityInput.value) || 1;
+  const qtyBtns = document.querySelectorAll('.qty-btn');
+  const addToCartBtn = document.getElementById('addToCartBtn');
+  
+  // Maximum allowed = stock - already in cart
+  // This ensures total never exceeds stock
+  const maxAllowed = Math.min(5, selectedVariant.stock) - cartItemQuantity;
+  
+  // Disable minus button if quantity is 1
+  if (qtyBtns[0]) {
+    qtyBtns[0].disabled = currentValue <= 1;
+    qtyBtns[0].style.opacity = currentValue <= 1 ? '0.5' : '1';
+    qtyBtns[0].style.cursor = currentValue <= 1 ? 'not-allowed' : 'pointer';
+  }
+  
+  // Disable plus button if:
+  // 1. Current quantity reaches max allowed
+  // 2. Current quantity reaches stock (prevents exceeding stock)
+  const canAddMore = currentValue < maxAllowed && currentValue < selectedVariant.stock;
+  
+  if (qtyBtns[1]) {
+    qtyBtns[1].disabled = !canAddMore;
+    qtyBtns[1].style.opacity = !canAddMore ? '0.5' : '1';
+    qtyBtns[1].style.cursor = !canAddMore ? 'not-allowed' : 'pointer';
+  }
+  
+  // Disable "Add to Cart" button if quantity exceeds stock or max allowed
+  if (addToCartBtn) {
+    const canAddToCart = currentValue <= selectedVariant.stock && currentValue <= maxAllowed;
+    addToCartBtn.disabled = !canAddToCart;
+    addToCartBtn.style.opacity = !canAddToCart ? '0.5' : '1';
+    addToCartBtn.style.cursor = !canAddToCart ? 'not-allowed' : 'pointer';
+  }
+}
 // Wishlist Functionality
 function setupWishlist() {
   document.getElementById('wishlistBtn').addEventListener('click', async (e) => {

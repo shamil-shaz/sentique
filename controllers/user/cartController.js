@@ -444,7 +444,137 @@ const getCartCount = async (req, res) => {
   }
 };
 
+const checkProductStock = async (req, res) => {
+  try {
+    const { productId, variantSize } = req.body;
 
+    // Validate input parameters
+    if (!productId || variantSize === undefined || variantSize === null) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Product ID and variant size required',
+        stock: 0,
+        isValid: false
+      });
+    }
+
+    // Validate product ID format
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid product ID',
+        stock: 0,
+        isValid: false
+      });
+    }
+
+    // Fetch product from database
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Product not found',
+        stock: 0,
+        isValid: false
+      });
+    }
+
+    // Find variant with matching size
+    const variant = product.variants?.find(v => v.size === Number(variantSize));
+    
+    // Get stock from variant if exists, otherwise from product
+    const availableStock = variant ? (variant.stock || 0) : (product.stock || 0);
+
+    // Check if product or variant is blocked
+    const isBlocked = product.isBlocked || (variant && variant.isBlocked);
+
+    // Determine if item can be purchased
+    const isValid = availableStock > 0 && !isBlocked;
+
+    res.json({ 
+      success: true, 
+      stock: availableStock,
+      isValid: isValid,
+      isBlocked: isBlocked,
+      productName: product.productName,
+      variantSize: variantSize,
+      message: isBlocked ? 'This product is blocked' : (availableStock <= 0 ? 'Out of stock' : 'In stock')
+    });
+
+  } catch (error) {
+    console.error('Error checking product stock:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error',
+      stock: 0,
+      isValid: false,
+      error: error.message
+    });
+  }
+};
+
+const validateCheckoutItems = async (req, res) => {
+  try {
+    const userId = req.session.user?.id || req.session.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Please login first' });
+    }
+
+    const cart = await Cart.findOne({ userId }).populate('items.productId');
+
+    if (!cart || cart.items.length === 0) {
+      return res.json({ success: true, isValid: true, message: 'Cart is empty' });
+    }
+
+    let outOfStockItems = [];
+    let totalValid = 0;
+
+    for (const item of cart.items) {
+      const product = item.productId;
+
+      if (!product) continue;
+
+      const variant = product.variants?.find(v => v.size === item.variantSize);
+      const availableStock = variant ? (variant.stock || 0) : (product.stock || 0);
+
+      if (item.quantity > availableStock) {
+        outOfStockItems.push({
+          productName: product.productName,
+          requestedQty: item.quantity,
+          availableStock: availableStock,
+          variantSize: item.variantSize
+        });
+      } else {
+        totalValid++;
+      }
+    }
+
+    if (outOfStockItems.length > 0) {
+      return res.json({
+        success: false,
+        isValid: false,
+        message: 'Some items are out of stock',
+        outOfStockItems: outOfStockItems,
+        outOfStockCount: outOfStockItems.length
+      });
+    }
+
+    res.json({
+      success: true,
+      isValid: true,
+      message: 'All items in stock',
+      totalValid: totalValid
+    });
+
+  } catch (error) {
+    console.error('Checkout validation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during validation'
+    });
+  }
+};
 
 module.exports = {
     getCartPage, 
@@ -453,7 +583,9 @@ module.exports = {
     updateCart,
     checkoutBlockedItems,
     checkCartQuantity,
-    getCartCount
+    getCartCount,
+    checkProductStock,
+    validateCheckoutItems
     
 
     

@@ -1951,96 +1951,153 @@ body {
     </div>
   </div>
 
-  <div class="modal" id="addressModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalTitle">Add New Address</h2>
-        <button class="close-btn" onclick="closeModal()">×</button>
-      </div>
-      <form id="addressForm" onsubmit="saveAddress(event)">
-        <input type="hidden" id="editId" name="id">
-        <div class="form-group">
-          <label class="form-label" for="type">Address Type *</label>
-          <select class="form-select" name="addressType" id="type" required>
-            <option value="" disabled selected>Select address type</option>
-            <option value="Home">🏠 Home</option>
-            <option value="Work">🏢 Work</option>
-            <option value="Other">📦 Other</option>
-          </select>
-          <div class="error-message" id="typeError">Please select a valid address type</div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="name">Full Name *</label>
-            <input type="text" class="form-input" name="name" id="name" placeholder="Enter full name" required minlength="3">
-            <div class="error-message" id="nameError">Name must be at least 3 characters</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="phone">Phone Number *</label>
-            <input type="tel" class="form-input" name="phone" id="phone" placeholder="10-digit number" required pattern="[0-9]{10}">
-            <div class="error-message" id="phoneError">Phone number must be 10 digits</div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="houseName">House/Building Name *</label>
-            <input type="text" class="form-input" name="houseName" id="houseName" placeholder="House/building name" required minlength="2">
-            <div class="error-message" id="houseNameError">House name must be at least 2 characters</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="buildingNumber">Building Number</label>
-            <input type="text" class="form-input" name="buildingNumber" id="buildingNumber" placeholder="Building number (optional)">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="landmark">Landmark *</label>
-          <textarea class="form-textarea" name="landmark" id="landmark" placeholder="Nearby landmark or reference" required minlength="3"></textarea>
-          <div class="error-message" id="landmarkError">Landmark must be at least 3 characters</div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="altPhone">Alternative Number</label>
-            <input type="tel" class="form-input" name="altPhone" id="altPhone" placeholder="10-digit number (optional)" pattern="[0-9]{10}">
-            <div class="error-message" id="altPhoneError">Alternative phone must be 10 digits</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="nationality">Nationality *</label>
-            <input type="text" class="form-input" name="nationality" id="nationality" placeholder="Enter nationality" required minlength="2">
-            <div class="error-message" id="nationalityError">Nationality must be at least 2 characters</div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="city">City *</label>
-            <input type="text" class="form-input" name="city" id="city" placeholder="Enter city" required>
-            <div class="error-message" id="cityError">City is required</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="state">State *</label>
-            <input type="text" class="form-input" name="state" id="state" placeholder="Enter state" required>
-            <div class="error-message" id="stateError">State is required</div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="zip">PIN Code *</label>
-          <input type="text" class="form-input" name="pincode" id="zip" placeholder="6-digit PIN code" required pattern="[0-9]{6}">
-          <div class="error-message" id="zipError">PIN code must be 6 digits</div>
-        </div>
-        <div class="form-group">
-          <div class="checkbox-group">
-            <input type="checkbox" id="setDefault" name="isDefault">
-            <label for="setDefault">Set as default address</label>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
-          <button type="submit" class="modal-btn btn-submit" id="submitBtn">Save Address</button>
-        </div>
-      </form>
+ 
+<div class="modal" id="addressModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add New Address</h2>
+      <button class="close-btn" onclick="closeModal()">×</button>
     </div>
+    <form id="addressForm" onsubmit="saveAddress(event)">
+      <input type="hidden" id="editId" name="id">
+      
+      <!-- Address Type -->
+      <div class="form-group">
+        <label class="form-label" for="type">Address Type *</label>
+        <select class="form-select" name="addressType" id="type" required>
+          <option value="" disabled selected>Select address type</option>
+          <option value="Home">🏠 Home</option>
+          <option value="Work">🏢 Work</option>
+          <option value="Other">📦 Other</option>
+        </select>
+        <div class="error-message" id="typeError">Please select a valid address type</div>
+      </div>
+
+      <!-- Name & Phone -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name *</label>
+          <input type="text" class="form-input" name="name" id="name" placeholder="Enter full name" required minlength="3">
+          <small style="color: #666; font-size: 12px; margin-top: 5px;">Letters and spaces only, 3-50 characters</small>
+          <div class="error-message" id="nameError"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number *</label>
+          <input type="tel" class="form-input" name="phone" id="phone" placeholder="10-digit number" required maxlength="10">
+          <div class="error-message" id="phoneError">Phone number must be 10 digits</div>
+        </div>
+      </div>
+
+      <!-- House & Building -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="houseName">House/Building Name *</label>
+          <input type="text" class="form-input" name="houseName" id="houseName" placeholder="House/building name" required minlength="2">
+          <div class="error-message" id="houseNameError">House name must be at least 2 characters</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="buildingNumber">Building Number</label>
+          <input type="text" class="form-input" name="buildingNumber" id="buildingNumber" placeholder="Building number (optional)">
+        </div>
+      </div>
+
+      <!-- Landmark -->
+      <div class="form-group">
+        <label class="form-label" for="landmark">Landmark *</label>
+        <textarea class="form-textarea" name="landmark" id="landmark" placeholder="Nearby landmark or reference" required minlength="3"></textarea>
+        <div class="error-message" id="landmarkError">Landmark must be at least 3 characters</div>
+      </div>
+
+      <!-- Alt Phone & Nationality -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="altPhone">Alternative Number</label>
+          <input type="tel" class="form-input" name="altPhone" id="altPhone" placeholder="10-digit number (optional)" maxlength="10">
+          <div class="error-message" id="altPhoneError">Alternative phone must be 10 digits</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="nationality">Nationality *</label>
+          <input type="text" class="form-input" name="nationality" id="nationality" value="India" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+          <small style="color: #666; font-size: 12px; margin-top: 5px;">India is the only available country</small>
+        </div>
+      </div>
+
+      <!-- City & State -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="city">City *</label>
+          <input type="text" class="form-input" name="city" id="city" placeholder="Auto-filled from PIN code" required>
+          <small style="color: #666; font-size: 12px; margin-top: 5px;">Auto-filled when you enter PIN code</small>
+          <div class="error-message" id="cityError">City is required</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="state">State *</label>
+          <select class="form-select" name="state" id="state" required>
+            <option value="" disabled selected>Select state</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Sikkim">Sikkim</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+          </select>
+          <small style="color: #666; font-size: 12px; margin-top: 5px;">Auto-filled when you enter PIN code</small>
+          <div class="error-message" id="stateError">State is required</div>
+        </div>
+      </div>
+
+      <!-- PIN Code -->
+      <div class="form-group">
+        <label class="form-label" for="zip">PIN Code *</label>
+        <input type="text" class="form-input" name="pincode" id="zip" placeholder="6-digit PIN code" required maxlength="6">
+        <small style="color: #666; font-size: 12px; margin-top: 5px;">6 digits - auto-fills city and state</small>
+        <div id="zipLoader" style="display: none; margin-top: 8px; color: #22c55e; font-size: 12px;">
+          <span>⏳ Fetching location...</span>
+        </div>
+        <div id="zipSuccess" style="display: none; margin-top: 8px; color: #22c55e; font-size: 12px;">
+          <span>✓ Location found</span>
+        </div>
+        <div class="error-message" id="zipError">PIN code must be 6 digits</div>
+      </div>
+
+      <!-- Default Address -->
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="setDefault" name="isDefault">
+          <label for="setDefault">⭐ Set as default address</label>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="modal-actions">
+        <button type="button" class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="modal-btn btn-submit" id="submitBtn">Save Address</button>
+      </div>
+    </form>
   </div>
-
-
+</div>
 
 
 
@@ -2297,27 +2354,34 @@ async function saveAddress(e) {
   }
 }
 
-// Real-time PIN code validation with API fetch
+// Real-time PIN code validation with API fetch - FIXED for state dropdown
 document.getElementById('zip')?.addEventListener('blur', async (e) => {
   const pincode = e.target.value.trim();
   const zipError = document.getElementById('zipError');
+  const zipSuccess = document.getElementById('zipSuccess');
+  const zipLoader = document.getElementById('zipLoader');
   
-  zipError.classList.remove('show');
+  zipError.style.display = 'none';
+  zipSuccess.style.display = 'none';
+  zipLoader.style.display = 'none';
 
   if (!pincode) return;
 
+  // Format validation
   if (!/^\d{6}$/.test(pincode)) {
     zipError.textContent = 'PIN code must be exactly 6 digits';
-    zipError.classList.add('show');
+    zipError.style.display = 'block';
     return;
   }
 
+  // All same digits check
   if (/^(\d)\1{5}$/.test(pincode)) {
     zipError.textContent = 'PIN code cannot have all same digits';
-    zipError.classList.add('show');
+    zipError.style.display = 'block';
     return;
   }
 
+  // Sequential check
   let isSequential = true;
   for (let i = 1; i < 6; i++) {
     if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
@@ -2327,10 +2391,11 @@ document.getElementById('zip')?.addEventListener('blur', async (e) => {
   }
   if (isSequential) {
     zipError.textContent = 'PIN code cannot be sequential';
-    zipError.classList.add('show');
+    zipError.style.display = 'block';
     return;
   }
 
+  // Reverse sequential check
   let isReverseSequential = true;
   for (let i = 1; i < 6; i++) {
     if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
@@ -2340,36 +2405,63 @@ document.getElementById('zip')?.addEventListener('blur', async (e) => {
   }
   if (isReverseSequential) {
     zipError.textContent = 'PIN code cannot be reverse sequential';
-    zipError.classList.add('show');
+    zipError.style.display = 'block';
     return;
   }
 
   // Fetch real location from API
+  zipLoader.style.display = 'block';
+  console.log('Fetching location for PIN:', pincode);
+
   try {
     const res = await fetch(`/addresses/get-location/${pincode}`);
     const data = await res.json();
 
+    console.log('API Response:', data);
+    zipLoader.style.display = 'none';
+
     if (data.success) {
-      document.getElementById('city').value = data.city || '';
-      
+      const city = data.city || '';
+      const state = data.state || '';
+
+      console.log('Received - City:', city, 'State:', state);
+
+      // Set city
+      document.getElementById('city').value = city;
+
+      // Set state - FIXED to properly select from dropdown
       const stateSelect = document.getElementById('state');
       let found = false;
-      for (let option of stateSelect.options) {
-        if (option.value.toLowerCase() === (data.state || '').toLowerCase()) {
-          option.selected = true;
+
+      for (let i = 0; i < stateSelect.options.length; i++) {
+        const optionValue = stateSelect.options[i].value;
+        console.log('Checking option:', optionValue, 'against:', state);
+        
+        if (optionValue === state) {
+          stateSelect.selectedIndex = i;
           found = true;
+          console.log('State matched and selected:', optionValue);
           break;
         }
       }
-      if (!found) stateSelect.selectedIndex = 0;
+
+      if (found) {
+        zipSuccess.textContent = `✓ Location found: ${city}, ${state}`;
+        zipSuccess.style.display = 'block';
+      } else {
+        console.warn('State not found in dropdown. Searched for:', state);
+        zipError.textContent = `City found (${city}) but state not in list. Please select manually.`;
+        zipError.style.display = 'block';
+      }
     } else {
       zipError.textContent = data.message || 'Invalid PIN code';
-      zipError.classList.add('show');
+      zipError.style.display = 'block';
     }
   } catch (err) {
+    zipLoader.style.display = 'none';
     console.error('Error fetching location:', err);
     zipError.textContent = 'Error fetching location data';
-    zipError.classList.add('show');
+    zipError.style.display = 'block';
   }
 });
 

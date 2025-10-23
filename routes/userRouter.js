@@ -147,6 +147,9 @@ router.post('/check',checkBlockedUser,userAuth,cartController. checkCartQuantity
 router.get('/cart/count', userAuth,cartController.getCartCount);
 
 
+router.post('/cart/validate-stock', userAuth, cartController.checkProductStock); 
+router.post('/cart/validate-checkout', userAuth, cartController.validateCheckoutItems);
+
 ////----------------- checkout-----------
 
 router.get('/checkout', userAuth, checkoutController.getCheckoutPage);

@@ -81,6 +81,15 @@
         opacity: 0.8;
     }
 
+    .cart-item.out-of-stock-qty-issue {
+        background-color: #fff5f5;
+    }
+
+    .cart-item.out-of-stock-qty-issue .quantity-control input {
+        border-color: #dc3545;
+        background-color: #ffe6e6;
+    }
+
     .product-image-wrapper {
         width: 120px;
         height: 120px;
@@ -324,9 +333,20 @@
         background: #f8d7da;
         border: 1px solid #f5c6cb;
         border-radius: 6px;
-        padding: 12px;
+        padding: 15px;
         margin-bottom: 15px;
         font-size: 0.9rem;
+        color: #721c24;
+        line-height: 1.6;
+    }
+
+    .blocked-notice i {
+        color: #721c24;
+        margin-right: 5px;
+    }
+
+    .blocked-notice strong {
+        font-weight: 700;
         color: #721c24;
     }
 
@@ -404,6 +424,21 @@
         color: white;
     }
 
+    [data-stock-message] {
+        display: none !important;
+        font-size: 0.85rem;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-top: 8px;
+        border-left: 3px solid #dc3545;
+    }
+
+    [data-stock-message].stock-warning {
+        background-color: #f8d7da;
+        color: #721c24;
+        display: block !important;
+    }
+
     @media (max-width: 992px) {
         .cart-container {
             grid-template-columns: 1fr;
@@ -449,44 +484,12 @@
         .current-price {
             font-size: 1.1rem;
         }
+
+        .blocked-notice {
+            padding: 12px;
+            font-size: 0.85rem;
+        }
     }
-
-    .blocked-notice {
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-    color: #721c24;
-    line-height: 1.6;
-  }
-
-  .blocked-notice i {
-    color: #721c24;
-    margin-right: 5px;
-  }
-
-  .blocked-notice strong {
-    font-weight: 700;
-    color: #721c24;
-  }
-
-  .blocked-notice div strong {
-    display: block;
-  }
-
-  /* Responsive */
-  @media (max-width: 576px) {
-    .blocked-notice {
-      padding: 12px;
-      font-size: 0.85rem;
-    }
-
-    .blocked-notice div {
-      gap: 8px;
-    }
-  }
 </style>
 
 <div class="cart-page">
@@ -499,7 +502,6 @@
 
   <% if (cartItems && cartItems.length > 0) { %>
     <div class="cart-container">
-    
       <div class="cart-items-section">
         <% 
         cartItems.forEach(item => {
@@ -510,11 +512,14 @@
           const availableQty = item.availableQty;
         %>
           <div class="cart-item <%= isUnavailable ? 'unavailable-item' : '' %>" 
+               data-product-id="<%= item.productId._id %>"
+               data-variant-size="<%= item.variant.size %>"
                data-unavailable="<%= isUnavailable %>"
                data-out-of-stock="<%= isOutOfStock %>"
                data-blocked="<%= isBlocked %>"
                data-block-reason="<%= item.blockReason || '' %>"
                data-product-name="<%= item.productId.productName || 'Unknown Product' %>">
+            
             <!-- Product Image -->
             <div class="product-image-wrapper">
               <% if (item.productId && item.productId.images && item.productId.images.length > 0) { %>
@@ -528,25 +533,25 @@
                      class="product-image">
               <% } %>
               
-             <% if (isBlocked) { %>
-  <div class="unavailable-overlay">
-    <% if (item.blockReason) { %>
-      <% if (item.blockReason.indexOf('Product') !== -1) { %>
-        PRODUCT BLOCKED
-      <% } else if (item.blockReason.indexOf('Brand') !== -1) { %>
-        BRAND BLOCKED
-      <% } else if (item.blockReason.indexOf('Category') !== -1) { %>
-        CATEGORY BLOCKED
-      <% } else { %>
-        TEMPORARILY BLOCKED
-      <% } %>
-    <% } else { %>
-      TEMPORARILY BLOCKED
-    <% } %>
-  </div>
-<% } else if (isOutOfStock) { %>
-  <div class="unavailable-overlay">OUT OF STOCK</div>
-<% } %>
+              <% if (isBlocked) { %>
+                <div class="unavailable-overlay">
+                  <% if (item.blockReason) { %>
+                    <% if (item.blockReason.indexOf('Product') !== -1) { %>
+                      PRODUCT BLOCKED
+                    <% } else if (item.blockReason.indexOf('Brand') !== -1) { %>
+                      BRAND BLOCKED
+                    <% } else if (item.blockReason.indexOf('Category') !== -1) { %>
+                      CATEGORY BLOCKED
+                    <% } else { %>
+                      TEMPORARILY BLOCKED
+                    <% } %>
+                  <% } else { %>
+                    TEMPORARILY BLOCKED
+                  <% } %>
+                </div>
+              <% } else if (isOutOfStock) { %>
+                <div class="unavailable-overlay">OUT OF STOCK</div>
+              <% } %>
             </div>
 
             <!-- Product Details -->
@@ -559,19 +564,19 @@
                 <% } %>
               </div>
               
-             <% if (isBlocked) { %>
-  <span class="stock-info unavailable">
-    <i class="fas fa-ban"></i> 
-    <% if (item.blockReason && item.blockReason.includes('Product')) { %>
-      Product Blocked by Admin
-    <% } else if (item.blockReason && item.blockReason.includes('Brand')) { %>
-      Brand Blocked by Admin
-    <% } else if (item.blockReason && item.blockReason.includes('Category')) { %>
-      Category Blocked by Admin
-    <% } else { %>
-      Temporarily Blocked
-    <% } %>
-  </span>
+              <% if (isBlocked) { %>
+                <span class="stock-info unavailable">
+                  <i class="fas fa-ban"></i> 
+                  <% if (item.blockReason && item.blockReason.includes('Product')) { %>
+                    Product Blocked by Admin
+                  <% } else if (item.blockReason && item.blockReason.includes('Brand')) { %>
+                    Brand Blocked by Admin
+                  <% } else if (item.blockReason && item.blockReason.includes('Category')) { %>
+                    Category Blocked by Admin
+                  <% } else { %>
+                    Temporarily Blocked
+                  <% } %>
+                </span>
               <% } else if (isOutOfStock) { %>
                 <span class="stock-info unavailable">
                   <i class="fas fa-times-circle"></i> Out of Stock
@@ -598,7 +603,7 @@
                   <%= isUnavailable || item.quantity <= 1 ? 'disabled' : '' %> 
                   id="minus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
                   onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', -1, <%= availableQty %>, <%= item.quantity %>)">
-                  -
+                  −
                 </button>
                 <input 
                   id="qty-<%= item.productId._id %>-<%= item.variant.size %>" 
@@ -615,6 +620,9 @@
                   +
                 </button>
               </div>
+
+              <!-- Stock Message (AFTER quantity control) -->
+              <div data-stock-message style="display: none; color: #dc3545; font-size: 0.85rem; margin-top: 8px; padding: 8px 12px; background: #f8d7da; border-radius: 4px; border-left: 3px solid #dc3545;"></div>
               
               <% if (!isUnavailable && item.quantity >= maxQtyPerOrder) { %>
                 <small style="color: #856404; font-size: 0.8rem;">
@@ -625,9 +633,9 @@
 
             <!-- Item Actions -->
             <div class="item-actions">
-            <div class="item-total" id="subtotal-<%= item.productId._id %>-<%= item.variant.size %>">
-  ₹<%= ((item.variant.salePrice || item.price) * item.quantity).toLocaleString() %>
-</div>
+              <div class="item-total" id="subtotal-<%= item.productId._id %>-<%= item.variant.size %>">
+                ₹<%= ((item.variant.salePrice || item.price) * item.quantity).toLocaleString() %>
+              </div>
 
               <div class="action-buttons">
                 <% if (isOutOfStock && !isBlocked) { %>
@@ -658,43 +666,42 @@
         <% } %>
 
         <% if (blockedCount > 0 && blockedProducts && blockedProducts.length > 0) { %>
-    <div class="blocked-notice">
-      <div style="display: flex; align-items: flex-start; gap: 10px;">
-        <i class="fas fa-ban" style="margin-top: 2px; flex-shrink: 0;"></i>
-        <div style="flex: 1;">
-          <strong style="display: block; margin-bottom: 8px;">
-            <strong><%= blockedCount %></strong> product<%= blockedCount > 1 ? 's are' : ' is' %> temporarily blocked by admin
-          </strong>
-          <div style="font-size: 0.85rem; line-height: 1.6;">
-            <% blockedProducts.forEach((product, index) => { %>
-              <div style="margin-bottom: 5px;">
-                • <%= product.reason %>
+          <div class="blocked-notice">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <i class="fas fa-ban" style="margin-top: 2px; flex-shrink: 0;"></i>
+              <div style="flex: 1;">
+                <strong style="display: block; margin-bottom: 8px;">
+                  <strong><%= blockedCount %></strong> product<%= blockedCount > 1 ? 's are' : ' is' %> temporarily blocked by admin
+                </strong>
+                <div style="font-size: 0.85rem; line-height: 1.6;">
+                  <% blockedProducts.forEach((product, index) => { %>
+                    <div style="margin-bottom: 5px;">
+                      • <%= product.reason %>
+                    </div>
+                  <% }); %>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.85rem; color: #721c24; font-weight: 500;">
+                  ⚠️ Please remove these items before proceeding to checkout
+                </div>
               </div>
-            <% }); %>
+            </div>
           </div>
-          <div style="margin-top: 10px; font-size: 0.85rem; color: #721c24; font-weight: 500;">
-            ⚠️ Please remove these items before proceeding to checkout
-          </div>
-        </div>
-      </div>
-    </div>
-  <% } %>
+        <% } %>
         
         <div class="summary-row">
-  <span class="summary-label">Subtotal:</span>
-  <span class="summary-value" id="cart-subtotal">₹<%= totalPrice.toLocaleString() %></span>
-</div>
+          <span class="summary-label">Subtotal:</span>
+          <span class="summary-value" id="cart-subtotal">₹<%= totalPrice.toLocaleString() %></span>
+        </div>
 
-<div class="summary-row">
-  <span class="summary-label">Shipping:</span>
-  <span class="summary-value">Free</span>
-</div>
+        <div class="summary-row">
+          <span class="summary-label">Shipping:</span>
+          <span class="summary-value">Free</span>
+        </div>
 
-<div class="summary-row">
-  <span class="summary-label">Total:</span>
-  <span class="summary-value" id="cart-total">₹<%= totalPrice.toLocaleString() %></span>
-</div>
-
+        <div class="summary-row">
+          <span class="summary-label">Total:</span>
+          <span class="summary-value" id="cart-total">₹<%= totalPrice.toLocaleString() %></span>
+        </div>
 
         <button id="checkout-button" class="checkout-button" onclick="proceedToCheckout()">
           Proceed to checkout
@@ -715,10 +722,90 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
   const MAX_QTY_PER_ORDER = 5;
 
- 
+  // Real-time stock validation
+  async function validateAllCartStock() {
+    const cartItems = document.querySelectorAll('.cart-item');
+    let hasStockIssues = false;
+
+    console.log('Validating ' + cartItems.length + ' items...');
+
+    for (const item of cartItems) {
+      const productId = item.getAttribute('data-product-id');
+      const variantSize = item.getAttribute('data-variant-size');
+      
+      console.log('Checking:', { productId, variantSize });
+
+      if (!productId || !variantSize) {
+        console.warn('Missing productId or variantSize');
+        continue;
+      }
+
+      const quantityInput = document.getElementById(`qty-${productId}-${variantSize}`);
+      const currentQty = parseInt(quantityInput?.value) || 0;
+
+      if (currentQty <= 0) continue;
+
+      try {
+        const response = await fetch('/cart/validate-stock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            productId: productId, 
+            variantSize: Number(variantSize), 
+            quantity: currentQty 
+          })
+        });
+
+        const data = await response.json();
+        console.log('Stock response:', data);
+
+        const stockMessage = item.querySelector('[data-stock-message]');
+
+        if (!data.isValid) {
+          hasStockIssues = true;
+          
+          item.setAttribute('data-out-of-stock-qty', 'true');
+          item.classList.add('out-of-stock-qty-issue');
+
+          if (stockMessage) {
+            stockMessage.style.display = 'block';
+            stockMessage.innerHTML = `⚠️ Out of Stock - You have ${currentQty} items, but only ${data.stock} available. Please reduce quantity.`;
+            stockMessage.classList.add('stock-warning');
+          }
+        } else {
+          item.setAttribute('data-out-of-stock-qty', 'false');
+          item.classList.remove('out-of-stock-qty-issue');
+
+          if (stockMessage) {
+            stockMessage.style.display = 'none';
+            stockMessage.innerHTML = '';
+            stockMessage.classList.remove('stock-warning');
+          }
+        }
+      } catch (error) {
+        console.error('Stock validation error:', error);
+      }
+    }
+
+    const checkoutBtn = document.getElementById('checkout-button');
+    if (checkoutBtn) {
+      checkoutBtn.disabled = hasStockIssues;
+      checkoutBtn.style.opacity = hasStockIssues ? '0.5' : '1';
+      checkoutBtn.style.cursor = hasStockIssues ? 'not-allowed' : 'pointer';
+    }
+
+    console.log('Validation complete. Has issues:', hasStockIssues);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, starting validation...');
+    validateAllCartStock();
+  });
+
   function changeQuantity(productId, variantSize, change, maxAvailable, currentQty) {
     const input = document.getElementById(`qty-${productId}-${variantSize}`);
     const plusBtn = document.getElementById(`plus-btn-${productId}-${variantSize}`);
@@ -728,7 +815,6 @@
     
     let newQty = parseInt(input.value) + change;
 
-    // Check minimum quantity
     if (newQty < 1) {
       Swal.fire({
         icon: 'warning',
@@ -739,7 +825,6 @@
       return;
     }
 
-    // Check maximum quantity
     if (newQty > maxAvailable) {
       const limitType = maxAvailable === MAX_QTY_PER_ORDER ? 'order limit (max 5 per order)' : 'available stock';
       Swal.fire({
@@ -751,10 +836,8 @@
       return;
     }
 
-    // Update input value
     input.value = newQty;
     
-    // Disable/enable buttons based on new quantity
     if (minusBtn) {
       minusBtn.disabled = newQty <= 1;
     }
@@ -762,75 +845,71 @@
       plusBtn.disabled = newQty >= maxAvailable;
     }
     
-    // Update cart
     updateCart(productId, variantSize);
   }
 
-  // Update Cart
- function updateCart(productId, variantSize) {
-  const quantity = parseInt(document.getElementById(`qty-${productId}-${variantSize}`).value);
+  function updateCart(productId, variantSize) {
+    const quantity = parseInt(document.getElementById(`qty-${productId}-${variantSize}`).value);
 
-  // Show loading
-  Swal.fire({
-    title: 'Updating...',
-    allowOutsideClick: false,
-    didOpen: () => Swal.showLoading()
-  });
+    Swal.fire({
+      title: 'Updating...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
 
-  fetch('/cart/update', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId, variantSize, quantity })
-  })
-  .then(res => res.json())
-  .then(data => {
-    Swal.close(); // ✅ Close the loading alert
+    fetch('/cart/update', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, variantSize, quantity })
+    })
+    .then(res => res.json())
+    .then(data => {
+      Swal.close();
 
-    if (data.success) {
-    const subtotalEl = document.getElementById(`subtotal-${productId}-${variantSize}`);
-if (subtotalEl) {
-  subtotalEl.textContent = `₹${data.updatedItem.subtotal.toLocaleString()}`;
-}
+      if (data.success) {
+        const subtotalEl = document.getElementById(`subtotal-${productId}-${variantSize}`);
+        if (subtotalEl) {
+          subtotalEl.textContent = `₹${data.updatedItem.subtotal.toLocaleString()}`;
+        }
 
-   const subtotalContainer = document.getElementById('cart-subtotal');
-const totalContainer = document.getElementById('cart-total');
+        const subtotalContainer = document.getElementById('cart-subtotal');
+        const totalContainer = document.getElementById('cart-total');
 
-if (subtotalContainer && totalContainer) {
-  subtotalContainer.textContent = `₹${data.cartTotal.toLocaleString()}`;
-  totalContainer.textContent = `₹${data.cartTotal.toLocaleString()}`;
-}
+        if (subtotalContainer && totalContainer) {
+          subtotalContainer.textContent = `₹${data.cartTotal.toLocaleString()}`;
+          totalContainer.textContent = `₹${data.cartTotal.toLocaleString()}`;
+        }
 
-      // ✅ Show success message
-      Swal.fire({
-        icon: 'success',
-        title: 'Updated',
-        text: 'Cart updated successfully!',
-        timer: 1000,
-        showConfirmButton: false
-      });
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated',
+          text: 'Cart updated successfully!',
+          timer: 1000,
+          showConfirmButton: false
+        });
 
-    } else {
+        setTimeout(() => validateAllCartStock(), 500);
+
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.message || 'Failed to update cart',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    })
+    .catch(err => {
+      console.error('Update cart error:', err);
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: data.message || 'Failed to update cart',
+        title: 'Server Error',
+        text: 'Failed to update cart. Please try again.',
         confirmButtonColor: '#dc3545'
       });
-    }
-  })
-  .catch(err => {
-    console.error('Update cart error:', err);
-    Swal.fire({
-      icon: 'error',
-      title: 'Server Error',
-      text: 'Failed to update cart. Please try again.',
-      confirmButtonColor: '#dc3545'
     });
-  });
-}
+  }
 
-
-  // Remove from Cart
   function removeFromCart(productId, variantSize) {
     Swal.fire({
       title: 'Remove Item?',
@@ -881,7 +960,6 @@ if (subtotalContainer && totalContainer) {
     });
   }
 
-  // Move to Wishlist
   function moveToWishlist(productId, variantSize) {
     Swal.fire({
       title: 'Move to Wishlist?',
@@ -894,7 +972,6 @@ if (subtotalContainer && totalContainer) {
       cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
-        // First add to wishlist
         fetch('/wishlist/add', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -903,7 +980,6 @@ if (subtotalContainer && totalContainer) {
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            // Then remove from cart
             return fetch(`/cart/remove/${productId}?variantSize=${variantSize}`, {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' }
@@ -939,45 +1015,94 @@ if (subtotalContainer && totalContainer) {
     });
   }
 
-  // Proceed to Checkout
-  function proceedToCheckout() {
-    const unavailableItems = document.querySelectorAll('.cart-item[data-unavailable="true"]');
-    
-    if (unavailableItems.length > 0) {
-      let htmlMessage = 'Please remove the following items before proceeding to checkout:<br><br>';
-      const outOfStockList = [];
-      const blockedList = [];
+  async function proceedToCheckout() {
+  // First check frontend unavailable items
+  const unavailableItems = document.querySelectorAll('.cart-item[data-unavailable="true"]');
+  
+  if (unavailableItems.length > 0) {
+    let htmlMessage = 'Please remove the following items before proceeding to checkout:<br><br>';
+    const outOfStockList = [];
+    const blockedList = [];
 
-      unavailableItems.forEach(item => {
-        if (item.dataset.blocked === 'true') {
-          blockedList.push(item.dataset.blockReason);
-        } else {
-          outOfStockList.push(`Product "${item.dataset.productName}" is out of stock`);
-        }
-      });
-
-      if (outOfStockList.length > 0) {
-        htmlMessage += '<strong>Out of Stock Items:</strong><br>' + outOfStockList.join('<br>') + '<br><br>';
+    unavailableItems.forEach(item => {
+      if (item.dataset.blocked === 'true') {
+        blockedList.push(item.dataset.blockReason);
+      } else {
+        outOfStockList.push(`Product "${item.dataset.productName}" is out of stock`);
       }
+    });
 
-      if (blockedList.length > 0) {
-        htmlMessage += '<strong>Blocked Items:</strong><br>' + blockedList.join('<br>') + '<br><br>';
+    if (outOfStockList.length > 0) {
+      htmlMessage += '<strong>Out of Stock Items:</strong><br>' + outOfStockList.join('<br>') + '<br><br>';
+    }
+
+    if (blockedList.length > 0) {
+      htmlMessage += '<strong>Blocked Items:</strong><br>' + blockedList.join('<br>') + '<br><br>';
+    }
+
+    Swal.fire({
+      icon: 'warning',
+      title: 'Unavailable Items in Cart',
+      html: htmlMessage,
+      confirmButtonColor: '#dc3545',
+      confirmButtonText: 'Got it'
+    });
+    return;
+  }
+
+  // Validate with server
+  try {
+    Swal.fire({
+      title: 'Validating...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const response = await fetch('/cart/validate-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const data = await response.json();
+    Swal.close();
+
+    if (!data.isValid) {
+      let htmlMessage = '<strong>Out of Stock Items:</strong><br>';
+      
+      if (data.outOfStockItems && data.outOfStockItems.length > 0) {
+        data.outOfStockItems.forEach(item => {
+          htmlMessage += `<div style="margin: 8px 0; padding: 8px; background: #f8d7da; border-radius: 4px;">
+            <strong>${item.productName}</strong><br>
+            You have: ${item.requestedQty}, Available: ${item.availableStock}
+          </div>`;
+        });
       }
 
       Swal.fire({
-        icon: 'warning',
-        title: 'Unavailable Items in Cart',
+        icon: 'error',
+        title: 'Cannot Proceed - Out of Stock',
         html: htmlMessage,
         confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Got it'
+        confirmButtonText: 'Reduce Quantity'
       });
       return;
     }
-    
-    window.location.href = '/checkout';
-  }
 
-  // Page load checks
+    // All valid, proceed
+    window.location.href = '/checkout';
+
+  } catch (error) {
+    console.error('Checkout validation error:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to validate cart. Please try again.',
+      confirmButtonColor: '#dc3545'
+    });
+  }
+}
+
+
   document.addEventListener('DOMContentLoaded', () => {
     const unavailableItems = document.querySelectorAll('.cart-item[data-unavailable="true"]');
     const checkoutButton = document.getElementById('checkout-button');

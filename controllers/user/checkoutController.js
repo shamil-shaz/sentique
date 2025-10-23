@@ -204,87 +204,404 @@ const getCheckoutPage = async (req, res) => {
 };
 
 
-const getAddressForEdit = async (req, res) => {
-    try {
+// const getAddressForEdit = async (req, res) => {
+//     try {
         
-        const userId = req.session.user?.id || req.session.user?._id;
-        const addressId = req.params.id;
+//         const userId = req.session.user?.id || req.session.user?._id;
+//         const addressId = req.params.id;
 
-        console.log('Getting address for edit - userId:', userId, 'addressId:', addressId);
+//         console.log('Getting address for edit - userId:', userId, 'addressId:', addressId);
 
-        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(addressId)) {
-            console.log('Validation failed - userId valid:', mongoose.Types.ObjectId.isValid(userId), 'addressId valid:', mongoose.Types.ObjectId.isValid(addressId));
-            return res.status(400).json({ success: false, message: 'Invalid user or address ID' });
-        }
+//         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(addressId)) {
+//             console.log('Validation failed - userId valid:', mongoose.Types.ObjectId.isValid(userId), 'addressId valid:', mongoose.Types.ObjectId.isValid(addressId));
+//             return res.status(400).json({ success: false, message: 'Invalid user or address ID' });
+//         }
 
-        const addressDoc = await Address.findOne({ userId });
-        if (!addressDoc) {
-            console.log('Address document not found for userId:', userId);
-            return res.status(404).json({ success: false, message: 'Address document not found' });
-        }
+//         const addressDoc = await Address.findOne({ userId });
+//         if (!addressDoc) {
+//             console.log('Address document not found for userId:', userId);
+//             return res.status(404).json({ success: false, message: 'Address document not found' });
+//         }
 
-        console.log('Found address document with', addressDoc.address.length, 'addresses');
+//         console.log('Found address document with', addressDoc.address.length, 'addresses');
 
-        const address = addressDoc.address.find(addr => addr._id.toString() === addressId);
-        if (!address) {
-            console.log('Address not found in document. Looking for:', addressId);
-            console.log('Available addresses:', addressDoc.address.map(a => a._id.toString()));
-            return res.status(404).json({ success: false, message: 'Address not found' });
-        }
+//         const address = addressDoc.address.find(addr => addr._id.toString() === addressId);
+//         if (!address) {
+//             console.log('Address not found in document. Looking for:', addressId);
+//             console.log('Available addresses:', addressDoc.address.map(a => a._id.toString()));
+//             return res.status(404).json({ success: false, message: 'Address not found' });
+//         }
 
-        const safeAddress = {
-            _id: address._id,
-            addressType: address.addressType || '',
-            name: address.name || '',
-            phone: address.phone || '',
-            houseName: address.houseName || '',
-            buildingNumber: address.buildingNumber || '',
-            landmark: address.landmark || '',
-            altPhone: address.altPhone || '',
-            nationality: address.nationality || '',
-            city: address.city || '',
-            state: address.state || '',
-            pincode: address.pincode || '',
-            isDefault: address.isDefault || false
-        };
+//         const safeAddress = {
+//             _id: address._id,
+//             addressType: address.addressType || '',
+//             name: address.name || '',
+//             phone: address.phone || '',
+//             houseName: address.houseName || '',
+//             buildingNumber: address.buildingNumber || '',
+//             landmark: address.landmark || '',
+//             altPhone: address.altPhone || '',
+//             nationality: address.nationality || '',
+//             city: address.city || '',
+//             state: address.state || '',
+//             pincode: address.pincode || '',
+//             isDefault: address.isDefault || false
+//         };
 
-        console.log('Successfully found and returning address');
-        return res.status(200).json({ success: true, address: safeAddress });
-    } catch (err) {
-        console.error('Get address error:', err);
-        return res.status(500).json({ success: false, message: 'Server error' });
+//         console.log('Successfully found and returning address');
+//         return res.status(200).json({ success: true, address: safeAddress });
+//     } catch (err) {
+//         console.error('Get address error:', err);
+//         return res.status(500).json({ success: false, message: 'Server error' });
+//     }
+// };
+
+
+// const deleteAddress = async (req, res) => {
+//     try {
+//         const userId = req.session.user?.id || req.session.user?._id;
+//         const addressId = req.params.id;
+
+//         console.log('Deleting address - userId:', userId, 'addressId:', addressId);
+
+//         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(addressId)) {
+//             return res.status(400).json({ success: false, message: 'Invalid user or address ID' });
+//         }
+
+//         const addressDoc = await Address.findOne({ userId });
+//         if (!addressDoc) {
+//             return res.status(404).json({ success: false, message: 'Address document not found' });
+//         }
+        
+//         addressDoc.address = addressDoc.address.filter(addr => addr._id.toString() !== addressId);
+//         await addressDoc.save();
+
+//         console.log('Address deleted successfully');
+//         return res.status(200).json({ success: true, message: 'Address deleted successfully' });
+//     } catch (err) {
+//         console.error('Delete address error:', err);
+//         return res.status(500).json({ success: false, message: 'Server error' });
+//     }
+// };
+
+
+// const validateAddressInput = (data) => {
+//   const errors = [];
+
+//   const trimmedData = {};
+//   Object.keys(data).forEach(key => {
+//     if (typeof data[key] === 'string') {
+//       trimmedData[key] = data[key].trim();
+//     } else {
+//       trimmedData[key] = data[key];
+//     }
+//   });
+
+//   // Address Type validation
+//   if (!trimmedData.addressType) {
+//     errors.push("Address type is required");
+//   } else if (!['Home', 'Work', 'Other'].includes(trimmedData.addressType)) {
+//     errors.push("Address type must be Home, Work, or Other");
+//   }
+
+//   // Full Name validation
+//   if (!trimmedData.name) {
+//     errors.push("Full name is required");
+//   } else if (trimmedData.name.length < 3) {
+//     errors.push("Full name must be at least 3 characters");
+//   }
+
+//   // Phone validation
+//   if (!trimmedData.phone) {
+//     errors.push("Phone number is required");
+//   } else if (!/^\d{10}$/.test(trimmedData.phone)) {
+//     errors.push("Phone number must be exactly 10 digits");
+//   }
+
+//   // House Name validation
+//   if (!trimmedData.houseName) {
+//     errors.push("House/Building name is required");
+//   } else if (trimmedData.houseName.length < 2) {
+//     errors.push("House/Building name must be at least 2 characters");
+//   }
+
+//   // Landmark validation
+//   if (!trimmedData.landmark) {
+//     errors.push("Landmark is required");
+//   } else if (trimmedData.landmark.length < 3) {
+//     errors.push("Landmark must be at least 3 characters");
+//   }
+
+//   // Nationality validation - ONLY LETTERS AND SPACES
+//   if (!trimmedData.nationality) {
+//     errors.push("Nationality is required");
+//   } else if (trimmedData.nationality.length < 2) {
+//     errors.push("Nationality must be at least 2 characters");
+//   } else if (!/^[a-zA-Z\s]+$/.test(trimmedData.nationality)) {
+//     errors.push("Nationality can only contain letters and spaces (no numbers or special characters)");
+//   }
+
+//   // City validation
+//   if (!trimmedData.city) {
+//     errors.push("City is required");
+//   } else if (trimmedData.city.length < 2) {
+//     errors.push("City must be at least 2 characters");
+//   }
+
+//   // State validation - ONLY LETTERS AND SPACES
+//   if (!trimmedData.state) {
+//     errors.push("State is required");
+//   } else if (trimmedData.state.length < 2) {
+//     errors.push("State must be at least 2 characters");
+//   } else if (!/^[a-zA-Z\s]+$/.test(trimmedData.state)) {
+//     errors.push("State can only contain letters and spaces (no numbers or special characters)");
+//   }
+
+//   // Pincode validation - MUST be exactly 6 digits
+//   if (!trimmedData.pincode) {
+//     errors.push("ZIP code is required");
+//   } else if (!/^\d{6}$/.test(trimmedData.pincode)) {
+//     errors.push("ZIP code must be exactly 6 digits");
+//   } else {
+//     const pincodeStr = trimmedData.pincode;
+    
+//     // Check if all digits are the same (000000, 111111, etc.)
+//     if (/^(\d)\1{5}$/.test(pincodeStr)) {
+//       errors.push("ZIP code cannot contain all same digits (like 000000 or 111111)");
+//     }
+    
+//     // Check if it's sequential like 123456, 234567, etc.
+//     let isSequential = true;
+//     for (let i = 1; i < 6; i++) {
+//       if (parseInt(pincodeStr[i]) - parseInt(pincodeStr[i - 1]) !== 1) {
+//         isSequential = false;
+//         break;
+//       }
+//     }
+//     if (isSequential) {
+//       errors.push("ZIP code cannot be sequential digits (like 123456)");
+//     }
+    
+//     // Check if it's reverse sequential like 654321, 543210, etc.
+//     let isReverseSequential = true;
+//     for (let i = 1; i < 6; i++) {
+//       if (parseInt(pincodeStr[i - 1]) - parseInt(pincodeStr[i]) !== 1) {
+//         isReverseSequential = false;
+//         break;
+//       }
+//     }
+//     if (isReverseSequential) {
+//       errors.push("ZIP code cannot be reverse sequential digits (like 654321)");
+//     }
+//   }
+
+//   // Alternative Phone validation (optional but validate if provided)
+//   if (trimmedData.altPhone && trimmedData.altPhone.length > 0) {
+//     if (!/^\d{10}$/.test(trimmedData.altPhone)) {
+//       errors.push("Alternative phone number must be exactly 10 digits");
+//     }
+//   }
+
+//   return errors;
+// };
+
+
+// const addAddress = async (req, res) => {
+//   try {
+//     const userId = req.session.user?.id || req.session.user?._id;
+//     const { addressType, name, phone, houseName, buildingNumber, landmark, altPhone, nationality, city, state, pincode, isDefault } = req.body;
+
+//     console.log('Adding new address for userId:', userId);
+
+//     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+//       return res.status(400).json({ success: false, message: 'Invalid user ID' });
+//     }
+
+    
+//     const validationErrors = validateAddressInput({
+//       addressType,
+//       name,
+//       phone,
+//       houseName,
+//       buildingNumber,
+//       landmark,
+//       altPhone,
+//       nationality,
+//       city,
+//       state,
+//       pincode
+//     });
+
+//     if (validationErrors.length > 0) {
+//       return res.status(400).json({ 
+//         success: false, 
+//         message: validationErrors[0],
+//         errors: validationErrors
+//       });
+//     }
+
+//     let addressDoc = await Address.findOne({ userId });
+
+//     const newAddress = {
+//       addressType: addressType.trim(),
+//       name: name.trim(),
+//       phone: phone.trim(),
+//       houseName: houseName.trim(),
+//       buildingNumber: buildingNumber ? buildingNumber.trim() : '',
+//       landmark: landmark.trim(),
+//       altPhone: altPhone ? altPhone.trim() : '',
+//       nationality: nationality.trim(),
+//       city: city.trim(),
+//       state: state.trim(),
+//       pincode: pincode.trim(),
+//       isDefault: isDefault || false
+//     };
+
+//     if (!addressDoc) {
+//       addressDoc = new Address({
+//         userId,
+//         address: [newAddress]
+//       });
+//     } else {
+//       if (isDefault) {
+//         addressDoc.address.forEach(addr => {
+//           addr.isDefault = false;
+//         });
+//       }
+//       addressDoc.address.push(newAddress);
+//     }
+
+//     await addressDoc.save();
+
+//     console.log('Address added successfully');
+//     return res.status(200).json({ success: true, message: 'Address added successfully' });
+//   } catch (err) {
+//     console.error('Add address error:', err);
+//     return res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// };
+
+// const editAddress = async (req, res) => {
+//   try {
+//     const userId = req.session.user?.id || req.session.user?._id;
+//     const addressId = req.params.id;
+//     const { addressType, name, phone, houseName, buildingNumber, landmark, altPhone, nationality, city, state, pincode, isDefault } = req.body;
+
+//     console.log('Editing address - userId:', userId, 'addressId:', addressId);
+
+//     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+//       return res.status(400).json({ success: false, message: 'Invalid user ID' });
+//     }
+
+//     if (!addressId || !mongoose.Types.ObjectId.isValid(addressId)) {
+//       return res.status(400).json({ success: false, message: 'Invalid address ID' });
+//     }
+
+//     // Validate all inputs
+//     const validationErrors = validateAddressInput({
+//       addressType,
+//       name,
+//       phone,
+//       houseName,
+//       buildingNumber,
+//       landmark,
+//       altPhone,
+//       nationality,
+//       city,
+//       state,
+//       pincode
+//     });
+
+//     if (validationErrors.length > 0) {
+//       return res.status(400).json({ 
+//         success: false, 
+//         message: validationErrors[0],
+//         errors: validationErrors
+//       });
+//     }
+
+//     const addressDoc = await Address.findOne({ userId });
+//     if (!addressDoc) {
+//       return res.status(404).json({ success: false, message: 'Address document not found' });
+//     }
+
+//     const addressIndex = addressDoc.address.findIndex(addr => addr._id.toString() === addressId);
+//     if (addressIndex === -1) {
+//       return res.status(404).json({ success: false, message: 'Address not found' });
+//     }
+
+//     if (isDefault) {
+//       addressDoc.address.forEach(addr => {
+//         addr.isDefault = false;
+//       });
+//     }
+
+//     addressDoc.address[addressIndex] = {
+//       _id: addressDoc.address[addressIndex]._id,
+//       addressType: addressType.trim(),
+//       name: name.trim(),
+//       phone: phone.trim(),
+//       houseName: houseName.trim(),
+//       buildingNumber: buildingNumber ? buildingNumber.trim() : '',
+//       landmark: landmark.trim(),
+//       altPhone: altPhone ? altPhone.trim() : '',
+//       nationality: nationality.trim(),
+//       city: city.trim(),
+//       state: state.trim(),
+//       pincode: pincode.trim(),
+//       isDefault: isDefault || false
+//     };
+
+//     await addressDoc.save();
+
+//     console.log('Address updated successfully');
+//     return res.status(200).json({ success: true, message: 'Address updated successfully' });
+//   } catch (err) {
+//     console.error('Edit address error:', err);
+//     return res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// };
+
+
+
+const isValidIndianPincode = (pincode) => {
+  if (!/^\d{6}$/.test(pincode)) {
+    return { valid: false, message: 'PIN code must be exactly 6 digits' };
+  }
+
+  // Check if all digits are the same (000000, 111111, etc.)
+  if (/^(\d)\1{5}$/.test(pincode)) {
+    return { valid: false, message: 'PIN code cannot have all same digits (like 000000 or 111111)' };
+  }
+
+  // Check if sequential (123456, 234567, etc.)
+  let isSequential = true;
+  for (let i = 1; i < 6; i++) {
+    if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
+      isSequential = false;
+      break;
     }
+  }
+  if (isSequential) {
+    return { valid: false, message: 'PIN code cannot be sequential digits (like 123456)' };
+  }
+
+  // Check if reverse sequential (654321, 543210, etc.)
+  let isReverseSequential = true;
+  for (let i = 1; i < 6; i++) {
+    if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
+      isReverseSequential = false;
+      break;
+    }
+  }
+  if (isReverseSequential) {
+    return { valid: false, message: 'PIN code cannot be reverse sequential digits (like 654321)' };
+  }
+
+  return { valid: true, message: 'Valid PIN code' };
 };
 
-
-const deleteAddress = async (req, res) => {
-    try {
-        const userId = req.session.user?.id || req.session.user?._id;
-        const addressId = req.params.id;
-
-        console.log('Deleting address - userId:', userId, 'addressId:', addressId);
-
-        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(addressId)) {
-            return res.status(400).json({ success: false, message: 'Invalid user or address ID' });
-        }
-
-        const addressDoc = await Address.findOne({ userId });
-        if (!addressDoc) {
-            return res.status(404).json({ success: false, message: 'Address document not found' });
-        }
-        
-        addressDoc.address = addressDoc.address.filter(addr => addr._id.toString() !== addressId);
-        await addressDoc.save();
-
-        console.log('Address deleted successfully');
-        return res.status(200).json({ success: true, message: 'Address deleted successfully' });
-    } catch (err) {
-        console.error('Delete address error:', err);
-        return res.status(500).json({ success: false, message: 'Server error' });
-    }
-};
-
-
+// Comprehensive address validation
 const validateAddressInput = (data) => {
   const errors = [];
 
@@ -304,108 +621,169 @@ const validateAddressInput = (data) => {
     errors.push("Address type must be Home, Work, or Other");
   }
 
-  // Full Name validation
+  // Full Name validation - 3-50 chars, letters and spaces only
   if (!trimmedData.name) {
     errors.push("Full name is required");
-  } else if (trimmedData.name.length < 3) {
-    errors.push("Full name must be at least 3 characters");
+  } else {
+    const name = trimmedData.name;
+    if (name.length < 3) {
+      errors.push("Full name must be at least 3 characters");
+    } else if (name.length > 50) {
+      errors.push("Full name cannot exceed 50 characters");
+    } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+      errors.push("Full name can only contain letters and spaces");
+    }
   }
 
-  // Phone validation
+  // Phone validation - exactly 10 digits
   if (!trimmedData.phone) {
     errors.push("Phone number is required");
   } else if (!/^\d{10}$/.test(trimmedData.phone)) {
     errors.push("Phone number must be exactly 10 digits");
   }
 
-  // House Name validation
+  // House Name validation - min 2 chars
   if (!trimmedData.houseName) {
     errors.push("House/Building name is required");
   } else if (trimmedData.houseName.length < 2) {
     errors.push("House/Building name must be at least 2 characters");
   }
 
-  // Landmark validation
+  // Landmark validation - min 3 chars
   if (!trimmedData.landmark) {
     errors.push("Landmark is required");
   } else if (trimmedData.landmark.length < 3) {
     errors.push("Landmark must be at least 3 characters");
   }
 
-  // Nationality validation - ONLY LETTERS AND SPACES
-  if (!trimmedData.nationality) {
-    errors.push("Nationality is required");
-  } else if (trimmedData.nationality.length < 2) {
-    errors.push("Nationality must be at least 2 characters");
-  } else if (!/^[a-zA-Z\s]+$/.test(trimmedData.nationality)) {
-    errors.push("Nationality can only contain letters and spaces (no numbers or special characters)");
+  // Alternative Phone validation (optional but validate if provided)
+  if (trimmedData.altPhone && trimmedData.altPhone.length > 0) {
+    if (!/^\d{10}$/.test(trimmedData.altPhone)) {
+      errors.push("Alternative phone number must be exactly 10 digits");
+    } else if (trimmedData.altPhone === trimmedData.phone) {
+      errors.push("Alternative phone cannot be same as main phone number");
+    }
   }
 
-  // City validation
+  // Nationality validation - must be India
+  if (!trimmedData.nationality) {
+    errors.push("Nationality is required");
+  } else if (trimmedData.nationality !== 'India') {
+    errors.push("Only India is available as nationality");
+  }
+
+  // City validation - min 2 chars
   if (!trimmedData.city) {
     errors.push("City is required");
   } else if (trimmedData.city.length < 2) {
     errors.push("City must be at least 2 characters");
   }
 
-  // State validation - ONLY LETTERS AND SPACES
+  // State validation - must be from predefined list
   if (!trimmedData.state) {
     errors.push("State is required");
-  } else if (trimmedData.state.length < 2) {
-    errors.push("State must be at least 2 characters");
-  } else if (!/^[a-zA-Z\s]+$/.test(trimmedData.state)) {
-    errors.push("State can only contain letters and spaces (no numbers or special characters)");
-  }
-
-  // Pincode validation - MUST be exactly 6 digits
-  if (!trimmedData.pincode) {
-    errors.push("ZIP code is required");
-  } else if (!/^\d{6}$/.test(trimmedData.pincode)) {
-    errors.push("ZIP code must be exactly 6 digits");
   } else {
-    const pincodeStr = trimmedData.pincode;
-    
-    // Check if all digits are the same (000000, 111111, etc.)
-    if (/^(\d)\1{5}$/.test(pincodeStr)) {
-      errors.push("ZIP code cannot contain all same digits (like 000000 or 111111)");
-    }
-    
-    // Check if it's sequential like 123456, 234567, etc.
-    let isSequential = true;
-    for (let i = 1; i < 6; i++) {
-      if (parseInt(pincodeStr[i]) - parseInt(pincodeStr[i - 1]) !== 1) {
-        isSequential = false;
-        break;
-      }
-    }
-    if (isSequential) {
-      errors.push("ZIP code cannot be sequential digits (like 123456)");
-    }
-    
-    // Check if it's reverse sequential like 654321, 543210, etc.
-    let isReverseSequential = true;
-    for (let i = 1; i < 6; i++) {
-      if (parseInt(pincodeStr[i - 1]) - parseInt(pincodeStr[i]) !== 1) {
-        isReverseSequential = false;
-        break;
-      }
-    }
-    if (isReverseSequential) {
-      errors.push("ZIP code cannot be reverse sequential digits (like 654321)");
+    const validStates = [
+      'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+      'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+      'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+      'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+      'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+      'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+    ];
+    if (!validStates.includes(trimmedData.state)) {
+      errors.push("Please select a valid Indian state");
     }
   }
 
-  // Alternative Phone validation (optional but validate if provided)
-  if (trimmedData.altPhone && trimmedData.altPhone.length > 0) {
-    if (!/^\d{10}$/.test(trimmedData.altPhone)) {
-      errors.push("Alternative phone number must be exactly 10 digits");
+  // PIN code validation with edge cases
+  if (!trimmedData.pincode) {
+    errors.push("PIN code is required");
+  } else {
+    const pincodeValidation = isValidIndianPincode(trimmedData.pincode);
+    if (!pincodeValidation.valid) {
+      errors.push(pincodeValidation.message);
     }
   }
 
   return errors;
 };
 
+// Get address for edit
+const getAddressForEdit = async (req, res) => {
+  try {
+    const userId = req.session.user?.id || req.session.user?._id;
+    const addressId = req.params.id;
 
+    console.log('Getting address for edit - userId:', userId, 'addressId:', addressId);
+
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(addressId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user or address ID' });
+    }
+
+    const addressDoc = await Address.findOne({ userId });
+    if (!addressDoc) {
+      return res.status(404).json({ success: false, message: 'Address document not found' });
+    }
+
+    const address = addressDoc.address.find(addr => addr._id.toString() === addressId);
+    if (!address) {
+      return res.status(404).json({ success: false, message: 'Address not found' });
+    }
+
+    const safeAddress = {
+      _id: address._id,
+      addressType: address.addressType || '',
+      name: address.name || '',
+      phone: address.phone || '',
+      houseName: address.houseName || '',
+      buildingNumber: address.buildingNumber || '',
+      landmark: address.landmark || '',
+      altPhone: address.altPhone || '',
+      nationality: address.nationality || 'India',
+      city: address.city || '',
+      state: address.state || '',
+      pincode: address.pincode || '',
+      isDefault: address.isDefault || false
+    };
+
+    console.log('Successfully found and returning address');
+    return res.status(200).json({ success: true, address: safeAddress });
+  } catch (err) {
+    console.error('Get address error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Delete address
+const deleteAddress = async (req, res) => {
+  try {
+    const userId = req.session.user?.id || req.session.user?._id;
+    const addressId = req.params.id;
+
+    console.log('Deleting address - userId:', userId, 'addressId:', addressId);
+
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(addressId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user or address ID' });
+    }
+
+    const addressDoc = await Address.findOne({ userId });
+    if (!addressDoc) {
+      return res.status(404).json({ success: false, message: 'Address document not found' });
+    }
+
+    addressDoc.address = addressDoc.address.filter(addr => addr._id.toString() !== addressId);
+    await addressDoc.save();
+
+    console.log('Address deleted successfully');
+    return res.status(200).json({ success: true, message: 'Address deleted successfully' });
+  } catch (err) {
+    console.error('Delete address error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Add new address
 const addAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -417,7 +795,6 @@ const addAddress = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid user ID' });
     }
 
-    
     const validationErrors = validateAddressInput({
       addressType,
       name,
@@ -433,8 +810,8 @@ const addAddress = async (req, res) => {
     });
 
     if (validationErrors.length > 0) {
-      return res.status(400).json({ 
-        success: false, 
+      return res.status(400).json({
+        success: false,
         message: validationErrors[0],
         errors: validationErrors
       });
@@ -450,7 +827,7 @@ const addAddress = async (req, res) => {
       buildingNumber: buildingNumber ? buildingNumber.trim() : '',
       landmark: landmark.trim(),
       altPhone: altPhone ? altPhone.trim() : '',
-      nationality: nationality.trim(),
+      nationality: 'India',
       city: city.trim(),
       state: state.trim(),
       pincode: pincode.trim(),
@@ -481,6 +858,7 @@ const addAddress = async (req, res) => {
   }
 };
 
+// Edit address
 const editAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -497,7 +875,6 @@ const editAddress = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid address ID' });
     }
 
-    // Validate all inputs
     const validationErrors = validateAddressInput({
       addressType,
       name,
@@ -513,8 +890,8 @@ const editAddress = async (req, res) => {
     });
 
     if (validationErrors.length > 0) {
-      return res.status(400).json({ 
-        success: false, 
+      return res.status(400).json({
+        success: false,
         message: validationErrors[0],
         errors: validationErrors
       });
@@ -545,7 +922,7 @@ const editAddress = async (req, res) => {
       buildingNumber: buildingNumber ? buildingNumber.trim() : '',
       landmark: landmark.trim(),
       altPhone: altPhone ? altPhone.trim() : '',
-      nationality: nationality.trim(),
+      nationality: 'India',
       city: city.trim(),
       state: state.trim(),
       pincode: pincode.trim(),
@@ -561,8 +938,6 @@ const editAddress = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
-
 
 
 const placeOrder = async (req, res) => {
@@ -743,5 +1118,5 @@ module.exports = {
     editAddress,
     deleteAddress,
     placeOrder,
-     validateAddressInput
+    validateAddressInput
 };

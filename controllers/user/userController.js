@@ -160,51 +160,51 @@ const securePassword = async (password) => {
     }
 };
 
-const signup = async (req, res) => {
-  try {
-    const { fullName, phone, email, referral, password, confirmPassword } = req.body;
+// const signup = async (req, res) => {
+//   try {
+//     const { fullName, phone, email, referral, password, confirmPassword } = req.body;
 
-    if (!fullName || !email || !phone || !password || !confirmPassword) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
-    }
+//     if (!fullName || !email || !phone || !password || !confirmPassword) {
+//       return res.status(400).json({ success: false, message: "All fields are required" });
+//     }
 
-    if (password !== confirmPassword) {
-      return res.status(400).json({ success: false, message: "Passwords do not match" });
-    }
+//     if (password !== confirmPassword) {
+//       return res.status(400).json({ success: false, message: "Passwords do not match" });
+//     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: "Email already registered" });
-    }
-    const securePass = await securePassword(password);
-    const otp = Math.floor(1000 + Math.random() * 9000);
-    console.log("Generated OTP:", otp);
-    console.log("OTP for user", email, "is", otp);
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ success: false, message: "Email already registered" });
+//     }
+//     const securePass = await securePassword(password);
+//     const otp = Math.floor(1000 + Math.random() * 9000);
+//     console.log("Generated OTP:", otp);
+//     console.log("OTP for user", email, "is", otp);
 
-    req.session.userData = {
-      fullName,
-      phone,
-      email,
-      referral,
-      password,
-    };
-    req.session.userOtp = otp;
+//     req.session.userData = {
+//       fullName,
+//       phone,
+//       email,
+//       referral,
+//       password,
+//     };
+//     req.session.userOtp = otp;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Sentique Email Verification",
-      text: `Your OTP is ${otp}`
-    });
-    return res.status(200).json({
-      success: true,
-      redirectUrl: "/verify-otp"
-    });
-  } catch (error) {
-    console.log("Signup error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
+//     await transporter.sendMail({
+//       from: process.env.EMAIL_USER,
+//       to: email,
+//       subject: "Sentique Email Verification",
+//       text: `Your OTP is ${otp}`
+//     });
+//     return res.status(200).json({
+//       success: true,
+//       redirectUrl: "/verify-otp"
+//     });
+//   } catch (error) {
+//     console.log("Signup error:", error);
+//     return res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
 
 
 // const loadVerifyOtpPage = async (req, res) => {
@@ -314,6 +314,57 @@ const signup = async (req, res) => {
 
 // BACKEND - Fix the OTP verification with expiration check
 
+const signup = async (req, res) => {
+  try {
+    const { fullName, phone, email, referral, password, confirmPassword } = req.body;
+
+    if (!fullName || !email || !phone || !password || !confirmPassword) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ success: false, message: "Passwords do not match" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Email already registered" });
+    }
+
+    const securePass = await securePassword(password);
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    console.log("Generated OTP:", otp);
+    console.log("OTP for user", email, "is", otp);
+
+    req.session.userData = {
+      fullName,
+      phone,
+      email,
+      referral,
+      password,
+    };
+    req.session.userOtp = otp;
+    
+    req.session.otpExpirationTime = Date.now() + 600000;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Sentique Email Verification",
+      text: `Your OTP is ${otp}`
+    });
+
+    console.log("OTP sent:", otp, "Expires at:", new Date(req.session.otpExpirationTime));
+
+    return res.status(200).json({
+      success: true,
+      redirectUrl: "/verify-otp"
+    });
+  } catch (error) {
+    console.log("Signup error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 const loadVerifyOtpPage = async (req, res) => {
     try {
         if (!req.session.userOtp || !req.session.userData) {
@@ -409,50 +460,6 @@ const verifyOtp = async (req, res) => {
         });
     }
 };
-
-const resendOtp = async (req, res) => {
-    try {
-        const userData = req.session.userData;
-
-        if (!userData || !userData.email) {
-            return res.status(400).json({
-                success: false,
-                message: "Session expired. Please sign up again.",
-            });
-        }
-
-        const otp = generateOtp();
-        
-        // Store OTP with expiration time (60 seconds = 60000 milliseconds)
-        req.session.userOtp = otp;
-        req.session.otpExpirationTime = Date.now() + 60000; // OTP expires in 60 seconds
-
-        const emailSent = await sendVerificationEmail(userData.email, otp);
-
-        if (emailSent) {
-            console.log("Resent OTP:", otp, "Expires at:", new Date(req.session.otpExpirationTime));
-            return res.status(200).json({
-                success: true,
-                message: "OTP resent successfully.",
-            });
-        } else {
-            return res.status(500).json({
-                success: false,
-                message: "Failed to resend OTP. Please try again.",
-            });
-        }
-    } catch (error) {
-        console.error("Error Resending OTP:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error. Please try again.",
-        });
-    }
-};
-
-// ALSO UPDATE YOUR SIGNUP ROUTE TO SET EXPIRATION TIME WHEN OTP IS FIRST SENT
-// Find this function and add the otpExpirationTime line:
-
 const sendOtp = async (req, res) => {
     try {
         const { email, fullName, phone, password } = req.body;
@@ -464,8 +471,8 @@ const sendOtp = async (req, res) => {
         // Store user data and OTP in session
         req.session.userData = { email, fullName, phone, password };
         req.session.userOtp = otp;
-        // ADD THIS LINE - Set OTP expiration time to 60 seconds from now
-        req.session.otpExpirationTime = Date.now() + 60000;
+        // SET OTP EXPIRATION TO 10 MINUTES (600000 milliseconds)
+        req.session.otpExpirationTime = Date.now() + 600000;
 
         const emailSent = await sendVerificationEmail(email, otp);
 
@@ -486,6 +493,46 @@ const sendOtp = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "An error occurred. Please try again.",
+        });
+    }
+};
+
+const resendOtp = async (req, res) => {
+    try {
+        const userData = req.session.userData;
+
+        if (!userData || !userData.email) {
+            return res.status(400).json({
+                success: false,
+                message: "Session expired. Please sign up again.",
+            });
+        }
+
+        const otp = generateOtp();
+        
+        // Store OTP with expiration time (10 minutes)
+        req.session.userOtp = otp;
+        req.session.otpExpirationTime = Date.now() + 600000; // 10 minutes
+
+        const emailSent = await sendVerificationEmail(userData.email, otp);
+
+        if (emailSent) {
+            console.log("Resent OTP:", otp, "Expires at:", new Date(req.session.otpExpirationTime));
+            return res.status(200).json({
+                success: true,
+                message: "OTP resent successfully.",
+            });
+        } else {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to resend OTP. Please try again.",
+            });
+        }
+    } catch (error) {
+        console.error("Error Resending OTP:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error. Please try again.",
         });
     }
 };
@@ -761,6 +808,7 @@ module.exports = {
     loadShopingPage, 
     loadProductDetails,
     generateOtp,
+    sendOtp
     
    
 };
