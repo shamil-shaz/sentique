@@ -11,6 +11,7 @@ const categoryController = require("../controllers/admin/categoryController");
 const productController = require("../controllers/admin/productController");
 const brandController = require('../controllers/admin/brandController');
 const adminOrderController=require('../controllers/admin/adminOrderController')
+const adminCouponsController=require('../controllers/admin/adminCouponsController')
 
 // Middlewares
 const { userAuth, adminAuth } = require('../middlewares/auth');
@@ -82,15 +83,34 @@ router.get("/orders", adminAuth, adminOrderController.getAdminOrderList);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/status', adminAuth, adminOrderController.updateProductStatus);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/approve-return', adminAuth, adminOrderController.approveReturn);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/reject-return', adminAuth, adminOrderController.rejectReturn);
-router.post('/orders/:orderId/items/all/all/approve-return', 
-    adminAuth, 
-    adminOrderController.approveReturn
-);
-
-router.post('/orders/:orderId/items/all/all/reject-return', 
-    adminAuth, 
-    adminOrderController.rejectReturn
-);
+router.post('/orders/:orderId/items/all/all/approve-return', adminAuth, adminOrderController.approveReturn);
+router.post('/orders/:orderId/items/all/all/reject-return', adminAuth, adminOrderController.rejectReturn);
 
 
+////-------------COUPONS MANAGEMENT-------------
+
+// router.get('/couponsManaging', adminAuth, adminCouponsController.getCoupons);
+
+// // Get all coupons (API)
+// router.get('/get-coupons', adminAuth, adminCouponsController.getAllCoupons);
+
+// // Create new coupon
+// router.post('/create-coupon', adminAuth, adminCouponsController.createCoupon);
+
+// // Update coupon
+// router.put('/update-coupon/:id', adminAuth, adminCouponsController.updateCoupon);
+
+// // Delete coupon
+// router.delete('/delete-coupon/:id', adminAuth, adminCouponsController.deleteCoupon);
+
+// // Toggle coupon status (active/inactive)
+// router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCouponStatus);
+
+router.get('/couponsManaging', adminAuth, adminCouponsController.getCoupons);
+router.get('/get-coupons', adminAuth, adminCouponsController.getAllCoupons);
+router.post('/create-coupon', adminAuth, adminCouponsController.createCoupon);
+router.put('/update-coupon/:id', adminAuth, adminCouponsController.updateCoupon);
+router.delete('/delete-coupon/:id', adminAuth, adminCouponsController.deleteCoupon);
+router.patch('/toggle-coupon-listing/:id', adminAuth, adminCouponsController.toggleCouponListing);
+router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCouponStatus);
 module.exports = router;

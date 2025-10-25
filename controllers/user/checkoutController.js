@@ -204,377 +204,16 @@ const getCheckoutPage = async (req, res) => {
 };
 
 
-// const getAddressForEdit = async (req, res) => {
-//     try {
-        
-//         const userId = req.session.user?.id || req.session.user?._id;
-//         const addressId = req.params.id;
-
-//         console.log('Getting address for edit - userId:', userId, 'addressId:', addressId);
-
-//         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(addressId)) {
-//             console.log('Validation failed - userId valid:', mongoose.Types.ObjectId.isValid(userId), 'addressId valid:', mongoose.Types.ObjectId.isValid(addressId));
-//             return res.status(400).json({ success: false, message: 'Invalid user or address ID' });
-//         }
-
-//         const addressDoc = await Address.findOne({ userId });
-//         if (!addressDoc) {
-//             console.log('Address document not found for userId:', userId);
-//             return res.status(404).json({ success: false, message: 'Address document not found' });
-//         }
-
-//         console.log('Found address document with', addressDoc.address.length, 'addresses');
-
-//         const address = addressDoc.address.find(addr => addr._id.toString() === addressId);
-//         if (!address) {
-//             console.log('Address not found in document. Looking for:', addressId);
-//             console.log('Available addresses:', addressDoc.address.map(a => a._id.toString()));
-//             return res.status(404).json({ success: false, message: 'Address not found' });
-//         }
-
-//         const safeAddress = {
-//             _id: address._id,
-//             addressType: address.addressType || '',
-//             name: address.name || '',
-//             phone: address.phone || '',
-//             houseName: address.houseName || '',
-//             buildingNumber: address.buildingNumber || '',
-//             landmark: address.landmark || '',
-//             altPhone: address.altPhone || '',
-//             nationality: address.nationality || '',
-//             city: address.city || '',
-//             state: address.state || '',
-//             pincode: address.pincode || '',
-//             isDefault: address.isDefault || false
-//         };
-
-//         console.log('Successfully found and returning address');
-//         return res.status(200).json({ success: true, address: safeAddress });
-//     } catch (err) {
-//         console.error('Get address error:', err);
-//         return res.status(500).json({ success: false, message: 'Server error' });
-//     }
-// };
-
-
-// const deleteAddress = async (req, res) => {
-//     try {
-//         const userId = req.session.user?.id || req.session.user?._id;
-//         const addressId = req.params.id;
-
-//         console.log('Deleting address - userId:', userId, 'addressId:', addressId);
-
-//         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(addressId)) {
-//             return res.status(400).json({ success: false, message: 'Invalid user or address ID' });
-//         }
-
-//         const addressDoc = await Address.findOne({ userId });
-//         if (!addressDoc) {
-//             return res.status(404).json({ success: false, message: 'Address document not found' });
-//         }
-        
-//         addressDoc.address = addressDoc.address.filter(addr => addr._id.toString() !== addressId);
-//         await addressDoc.save();
-
-//         console.log('Address deleted successfully');
-//         return res.status(200).json({ success: true, message: 'Address deleted successfully' });
-//     } catch (err) {
-//         console.error('Delete address error:', err);
-//         return res.status(500).json({ success: false, message: 'Server error' });
-//     }
-// };
-
-
-// const validateAddressInput = (data) => {
-//   const errors = [];
-
-//   const trimmedData = {};
-//   Object.keys(data).forEach(key => {
-//     if (typeof data[key] === 'string') {
-//       trimmedData[key] = data[key].trim();
-//     } else {
-//       trimmedData[key] = data[key];
-//     }
-//   });
-
-//   // Address Type validation
-//   if (!trimmedData.addressType) {
-//     errors.push("Address type is required");
-//   } else if (!['Home', 'Work', 'Other'].includes(trimmedData.addressType)) {
-//     errors.push("Address type must be Home, Work, or Other");
-//   }
-
-//   // Full Name validation
-//   if (!trimmedData.name) {
-//     errors.push("Full name is required");
-//   } else if (trimmedData.name.length < 3) {
-//     errors.push("Full name must be at least 3 characters");
-//   }
-
-//   // Phone validation
-//   if (!trimmedData.phone) {
-//     errors.push("Phone number is required");
-//   } else if (!/^\d{10}$/.test(trimmedData.phone)) {
-//     errors.push("Phone number must be exactly 10 digits");
-//   }
-
-//   // House Name validation
-//   if (!trimmedData.houseName) {
-//     errors.push("House/Building name is required");
-//   } else if (trimmedData.houseName.length < 2) {
-//     errors.push("House/Building name must be at least 2 characters");
-//   }
-
-//   // Landmark validation
-//   if (!trimmedData.landmark) {
-//     errors.push("Landmark is required");
-//   } else if (trimmedData.landmark.length < 3) {
-//     errors.push("Landmark must be at least 3 characters");
-//   }
-
-//   // Nationality validation - ONLY LETTERS AND SPACES
-//   if (!trimmedData.nationality) {
-//     errors.push("Nationality is required");
-//   } else if (trimmedData.nationality.length < 2) {
-//     errors.push("Nationality must be at least 2 characters");
-//   } else if (!/^[a-zA-Z\s]+$/.test(trimmedData.nationality)) {
-//     errors.push("Nationality can only contain letters and spaces (no numbers or special characters)");
-//   }
-
-//   // City validation
-//   if (!trimmedData.city) {
-//     errors.push("City is required");
-//   } else if (trimmedData.city.length < 2) {
-//     errors.push("City must be at least 2 characters");
-//   }
-
-//   // State validation - ONLY LETTERS AND SPACES
-//   if (!trimmedData.state) {
-//     errors.push("State is required");
-//   } else if (trimmedData.state.length < 2) {
-//     errors.push("State must be at least 2 characters");
-//   } else if (!/^[a-zA-Z\s]+$/.test(trimmedData.state)) {
-//     errors.push("State can only contain letters and spaces (no numbers or special characters)");
-//   }
-
-//   // Pincode validation - MUST be exactly 6 digits
-//   if (!trimmedData.pincode) {
-//     errors.push("ZIP code is required");
-//   } else if (!/^\d{6}$/.test(trimmedData.pincode)) {
-//     errors.push("ZIP code must be exactly 6 digits");
-//   } else {
-//     const pincodeStr = trimmedData.pincode;
-    
-//     // Check if all digits are the same (000000, 111111, etc.)
-//     if (/^(\d)\1{5}$/.test(pincodeStr)) {
-//       errors.push("ZIP code cannot contain all same digits (like 000000 or 111111)");
-//     }
-    
-//     // Check if it's sequential like 123456, 234567, etc.
-//     let isSequential = true;
-//     for (let i = 1; i < 6; i++) {
-//       if (parseInt(pincodeStr[i]) - parseInt(pincodeStr[i - 1]) !== 1) {
-//         isSequential = false;
-//         break;
-//       }
-//     }
-//     if (isSequential) {
-//       errors.push("ZIP code cannot be sequential digits (like 123456)");
-//     }
-    
-//     // Check if it's reverse sequential like 654321, 543210, etc.
-//     let isReverseSequential = true;
-//     for (let i = 1; i < 6; i++) {
-//       if (parseInt(pincodeStr[i - 1]) - parseInt(pincodeStr[i]) !== 1) {
-//         isReverseSequential = false;
-//         break;
-//       }
-//     }
-//     if (isReverseSequential) {
-//       errors.push("ZIP code cannot be reverse sequential digits (like 654321)");
-//     }
-//   }
-
-//   // Alternative Phone validation (optional but validate if provided)
-//   if (trimmedData.altPhone && trimmedData.altPhone.length > 0) {
-//     if (!/^\d{10}$/.test(trimmedData.altPhone)) {
-//       errors.push("Alternative phone number must be exactly 10 digits");
-//     }
-//   }
-
-//   return errors;
-// };
-
-
-// const addAddress = async (req, res) => {
-//   try {
-//     const userId = req.session.user?.id || req.session.user?._id;
-//     const { addressType, name, phone, houseName, buildingNumber, landmark, altPhone, nationality, city, state, pincode, isDefault } = req.body;
-
-//     console.log('Adding new address for userId:', userId);
-
-//     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-//       return res.status(400).json({ success: false, message: 'Invalid user ID' });
-//     }
-
-    
-//     const validationErrors = validateAddressInput({
-//       addressType,
-//       name,
-//       phone,
-//       houseName,
-//       buildingNumber,
-//       landmark,
-//       altPhone,
-//       nationality,
-//       city,
-//       state,
-//       pincode
-//     });
-
-//     if (validationErrors.length > 0) {
-//       return res.status(400).json({ 
-//         success: false, 
-//         message: validationErrors[0],
-//         errors: validationErrors
-//       });
-//     }
-
-//     let addressDoc = await Address.findOne({ userId });
-
-//     const newAddress = {
-//       addressType: addressType.trim(),
-//       name: name.trim(),
-//       phone: phone.trim(),
-//       houseName: houseName.trim(),
-//       buildingNumber: buildingNumber ? buildingNumber.trim() : '',
-//       landmark: landmark.trim(),
-//       altPhone: altPhone ? altPhone.trim() : '',
-//       nationality: nationality.trim(),
-//       city: city.trim(),
-//       state: state.trim(),
-//       pincode: pincode.trim(),
-//       isDefault: isDefault || false
-//     };
-
-//     if (!addressDoc) {
-//       addressDoc = new Address({
-//         userId,
-//         address: [newAddress]
-//       });
-//     } else {
-//       if (isDefault) {
-//         addressDoc.address.forEach(addr => {
-//           addr.isDefault = false;
-//         });
-//       }
-//       addressDoc.address.push(newAddress);
-//     }
-
-//     await addressDoc.save();
-
-//     console.log('Address added successfully');
-//     return res.status(200).json({ success: true, message: 'Address added successfully' });
-//   } catch (err) {
-//     console.error('Add address error:', err);
-//     return res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// };
-
-// const editAddress = async (req, res) => {
-//   try {
-//     const userId = req.session.user?.id || req.session.user?._id;
-//     const addressId = req.params.id;
-//     const { addressType, name, phone, houseName, buildingNumber, landmark, altPhone, nationality, city, state, pincode, isDefault } = req.body;
-
-//     console.log('Editing address - userId:', userId, 'addressId:', addressId);
-
-//     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-//       return res.status(400).json({ success: false, message: 'Invalid user ID' });
-//     }
-
-//     if (!addressId || !mongoose.Types.ObjectId.isValid(addressId)) {
-//       return res.status(400).json({ success: false, message: 'Invalid address ID' });
-//     }
-
-//     // Validate all inputs
-//     const validationErrors = validateAddressInput({
-//       addressType,
-//       name,
-//       phone,
-//       houseName,
-//       buildingNumber,
-//       landmark,
-//       altPhone,
-//       nationality,
-//       city,
-//       state,
-//       pincode
-//     });
-
-//     if (validationErrors.length > 0) {
-//       return res.status(400).json({ 
-//         success: false, 
-//         message: validationErrors[0],
-//         errors: validationErrors
-//       });
-//     }
-
-//     const addressDoc = await Address.findOne({ userId });
-//     if (!addressDoc) {
-//       return res.status(404).json({ success: false, message: 'Address document not found' });
-//     }
-
-//     const addressIndex = addressDoc.address.findIndex(addr => addr._id.toString() === addressId);
-//     if (addressIndex === -1) {
-//       return res.status(404).json({ success: false, message: 'Address not found' });
-//     }
-
-//     if (isDefault) {
-//       addressDoc.address.forEach(addr => {
-//         addr.isDefault = false;
-//       });
-//     }
-
-//     addressDoc.address[addressIndex] = {
-//       _id: addressDoc.address[addressIndex]._id,
-//       addressType: addressType.trim(),
-//       name: name.trim(),
-//       phone: phone.trim(),
-//       houseName: houseName.trim(),
-//       buildingNumber: buildingNumber ? buildingNumber.trim() : '',
-//       landmark: landmark.trim(),
-//       altPhone: altPhone ? altPhone.trim() : '',
-//       nationality: nationality.trim(),
-//       city: city.trim(),
-//       state: state.trim(),
-//       pincode: pincode.trim(),
-//       isDefault: isDefault || false
-//     };
-
-//     await addressDoc.save();
-
-//     console.log('Address updated successfully');
-//     return res.status(200).json({ success: true, message: 'Address updated successfully' });
-//   } catch (err) {
-//     console.error('Edit address error:', err);
-//     return res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// };
-
-
 
 const isValidIndianPincode = (pincode) => {
   if (!/^\d{6}$/.test(pincode)) {
     return { valid: false, message: 'PIN code must be exactly 6 digits' };
   }
 
-  // Check if all digits are the same (000000, 111111, etc.)
   if (/^(\d)\1{5}$/.test(pincode)) {
     return { valid: false, message: 'PIN code cannot have all same digits (like 000000 or 111111)' };
   }
-
-  // Check if sequential (123456, 234567, etc.)
+ 
   let isSequential = true;
   for (let i = 1; i < 6; i++) {
     if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
@@ -586,7 +225,6 @@ const isValidIndianPincode = (pincode) => {
     return { valid: false, message: 'PIN code cannot be sequential digits (like 123456)' };
   }
 
-  // Check if reverse sequential (654321, 543210, etc.)
   let isReverseSequential = true;
   for (let i = 1; i < 6; i++) {
     if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
@@ -601,7 +239,7 @@ const isValidIndianPincode = (pincode) => {
   return { valid: true, message: 'Valid PIN code' };
 };
 
-// Comprehensive address validation
+
 const validateAddressInput = (data) => {
   const errors = [];
 
@@ -614,14 +252,12 @@ const validateAddressInput = (data) => {
     }
   });
 
-  // Address Type validation
   if (!trimmedData.addressType) {
     errors.push("Address type is required");
   } else if (!['Home', 'Work', 'Other'].includes(trimmedData.addressType)) {
     errors.push("Address type must be Home, Work, or Other");
   }
-
-  // Full Name validation - 3-50 chars, letters and spaces only
+  
   if (!trimmedData.name) {
     errors.push("Full name is required");
   } else {
@@ -635,28 +271,25 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // Phone validation - exactly 10 digits
   if (!trimmedData.phone) {
     errors.push("Phone number is required");
   } else if (!/^\d{10}$/.test(trimmedData.phone)) {
     errors.push("Phone number must be exactly 10 digits");
   }
 
-  // House Name validation - min 2 chars
   if (!trimmedData.houseName) {
     errors.push("House/Building name is required");
   } else if (trimmedData.houseName.length < 2) {
     errors.push("House/Building name must be at least 2 characters");
   }
 
-  // Landmark validation - min 3 chars
+
   if (!trimmedData.landmark) {
     errors.push("Landmark is required");
   } else if (trimmedData.landmark.length < 3) {
     errors.push("Landmark must be at least 3 characters");
   }
 
-  // Alternative Phone validation (optional but validate if provided)
   if (trimmedData.altPhone && trimmedData.altPhone.length > 0) {
     if (!/^\d{10}$/.test(trimmedData.altPhone)) {
       errors.push("Alternative phone number must be exactly 10 digits");
@@ -665,21 +298,20 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // Nationality validation - must be India
+
   if (!trimmedData.nationality) {
     errors.push("Nationality is required");
   } else if (trimmedData.nationality !== 'India') {
     errors.push("Only India is available as nationality");
   }
 
-  // City validation - min 2 chars
+
   if (!trimmedData.city) {
     errors.push("City is required");
   } else if (trimmedData.city.length < 2) {
     errors.push("City must be at least 2 characters");
   }
 
-  // State validation - must be from predefined list
   if (!trimmedData.state) {
     errors.push("State is required");
   } else {
@@ -696,7 +328,6 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // PIN code validation with edge cases
   if (!trimmedData.pincode) {
     errors.push("PIN code is required");
   } else {
@@ -709,7 +340,6 @@ const validateAddressInput = (data) => {
   return errors;
 };
 
-// Get address for edit
 const getAddressForEdit = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -755,7 +385,7 @@ const getAddressForEdit = async (req, res) => {
   }
 };
 
-// Delete address
+
 const deleteAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -783,7 +413,6 @@ const deleteAddress = async (req, res) => {
   }
 };
 
-// Add new address
 const addAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -858,7 +487,6 @@ const addAddress = async (req, res) => {
   }
 };
 
-// Edit address
 const editAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -940,176 +568,176 @@ const editAddress = async (req, res) => {
 };
 
 
-const placeOrder = async (req, res) => {
-  try {
-    const userId = req.session.user?.id || req.session.user?._id;
-    const { addressId, paymentMethod, couponCode } = req.body;
+// const placeOrder = async (req, res) => {
+//   try {
+//     const userId = req.session.user?.id || req.session.user?._id;
+//     const { addressId, paymentMethod, couponCode } = req.body;
 
-    console.log('Placing order - userId:', userId, 'addressId:', addressId, 'paymentMethod:', paymentMethod);
+//     console.log('Placing order - userId:', userId, 'addressId:', addressId, 'paymentMethod:', paymentMethod);
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ success: false, message: 'Invalid user ID' });
-    }
+//     if (!mongoose.Types.ObjectId.isValid(userId)) {
+//       return res.status(400).json({ success: false, message: 'Invalid user ID' });
+//     }
 
-    if (!addressId || !mongoose.Types.ObjectId.isValid(addressId)) {
-      return res.status(400).json({ success: false, message: 'Please select a valid delivery address' });
-    }
+//     if (!addressId || !mongoose.Types.ObjectId.isValid(addressId)) {
+//       return res.status(400).json({ success: false, message: 'Please select a valid delivery address' });
+//     }
 
-    if (!paymentMethod) {
-      return res.status(400).json({ success: false, message: 'Please select a payment method' });
-    }
+//     if (!paymentMethod) {
+//       return res.status(400).json({ success: false, message: 'Please select a payment method' });
+//     }
 
-    let normalizedPaymentMethod;
-    if (paymentMethod.toLowerCase() === 'cod') {
-      normalizedPaymentMethod = 'COD';
-    } else if (paymentMethod.toLowerCase() === 'online payment') {
-      normalizedPaymentMethod = 'Online Payment';
-    } else if (paymentMethod.toLowerCase() === 'wallet') {
-      normalizedPaymentMethod = 'Wallet';
-    } else {
-      return res.status(400).json({ success: false, message: 'Invalid payment method' });
-    }
+//     let normalizedPaymentMethod;
+//     if (paymentMethod.toLowerCase() === 'cod') {
+//       normalizedPaymentMethod = 'COD';
+//     } else if (paymentMethod.toLowerCase() === 'online payment') {
+//       normalizedPaymentMethod = 'Online Payment';
+//     } else if (paymentMethod.toLowerCase() === 'wallet') {
+//       normalizedPaymentMethod = 'Wallet';
+//     } else {
+//       return res.status(400).json({ success: false, message: 'Invalid payment method' });
+//     }
 
-    const cart = await Cart.findOne({ userId }).populate({
-      path: 'items.productId',
-      select: 'productName price salePrice variants stock',
-    });
+//     const cart = await Cart.findOne({ userId }).populate({
+//       path: 'items.productId',
+//       select: 'productName price salePrice variants stock',
+//     });
 
-    if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ success: false, message: 'Your cart is empty' });
-    }
+//     if (!cart || cart.items.length === 0) {
+//       return res.status(400).json({ success: false, message: 'Your cart is empty' });
+//     }
 
-    const addressDoc = await Address.findOne({ userId });
-    if (!addressDoc) {
-      return res.status(404).json({ success: false, message: 'Address not found' });
-    }
+//     const addressDoc = await Address.findOne({ userId });
+//     if (!addressDoc) {
+//       return res.status(404).json({ success: false, message: 'Address not found' });
+//     }
 
-    const deliveryAddress = addressDoc.address.find((addr) => addr._id.toString() === addressId);
-    if (!deliveryAddress) {
-      return res.status(404).json({ success: false, message: 'Selected address not found' });
-    }
+//     const deliveryAddress = addressDoc.address.find((addr) => addr._id.toString() === addressId);
+//     if (!deliveryAddress) {
+//       return res.status(404).json({ success: false, message: 'Selected address not found' });
+//     }
 
-    for (const item of cart.items) {
-      const product = item.productId;
-      if (!product) {
-        return res.status(400).json({ success: false, message: 'Some products are no longer available' });
-      }
+//     for (const item of cart.items) {
+//       const product = item.productId;
+//       if (!product) {
+//         return res.status(400).json({ success: false, message: 'Some products are no longer available' });
+//       }
 
-      const variant = product.variants?.find((v) => v.size === item.variantSize);
-      const availableStock = variant?.stock ?? product.stock ?? 0;
+//       const variant = product.variants?.find((v) => v.size === item.variantSize);
+//       const availableStock = variant?.stock ?? product.stock ?? 0;
 
-      if (availableStock < item.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: `${product.productName} (${item.variantSize}ml) is out of stock or has insufficient stock`,
-        });
-      }
-    }
+//       if (availableStock < item.quantity) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `${product.productName} (${item.variantSize}ml) is out of stock or has insufficient stock`,
+//         });
+//       }
+//     }
 
-    let subtotal = 0;
-    const orderItems = [];
+//     let subtotal = 0;
+//     const orderItems = [];
 
-    for (const item of cart.items) {
-      const product = item.productId;
-      const variant = product.variants?.find((v) => v.size === item.variantSize);
-      const price = variant?.salePrice || variant?.price || product.salePrice || product.price || 0;
-      const itemTotal = price * item.quantity;
-      subtotal += itemTotal;
+//     for (const item of cart.items) {
+//       const product = item.productId;
+//       const variant = product.variants?.find((v) => v.size === item.variantSize);
+//       const price = variant?.salePrice || variant?.price || product.salePrice || product.price || 0;
+//       const itemTotal = price * item.quantity;
+//       subtotal += itemTotal;
 
-      orderItems.push({
-        product: product._id,
-        productName: product.productName,
-        variantSize: item.variantSize,
-        quantity: item.quantity,
-        price: price,
-        total: itemTotal,
-      });
-    }
+//       orderItems.push({
+//         product: product._id,
+//         productName: product.productName,
+//         variantSize: item.variantSize,
+//         quantity: item.quantity,
+//         price: price,
+//         total: itemTotal,
+//       });
+//     }
 
-    let discount = 0;
-    let couponApplied = false;
-    let appliedCouponCode = null;
+//     let discount = 0;
+//     let couponApplied = false;
+//     let appliedCouponCode = null;
 
-    if (couponCode) {
-      const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
-      if (coupon) {
-        discount = (subtotal * coupon.discountPercentage) / 100;
-        couponApplied = true;
-        appliedCouponCode = couponCode;
-        console.log(`Coupon applied: ${couponCode}, Discount: ${discount}`);
-      } else {
-        console.log(`Invalid coupon code: ${couponCode}`);
-      }
-    }
+//     if (couponCode) {
+//       const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
+//       if (coupon) {
+//         discount = (subtotal * coupon.discountPercentage) / 100;
+//         couponApplied = true;
+//         appliedCouponCode = couponCode;
+//         console.log(`Coupon applied: ${couponCode}, Discount: ${discount}`);
+//       } else {
+//         console.log(`Invalid coupon code: ${couponCode}`);
+//       }
+//     }
 
-    const finalAmount = Math.max(subtotal - discount, 0);
+//     const finalAmount = Math.max(subtotal - discount, 0);
 
-    const orderData = {
-      user: userId,
-      orderItems,
-      totalPrice: subtotal,
-      discount,
-      finalAmount,
-      deliveryAddress: {
-        name: deliveryAddress.name,
-        phone: deliveryAddress.phone,
-        houseName: deliveryAddress.houseName,
-        buildingNumber: deliveryAddress.buildingNumber,
-        landmark: deliveryAddress.landmark,
-        city: deliveryAddress.city,
-        state: deliveryAddress.state,
-        pincode: deliveryAddress.pincode,
-        addressType: deliveryAddress.addressType,
-      },
-      paymentMethod: normalizedPaymentMethod,
-      paymentStatus: normalizedPaymentMethod === 'COD' ? 'Pending' : 'Pending',
-      couponApplied,
-      couponCode: appliedCouponCode,
-      status: 'Pending',
-      createdOn: new Date(),
-    };
+//     const orderData = {
+//       user: userId,
+//       orderItems,
+//       totalPrice: subtotal,
+//       discount,
+//       finalAmount,
+//       deliveryAddress: {
+//         name: deliveryAddress.name,
+//         phone: deliveryAddress.phone,
+//         houseName: deliveryAddress.houseName,
+//         buildingNumber: deliveryAddress.buildingNumber,
+//         landmark: deliveryAddress.landmark,
+//         city: deliveryAddress.city,
+//         state: deliveryAddress.state,
+//         pincode: deliveryAddress.pincode,
+//         addressType: deliveryAddress.addressType,
+//       },
+//       paymentMethod: normalizedPaymentMethod,
+//       paymentStatus: normalizedPaymentMethod === 'COD' ? 'Pending' : 'Pending',
+//       couponApplied,
+//       couponCode: appliedCouponCode,
+//       status: 'Pending',
+//       createdOn: new Date(),
+//     };
 
-    const order = new Order(orderData);
-    await order.save();
+//     const order = new Order(orderData);
+//     await order.save();
 
-    for (const item of cart.items) {
-      const product = await Product.findById(item.productId._id);
-      if (product) {
-        const variantIndex = product.variants?.findIndex((v) => v.size === item.variantSize);
-        if (variantIndex !== -1 && product.variants[variantIndex]) {
-          const updateField = `variants.${variantIndex}.stock`;
-          await Product.findByIdAndUpdate(
-            item.productId._id,
-            { $inc: { [updateField]: -item.quantity } },
-            { runValidators: false }
-          );
-        } else if (typeof product.stock === 'number') {
-          await Product.findByIdAndUpdate(
-            item.productId._id,
-            { $inc: { stock: -item.quantity } },
-            { runValidators: false }
-          );
-        }
-      }
-    }
+//     for (const item of cart.items) {
+//       const product = await Product.findById(item.productId._id);
+//       if (product) {
+//         const variantIndex = product.variants?.findIndex((v) => v.size === item.variantSize);
+//         if (variantIndex !== -1 && product.variants[variantIndex]) {
+//           const updateField = `variants.${variantIndex}.stock`;
+//           await Product.findByIdAndUpdate(
+//             item.productId._id,
+//             { $inc: { [updateField]: -item.quantity } },
+//             { runValidators: false }
+//           );
+//         } else if (typeof product.stock === 'number') {
+//           await Product.findByIdAndUpdate(
+//             item.productId._id,
+//             { $inc: { stock: -item.quantity } },
+//             { runValidators: false }
+//           );
+//         }
+//       }
+//     }
 
-    cart.items = [];
-    await cart.save();
+//     cart.items = [];
+//     await cart.save();
 
-    console.log('Order placed successfully:', order.orderId);
+//     console.log('Order placed successfully:', order.orderId);
 
-    req.flash('success', 'Order placed successfully!');
+//     req.flash('success', 'Order placed successfully!');
 
-    return res.status(200).json({
-      success: true,
-      message: 'Order placed successfully',
-      orderId: order.orderId,
-    });
-  } catch (err) {
-    console.error('Place order error:', err.message, err.stack);
-    return res.status(500).json({ success: false, message: 'Server error. Please try again.' });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: 'Order placed successfully',
+//       orderId: order.orderId,
+//     });
+//   } catch (err) {
+//     console.error('Place order error:', err.message, err.stack);
+//     return res.status(500).json({ success: false, message: 'Server error. Please try again.' });
+//   }
+// };
 
 module.exports = { 
     getCheckoutPage, 
@@ -1117,6 +745,6 @@ module.exports = {
     addAddress,
     editAddress,
     deleteAddress,
-    placeOrder,
+   // placeOrder,
     validateAddressInput
 };

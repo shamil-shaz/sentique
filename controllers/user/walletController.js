@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const Wallet = require('../../models/walletSchema');
 const User = require('../../models/userSchema');
@@ -63,15 +62,15 @@ const getWalletPage = async (req, res) => {
       balance: parseFloat(wallet.balance || 0).toFixed(2),
       totalCredits: allTransactions
         .filter((t) => t.type === 'credit')
-        .reduce((a, t) => a + t.amount, 0)
+        .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
         .toFixed(2) || '0.00',
       totalDebits: allTransactions
         .filter((t) => t.type === 'debit')
-        .reduce((a, t) => a + t.amount, 0)
+        .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
         .toFixed(2) || '0.00',
       monthlyTotal: allTransactions
         .filter((t) => new Date(t.date).getMonth() === new Date().getMonth())
-        .reduce((a, t) => a + (t.type === 'credit' ? t.amount : -t.amount), 0)
+        .reduce((a, t) => a + (t.type === 'credit' ? parseFloat(t.amount || 0) : -parseFloat(t.amount || 0)), 0)
         .toFixed(2) || '0.00',
       transactionCount: allTransactions.length,
     };
@@ -114,15 +113,15 @@ const getWalletData = async (req, res) => {
       balance: parseFloat(wallet.balance || 0).toFixed(2),
       totalCredits: allTransactions
         .filter((t) => t.type === 'credit')
-        .reduce((a, t) => a + t.amount, 0)
+        .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
         .toFixed(2) || '0.00',
       totalDebits: allTransactions
         .filter((t) => t.type === 'debit')
-        .reduce((a, t) => a + t.amount, 0)
+        .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
         .toFixed(2) || '0.00',
       monthlyTotal: allTransactions
         .filter((t) => new Date(t.date).getMonth() === new Date().getMonth())
-        .reduce((a, t) => a + (t.type === 'credit' ? t.amount : -t.amount), 0)
+        .reduce((a, t) => a + (t.type === 'credit' ? parseFloat(t.amount || 0) : -parseFloat(t.amount || 0)), 0)
         .toFixed(2) || '0.00',
       transactionCount: allTransactions.length,
       totalPages: Math.ceil(allTransactions.length / 5) || 1,
@@ -222,6 +221,7 @@ const addTestTransaction = async (req, res) => {
       return res.status(404).json({ error: 'Wallet not found' });
     }
 
+    // ✅ UPDATED: Added 'Order Cancellation' as valid description
     const validDescriptions = ['Refund', 'Return', 'Referral', 'Add Money', 'Purchase', 'Order Cancellation', 'Adjustment', 'Cashback'];
     if (!validDescriptions.includes(description)) {
       return res.status(400).json({ error: 'Invalid description' });

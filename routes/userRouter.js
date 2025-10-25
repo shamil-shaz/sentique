@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const { userAuth, checkBlockedUser } = require('../middlewares/auth');
+const apiAuth=require('../middlewares/apiAuth.js')
 const userController = require("../controllers/user/userController");
 const profileController = require("../controllers/user/profileController");
 
@@ -13,6 +14,8 @@ const checkoutController=require('../controllers/user/checkoutController')
 const orderController=require('../controllers/user/orderController')
 const walletController=require('../controllers/user/walletController')
 const invoiceController=require('../controllers/user/invoiceController.js')
+const paymentController=require('../controllers/user/paymentController.js')
+const couponController=require('../controllers/user/couponController.js')
 
 
 
@@ -156,7 +159,7 @@ router.get('/checkout', userAuth, checkoutController.getCheckoutPage);
 router.get('/addresses/addresses-edit/:id', userAuth, checkoutController.getAddressForEdit);
 router.post('/checkout/add-address', userAuth, checkoutController.addAddress);
 router.post('/checkout/edit-address/:id', userAuth, checkoutController.editAddress);
-router.post('/order/place', userAuth, checkoutController.placeOrder);
+// router.post('/order/place', userAuth, checkoutController.placeOrder);
 
 
 //// ----------------------order-----------
@@ -183,5 +186,30 @@ router.get('/api/wallet/transactions', userAuth,walletController. getPaginatedTr
 router.post('/api/wallet/test-transaction', userAuth, walletController.addTestTransaction);
 
 
+///------------------payment-----------------
+
+router.post('/order/place', userAuth, paymentController.placeOrder);
+router.get('/payment/check-auth', paymentController.checkAuth);
+router.post('/payment/create-razorpay-order', apiAuth, paymentController.createRazorpayOrder);
+router.post('/payment/verify-razorpay-payment', apiAuth, paymentController.verifyRazorpayPayment);
+//router.post('/payment/place-order', apiAuth, paymentController.placeOrder);
+
+
+///----------coupns------------
+
+// ==================== API ROUTES (JSON) ====================
+router.get('/api/coupons', couponController.getAvailableCouponsJSON);
+
+// ==================== VIEW ROUTES (HTML) ====================
+router.get('/coupons', couponController.getAvailableCouponsHTML);
+
+// ==================== PROTECTED ROUTES ====================
+router.get('/api/coupons/:couponId', couponController.getCouponDetails);
+router.get('/api/coupons/search', userAuth, couponController.searchCoupons);
+router.get('/api/coupons/validate/:code', userAuth, couponController.validateCouponCode);
+router.post('/api/coupons/apply', userAuth, couponController.applyCouponAtCheckout);
+router.post('/api/coupons/record-usage', userAuth, couponController.recordCouponUsage);
+
+module.exports = router;
 
 module.exports = router;

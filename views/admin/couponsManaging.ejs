@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupon Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #0f766e;
+            --primary-light: #14b8a6;
+            --primary-dark: #0d5d56;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --neutral-50: #f8fafc;
+            --neutral-100: #f1f5f9;
+            --neutral-200: #e2e8f0;
+            --neutral-300: #cbd5e1;
+            --neutral-600: #475569;
+            --neutral-700: #334155;
+            --neutral-900: #0f172a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
+            min-height: 100vh;
+            color: var(--neutral-900);
+            display: flex;
+        }
+
+        /* Added sidebar styling */
+        .sidebar {
+            width: 250px;
+           
+            color: white;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding-left: 24px;
+        }
+
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left: 4px solid white;
+            padding-left: 16px;
+        }
+
+        /* Added main content wrapper */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(15, 118, 110, 0.15);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 15px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        /* Add Button Section */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 20px rgba(15, 118, 110, 0.2);
+            letter-spacing: 0.3px;
+            display: inline-block;
+            visibility: visible;
+            opacity: 1;
+            z-index: 10;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(15, 118, 110, 0.3);
+        }
+
+        .add-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Reduced search bar width and added icon styling */
+        .search-bar {
+            flex: 0 0 300px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 2px solid var(--neutral-200);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neutral-600);
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+            border: 1px solid var(--neutral-200);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            border-bottom: 2px solid var(--neutral-200);
+            padding-bottom: 18px;
+            flex-shrink: 0;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            color: var(--neutral-900);
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .close-btn {
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            background: none;
+            border: none;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--neutral-200);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: var(--neutral-50);
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+        }
+
+        /* Discount Type Selector */
+        .discount-type-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .discount-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .discount-option input[type="radio"] {
+            display: none;
+        }
+
+        .discount-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .discount-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+        }
+
+        /* Modal Buttons */
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            padding-top: 20px;
+            border-top: 2px solid var(--neutral-200);
+            background: white;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(15, 118, 110, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(15, 118, 110, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Added horizontal scroll to table container */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        thead {
+            background: linear-gradient(90deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
+            border-bottom: 2px solid var(--neutral-200);
+        }
+
+        th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--neutral-700);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 16px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        /* Coupon Code Styling */
+        .coupon-code {
+            background: linear-gradient(135deg, rgba(15, 118, 110, 0.08) 0%, rgba(20, 184, 166, 0.08) 100%);
+            border: 2px dotted var(--primary);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-family: 'Courier New', 'Monaco', monospace;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(15, 118, 110, 0.1);
+            text-transform: uppercase;
+        }
+
+        .coupon-code:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.08);
+            box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .status-upcoming {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+            color: #b45309;
+            border: 1.5px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-ongoing {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            color: #059669;
+            border: 1.5px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-expired {
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(107, 114, 128, 0.05) 100%);
+            color: #4b5563;
+            border: 1.5px solid rgba(107, 114, 128, 0.3);
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            color: #059669;
+            border: 1.5px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-inactive {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+            color: #dc2626;
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-upcoming .status-dot {
+            background: #ffc107;
+        }
+
+        .status-ongoing .status-dot {
+            background: #28a745;
+        }
+
+        .status-expired .status-dot {
+            background: #dc3545;
+        }
+
+        .status-active .status-dot {
+            background: #28a745;
+        }
+
+        .status-inactive .status-dot {
+            background: #dc3545;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .btn-edit {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .btn-edit:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .btn-toggle {
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(15, 118, 110, 0.2);
+        }
+
+        .btn-toggle:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 20px;
+        }
+
+        .pagination-btn {
+            padding: 10px 18px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: var(--neutral-700);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+                padding: 15px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 25px;
+            }
+
+            table {
+                font-size: 12px;
+                min-width: 800px;
+            }
+
+            th, td {
+                padding: 12px 8px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+
+            .search-bar {
+                flex: 0 0 250px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                width: 150px;
+            }
+
+            .main-content {
+                margin-left: 150px;
+            }
+
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .add-btn {
+                width: 100%;
+            }
+
+            .search-bar {
+                flex: 1;
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Added sidebar navigation -->
+    <div class="sidebar">
+       <%- include("../partials/admin/header.ejs") %>
+    </div>
+
+    <!-- Added main-content wrapper -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <h1>🎟️ Coupon Management System</h1>
+                <p>Manage your promotional coupons efficiently</p>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <button class="add-btn" onclick="openAddModal()">+ Add New Coupon</button>
+                <!-- Added search icon and reduced width -->
+                <div class="search-bar">
+                
+                    <input type="text" id="searchInput" placeholder="Search coupon..." onkeyup="filterCoupons()">
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <!-- Added overflow-x: auto for horizontal scrolling -->
+            <div class="table-container">
+                <table id="couponsTable">
+                    <thead>
+                        <tr>
+                            <th>Coupon Code</th>
+                            <th>Coupon Name</th>
+                            <th>Type</th>
+                            <th>Offer</th>
+                            <th>Min Purchase</th>
+                            <th>Start Date</th>
+                            <th>Expiry Date</th>
+                            <th>Status</th>
+                            <th>Action Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="couponsBody">
+                    </tbody>
+                </table>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <h3>No Coupons Found</h3>
+                    <p>Start by adding your first coupon</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <button class="pagination-btn" onclick="previousPage()" id="prevBtn">← Previous</button>
+                <span class="pagination-info">
+                    Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                </span>
+                <button class="pagination-btn" onclick="nextPage()" id="nextBtn">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="couponModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Coupon</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form id="couponForm" onsubmit="saveCoupon(event)">
+                <div class="form-group">
+                    <label for="couponCode">Coupon Code *</label>
+                    <input type="text" id="couponCode" required placeholder="e.g., SAVE20">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="couponName">Coupon Name *</label>
+                        <input type="text" id="couponName" required placeholder="e.g., Summer Sale">
+                    </div>
+                    <div class="form-group">
+                        <label for="usageLimit">Usage Limit *</label>
+                        <input type="number" id="usageLimit" required min="1" placeholder="e.g., 100">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Discount Type *</label>
+                    <div class="discount-type-group">
+                        <div class="discount-option">
+                            <input type="radio" id="discountPercent" name="discountType" value="percent" checked onchange="updateOfferLabel()">
+                            <label for="discountPercent">Percentage (%)</label>
+                        </div>
+                        <div class="discount-option">
+                            <input type="radio" id="discountFixed" name="discountType" value="fixed" onchange="updateOfferLabel()">
+                            <label for="discountFixed">Fixed Amount (₹)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Added coupon type selector for Normal vs One-Time Use -->
+                <div class="form-group">
+                    <label>Coupon Type *</label>
+                    <div class="discount-type-group">
+                        <div class="discount-option">
+                            <input type="radio" id="couponNormal" name="couponType" value="normal" checked>
+                            <label for="couponNormal">Normal Coupon</label>
+                        </div>
+                        <div class="discount-option">
+                            <input type="radio" id="couponOneTime" name="couponType" value="oneTime">
+                            <label for="couponOneTime">One-Time Use</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="offerAmount"><span id="offerLabel">Offer Amount (%)</span> *</label>
+                        <input type="number" id="offerAmount" required min="0" placeholder="e.g., 20">
+                    </div>
+                    <div class="form-group">
+                        <label for="minPurchase">Minimum Purchase (₹) *</label>
+                        <input type="number" id="minPurchase" required min="0" placeholder="e.g., 500">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Start Date *</label>
+                        <input type="date" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expireDate">Expiry Date *</label>
+                        <input type="date" id="expireDate" required>
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Coupon</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+ // ==================== FRONTEND - VALIDATION WITH PROPER ERROR MESSAGES ====================
+
+let coupons = [];
+let currentPage = 1;
+const itemsPerPage = 5;
+let editingId = null;
+let isLoading = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadCoupons();
+    renderTable();
+    updateStatusAutomatically();
+    setInterval(updateStatusAutomatically, 60000);
+});
+
+// EDGE CASE 1: Empty Fields Validation
+function validateEmptyFields(formData) {
+    const requiredFields = {
+        couponCode: formData.couponCode,
+        couponName: formData.couponName,
+        offerAmount: formData.offerAmount,
+        minPurchase: formData.minPurchase,
+        usageLimit: formData.usageLimit,
+        startDate: formData.startDate,
+        expireDate: formData.expireDate
+    };
+
+    for (const [field, value] of Object.entries(requiredFields)) {
+        if (!value || (typeof value === 'string' && !value.trim())) {
+            const fieldNames = {
+                couponCode: 'Coupon Code',
+                couponName: 'Coupon Name',
+                offerAmount: 'Offer Amount',
+                minPurchase: 'Minimum Purchase',
+                usageLimit: 'Usage Limit',
+                startDate: 'Start Date',
+                expireDate: 'Expiry Date'
+            };
+            return { valid: false, message: `${fieldNames[field]} is required` };
+        }
+    }
+    return { valid: true };
+}
+
+// EDGE CASE 3: Coupon Code Format Validation
+function validateCouponCodeFormat(code) {
+    // Check for spaces
+    if (code.includes(' ')) {
+        return { valid: false, message: 'Coupon code cannot contain spaces' };
+    }
+
+    // Check for special characters (only allow letters, numbers, hyphens, underscores)
+    const validFormat = /^[A-Z0-9_-]+$/i;
+    if (!validFormat.test(code)) {
+        return { valid: false, message: 'Coupon code can only contain letters, numbers, hyphens (-), and underscores (_)' };
+    }
+
+    // Check length
+    if (code.length < 3) {
+        return { valid: false, message: 'Coupon code must be at least 3 characters' };
+    }
+
+    if (code.length > 20) {
+        return { valid: false, message: 'Coupon code cannot exceed 20 characters' };
+    }
+
+    return { valid: true };
+}
+
+// EDGE CASE 4: Coupon Name Capitalization
+function capitalizeWords(str) {
+    return str
+        .trim()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+}
+
+// EDGE CASE 4: Coupon Name Format Validation
+function validateCouponNameFormat(name) {
+    name = name.trim();
+
+    if (name.length < 2) {
+        return { valid: false, message: 'Coupon name must be at least 2 characters' };
+    }
+
+    if (name.length > 50) {
+        return { valid: false, message: 'Coupon name cannot exceed 50 characters' };
+    }
+
+    return { valid: true };
+}
+
+// EDGE CASE 5: Discount Validation - ALLOW 100%
+function validateDiscount(discount, discountType, minimumPrice) {
+    discount = parseFloat(discount);
+
+    // Check if numeric
+    if (isNaN(discount)) {
+        return { valid: false, message: 'Discount must be a valid number' };
+    }
+
+    // Check for zero
+    if (discount === 0) {
+        return { valid: false, message: 'Discount cannot be zero' };
+    }
+
+    // Check for negative
+    if (discount < 0) {
+        return { valid: false, message: 'Discount cannot be negative' };
+    }
+
+    // Check percentage >= 100 (ALLOW 100%)
+    if (discountType === 'percentage' && discount > 100) {
+        return { valid: false, message: 'Percentage discount cannot exceed 100%' };
+    }
+
+    // Check flat discount > minimum purchase
+    if (discountType === 'flat') {
+        minimumPrice = parseFloat(minimumPrice);
+        if (!isNaN(minimumPrice) && minimumPrice > 0 && discount > minimumPrice) {
+            return { 
+                valid: false, 
+                message: `Flat discount (₹${discount}) cannot be greater than minimum purchase (₹${minimumPrice})` 
+            };
+        }
+    }
+
+    return { valid: true };
+}
+
+// EDGE CASE 6: Minimum Purchase Validation
+function validateMinimumPurchase(minPurchase) {
+    minPurchase = parseFloat(minPurchase);
+
+    // Check if numeric
+    if (isNaN(minPurchase)) {
+        return { valid: false, message: 'Minimum purchase must be a valid number' };
+    }
+
+    // Check for negative
+    if (minPurchase < 0) {
+        return { valid: false, message: 'Minimum purchase cannot be negative' };
+    }
+
+    return { valid: true };
+}
+
+// EDGE CASE 7: Usage Limit Validation
+function validateUsageLimit(limit) {
+    limit = parseInt(limit);
+
+    // Check if numeric
+    if (isNaN(limit)) {
+        return { valid: false, message: 'Usage limit must be a valid number' };
+    }
+
+    // Check for zero or negative
+    if (limit <= 0) {
+        return { valid: false, message: 'Usage limit must be at least 1' };
+    }
+
+    // Check if integer
+    if (!Number.isInteger(limit)) {
+        return { valid: false, message: 'Usage limit must be a whole number (no decimals)' };
+    }
+
+    return { valid: true };
+}
+
+// EDGE CASE 8: Date Validation with Timezone Normalization
+function validateDates(startDate, expireDate) {
+    let start = new Date(startDate);
+    let expire = new Date(expireDate);
+    let today = new Date();
+
+    // Normalize dates (remove time for comparison)
+    start.setHours(0, 0, 0, 0);
+    expire.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    // Check for invalid date format
+    if (isNaN(start.getTime()) || isNaN(expire.getTime())) {
+        return { valid: false, message: 'Invalid date format. Please use YYYY-MM-DD' };
+    }
+
+    // Check if start date is in past (only for new coupons)
+    if (!editingId && start < today) {
+        return { valid: false, message: 'Start date cannot be in the past' };
+    }
+
+    // Check if start date equals expire date
+    if (start.getTime() === expire.getTime()) {
+        return { valid: false, message: 'Start date and expiry date cannot be the same' };
+    }
+
+    // Check if start date is after expire date
+    if (start > expire) {
+        return { valid: false, message: 'Start date must be before expiry date' };
+    }
+
+    return { valid: true };
+}
+
+// EDGE CASE 2: Duplicate Validation (from loaded coupons)
+function validateNoDuplicate(code, name) {
+    code = code.trim().toUpperCase();
+    name = capitalizeWords(name.trim());
+
+    // Check for duplicate code (case-insensitive)
+    const duplicateCode = coupons.find(c => 
+        c.couponCode === code && c._id !== editingId
+    );
+    if (duplicateCode) {
+        return { valid: false, message: 'Coupon code already exists. Please use a different code' };
+    }
+
+    // Check for duplicate name (case-insensitive)
+    const duplicateName = coupons.find(c => 
+        c.couponName.toLowerCase() === name.toLowerCase() && c._id !== editingId
+    );
+    if (duplicateName) {
+        return { valid: false, message: 'Coupon name already exists. Please use a different name' };
+    }
+
+    return { valid: true };
+}
+
+// EDGE CASE 11: Safe Search with Special Character Handling
+function sanitizeSearchTerm(term) {
+    return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').toLowerCase();
+}
+
+// EDGE CASE 9: Check if Coupon is Expired
+function isExpiredCoupon(coupon) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expireDate = new Date(coupon.expireDate);
+    expireDate.setHours(0, 0, 0, 0);
+    return today > expireDate;
+}
+
+// Load coupons from API
+function loadCoupons() {
+    fetch('/admin/get-coupons')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                coupons = data.coupons;
+                currentPage = 1;
+                renderTable();
+            } else {
+                showError('Failed to load coupons', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading coupons:', error);
+            showError('Network Error', 'Unable to load coupons. Please check your connection.');
+        });
+}
+
+// Show error with title and message
+function showError(title, message) {
+    Swal.fire({
+        icon: 'error',
+        title: title,
+        text: message,
+        confirmButtonColor: '#ef4444',
+        didOpen: () => {
+            console.log('❌ Error:', title, '-', message);
+        }
+    });
+}
+
+// Show success message
+function showSuccess(title, message) {
+    Swal.fire({
+        icon: 'success',
+        title: title,
+        text: message,
+        confirmButtonColor: '#0f766e',
+        timer: 1500
+    });
+}
+
+function openAddModal() {
+    editingId = null;
+    document.getElementById('modalTitle').textContent = 'Add New Coupon';
+    document.getElementById('couponForm').reset();
+    document.getElementById('discountPercent').checked = true;
+    document.getElementById('couponNormal').checked = true;
+    updateOfferLabel();
+    document.getElementById('couponModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('couponModal').style.display = 'none';
+    editingId = null;
+}
+
+function updateOfferLabel() {
+    const isPercent = document.getElementById('discountPercent').checked;
+    document.getElementById('offerLabel').textContent = isPercent ? 'Offer Amount (%)' : 'Offer Amount (₹)';
+}
+
+// Disable buttons during API call
+function setButtonsDisabled(disabled) {
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const cancelBtn = document.querySelector('.btn-secondary');
+    const addBtn = document.querySelector('.add-btn');
+    
+    if (submitBtn) submitBtn.disabled = disabled;
+    if (cancelBtn) cancelBtn.disabled = disabled;
+    if (addBtn) addBtn.disabled = disabled;
+}
+
+// Main Save Function with ALL Edge Cases
+function saveCoupon(event) {
+    event.preventDefault();
+
+    if (isLoading) {
+        showError('Please Wait', 'Request is already being processed...');
+        return;
+    }
+
+    const couponCode = document.getElementById('couponCode').value;
+    const couponName = document.getElementById('couponName').value;
+    const discountType = document.querySelector('input[name="discountType"]:checked').value;
+    const couponType = document.querySelector('input[name="couponType"]:checked').value;
+    const offerAmount = document.getElementById('offerAmount').value;
+    const minPurchase = document.getElementById('minPurchase').value;
+    const startDate = document.getElementById('startDate').value;
+    const expireDate = document.getElementById('expireDate').value;
+    const usageLimit = document.getElementById('usageLimit').value;
+
+    console.log('📝 Validating coupon data...');
+
+    // VALIDATION CHAIN
+    
+    // 1. Empty Fields
+    const emptyValidation = validateEmptyFields({
+        couponCode,
+        couponName,
+        offerAmount,
+        minPurchase,
+        usageLimit,
+        startDate,
+        expireDate
+    });
+    if (!emptyValidation.valid) {
+        console.log('❌ Empty field error:', emptyValidation.message);
+        showError('Validation Error', emptyValidation.message);
+        return;
+    }
+
+    // 3. Code Format
+    const codeFormatValidation = validateCouponCodeFormat(couponCode);
+    if (!codeFormatValidation.valid) {
+        console.log('❌ Code format error:', codeFormatValidation.message);
+        showError('Invalid Coupon Code', codeFormatValidation.message);
+        return;
+    }
+
+    // 4. Name Format
+    const nameFormatValidation = validateCouponNameFormat(couponName);
+    if (!nameFormatValidation.valid) {
+        console.log('❌ Name format error:', nameFormatValidation.message);
+        showError('Invalid Coupon Name', nameFormatValidation.message);
+        return;
+    }
+
+    // 2. Duplicate Check
+    const duplicateValidation = validateNoDuplicate(couponCode, couponName);
+    if (!duplicateValidation.valid) {
+        console.log('❌ Duplicate error:', duplicateValidation.message);
+        showError('Duplicate Entry', duplicateValidation.message);
+        return;
+    }
+
+    // 6. Minimum Purchase
+    const minValidation = validateMinimumPurchase(minPurchase);
+    if (!minValidation.valid) {
+        console.log('❌ Min purchase error:', minValidation.message);
+        showError('Invalid Minimum Purchase', minValidation.message);
+        return;
+    }
+
+    // 5. Discount
+    const discountValidation = validateDiscount(offerAmount, discountType, minPurchase);
+    if (!discountValidation.valid) {
+        console.log('❌ Discount error:', discountValidation.message);
+        showError('Invalid Discount', discountValidation.message);
+        return;
+    }
+
+    // 7. Usage Limit
+    const limitValidation = validateUsageLimit(usageLimit);
+    if (!limitValidation.valid) {
+        console.log('❌ Limit error:', limitValidation.message);
+        showError('Invalid Usage Limit', limitValidation.message);
+        return;
+    }
+
+    // 8. Dates
+    const dateValidation = validateDates(startDate, expireDate);
+    if (!dateValidation.valid) {
+        console.log('❌ Date error:', dateValidation.message);
+        showError('Invalid Dates', dateValidation.message);
+        return;
+    }
+
+    // 10. Editing Edge Case - Cannot edit expired
+    if (editingId) {
+        const existingCoupon = coupons.find(c => c._id === editingId);
+        if (!existingCoupon) {
+            console.log('❌ Coupon deleted');
+            showError('Coupon Not Found', 'This coupon has been deleted');
+            return;
+        }
+        if (isExpiredCoupon(existingCoupon)) {
+            console.log('❌ Cannot edit expired coupon');
+            showError('Cannot Edit', 'Cannot modify an expired coupon');
+            return;
+        }
+    }
+
+    console.log('✅ All validations passed!');
+
+    // Prepare data with normalized values
+    const mappedDiscountType = discountType === 'percent' ? 'percentage' : 'flat';
+    const mappedUsageType = couponType === 'normal' ? 'multiple' : 'once';
+
+    const couponData = {
+        couponCode: couponCode.trim().toUpperCase(),
+        couponName: capitalizeWords(couponName),
+        discountType: mappedDiscountType,
+        usageType: mappedUsageType,
+        discountPrice: parseFloat(offerAmount),
+        minimumPrice: parseFloat(minPurchase),
+        activeDate: startDate,
+        expireDate: expireDate,
+        limit: parseInt(usageLimit),
+        description: '',
+        isListed: true
+    };
+
+    console.log('📤 Sending to server:', couponData);
+
+    // Disable buttons and set loading
+    isLoading = true;
+    setButtonsDisabled(true);
+
+    const url = editingId ? `/admin/update-coupon/${editingId}` : '/admin/create-coupon';
+    const method = editingId ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(couponData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.log('❌ HTTP Error:', response.status);
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        isLoading = false;
+        setButtonsDisabled(false);
+
+        console.log('📥 Server response:', data);
+
+        if (data.success) {
+            console.log('✅ Success!');
+            showSuccess(
+                editingId ? 'Coupon Updated' : 'Coupon Added',
+                editingId ? 'Coupon has been updated successfully' : 'New coupon has been added successfully'
+            );
+            closeModal();
+            loadCoupons();
+        } else {
+            console.log('❌ Server error:', data.message);
+            showError('Server Error', data.message || 'Failed to save coupon');
+        }
+    })
+    .catch(error => {
+        isLoading = false;
+        setButtonsDisabled(false);
+        console.error('❌ Network error:', error);
+        showError('Network Error', error.message || 'Failed to connect to server');
+    });
+}
+
+// Edit Coupon with Edge Cases
+function editCoupon(id) {
+    const coupon = coupons.find(c => c._id === id);
+    if (!coupon) {
+        showError('Not Found', 'Coupon not found. It may have been deleted.');
+        return;
+    }
+
+    if (isExpiredCoupon(coupon)) {
+        showError('Cannot Edit', 'Cannot modify an expired coupon');
+        return;
+    }
+
+    editingId = id;
+    document.getElementById('modalTitle').textContent = 'Edit Coupon';
+    document.getElementById('couponCode').value = coupon.couponCode;
+    document.getElementById('couponName').value = coupon.couponName;
+    document.getElementById('offerAmount').value = coupon.discountPrice;
+    document.getElementById('minPurchase').value = coupon.minimumPrice;
+    document.getElementById('startDate').value = coupon.activeDate.split('T')[0];
+    document.getElementById('expireDate').value = coupon.expireDate.split('T')[0];
+    document.getElementById('usageLimit').value = coupon.limit;
+
+    if (coupon.discountType === 'percentage') {
+        document.getElementById('discountPercent').checked = true;
+    } else {
+        document.getElementById('discountFixed').checked = true;
+    }
+
+    if (coupon.usageType === 'multiple') {
+        document.getElementById('couponNormal').checked = true;
+    } else {
+        document.getElementById('couponOneTime').checked = true;
+    }
+
+    updateOfferLabel();
+    document.getElementById('couponModal').style.display = 'block';
+}
+
+function getCouponStatus(coupon) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(coupon.activeDate);
+    startDate.setHours(0, 0, 0, 0);
+
+    const expireDate = new Date(coupon.expireDate);
+    expireDate.setHours(0, 0, 0, 0);
+
+    if (today < startDate) {
+        return { status: 'Upcoming', class: 'status-upcoming' };
+    } else if (today >= startDate && today <= expireDate) {
+        return { status: 'Ongoing', class: 'status-ongoing' };
+    } else {
+        return { status: 'Expired', class: 'status-expired' };
+    }
+}
+
+function formatOffer(coupon) {
+    if (coupon.discountType === 'percentage') {
+        return `${coupon.discountPrice}%`;
+    } else {
+        return `₹${coupon.discountPrice}`;
+    }
+}
+
+function formatUsageType(usageType) {
+    return usageType === 'once' ? '🔐 One-Time Use' : '♻️ Multiple Uses';
+}
+
+function updateStatusAutomatically() {
+    renderTable();
+}
+
+function renderTable() {
+    const tbody = document.getElementById('couponsBody');
+    const emptyState = document.getElementById('emptyState');
+    const table = document.getElementById('couponsTable');
+
+    if (coupons.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'block';
+        table.style.display = 'none';
+        currentPage = 1;
+        return;
+    }
+
+    table.style.display = 'table';
+    emptyState.style.display = 'none';
+
+    const totalPages = Math.ceil(coupons.length / itemsPerPage);
+    
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedCoupons = coupons.slice(startIndex, endIndex);
+
+    tbody.innerHTML = paginatedCoupons.map(coupon => {
+        const status = getCouponStatus(coupon);
+        const actionStatus = coupon.isListed ? 
+            { status: 'Active', class: 'status-active' } : 
+            { status: 'Inactive', class: 'status-inactive' };
+
+        const isExpired = isExpiredCoupon(coupon);
+        const editButtonDisabled = isExpired ? 'disabled' : '';
+
+        return `
+            <tr>
+                <td><span class="coupon-code">${coupon.couponCode}</span></td>
+                <td>${coupon.couponName}</td>
+                <td><strong>${formatUsageType(coupon.usageType)}</strong></td>
+                <td><strong>${formatOffer(coupon)}</strong></td>
+                <td>₹${coupon.minimumPrice}</td>
+                <td>${new Date(coupon.activeDate).toLocaleDateString()}</td>
+                <td>${new Date(coupon.expireDate).toLocaleDateString()}</td>
+                <td>
+                    <span class="status-badge ${status.class}">
+                        <span class="status-dot"></span>
+                        ${status.status}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge ${actionStatus.class}">
+                        <span class="status-dot"></span>
+                        ${actionStatus.status}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-edit" onclick="editCoupon('${coupon._id}')" ${editButtonDisabled} title="${isExpired ? 'Cannot edit expired coupon' : ''}">Edit</button>
+                        <button class="action-btn btn-toggle" onclick="toggleCouponStatus('${coupon._id}')">
+                            ${coupon.isListed ? 'Unlist' : 'List'}
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deleteCoupon('${coupon._id}')">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = currentPage === totalPages;
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(coupons.length / itemsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function previousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function filterCoupons() {
+    const searchTerm = sanitizeSearchTerm(document.getElementById('searchInput').value);
+    
+    if (!searchTerm) {
+        renderTable();
+        return;
+    }
+
+    const filtered = coupons.filter(coupon =>
+        coupon.couponCode.toLowerCase().includes(searchTerm) ||
+        coupon.couponName.toLowerCase().includes(searchTerm)
+    );
+
+    const tbody = document.getElementById('couponsBody');
+    const emptyState = document.getElementById('emptyState');
+    const table = document.getElementById('couponsTable');
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'block';
+        table.style.display = 'none';
+        return;
+    }
+
+    table.style.display = 'table';
+    emptyState.style.display = 'none';
+
+    tbody.innerHTML = filtered.map(coupon => {
+        const status = getCouponStatus(coupon);
+        const actionStatus = coupon.isListed ? 
+            { status: 'Active', class: 'status-active' } : 
+            { status: 'Inactive', class: 'status-inactive' };
+
+        const isExpired = isExpiredCoupon(coupon);
+        const editButtonDisabled = isExpired ? 'disabled' : '';
+
+        return `
+            <tr>
+                <td><span class="coupon-code">${coupon.couponCode}</span></td>
+                <td>${coupon.couponName}</td>
+                <td><strong>${formatUsageType(coupon.usageType)}</strong></td>
+                <td><strong>${formatOffer(coupon)}</strong></td>
+                <td>₹${coupon.minimumPrice}</td>
+                <td>${new Date(coupon.activeDate).toLocaleDateString()}</td>
+                <td>${new Date(coupon.expireDate).toLocaleDateString()}</td>
+                <td>
+                    <span class="status-badge ${status.class}">
+                        <span class="status-dot"></span>
+                        ${status.status}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge ${actionStatus.class}">
+                        <span class="status-dot"></span>
+                        ${actionStatus.status}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-edit" onclick="editCoupon('${coupon._id}')" ${editButtonDisabled} title="${isExpired ? 'Cannot edit expired coupon' : ''}">Edit</button>
+                        <button class="action-btn btn-toggle" onclick="toggleCouponStatus('${coupon._id}')">
+                            ${coupon.isListed ? 'Unlist' : 'List'}
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deleteCoupon('${coupon._id}')">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function toggleCouponStatus(id) {
+    isLoading = true;
+    fetch(`/admin/toggle-coupon-listing/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        isLoading = false;
+        if (data.success) {
+            showSuccess('Success', data.message);
+            loadCoupons();
+        } else {
+            showError('Error', data.message);
+        }
+    })
+    .catch(error => {
+        isLoading = false;
+        showError('Network Error', error.message);
+    });
+}
+
+function deleteCoupon(id) {
+    Swal.fire({
+        title: 'Delete Coupon?',
+        text: 'This action cannot be undone',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Delete'
+    }).then(result => {
+        if (result.isConfirmed) {
+            isLoading = true;
+            fetch(`/admin/delete-coupon/${id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                isLoading = false;
+                if (data.success) {
+                    showSuccess('Deleted', 'Coupon deleted successfully');
+                    loadCoupons();
+                } else {
+                    showError('Error', data.message);
+                }
+            })
+            .catch(error => {
+                isLoading = false;
+                showError('Network Error', error.message);
+            });
+        }
+    });
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('couponModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+    </script>
+</body>
+</html>

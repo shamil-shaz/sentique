@@ -82,8 +82,33 @@ const adminRouter = require('./routes/adminRouter');
 
 
     // --------------- ROUTES ---------------
+   app.use((req, res, next) => {
+      if (req.path.includes('/user/payment')) {
+        console.log('\n  INCOMING REQUEST:');
+        console.log('   Path:', req.path);
+        console.log('   Method:', req.method);
+        console.log('   Session ID:', req.sessionID);
+        console.log('   User in session:', !!req.session?.user);
+        console.log('   User ID:', req.session?.user?.id || req.session?.user?._id);
+        console.log('   Headers:', {
+          contentType: req.headers['content-type'],
+          cookie: !!req.headers.cookie
+        });
+      }
+      next();
+    });
+
+
     app.use("/", userRouter);
     app.use("/admin", adminRouter);
+
+    app.use((req, res, next) => {
+      if (req.path.includes('/user/payment')) {
+        console.log(' Request reached 404 handler (route not matched)');
+        console.log('   Path:', req.path);
+      }
+      next();
+    });
 
 
     // --------------- 404 HANDLER ---------------
