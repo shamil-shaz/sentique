@@ -248,6 +248,48 @@ body {
     color: #666;
 }
 
+ .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.95rem;
+    color: #666;
+  }
+
+  .summary-row.discount-row {
+    background: #f0fdf4;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border-left: 3px solid #10b981;
+    border-bottom: none;
+  }
+
+  .summary-row strong {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .summary-divider {
+    margin: 12px 0;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .grand-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .grand-total span:last-child {
+    color: #22c55e;
+  }
+
 .summary-row strong {
     color: #333;
     font-weight: 600;
@@ -1161,30 +1203,41 @@ body {
 
             <!-- Order Summary -->
             <div class="info-card">
-                <div class="info-card-header">
-                    <div class="icon-box icon-rose">📄</div>
-                    <h2>Order Summary</h2>
-                </div>
-                <div class="info-card-content">
-                    <div class="summary-row">
-                        <span>Items Total</span>
-                        <strong><%= amount %></strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>Shipping Charge</span>
-                        <strong>₹0.00</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>Total</span>
-                        <strong><%= amount %></strong>
-                    </div>
-                    <hr class="summary-divider">
-                    <div class="grand-total">
-                        <span>Grand Total</span>
-                        <span><%= amount %></span>
-                    </div>
-                </div>
+    <div class="info-card-header">
+        <div class="icon-box icon-rose">📄</div>
+        <h2>Order Summary</h2>
+    </div>
+    <div class="info-card-content">
+        <!-- ✅ SUBTOTAL ROW -->
+        <div class="summary-row">
+            <span>Items Subtotal</span>
+            <strong><%= subtotal %></strong>
+        </div>
+        
+        <!-- ✅ DISCOUNT ROW (CONDITIONAL) -->
+        <% if (couponApplied && discount !== '₹0.00') { %>
+            <div class="summary-row discount-row">
+                <span>Coupon Discount <% if (couponCode) { %><span style="font-size: 0.85em; color: #10b981;">(<%- couponCode %>)</span><% } %></span>
+                <strong style="color: #10b981;">-<%= discount %></strong>
             </div>
+        <% } %>
+
+        <!-- Shipping Charge -->
+        <div class="summary-row">
+            <span>Shipping Charge</span>
+            <strong>₹0.00</strong>
+        </div>
+
+        <hr class="summary-divider">
+
+        <!-- ✅ FINAL TOTAL -->
+        <div class="grand-total">
+            <span>Grand Total</span>
+            <span><%= amount %></span>
+        </div>
+    </div>
+</div>
+
         </div>
 
         <!-- Order Items -->

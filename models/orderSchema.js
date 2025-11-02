@@ -41,6 +41,32 @@ const orderSchema = new Schema({
         type: Number, 
         required: true 
       },
+      discountApplied: {
+  type: Number,
+  default: 0,
+  description: 'Proportional discount applied to this item'
+},
+discountPercentage: {
+  type: Number,
+  default: 0,
+  description: 'Percentage discount for this item'
+},
+originalPrice: {
+  type: Number,
+  description: 'Original price per unit before discount'
+},
+originalSubtotal: {
+  type: Number,
+  description: 'Original total before discount (quantity * price)'
+},
+finalSubtotal: {
+  type: Number,
+  description: 'Final price after discount'
+},
+finalPrice: {
+  type: Number,
+  description: 'Final price per unit'
+},
       status: {
         type: String,
         enum: ['Placed', 'Confirmed', 'Processing', 'Shipped', 'OutForDelivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
@@ -146,13 +172,23 @@ const orderSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  couponApplied: {
-    type: Boolean,
-    default: false,
-  },
-  couponCode: {
-    type: String,
-  },
+ couponApplied: {
+  type: Boolean,
+  default: false,
+},
+couponCode: {
+  type: String,
+},
+discountType: {
+  type: String,
+  enum: ['flat', 'percentage'],
+  description: 'Type of discount applied'
+},
+discountDistributionMethod: {
+  type: String,
+  default: 'proportional',
+  description: 'How discount is distributed across items'
+},
   status: {
     type: String,
     required: true,

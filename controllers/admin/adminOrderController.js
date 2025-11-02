@@ -117,8 +117,6 @@ const getAdminOrderList = async (req, res) => {
   }
 };
 
-
-
 const updateProductStatus = async (req, res) => {
   try {
     
@@ -343,346 +341,6 @@ const updateItemStatusRoute = async (req, res) => {
 };
 
 
-// const approveReturn = async (req, res) => {
-//   try {
-//     // GET PARAMS: From URL params (preferred) or body (fallback)
-//     const { orderId: paramOrderId, itemIndex: paramItemIndex, variantSize: paramVariantSize } = req.params;
-//     const { orderId: bodyOrderId, itemIndex: bodyItemIndex, variantSize: bodyVariantSize } = req.body;
-
-//     // PRIORITIZE: URL params over body params
-//     const orderId = paramOrderId || bodyOrderId;
-//     const itemIndex = paramItemIndex !== undefined ? paramItemIndex : bodyItemIndex;
-//     const variantSize = paramVariantSize || bodyVariantSize;
-
-//     console.log("Approve Return Called:", { orderId, itemIndex, variantSize });
-
-//     // VALIDATION
-//     if (!orderId) {
-//       return res.status(400).json({ success: false, error: 'orderId is required' });
-//     }
-
-//     // FIND ORDER
-//     const order = await Order.findOne({ orderId }).populate('orderItems.product');
-
-//     if (!order) {
-//       return res.status(404).json({ success: false, error: 'Order not found' });
-//     }
-
-//     if (!order.user || !mongoose.Types.ObjectId.isValid(order.user)) {
-//       return res.status(400).json({ success: false, error: 'Invalid user in order' });
-//     }
-
-//     let refundAmount = 0;
-//     let productName = 'N/A';
-//     const itemsToProcess = [];
-
-//     // CASE 1: Specific item by itemIndex and variantSize
-//     if (itemIndex !== undefined && variantSize !== undefined && itemIndex !== 'all' && variantSize !== 'all') {
-//       const idx = parseInt(itemIndex);
-//       if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
-//         return res.status(404).json({ success: false, error: 'Invalid item index' });
-//       }
-
-//       const item = order.orderItems[idx];
-
-//       // CRITICAL: Verify variant matches
-//       if (String(item.variantSize) !== String(variantSize)) {
-//         return res.status(400).json({ 
-//           success: false, 
-//           error: `Variant mismatch. Expected ${item.variantSize}ml, got ${variantSize}ml` 
-//         });
-//       }
-
-//       if (item.status !== 'Return Request') {
-//         return res.status(400).json({ 
-//           success: false, 
-//           error: `Cannot approve return. Current status: ${item.status}` 
-//         });
-//       }
-
-//       // UPDATE STATUS
-//       item.status = 'Returned';
-//       item.returnedAt = new Date();
-//       refundAmount = (item.price || 0) * (item.quantity || 1);
-//       productName = item.productName || (item.product ? item.product.productName : 'N/A');
-      
-//       itemsToProcess.push({
-//         productId: item.product._id,
-//         quantity: item.quantity || 1,
-//         size: item.variantSize,
-//         productName: item.productName
-//       });
-
-//     } 
-//     // CASE 2: Entire order (all items in Return Request)
-//     else if (itemIndex === 'all' || itemIndex === undefined) {
-//       const returnItems = order.orderItems.filter(i => i.status === 'Return Request');
-//       if (returnItems.length === 0) {
-//         return res.status(400).json({ success: false, error: 'No items with Return Request status found' });
-//       }
-
-//       returnItems.forEach(item => {
-//         item.status = 'Returned';
-//         item.returnedAt = new Date();
-//         refundAmount += (item.price || 0) * (item.quantity || 1);
-//         itemsToProcess.push({
-//           productId: item.product._id,
-//           quantity: item.quantity || 1,
-//           size: item.variantSize,
-//           productName: item.productName
-//         });
-//       });
-//     }
-
-//     // RESTORE STOCK: Process each item
-//     for (const item of itemsToProcess) {
-//       try {
-//         const product = await Product.findById(item.productId);
-//         if (!product) {
-//           console.warn(`Product not found for stock restoration: ${item.productId}`);
-//           continue;
-//         }
-
-//         console.log(`Restoring stock - Product: ${product.productName}, Size: ${item.size}ml, Quantity: ${item.quantity}`);
-
-//         if (item.size && product.variants && Array.isArray(product.variants)) {
-//           const sizeNum = Number(item.size);
-//           const variantIndex = product.variants.findIndex(v => Number(v.size) === sizeNum);
-          
-//           if (variantIndex !== -1) {
-//             const oldStock = product.variants[variantIndex].stock;
-//             product.variants[variantIndex].stock += item.quantity;
-//             const newStock = product.variants[variantIndex].stock;
-            
-//             console.log(`Stock restored: ${item.size}ml - ${oldStock} -> ${newStock} (Added ${item.quantity} units)`);
-//           } else {
-//             console.warn(`Variant ${item.size}ml not found for product ${product.productName}`);
-//           }
-//         }
-
-//         product.markModified('variants');
-//         await product.save();
-//         console.log(`Product saved successfully`);
-        
-//       } catch (error) {
-//         console.error(`Error restoring stock for product ${item.productId}:`, error);
-//       }
-//     }
-
-//     // PROCESS REFUND: Add to wallet
-//     let wallet = await Wallet.findOne({ user: order.user });
-//     if (!wallet) {
-//       wallet = new Wallet({
-//         user: order.user,
-//         balance: 0,
-//         transactions: []
-//       });
-//     }
-
-//     if (refundAmount > 0) {
-//       wallet.balance += refundAmount;
-      
-//       const itemNames = itemsToProcess.map(i => `${i.productName} (${i.size}ml)`).join(', ');
-      
-//       wallet.transactions.push({
-//         type: 'credit',
-//         amount: refundAmount,
-//         description: 'Refund',
-//         reason: itemIndex && itemIndex !== 'all'
-//           ? `Refund for returned item - Order #${order.orderId}`
-//           : `Refund for full order - Order #${order.orderId}`,
-//         orderId: order.orderId,
-//         productName: itemNames,
-//         productId: itemsToProcess.length === 1 ? itemsToProcess[0].productId : null,
-//         date: new Date()
-//       });
-//     }
-
-//     await wallet.save();
-
-//     // UPDATE ORDER STATUS
-//     const statuses = order.orderItems.map(i => i.status);
-//     if (statuses.every(s => s === 'Returned' || s === 'Cancelled')) {
-//       order.status = 'Returned';
-//     } else if (statuses.some(s => s === 'Return Request')) {
-//       order.status = 'Return Request';
-//     } else if (statuses.every(s => s === 'Delivered')) {
-//       order.status = 'Delivered';
-//     } else if (statuses.every(s => s === 'Cancelled')) {
-//       order.status = 'Cancelled';
-//     } else if (statuses.includes('OutForDelivery')) {
-//       order.status = 'OutForDelivery';
-//     } else if (statuses.includes('Shipped')) {
-//       order.status = 'Shipped';
-//     } else if (statuses.includes('Processing')) {
-//       order.status = 'Processing';
-//     } else {
-//       order.status = 'Pending';
-//     }
-
-//     // MARK MODIFIED: Ensure subdocuments are saved
-//     order.markModified('orderItems');
-//     await order.save();
-
-//     console.log(`✓ Return approved successfully: ${itemsToProcess.length} item(s), Refund: ₹${refundAmount}`);
-
-//     res.json({
-//       success: true,
-//       message: itemIndex && itemIndex !== 'all'
-//         ? `Return approved for ${productName} (${variantSize}ml). Refund: ₹${refundAmount.toFixed(2)}`
-//         : `Full order return approved. Refund: ₹${refundAmount.toFixed(2)}`,
-//       refundAmount,
-//       itemsProcessed: itemsToProcess.length
-//     });
-
-//   } catch (error) {
-//     console.error('Error approving return request:', error);
-
-//     if (error.name === 'ValidationError') {
-//       const errors = Object.values(error.errors).map(err => ({
-//         path: err.path,
-//         value: err.value,
-//         message: err.message
-//       }));
-//       return res.status(400).json({ success: false, error: 'Validation failed', details: errors });
-//     }
-
-//     res.status(500).json({ success: false, error: 'Failed to approve return request' });
-//   }
-// };
-
-// const rejectReturn = async (req, res) => {
-//   try {
-//     // GET PARAMS: From URL params (preferred) or body (fallback)
-//     const { orderId: paramOrderId, itemIndex: paramItemIndex, variantSize: paramVariantSize } = req.params;
-//     const { orderId: bodyOrderId, itemIndex: bodyItemIndex, variantSize: bodyVariantSize, reason } = req.body;
-
-//     // PRIORITIZE: URL params over body params
-//     const orderId = paramOrderId || bodyOrderId;
-//     const itemIndex = paramItemIndex !== undefined ? paramItemIndex : bodyItemIndex;
-//     const variantSize = paramVariantSize || bodyVariantSize;
-
-//     console.log('Reject Return Called:', { orderId, itemIndex, variantSize, reason });
-
-//     // VALIDATION
-//     if (!orderId) {
-//       return res.status(400).json({ success: false, error: 'orderId is required' });
-//     }
-
-//     // FIND ORDER
-//     const order = await Order.findOne({ orderId }).populate('orderItems.product');
-
-//     if (!order) {
-//       return res.status(404).json({ success: false, error: 'Order not found' });
-//     }
-
-//     let rejectedProductName = '';
-
-//     // CASE 1: Specific item by itemIndex and variantSize
-//     if (itemIndex !== undefined && variantSize !== undefined && itemIndex !== 'all' && variantSize !== 'all') {
-//       const idx = parseInt(itemIndex);
-//       if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
-//         return res.status(404).json({ success: false, error: 'Invalid item index' });
-//       }
-
-//       const item = order.orderItems[idx];
-
-//       // CRITICAL: Verify variant matches
-//       if (String(item.variantSize) !== String(variantSize)) {
-//         return res.status(400).json({ 
-//           success: false, 
-//           error: `Variant mismatch. Expected ${item.variantSize}ml, got ${variantSize}ml` 
-//         });
-//       }
-
-//       if (item.status !== 'Return Request') {
-//         return res.status(400).json({
-//           success: false,
-//           error: `Cannot reject return. Current status: ${item.status}`
-//         });
-//       }
-
-//       // UPDATE STATUS
-//       item.status = 'Delivered';
-//       item.returnRejected = true;
-//       item.returnRejectedAt = new Date();
-//       item.returnRejectionReason = reason || 'Return request rejected by admin';
-//       item.returnRequestedAt = null;
-//       item.returnReason = null;
-//       item.returnDetails = null;
-
-//       rejectedProductName = `${item.productName} (${variantSize}ml)`;
-//       console.log(`Rejecting return for single item: ${rejectedProductName}`);
-
-//     } 
-//     // CASE 2: Entire order (all items in Return Request)
-//     else if (itemIndex === 'all' || itemIndex === undefined) {
-//       const returnRequestedItems = order.orderItems.filter(i => i.status === 'Return Request');
-
-//       if (returnRequestedItems.length === 0) {
-//         return res.status(400).json({
-//           success: false,
-//           error: 'No items with Return Request status found'
-//         });
-//       }
-
-//       returnRequestedItems.forEach(item => {
-//         item.status = 'Delivered';
-//         item.returnRejected = true;
-//         item.returnRejectedAt = new Date();
-//         item.returnRejectionReason = reason || 'Return request rejected by admin';
-//         item.returnRequestedAt = null;
-//         item.returnReason = null;
-//         item.returnDetails = null;
-//       });
-
-//       rejectedProductName = 'Full order';
-//       console.log(`Rejecting full order return. Items: ${returnRequestedItems.length}`);
-//     }
-
-//     // UPDATE ORDER STATUS
-//     const statuses = order.orderItems.map(i => i.status);
-
-//     if (statuses.every(s => s === 'Delivered')) {
-//       order.status = 'Delivered';
-//     } else if (statuses.some(s => s === 'Return Request')) {
-//       order.status = 'Return Request';
-//     } else if (statuses.every(s => s === 'Cancelled')) {
-//       order.status = 'Cancelled';
-//     } else if (statuses.includes('OutForDelivery')) {
-//       order.status = 'OutForDelivery';
-//     } else if (statuses.includes('Shipped')) {
-//       order.status = 'Shipped';
-//     } else if (statuses.includes('Processing')) {
-//       order.status = 'Processing';
-//     } else {
-//       order.status = 'Pending';
-//     }
-
-//     // MARK MODIFIED: Ensure subdocuments are saved
-//     order.markModified('orderItems');
-//     await order.save();
-
-//     console.log(`✓ Return rejected successfully: ${rejectedProductName}`);
-
-//     res.json({
-//       success: true,
-//       message: itemIndex && itemIndex !== 'all'
-//         ? `Return rejected for ${rejectedProductName}`
-//         : 'Full order return rejected successfully',
-//       reason: reason || 'Return request rejected by admin'
-//     });
-
-//   } catch (error) {
-//     console.error('Error rejecting return request:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: error.message || 'Failed to reject return request'
-//     });
-//   }
-// };
-
-
 const approveReturn = async (req, res) => {
   try {
     const { orderId: paramOrderId, itemIndex: paramItemIndex, variantSize: paramVariantSize } = req.params;
@@ -745,10 +403,21 @@ const approveReturn = async (req, res) => {
       }
 
       // UPDATE STATUS
-      item.status = 'Returned';
+item.status = 'Returned';
       item.returnedAt = new Date();
-      refundAmount = (item.price || 0) * (item.quantity || 1);
+
+      // ✅ NEW: Calculate refund with discount deduction
+      const itemDiscount = item.discountApplied || 0;
+      const itemOriginalTotal = (item.price || 0) * (item.quantity || 1);
+      refundAmount = itemOriginalTotal - itemDiscount;
+
       productName = item.productName || (item.product ? item.product.productName : 'N/A');
+
+      console.log(`Admin Approve Return:
+      Product: ${productName}
+      Original: ₹${itemOriginalTotal}
+      Discount: ₹${itemDiscount}
+      Refund: ₹${refundAmount}`);
       
       console.log(`✓ Item approved: ${productName} ${variantSize}ml - Refund: ₹${refundAmount}`);
       
@@ -769,10 +438,19 @@ const approveReturn = async (req, res) => {
 
       console.log(`Approving full order return: ${returnItems.length} items in Return Request`);
 
-      returnItems.forEach(item => {
+       returnItems.forEach(item => {
         item.status = 'Returned';
         item.returnedAt = new Date();
-        refundAmount += (item.price || 0) * (item.quantity || 1);
+        
+        // ✅ NEW: Calculate refund with discount deduction
+        const itemDiscount = item.discountApplied || 0;
+        const itemOriginalTotal = (item.price || 0) * (item.quantity || 1);
+        const itemRefund = itemOriginalTotal - itemDiscount;
+        
+        refundAmount += itemRefund;
+        
+        console.log(`Item: ${item.productName} - Original: ₹${itemOriginalTotal}, Discount: ₹${itemDiscount}, Refund: ₹${itemRefund}`);
+        
         itemsToProcess.push({
           productId: item.product._id,
           quantity: item.quantity || 1,
@@ -898,9 +576,7 @@ const approveReturn = async (req, res) => {
   }
 };
 
-// =====================================================
-// ALSO FIX: rejectReturn function - same issue
-// =====================================================
+
 
 const rejectReturn = async (req, res) => {
   try {

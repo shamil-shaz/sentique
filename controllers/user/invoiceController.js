@@ -214,26 +214,33 @@ const generateInvoice = async (req, res) => {
         .text(`-₹${cancelledTotal.toFixed(2)}`, 500, summaryY + 18, { align: 'right', width: 60 });
     }
   
-    if (order.discount > 0) {
+    // ✅ FIX: Calculate discount amount safely
+    const discountAmount = parseFloat(order.discount || 0);
+    let discountY = summaryY + 36;
+    
+    if (discountAmount > 0) {
       doc.fontSize(9).fillColor(primaryColor).font('Helvetica')
-        .text('Discount:', summaryX, summaryY + 36, { width: 150 });
+        .text('Discount:', summaryX, discountY, { width: 150 });
       doc.fontSize(9).fillColor('#27ae60').font('Helvetica')
-        .text(`-₹${parseFloat(order.discount || 0).toFixed(2)}`, 500, summaryY + 36, { align: 'right', width: 60 });
+        .text(`-₹${discountAmount.toFixed(2)}`, 500, discountY, { align: 'right', width: 60 });
+      discountY += 18;
     }
  
     doc.fontSize(9).fillColor(primaryColor).font('Helvetica')
-      .text('Shipping:', summaryX, summaryY + 54, { width: 150 });
+      .text('Shipping:', summaryX, discountY, { width: 150 });
     doc.fontSize(9).fillColor(darkGray).font('Helvetica')
-      .text('₹0.00', 500, summaryY + 54, { align: 'right', width: 60 });
+      .text('₹0.00', 500, discountY, { align: 'right', width: 60 });
 
+    // ✅ FIX: Calculate final total by subtracting discount
+    const finalTotal = Math.max(0, deliveredTotal - discountAmount);
  
-    const totalBoxY = summaryY + 75;
+    const totalBoxY = discountY + 21;
     doc.rect(summaryX - 10, totalBoxY, 200, 40)
       .fillAndStroke(primaryColor, primaryColor);
 
     doc.fontSize(12).fillColor('#FFFFFF').font('Helvetica-Bold');
     doc.text('TOTAL DUE:', summaryX, totalBoxY + 12, { width: 100 });
-    doc.text(`₹${deliveredTotal.toFixed(2)}`, summaryX + 110, totalBoxY + 12, { align: 'right', width: 80 });
+    doc.text(`₹${finalTotal.toFixed(2)}`, summaryX + 110, totalBoxY + 12, { align: 'right', width: 80 });
 
    
     const paymentY = totalBoxY + 60;

@@ -1,1009 +1,1309 @@
 <%- include('../../views/partials/user/header') %>
 
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Management</title>
+    
+  
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+        }
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f5f7fa;
-        color: #2c3e50;
-    }
-
-    .wallet-wrapper {
-        display: flex;
-        gap: 20px;
-        max-width: 1600px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-
-    .sidebar-section {
-        width: 280px;
-        flex-shrink: 0;
-    }
-
-    .wallet-container {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .page-header {
-        margin-bottom: 30px;
-    }
-
-    .page-header h1 {
-        font-size: 28px;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 8px;
-    }
-
-    .breadcrumb {
-        font-size: 13px;
-        color: #6c757d;
-    }
-
-    .breadcrumb span {
-        color: #c5a572;
-        margin: 0 5px;
-    }
-
-    .wallet-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 18px;
-        margin-bottom: 30px;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 14px;
-        padding: 22px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        border-left: 4px solid #c5a572;
-    }
-
-    .stat-card:hover {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-        transform: translateY(-3px);
-    }
-
-    .stat-card.balance {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        color: white;
-        border-left-color: #c5a572;
-    }
-
-    .stat-label {
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        opacity: 0.8;
-        margin-bottom: 10px;
-        font-weight: 700;
-    }
-
-    .stat-value {
-        font-size: 26px;
-        font-weight: 800;
-        color: #2c3e50;
-    }
-
-    .stat-card.balance .stat-value {
-        color: white;
-        font-size: 32px;
-    }
-
-    .stat-card.credit {
-        border-left-color: #27ae60;
-    }
-
-    .stat-card.credit .stat-label {
-        color: #27ae60;
-    }
-
-    .stat-card.debit {
-        border-left-color: #e74c3c;
-    }
-
-    .stat-card.debit .stat-label {
-        color: #e74c3c;
-    }
-
-    .transactions-card {
-        background: white;
-        border-radius: 14px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-    }
-
-    .card-header {
-        padding: 28px 28px 20px;
-        border-bottom: 2px solid #f0f2f5;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    .card-header h2 {
-        font-size: 22px;
-        font-weight: 800;
-        color: #1a1a1a;
-    }
-
-    .filter-tabs {
-        display: flex;
-        gap: 8px;
-        background: #f8f9fa;
-        padding: 4px;
-        border-radius: 10px;
-    }
-
-    .tab-btn {
-        padding: 10px 20px;
-        border: none;
-        background: transparent;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: #6c757d;
-    }
-
-    .tab-btn.active {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.25);
-    }
-
-    .tab-btn:hover:not(.active) {
-        color: #2c3e50;
-        background: rgba(44, 62, 80, 0.05);
-    }
-
-    .card-body {
-        padding: 0;
-        overflow-x: auto;
-    }
-
-    .transaction-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .transaction-table thead {
-        background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
-    }
-
-    .transaction-table th {
-        padding: 16px 20px;
-        text-align: left;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #495057;
-        border-bottom: 2px solid #e9ecef;
-    }
-
-    .transaction-table td {
-        padding: 18px 20px;
-        border-bottom: 1px solid #f0f2f5;
-        font-size: 14px;
-    }
-
-    .transaction-table tbody tr {
-        transition: all 0.3s ease;
-    }
-
-    .transaction-table tbody tr:hover {
-        background: #f8f9fa;
-    }
-
-    .serial-no {
-        font-weight: 700;
-        color: #2c3e50;
-        width: 50px;
-        font-size: 15px;
-    }
-
-    .order-id {
-        font-family: 'Courier New', monospace;
-        font-size: 13px;
-        color: #2c3e50;
-        font-weight: 700;
-        background: #f8f9fa;
-        padding: 6px 10px;
-        border-radius: 4px;
-    }
-
-    .reason-badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        background: #e3f2fd;
-        color: #1976d2;
-    }
-
-    .reason-badge.refund {
-        background: #fff9e6;
-        color: #d4941e;
-    }
-
-    .reason-badge.return {
-        background: #ffe6e6;
-        color: #c41e1e;
-    }
-
-    .reason-badge.referral {
-        background: #e6f7e6;
-        color: #2d8a2d;
-    }
-
-    .reason-badge.add-money {
-        background: #e6f2ff;
-        color: #0066cc;
-    }
-
-    .reason-badge.add-wallet {
-        background: #e6f2ff;
-        color: #0066cc;
-    }
-
-    .reason-badge.purchase {
-        background: #f0f0f0;
-        color: #404040;
-    }
-
-    .reason-badge.order-cancellation {
-        background: #ffe6e6;
-        color: #c41e1e;
-    }
-
-    .reason-badge.adjustment {
-        background: #fff9e6;
-        color: #d4941e;
-    }
-
-    .reason-badge.cashback {
-        background: #e6f7e6;
-        color: #2d8a2d;
-    }
-
-    .reason-badge.order-refunded {
-        background: #fff9e6;
-        color: #d4941e;
-    }
-
-    .reason-badge.item-purchased {
-        background: #f0f0f0;
-        color: #404040;
-    }
-
-    .reason-badge.friend-referral {
-        background: #e6f7e6;
-        color: #2d8a2d;
-    }
-
-    .transaction-date {
-        color: #6c757d;
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .transaction-time {
-        font-size: 11px;
-        color: #adb5bd;
-    }
-
-    .transaction-amount {
-        font-weight: 800;
-        font-size: 15px;
-    }
-
-    .amount-credit {
-        color: #27ae60;
-    }
-
-    .amount-debit {
-        color: #e74c3c;
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .status-credit {
-        background: rgba(39, 174, 96, 0.15);
-        color: #27ae60;
-    }
-
-    .status-debit {
-        background: rgba(231, 76, 60, 0.15);
-        color: #e74c3c;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 80px 40px;
-        color: #6c757d;
-    }
-
-    .empty-state-icon {
-        font-size: 64px;
-        margin-bottom: 20px;
-        opacity: 0.6;
-    }
-
-    .empty-state-text {
-        font-size: 16px;
-        font-weight: 500;
-    }
-
-    .card-footer {
-        padding: 30px 28px;
-        border-top: 2px solid #f0f2f5;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 20px;
-    }
-
-    /* Modern Pagination Styles */
-    .pagination-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        width: 100%;
-    }
-
-    .pagination {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: #f8f9fa;
-        padding: 8px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    }
-
-    .pagination button {
-        min-width: 40px;
-        height: 40px;
-        padding: 0 12px;
-        border: 2px solid transparent;
-        background: white;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        font-weight: 600;
-        color: #495057;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .pagination button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        z-index: 0;
-    }
-
-    .pagination button span {
-        position: relative;
-        z-index: 1;
-    }
-
-    .pagination button:hover:not(:disabled):not(.active) {
-        border-color: #2c3e50;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
-    }
-
-    .pagination button.active {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        color: white;
-        border-color: #2c3e50;
-        box-shadow: 0 4px 16px rgba(44, 62, 80, 0.3);
-        transform: scale(1.05);
-    }
-
-    .pagination button:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-        background: #e9ecef;
-        color: #adb5bd;
-    }
-
-    .pagination button:disabled:hover {
-        transform: none;
-        box-shadow: none;
-        border-color: transparent;
-    }
-
-    .pagination .page-nav {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        font-weight: 700;
-    }
-
-    .pagination .page-nav:hover:not(:disabled) {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        color: white;
-    }
-
-    .pagination-dots {
-        color: #adb5bd;
-        font-weight: 700;
-        padding: 0 8px;
-        user-select: none;
-        font-size: 16px;
-    }
-
-    .pagination-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: white;
-        padding: 10px 18px;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #495057;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    }
-
-    .pagination-info .page-indicator {
-        color: #2c3e50;
-        font-weight: 700;
-        font-size: 14px;
-    }
-
-    .pagination-info .divider {
-        color: #c5a572;
-        font-weight: 700;
-    }
-
-    @media (max-width: 1024px) {
         .wallet-wrapper {
-            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
         }
 
         .sidebar-section {
-            width: 100%;
+            width: 280px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 30px;
+            height: fit-content;
         }
 
-        .wallet-container {
+        .sidebar-placeholder {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .content-section {
             flex: 1;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .wallet-wrapper {
-            padding: 15px;
+            min-width: 0;
         }
 
-        .wallet-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .stat-card {
-            padding: 16px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-        }
-
-        .stat-card.balance .stat-value {
-            font-size: 24px;
-        }
-
-        .card-header {
-            flex-direction: column;
+        .page-header {
+            display: flex;
+            justify-content: space-between;
             align-items: flex-start;
-            padding: 20px;
+            margin-bottom: 40px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        .filter-tabs {
-            width: 100%;
-        }
-
-        .tab-btn {
+        .header-left {
             flex: 1;
-            padding: 10px 12px;
-            font-size: 12px;
-        }
-
-        .transaction-table {
-            font-size: 12px;
-        }
-
-        .transaction-table th,
-        .transaction-table td {
-            padding: 12px 10px;
-        }
-
-        .card-footer {
-            padding: 20px;
-        }
-
-        .pagination-wrapper {
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .pagination button {
-            min-width: 36px;
-            height: 36px;
-            font-size: 13px;
-        }
-
-        .pagination .page-nav {
-            width: 36px;
-            height: 36px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .wallet-wrapper {
-            padding: 12px;
         }
 
         .page-header h1 {
-            font-size: 22px;
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-top: 10px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .breadcrumb span {
+            color: #c5a572;
+        }
+
+        .add-money-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .add-money-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
         }
 
         .wallet-grid {
-            grid-template-columns: 1fr;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #c5a572;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .stat-card.balance {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.75;
+            margin-bottom: 12px;
+            font-weight: 700;
         }
 
         .stat-value {
-            font-size: 18px;
+            font-size: 28px;
+            font-weight: 800;
+            color: #2c3e50;
         }
 
         .stat-card.balance .stat-value {
-            font-size: 22px;
+            color: white;
+            font-size: 36px;
+        }
+
+        .transactions-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
         }
 
         .card-header {
-            padding: 15px;
+            padding: 28px;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         .card-header h2 {
-            font-size: 18px;
+            font-size: 24px;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 6px;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+        }
+
+        .card-body {
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
         .transaction-table th {
-            font-size: 10px;
-            padding: 8px 6px;
+            padding: 18px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+            border-bottom: 2px solid #e9ecef;
         }
 
         .transaction-table td {
-            padding: 10px 6px;
+            padding: 16px;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 13px;
+        }
+
+        .transaction-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .serial-no {
+            font-weight: 700;
+            color: #2c3e50;
+            width: 50px;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 11px;
+            font-weight: 600;
         }
 
-        .pagination {
-            gap: 4px;
-            padding: 6px;
+        .badge-credit {
+            background: #e6f7e6;
+            color: #2d8a2d;
         }
 
-        .pagination button {
-            min-width: 32px;
-            height: 32px;
-            font-size: 12px;
+        .badge-debit {
+            background: #ffe6e6;
+            color: #c41e1e;
         }
 
-        .pagination .page-nav {
-            width: 32px;
-            height: 32px;
+        .amount {
+            font-weight: 700;
             font-size: 14px;
         }
 
-        .pagination-info {
-            font-size: 12px;
-            padding: 8px 14px;
+        .amount-credit {
+            color: #27ae60;
+        }
+
+        .amount-debit {
+            color: #e74c3c;
+        }
+
+        .amount-failed {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .status-badge {
+            background: rgba(39, 174, 96, 0.15);
+            color: #27ae60;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-badge.debit {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+        }
+         .status-badge.failed {
+            background: rgba(114, 112, 112, 0.15);
+            color: #686767;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #6c757d;
         }
 
         .card-footer {
-            padding: 15px;
+            padding: 30px 28px;
+            border-top: 2px solid #f0f2f5;
+            display: flex;
+            justify-content: center;
         }
-    }
-</style>
 
-<div class="wallet-wrapper">
-    <!-- Sidebar Section -->
-    <div class="sidebar-section">
-        <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'wallet' }) %>
-    </div>
+        .pagination {
+            display: flex;
+            gap: 6px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-    <!-- Main Content -->
-    <div class="wallet-container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="breadcrumb">
-                Home <span>/</span> My Account <span>/</span> Wallet
-            </div>
-            <h1>💰 Wallet Management</h1>
-        </div>
+        .pagination button {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border: 2px solid transparent;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
 
-        <!-- Stats Grid -->
-        <div class="wallet-grid">
-            <div class="stat-card balance">
-                <div class="stat-label">Available Balance</div>
-                <div class="stat-value" id="walletBalance">₹<%= parseFloat(walletData.balance).toFixed(2) %></div>
-            </div>
-            <div class="stat-card credit">
-                <div class="stat-label">Total Credits</div>
-                <div class="stat-value" id="totalCredits">₹<%= walletData.totalCredits %></div>
-            </div>
-            <div class="stat-card debit">
-                <div class="stat-label">Total Debits</div>
-                <div class="stat-value" id="totalDebits">₹<%= walletData.totalDebits %></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">This Month</div>
-                <div class="stat-value" id="monthlyTotal">₹<%= walletData.monthlyTotal %></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Transactions</div>
-                <div class="stat-value" id="transactionCount"><%= walletData.transactionCount %></div>
-            </div>
-        </div>
+        .pagination button.active {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            border-color: #2c3e50;
+        }
 
-        <!-- Transactions Card -->
-        <div class="transactions-card">
-            <div class="card-header">
-                <h2>📋 Transaction History</h2>
-                <div class="filter-tabs">
-                    <button class="tab-btn active" onclick="filterTransactions('all', event)">All</button>
-                    <button class="tab-btn" onclick="filterTransactions('credit', event)">Credits</button>
-                    <button class="tab-btn" onclick="filterTransactions('debit', event)">Debits</button>
+        .pagination button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-modal {
+            font-size: 24px;
+            font-weight: bold;
+            color: #adb5bd;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .modal-body {
+            margin-bottom: 25px;
+        }
+
+        .amount-input-group {
+            margin-bottom: 20px;
+        }
+
+        .amount-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .amount-input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .amount-input-group input:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .quick-amount-btn {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .quick-amount-btn:hover {
+            border-color: #27ae60;
+            background: #f0f8f5;
+        }
+
+        .quick-amount-btn.active {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+
+        .info-box {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f0f8f5;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .info-box p {
+            font-size: 12px;
+            color: #27ae60;
+            margin: 0;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background: #f0f2f5;
+            color: #2c3e50;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-add:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .wallet-wrapper {
+                padding: 25px 15px;
+            }
+
+            .main-layout {
+                gap: 20px;
+            }
+
+            .sidebar-section {
+                width: 250px;
+            }
+
+            .page-header h1 {
+                font-size: 28px;
+            }
+
+            .wallet-grid {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .sidebar-section {
+                width: 100%;
+                position: static;
+                top: auto;
+            }
+
+            .content-section {
+                width: 100%;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .page-header h1 {
+                font-size: 26px;
+            }
+
+            .add-money-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .wallet-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-tabs {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .wallet-wrapper {
+                padding: 20px 15px;
+            }
+
+            .main-layout {
+                gap: 20px;
+            }
+
+            .page-header h1 {
+                font-size: 22px;
+            }
+
+            .breadcrumb {
+                font-size: 12px;
+            }
+
+            .wallet-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-value {
+                font-size: 22px;
+            }
+
+            .stat-card.balance .stat-value {
+                font-size: 26px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+                margin-bottom: 8px;
+            }
+
+            .card-header {
+                padding: 16px;
+            }
+
+            .card-header h2 {
+                font-size: 18px;
+            }
+
+            .transaction-table {
+                font-size: 12px;
+            }
+
+            .transaction-table th,
+            .transaction-table td {
+                padding: 12px 8px;
+            }
+
+            .tab-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .quick-amounts {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wallet-wrapper {
+                padding: 15px 12px;
+            }
+
+            .main-layout {
+                gap: 15px;
+            }
+
+            .sidebar-section {
+                width: 100%;
+            }
+
+            .page-header h1 {
+                font-size: 18px;
+            }
+
+            .breadcrumb {
+                font-size: 11px;
+            }
+
+            .wallet-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 12px;
+            }
+
+            .stat-value {
+                font-size: 18px;
+            }
+
+            .stat-card.balance .stat-value {
+                font-size: 22px;
+            }
+
+            .stat-label {
+                font-size: 9px;
+            }
+
+            .card-header {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .card-header h2 {
+                font-size: 16px;
+            }
+
+            .transaction-table th,
+            .transaction-table td {
+                padding: 10px 6px;
+                font-size: 11px;
+            }
+
+            .serial-no {
+                width: 25px;
+                font-size: 10px;
+            }
+
+            .filter-tabs {
+                width: 100%;
+                padding: 4px;
+                gap: 4px;
+            }
+
+            .tab-btn {
+                padding: 6px 8px;
+                font-size: 11px;
+                flex: 1;
+                text-align: center;
+            }
+
+            .add-money-btn {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+
+            .modal-content {
+                width: 100%;
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .modal-header h2 {
+                font-size: 16px;
+            }
+
+            .quick-amounts {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .quick-amount-btn {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .pagination {
+                gap: 4px;
+                padding: 8px;
+            }
+
+            .pagination button {
+                min-width: 32px;
+                height: 32px;
+                padding: 0 6px;
+                font-size: 12px;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wallet-wrapper">
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-placeholder">
+                    <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'wallet' }) %>
                 </div>
             </div>
 
-            <div class="card-body">
-                <table class="transaction-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Order ID</th>
-                            <th>Reason</th>
-                            <th>Date & Time</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionBody">
-                        <% if (transactions && transactions.length > 0) { %>
-                            <% transactions.forEach(t => { %>
-                                <tr>
-                                    <td class="serial-no"><%= t.serialNo %></td>
-                                    <td class="order-id"><%= t.orderId %></td>
-                                    <td>
-                                      <span class="reason-badge <%= t.reason.toLowerCase().replace(/\s+/g, '-') %>">
-        <%= t.reason %>
-    </span>
-                                    </td>
-                                    <td>
-                                        <div class="transaction-date"><%= t.date %></div>
-                                        <div class="transaction-time"><%= t.time %></div>
-                                    </td>
-                                    <td class="transaction-amount <%= t.type === 'credit' ? 'amount-credit' : 'amount-debit' %>">
-                                        <%= t.type === 'credit' ? ' +' : ' -' %>₹<%= t.amount %>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge <%= t.type === 'credit' ? 'status-credit' : 'status-debit' %>">
-                                            <%= t.type === 'credit' ? 'Credited' : 'Debited' %>
-                                        </span>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        <% } else { %>
-                            <tr>
-                                <td colspan="6">
-                                    <div class="empty-state">
-                                        <div class="empty-state-icon">📭</div>
-                                        <div class="empty-state-text">No transactions found</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+            <!-- Content Section -->
+            <div class="content-section">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="header-left">
+                        <div class="breadcrumb">
+                            Home <span>/</span> My Account <span>/</span> Wallet
+                        </div>
+                        <h1>💰 Wallet Management</h1>
+                    </div>
+                    <button class="add-money-btn" onclick="openAddMoneyModal()">
+                        <span>➕</span> Add Money
+                    </button>
+                </div>
 
-            <% if (totalPages > 1 || totalTransactions > 0) { %>
-                <div class="card-footer">
-                    <div class="pagination-wrapper">
-                        <div class="pagination" id="paginationContainer">
-                            <!-- Pagination will be generated dynamically -->
-                        </div>
-                        <div class="pagination-info">
-                            <span>Page</span>
-                            <span class="page-indicator" id="currentPageInfo"><%= currentPage %></span>
-                            <span class="divider">/</span>
-                            <span class="page-indicator" id="totalPagesInfo"><%= totalPages %></span>
-                        </div>
+                <!-- Stats Grid -->
+                <div class="wallet-grid">
+                    <div class="stat-card balance">
+                        <div class="stat-label">💵 Balance</div>
+                        <div class="stat-value" id="walletBalance">₹0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📈 Credits</div>
+                        <div class="stat-value" id="totalCredits" style="color: #27ae60;">₹0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📉 Debits</div>
+                        <div class="stat-value" id="totalDebits" style="color: #e74c3c;">₹0.00</div>
+                    </div>
+                   
+                    <div class="stat-card">
+                        <div class="stat-label">📊 Total Txns</div>
+                        <div class="stat-value" id="transactionCount">0</div>
                     </div>
                 </div>
-            <% } %>
+
+                <!-- Transactions Card -->
+                <div class="transactions-card">
+                    <div class="card-header">
+                        <h2>📋 Transaction History</h2>
+                        <div class="filter-tabs">
+                            <button class="tab-btn active" onclick="filterTransactions('all', event)">All</button>
+                            <button class="tab-btn" onclick="filterTransactions('credit', event)">Credits</button>
+                            <button class="tab-btn" onclick="filterTransactions('debit', event)">Debits</button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Transaction Type</th>
+                                    <th>Description</th>
+                                    <th>Date & Time</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionBody">
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="empty-state">📭 No transactions</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="pagination" id="paginationContainer"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    let currentPage = <%= currentPage %>;
-    let totalPages = <%= totalPages %>;
-    let totalTransactions = <%= totalTransactions %>;
-    let currentFilter = 'all';
+    <!-- Modal -->
+    <div id="addMoneyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💳 Add Money</h2>
+                <button class="close-modal" onclick="closeAddMoneyModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="amount-input-group">
+                    <label>Amount (₹)</label>
+                    <input 
+                        type="number" 
+                        id="amountInput" 
+                        placeholder="₹10 - ₹100,000" 
+                        min="10" 
+                        max="100000" 
+                        step="10"
+                    >
+                </div>
+                
+                <div style="text-align: center; color: #6c757d; font-size: 13px; margin: 20px 0;">
+                    Quick Select
+                </div>
+                
+                <div class="quick-amounts">
+                    <button class="quick-amount-btn" onclick="setQuickAmount(100)">₹100</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(500)">₹500</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(1000)">₹1000</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(2000)">₹2000</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(5000)">₹5000</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(10000)">₹10000</button>
+                </div>
+                
+                <div class="info-box">
+                    <p><strong>✓ Secure Payment</strong> - Powered by Razorpay</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeAddMoneyModal()">Cancel</button>
+                <button class="btn-add" id="proceedBtn" onclick="proceedToPayment()">Proceed</button>
+            </div>
+        </div>
+    </div>
 
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('Initial transactions:', <%- JSON.stringify(transactions) %>); // Debug log
-        console.log('Initial totalPages:', totalPages, 'currentPage:', currentPage); // Debug log
-        renderPagination();
-        loadWalletData();
-    });
-
-    async function loadWalletData() {
-        try {
-            const response = await fetch('/api/wallet/data');
-            if (!response.ok) throw new Error('Failed to fetch wallet data');
-            const data = await response.json();
-            console.log('Wallet data:', data); // Debug log
+    <script>
+        console.log('🔍 Checking Razorpay...');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof Razorpay !== 'undefined') {
+                console.log('✅ Razorpay loaded successfully');
+            } else {
+                console.error('❌ Razorpay NOT loaded');
+            }
             
-            document.getElementById('walletBalance').textContent = '₹' + parseFloat(data.balance).toFixed(2);
-            document.getElementById('totalCredits').textContent = '₹' + data.totalCredits;
-            document.getElementById('totalDebits').textContent = '₹' + data.totalDebits;
-            document.getElementById('monthlyTotal').textContent = '₹' + data.monthlyTotal;
-            document.getElementById('transactionCount').textContent = data.transactionCount;
-            
-            totalPages = data.totalPages || 1;
-            totalTransactions = data.transactionCount;
-        } catch (error) {
-            console.error('Error loading wallet data:', error);
-        }
-    }
-
-    function filterTransactions(type, event) {
-        currentFilter = type;
-        currentPage = 1;
-        
-        const tabs = document.querySelectorAll('.tab-btn');
-        tabs.forEach((tab) => tab.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        loadPageData(currentPage);
-    }
-
-    function renderTransactionTable(transactions) {
-        const tbody = document.getElementById('transactionBody');
-        tbody.innerHTML = '';
-        
-        console.log('Rendering transactions:', transactions); // Debug log
-        if (!transactions || transactions.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📭</div>
-                            <div class="empty-state-text">No transactions found for this filter</div>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-
-        let html = '';
-        transactions.forEach((t) => {
-            const reasonClass = t.reason.toLowerCase().replace(/\s+/g, '-');
-            const statusClass = t.type === 'credit' ? 'status-credit' : 'status-debit';
-            const amountClass = t.type === 'credit' ? 'amount-credit' : 'amount-debit';
-            const amountSign = t.type === 'credit' ? ' +' : ' -';
-            const statusText = t.type === 'credit' ? 'Credited' : 'Debited';
-
-            html += `
-                <tr>
-                    <td class="serial-no">${t.serialNo}</td>
-                    <td class="order-id">${t.orderId}</td>
-                    <td>
-                        <span class="reason-badge ${reasonClass}">
-                            ${t.reason}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="transaction-date">${t.date}</div>
-                        <div class="transaction-time">${t.time}</div>
-                    </td>
-                    <td class="transaction-amount ${amountClass}">
-                        ${amountSign}₹${t.amount}
-                    </td>
-                    <td>
-                        <span class="status-badge ${statusClass}">
-                            ${statusText}
-                        </span>
-                    </td>
-                </tr>
-            `;
+            loadWalletData();
+            loadTransactions(1);
         });
-        tbody.innerHTML = html;
-    }
 
-    function renderPagination() {
-        const container = document.getElementById('paginationContainer');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        console.log('Rendering pagination: totalPages=', totalPages, 'currentPage=', currentPage); // Debug log
-        if (totalPages <= 1) {
-            container.innerHTML = `
-                <button class="page-nav" disabled>
-                    <span>←</span>
-                </button>
-                <button class="active">
-                    <span>1</span>
-                </button>
-                <button class="page-nav" disabled>
-                    <span>→</span>
-                </button>
-            `;
-            return;
-        }
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilter = 'all';
 
-        // Previous button
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'page-nav';
-        prevBtn.innerHTML = '<span>←</span>';
-        prevBtn.title = 'Previous Page';
-        prevBtn.onclick = () => changePage('prev');
-        prevBtn.disabled = currentPage === 1;
-        container.appendChild(prevBtn);
-
-        // Page numbers with smart ellipsis
-        const maxVisible = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-        
-        if (endPage - startPage < maxVisible - 1) {
-            startPage = Math.max(1, endPage - maxVisible + 1);
-        }
-
-        // First page
-        if (startPage > 1) {
-            const pageBtn = document.createElement('button');
-            pageBtn.innerHTML = '<span>1</span>';
-            pageBtn.onclick = () => goToPage(1);
-            container.appendChild(pageBtn);
-            
-            if (startPage > 2) {
-                const dots = document.createElement('span');
-                dots.className = 'pagination-dots';
-                dots.textContent = '•••';
-                container.appendChild(dots);
+        async function loadWalletData() {
+            try {
+                const response = await fetch('/api/wallet/data');
+                const data = await response.json();
+                
+                document.getElementById('walletBalance').textContent = '₹' + parseFloat(data.balance).toFixed(2);
+                document.getElementById('totalCredits').textContent = '₹' + data.totalCredits;
+                document.getElementById('totalDebits').textContent = '₹' + data.totalDebits;
+                document.getElementById('monthlyTotal').textContent = '₹' + data.monthlyTotal;
+                document.getElementById('transactionCount').textContent = data.transactionCount;
+                
+                totalPages = data.totalPages || 1;
+            } catch (error) {
+                console.error('Error:', error);
             }
         }
 
-        // Middle pages
-        for (let i = startPage; i <= endPage; i++) {
-            const pageBtn = document.createElement('button');
-            pageBtn.innerHTML = `<span>${i}</span>`;
-            pageBtn.onclick = () => goToPage(i);
-            if (i === currentPage) pageBtn.classList.add('active');
-            container.appendChild(pageBtn);
+        function filterTransactions(type, event) {
+            currentFilter = type;
+            currentPage = 1;
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            loadTransactions(1);
         }
 
-        // Last page
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                const dots = document.createElement('span');
-                dots.className = 'pagination-dots';
-                dots.textContent = '•••';
-                container.appendChild(dots);
+        async function loadTransactions(page) {
+            try {
+                const response = await fetch(`/api/wallet/transactions?page=${page}&filter=${currentFilter}`);
+                const data = await response.json();
+                totalPages = data.totalPages || 1;
+                currentPage = page;
+                renderTransactions(data.transactions);
+                renderPagination();
+            } catch (error) {
+                console.error('Error:', error);
             }
+        }
+
+        function renderTransactions(transactions) {
+            const tbody = document.getElementById('transactionBody');
             
-            const pageBtn = document.createElement('button');
-            pageBtn.innerHTML = `<span>${totalPages}</span>`;
-            pageBtn.onclick = () => goToPage(totalPages);
-            container.appendChild(pageBtn);
-        }
-
-        // Next button
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'page-nav';
-        nextBtn.innerHTML = '<span>→</span>';
-        nextBtn.title = 'Next Page';
-        nextBtn.onclick = () => changePage('next');
-        nextBtn.disabled = currentPage === totalPages;
-        container.appendChild(nextBtn);
-
-        // Update page info
-        const currentPageInfo = document.getElementById('currentPageInfo');
-        const totalPagesInfo = document.getElementById('totalPagesInfo');
-        if (currentPageInfo) currentPageInfo.textContent = currentPage;
-        if (totalPagesInfo) totalPagesInfo.textContent = totalPages;
-    }
-
-    async function changePage(direction) {
-        console.log('Changing page:', direction, 'currentPage:', currentPage, 'totalPages:', totalPages); // Debug log
-        if (direction === 'prev' && currentPage > 1) {
-            currentPage--;
-        } else if (direction === 'next' && currentPage < totalPages) {
-            currentPage++;
-        }
-        await loadPageData(currentPage);
-    }
-
-    async function goToPage(page) {
-        console.log('Going to page:', page); // Debug log
-        if (page >= 1 && page <= totalPages && page !== currentPage) {
-            currentPage = page;
-            await loadPageData(page);
-        }
-    }
-
-    async function loadPageData(page) {
-        try {
-            const response = await fetch(`/api/wallet/transactions?page=${page}&filter=${currentFilter}`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch transactions');
+            if (!transactions || transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">📭 No transactions</div></td></tr>';
+                return;
             }
-            
-            const data = await response.json();
-            
-            console.log('Paginated data:', data); // Debug log
-            totalPages = data.totalPages || 1;
-            totalTransactions = data.totalTransactions || 0;
-            currentPage = page;
-            
-            renderTransactionTable(data.transactions);
-            renderPagination();
-            
-            // Smooth scroll to top of table
-            const cardBody = document.querySelector('.card-body');
-            if (cardBody) {
-                cardBody.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        } catch (error) {
-            console.error('Error loading page data:', error);
-        }
-    }
-</script>
 
+            let html = '';
+            transactions.forEach(t => {
+                const amountClass = t.type === 'credit' ? 'amount-credit' : t.type === 'failed' ? 'amount-failed' : 'amount-debit';
+                const amountSign = t.type === 'credit' ? '+' : t.type === 'failed' ? '' : '-';
+                const statusClass = t.type === 'credit' ? '' : t.type === 'failed' ? 'failed' : 'debit';
+
+                let transactionType = '';
+                let descriptionText = '';
+
+                switch(t.description) {
+                    case 'Add Money':
+                        transactionType = 'Wallet Top-up';
+                        descriptionText = 'Money added to wallet';
+                        break;
+                    case 'Payment Failed':
+                        transactionType = 'Payment Failed';
+                        descriptionText = `Failed to add ₹${t.amount}`;
+                        break;
+                    case 'Purchase':
+                        transactionType = 'Product Purchase';
+                        descriptionText = `Order ID: ${t.orderId}`;
+                        break;
+                    case 'Refund':
+                        transactionType = 'Product Refund';
+                        descriptionText = `${t.productName || 'Product'} refunded`;
+                        break;
+                    case 'Return':
+                        transactionType = 'Product Return';
+                        descriptionText = `${t.productName || 'Product'} returned`;
+                        break;
+                    case 'Order Cancellation':
+                        transactionType = 'Order Cancelled';
+                        descriptionText = `${t.productName || 'Order'} cancelled`;
+                        break;
+                    case 'Referral':
+                        transactionType = 'Referral Bonus';
+                        descriptionText = `Referred by ${t.reason || 'User'}`;
+                        break;
+                    case 'Cashback':
+                        transactionType = 'Cashback';
+                        descriptionText = `Cashback on ${t.productName || 'purchase'}`;
+                        break;
+                    case 'Adjustment':
+                        transactionType = 'Account Adjustment';
+                        descriptionText = t.reason || 'Account adjustment';
+                        break;
+                    default:
+                        transactionType = t.description;
+                        descriptionText = t.details || '-';
+                }
+
+                let badgeClass = 'badge-credit';
+                if (t.description === 'Purchase' || t.description === 'Return') {
+                    badgeClass = 'badge-debit';
+                }
+
+                html += `
+                    <tr>
+                        <td class="serial-no">${t.serialNo}</td>
+                        <td><span class="badge ${badgeClass}">${transactionType}</span></td>
+                        <td>
+                            <div><strong>${descriptionText}</strong></div>
+                            ${t.details && t.details !== descriptionText ? `<div style="font-size: 11px; color: #999;">${t.details}</div>` : ''}
+                        </td>
+                        <td>
+                            <div>${t.date}</div>
+                            <div style="font-size: 11px; color: #999;">${t.time}</div>
+                        </td>
+                        <td class="amount ${amountClass}">
+                            ${amountSign}₹${t.amount}
+                        </td>
+                        <td>
+                            <span class="status-badge ${statusClass}">${t.type === 'credit' ? 'Credited' : t.type === 'failed' ? 'Failed' : 'Debited'}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderPagination() {
+            const container = document.getElementById('paginationContainer');
+            container.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '← Prev';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => loadTransactions(currentPage - 1);
+            container.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+                    const btn = document.createElement('button');
+                    btn.textContent = i;
+                    btn.classList.toggle('active', i === currentPage);
+                    btn.onclick = () => loadTransactions(i);
+                    container.appendChild(btn);
+                }
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Next →';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => loadTransactions(currentPage + 1);
+            container.appendChild(nextBtn);
+        }
+
+        function openAddMoneyModal() {
+            document.getElementById('addMoneyModal').classList.add('show');
+        }
+
+        function closeAddMoneyModal() {
+            document.getElementById('addMoneyModal').classList.remove('show');
+            document.getElementById('amountInput').value = '';
+        }
+
+        function setQuickAmount(amount) {
+            document.getElementById('amountInput').value = amount;
+            document.querySelectorAll('.quick-amount-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        async function proceedToPayment() {
+            const amount = document.getElementById('amountInput').value;
+
+            if (!amount || amount < 10 || amount > 100000) {
+                Swal.fire('Error', 'Enter amount between ₹10 - ₹100,000', 'error');
+                return;
+            }
+
+            try {
+                if (typeof Razorpay === 'undefined') {
+                    throw new Error('Razorpay library not loaded. Refreshing page...');
+                }
+
+                Swal.fire({
+                    title: 'Creating Order...',
+                    html: `Amount: <strong>₹${amount}</strong>`,
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                const response = await fetch('/api/wallet/create-add-money-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ amount: parseFloat(amount) })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Order creation failed');
+                }
+
+                const orderData = await response.json();
+
+                if (!orderData.success) {
+                    throw new Error(orderData.message || 'Failed to create order');
+                }
+
+                Swal.close();
+
+                const options = {
+                    key: orderData.keyId,
+                    amount: orderData.amount,
+                    currency: orderData.currency,
+                    name: 'Sentique',
+                    description: `Add Money - ₹${amount}`,
+                    order_id: orderData.orderId,
+                    handler: async (response) => {
+                        await verifyPayment(response, parseFloat(amount));
+                    },
+                    theme: { color: '#27ae60' },
+                    modal: {
+                        ondismiss: () => {
+                            handlePaymentCancelled(parseFloat(amount), orderData.orderId);
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                
+                rzp.on('payment.failed', (response) => {
+                    console.error('❌ Payment failed:', response.error);
+                    handlePaymentFailed(response, parseFloat(amount), orderData.orderId);
+                });
+
+                rzp.on('error', (response) => {
+                    console.error('❌ Razorpay error:', response);
+                });
+
+                rzp.open();
+
+            } catch (err) {
+                console.error('❌ Error:', err.message);
+                Swal.fire('Error', err.message, 'error');
+            }
+        }
+
+        async function handlePaymentFailed(response, amount, orderId) {
+            try {
+                const errorCode = response.error.code || 'UNKNOWN_ERROR';
+                const errorDescription = response.error.description || 'Payment could not be processed';
+                const paymentId = response.error.metadata?.payment_id || 'FAILED_' + Date.now();
+
+                console.log('📝 Recording payment failure:', { errorCode, errorDescription, amount });
+
+                const failureResponse = await fetch('/api/wallet/record-failed-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        amount: amount,
+                        orderId: orderId,
+                        paymentId: paymentId,
+                        errorCode: errorCode,
+                        errorDescription: errorDescription
+                    })
+                });
+
+                if (failureResponse.ok) {
+                    const failureData = await failureResponse.json();
+                    console.log('✅ Payment failure recorded:', failureData);
+                } else {
+                    console.error('❌ Failed to record payment failure');
+                }
+
+                Swal.close();
+
+                setTimeout(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed ❌',
+                        html: `
+                            <div style="text-align: left;">
+                                <p style="margin-bottom: 15px; font-size: 14px;">
+                                    <strong>Your payment could not be processed.</strong>
+                                </p>
+                                <div style="background: #ffe6e6; padding: 12px; border-radius: 8px; border-left: 4px solid #e74c3c; margin-bottom: 15px;">
+                                    <p style="font-size: 12px; color: #c41e1e; margin: 0;">
+                                        <strong>Error:</strong> ${errorDescription}
+                                    </p>
+                                </div>
+                                <div style="background: #f9f9f9; padding: 12px; border-radius: 8px;">
+                                    <p style="font-size: 11px; color: #666; margin: 5px 0;">
+                                        <strong>Amount:</strong> ₹${amount.toFixed(2)}
+                                    </p>
+                                    <p style="font-size: 11px; color: #666; margin: 5px 0;">
+                                        <strong>Error Code:</strong> ${errorCode}
+                                    </p>
+                                    <p style="font-size: 11px; color: #666; margin: 5px 0;">
+                                        <strong>Transaction ID:</strong> ${paymentId}
+                                    </p>
+                                </div>
+                                <p style="font-size: 12px; color: #e74c3c; margin-top: 15px; font-weight: 600;">
+                                    ⚠️ This failed transaction has been recorded in your wallet.
+                                </p>
+                            </div>
+                        `,
+                        confirmButtonText: 'Go to Wallet',
+                        confirmButtonColor: '#e74c3c',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            const razorpayError = document.querySelector('[class*="razorpay-error"]');
+                            if (razorpayError) {
+                                razorpayError.style.display = 'none';
+                            }
+                        }
+                    }).then(() => {
+                        closeAddMoneyModal();
+                        loadWalletData();
+                        loadTransactions(1);
+                        document.querySelector('.wallet-grid')?.scrollIntoView({ behavior: 'smooth' });
+                    });
+                }, 500);
+
+            } catch (err) {
+                console.error('Error recording payment failure:', err);
+                Swal.fire('Error', 'Payment failed. Please try again.', 'error').then(() => {
+                    closeAddMoneyModal();
+                });
+            }
+        }
+
+        function handlePaymentCancelled(amount, orderId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Payment Cancelled',
+                html: `
+                    <p>You cancelled the payment.</p>
+                    <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                        Amount: <strong>₹${amount.toFixed(2)}</strong>
+                    </p>
+                `,
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#f39c12'
+            });
+        }
+
+        async function verifyPayment(response, amount) {
+            Swal.fire({
+                title: 'Verifying...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const result = await fetch('/api/wallet/verify-add-money-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                        amount
+                    })
+                });
+
+                const data = await result.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success! 🎉',
+                        html: `
+                            <p style="font-size: 18px; margin-bottom: 10px;">
+                                <strong>₹${amount.toFixed(2)}</strong> added
+                            </p>
+                            <div style="background: #f0f8f5; padding: 15px; border-radius: 8px;">
+                                <p style="color: #27ae60; margin: 0;">New Balance</p>
+                                <p style="font-size: 24px; color: #27ae60; font-weight: 700; margin: 5px 0;">
+                                    ₹${parseFloat(data.newBalance).toFixed(2)}
+                                </p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#27ae60'
+                    }).then(() => {
+                        loadWalletData();
+                        loadTransactions(1);
+                        closeAddMoneyModal();
+                    });
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (err) {
+                Swal.fire('Failed', err.message, 'error');
+            }
+        }
+
+        window.onclick = (e) => {
+            const modal = document.getElementById('addMoneyModal');
+            if (e.target === modal) closeAddMoneyModal();
+        }
+    </script>
+</body>
+</html>
 <%- include('../../views/partials/user/footer') %>

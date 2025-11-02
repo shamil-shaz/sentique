@@ -7,91 +7,91 @@ const User = require('../../models/userSchema');
 const Order=require('../../models/orderSchema')
 const Wallet=require('../../models/walletSchema')
 
-const getOrderSuccess = async (req, res) => {
-  try {
-    const user = req.session.user;
-    console.log('Session user in getOrderSuccess:', user);
+// const getOrderSuccess = async (req, res) => {
+//   try {
+//     const user = req.session.user;
+//     console.log('Session user in getOrderSuccess:', user);
 
-    const userId = user?._id || user?.id;
-    if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-      console.log('Redirecting to /login due to invalid user or userId');
-      return res.redirect('/login');
-    }
+//     const userId = user?._id || user?.id;
+//     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+//       console.log('Redirecting to /login due to invalid user or userId');
+//       return res.redirect('/login');
+//     }
  
-    const latestOrder = await Order.findOne({ user: userId })
-      .sort({ createdOn: -1 })
-      .populate('orderItems.product')
-      .lean();
+//     const latestOrder = await Order.findOne({ user: userId })
+//       .sort({ createdOn: -1 })
+//       .populate('orderItems.product')
+//       .lean();
 
-    console.log('Latest order:', latestOrder);
+//     console.log('Latest order:', latestOrder);
 
-    if (!latestOrder) {
-      console.log('No order found for user:', userId);
-      return res.render('orderSuccess', {
-          images: product.images?.length ? product.images : ['default.jpg'],
-        orderId: 'N/A',
-        date: 'N/A',
-        time: 'N/A',
-        paymentMethod: 'N/A',
-        amount: 'N/A',
-        deliveryDate: 'N/A',
-        items: [],
-        deliveryAddress: 'N/A',
-        success: req.flash('success'),
-      });
-    }
+//     if (!latestOrder) {
+//       console.log('No order found for user:', userId);
+//       return res.render('orderSuccess', {
+//           images: product.images?.length ? product.images : ['default.jpg'],
+//         orderId: 'N/A',
+//         date: 'N/A',
+//         time: 'N/A',
+//         paymentMethod: 'N/A',
+//         amount: 'N/A',
+//         deliveryDate: 'N/A',
+//         items: [],
+//         deliveryAddress: 'N/A',
+//         success: req.flash('success'),
+//       });
+//     }
 
-    const orderDate = new Date(latestOrder.createdOn);
-    const formattedDate = orderDate.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-    const formattedTime = orderDate.toLocaleTimeString('en-IN', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+//     const orderDate = new Date(latestOrder.createdOn);
+//     const formattedDate = orderDate.toLocaleDateString('en-IN', {
+//       day: '2-digit',
+//       month: 'short',
+//       year: 'numeric',
+//     });
+//     const formattedTime = orderDate.toLocaleTimeString('en-IN', {
+//       hour: '2-digit',
+//       minute: '2-digit',
+//     });
  
-    const deliveryDate = new Date(orderDate);
-    deliveryDate.setDate(deliveryDate.getDate() + 5);
-    const formattedDelivery = deliveryDate.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+//     const deliveryDate = new Date(orderDate);
+//     deliveryDate.setDate(deliveryDate.getDate() + 5);
+//     const formattedDelivery = deliveryDate.toLocaleDateString('en-IN', {
+//       day: '2-digit',
+//       month: 'short',
+//       year: 'numeric',
+//     });
 
-    const deliveryAddress = latestOrder.deliveryAddress
-      ? `${latestOrder.deliveryAddress.name}, ${latestOrder.deliveryAddress.houseName}, ${latestOrder.deliveryAddress.city}, ${latestOrder.deliveryAddress.state} - ${latestOrder.deliveryAddress.pincode}`
-      : 'N/A';
+//     const deliveryAddress = latestOrder.deliveryAddress
+//       ? `${latestOrder.deliveryAddress.name}, ${latestOrder.deliveryAddress.houseName}, ${latestOrder.deliveryAddress.city}, ${latestOrder.deliveryAddress.state} - ${latestOrder.deliveryAddress.pincode}`
+//       : 'N/A';
    
-    const formattedItems = latestOrder.orderItems.map((item) => ({
-      productName: item.productName,
-       productId: item.product,
-      variantSize: item.variantSize ? `${item.variantSize}ml` : 'N/A',
-      quantity: item.quantity,
-      price: `₹${item.price}`,
-      total: `₹${item.total}`,
-    }));
+//     const formattedItems = latestOrder.orderItems.map((item) => ({
+//       productName: item.productName,
+//        productId: item.product,
+//       variantSize: item.variantSize ? `${item.variantSize}ml` : 'N/A',
+//       quantity: item.quantity,
+//       price: `₹${item.price}`,
+//       total: `₹${item.total}`,
+//     }));
 
-    console.log('Formatted items:', formattedItems);
-    console.log('Flash messages in getOrderSuccess:', req.flash());
+//     console.log('Formatted items:', formattedItems);
+//     console.log('Flash messages in getOrderSuccess:', req.flash());
 
-    res.render('orderSuccess', {
-      orderId: latestOrder.orderId || 'N/A',
-      date: formattedDate,
-      time: formattedTime,
-      paymentMethod: latestOrder.paymentMethod || 'Unknown',
-      amount: latestOrder.finalAmount ? `₹${latestOrder.finalAmount}` : 'N/A',
-      deliveryDate: formattedDelivery,
-      items: formattedItems,
-      deliveryAddress: deliveryAddress,
-      success: req.flash('success'),
-    });
-  } catch (error) {
-    console.error('Error loading order success page:', error.message, error.stack);
-    res.redirect('/pageNotFound');
-  }
-};
+//     res.render('orderSuccess', {
+//       orderId: latestOrder.orderId || 'N/A',
+//       date: formattedDate,
+//       time: formattedTime,
+//       paymentMethod: latestOrder.paymentMethod || 'Unknown',
+//       amount: latestOrder.finalAmount ? `₹${latestOrder.finalAmount}` : 'N/A',
+//       deliveryDate: formattedDelivery,
+//       items: formattedItems,
+//       deliveryAddress: deliveryAddress,
+//       success: req.flash('success'),
+//     });
+//   } catch (error) {
+//     console.error('Error loading order success page:', error.message, error.stack);
+//     res.redirect('/pageNotFound');
+//   }
+// };
 
 // const cancelSingleOrder = async (req, res) => {
 //   try {
@@ -348,6 +348,124 @@ const getOrderSuccess = async (req, res) => {
 
 
 // Cancel Single Item and Credit Wallet
+
+const getOrderSuccess = async (req, res) => {
+  try {
+    const user = req.session.user;
+    console.log('Session user in getOrderSuccess:', user);
+
+    const userId = user?._id || user?.id;
+    if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+      console.log('Redirecting to /login due to invalid user or userId');
+      return res.redirect('/login');
+    }
+
+    const latestOrder = await Order.findOne({ user: userId })
+      .sort({ createdOn: -1 })
+      .populate('orderItems.product')
+      .lean();
+
+    // ✅ Discount verification logging
+    console.log('Latest order data:', {
+      orderId: latestOrder?.orderId,
+      totalPrice: latestOrder?.totalPrice,
+      discount: latestOrder?.discount,
+      finalAmount: latestOrder?.finalAmount,
+      couponApplied: latestOrder?.couponApplied,
+      couponCode: latestOrder?.couponCode
+    });
+
+    if (!latestOrder) {
+      console.log('No order found for user:', userId);
+      return res.render('orderSuccess', {
+        orderId: 'N/A',
+        date: 'N/A',
+        time: 'N/A',
+        paymentMethod: 'N/A',
+        subtotal: '₹0',
+        discount: '₹0',
+        shipping: 'Free',
+        amount: '₹0',
+        deliveryDate: 'N/A',
+        items: [],
+        deliveryAddress: 'N/A',
+        success: req.flash('success'),
+      });
+    }
+
+    const orderDate = new Date(latestOrder.createdOn);
+    const formattedDate = orderDate.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+    const formattedTime = orderDate.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const deliveryDate = new Date(orderDate);
+    deliveryDate.setDate(deliveryDate.getDate() + 5);
+    const formattedDelivery = deliveryDate.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+
+    const deliveryAddress = latestOrder.deliveryAddress
+      ? `${latestOrder.deliveryAddress.name}, ${latestOrder.deliveryAddress.houseName}, ${latestOrder.deliveryAddress.city}, ${latestOrder.deliveryAddress.state} - ${latestOrder.deliveryAddress.pincode}`
+      : 'N/A';
+
+    const formattedItems = latestOrder.orderItems.map((item) => ({
+      productName: item.productName,
+      productId: item.product,
+      variantSize: item.variantSize ? `${item.variantSize}ml` : 'N/A',
+      quantity: item.quantity,
+      price: `₹${item.price}`,
+      total: `₹${item.total}`,
+    }));
+
+    console.log('Formatted items:', formattedItems);
+
+    // ✅ Properly format discount and amounts
+    const subtotalAmount = latestOrder.totalPrice || 0;
+    const discountAmount = latestOrder.discount || 0;
+    const finalAmount = latestOrder.finalAmount || 0;
+
+    // Format for display
+    const formattedSubtotal = `₹${subtotalAmount.toFixed(2)}`;
+    const formattedDiscount = discountAmount > 0 ? `-₹${discountAmount.toFixed(2)}` : '₹0';
+    const formattedFinalAmount = `₹${finalAmount.toFixed(2)}`;
+
+    console.log('Formatted amounts:', {
+      subtotal: formattedSubtotal,
+      discount: formattedDiscount,
+      final: formattedFinalAmount
+    });
+
+    // ✅ Pass all required data to template
+    res.render('orderSuccess', {
+      orderId: latestOrder.orderId || 'N/A',
+      date: formattedDate,
+      time: formattedTime,
+      paymentMethod: latestOrder.paymentMethod || 'Unknown',
+      subtotal: formattedSubtotal,
+      discount: formattedDiscount,
+      shipping: 'Free',
+      amount: formattedFinalAmount,
+      deliveryDate: formattedDelivery,
+      items: formattedItems,
+      deliveryAddress: deliveryAddress,
+      couponApplied: latestOrder.couponApplied || false,
+      couponCode: latestOrder.couponCode || null,
+      success: req.flash('success'),
+    });
+  } catch (error) {
+    console.error('Error loading order success page:', error.message, error.stack);
+    res.redirect('/pageNotFound');
+  }
+};
+
 const cancelSingleOrder = async (req, res) => {
   try {
     const user = req.session.user;
@@ -424,8 +542,15 @@ const cancelSingleOrder = async (req, res) => {
       throw stockError;
     }
    
-    // ✅ CALCULATE REFUND AMOUNT (proportional to item)
-    const refundAmount = item.total;
+   const itemDiscount = item.discountApplied || 0;
+    const originalItemTotal = item.total;
+    const refundAmount = originalItemTotal - itemDiscount;
+
+    console.log(`Refund Calculation:
+    Product: ${item.productName}
+    Original Total: ₹${originalItemTotal}
+    Discount Applied: ₹${itemDiscount}
+    Refund Amount: ₹${refundAmount}`);
     
     item.status = 'Cancelled';
     item.cancelReason = reason;
@@ -584,7 +709,14 @@ const cancelAllOrder = async (req, res) => {
         }
         
         // ✅ ADD REFUND AMOUNT TO TOTAL
-        totalRefundAmount += item.total;
+        const itemDiscount = item.discountApplied || 0;
+        const itemRefund = item.total - itemDiscount;
+        totalRefundAmount += itemRefund;
+
+        console.log(`Item ${item.productName}:
+        Original: ₹${item.total}
+        Discount: ₹${itemDiscount}
+        Refund: ₹${itemRefund}`);
         
         item.status = 'Cancelled';
         item.cancelReason = reason;
@@ -671,6 +803,144 @@ const cancelAllOrder = async (req, res) => {
   }
 };
 
+// const getOrderDetails = async (req, res) => {
+//   try {
+//     const user = req.session.user;
+//     const userId = user?._id || user?.id;
+//     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+//       return res.redirect('/login');
+//     }
+
+//     const orderId = req.params.orderId;
+//     const latestOrder = await Order.findOne({ orderId, user: userId })
+//       .populate('orderItems.product')
+//       .lean();
+
+//     if (!latestOrder) {
+//       return res.redirect('/pageNotFound');
+//     }
+
+//     const formattedDate = latestOrder.createdOn
+//       ? new Date(latestOrder.createdOn).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+//       : 'N/A';
+   
+//     const deliveryAddress = latestOrder.deliveryAddress || {
+//       name: 'N/A',
+//       houseName: 'N/A',
+//       city: 'N/A',
+//       state: 'N/A',
+//       pincode: 'N/A',
+//       phone: 'N/A',
+//     };
+
+//     // MAP WITH INDEX - THIS IS KEY
+//     const formattedItems = latestOrder.orderItems.map((item, index) => {
+//       let itemStatus = item.status || 'Placed';
+//       if (itemStatus === 'Active') {
+//         itemStatus = latestOrder.status || 'Placed';
+//       }
+      
+//       const itemDeliveredDate = item.deliveredAt || latestOrder.deliveredAt || latestOrder.createdOn;
+//       const returnDate = new Date(itemDeliveredDate);
+//       returnDate.setDate(returnDate.getDate() + 7);
+//       const isItemReturnEligible = itemStatus === 'Delivered' && Date.now() <= returnDate.getTime();
+      
+//       const isReturnRejected = item.returnRejected === true;
+
+//       const tracking = {
+//         placedDate: item.tracking?.placedDate || null,
+//         placedTime: item.tracking?.placedTime || null,
+//         confirmedDate: item.tracking?.confirmedDate || null,
+//         confirmedTime: item.tracking?.confirmedTime || null,
+//         processingDate: item.tracking?.processingDate || null,
+//         processingTime: item.tracking?.processingTime || null,
+//         shippedDate: item.tracking?.shippedDate || null,
+//         shippedTime: item.tracking?.shippedTime || null,
+//         shippedLocation: item.tracking?.shippedLocation || 'Warehouse',
+//         outForDeliveryDate: item.tracking?.outForDeliveryDate || null,
+//         outForDeliveryTime: item.tracking?.outForDeliveryTime || null,
+//         outForDeliveryLocation: item.tracking?.outForDeliveryLocation || deliveryAddress.city,
+//         deliveredDate: item.tracking?.deliveredDate || null,
+//         deliveredTime: item.tracking?.deliveredTime || null,
+//         estimatedDeliveryDate: item.tracking?.estimatedDeliveryDate || 'N/A'
+//       };
+
+//       return {
+//         itemIndex: index, // CRITICAL: Array index as unique identifier
+//         productId: item.product?._id,
+//         productName: item.productName || item.product?.name || 'Unknown Product',
+//         variantSize: item.variantSize ? `${item.variantSize}ml` : 'N/A',
+//         variantSizeRaw: item.variantSize || null, // Raw value for passing to backend
+//         quantity: item.quantity || 1,
+//         price: item.price ? `₹${item.price.toFixed(2)}` : 'N/A',
+//         total: item.total ? `₹${item.total.toFixed(2)}` : 'N/A',
+//         status: itemStatus,
+//         isReturnEligible: isItemReturnEligible && !isReturnRejected,
+//         returnRejected: isReturnRejected, 
+//         returnRejectionReason: item.returnRejectionReason || 'Return request was not approved', 
+//         image: item.product?.images?.[0]
+//           ? (item.product.images[0].startsWith('http')
+//               ? item.product.images[0]
+//               : `/Uploads/product-images/${item.product.images[0]}`)
+//           : 'https://via.placeholder.com/130x130?text=No+Image',
+//         tracking
+//       };
+//     });
+    
+//     const canCancelEntireOrder = formattedItems.some(
+//       item => ['Placed', 'Confirmed', 'Processing', 'Active'].includes(item.status)
+//     );
+
+//     const isShippedOrOut = formattedItems.some(
+//       item => item.status === 'Shipped' || item.status === 'OutForDelivery'
+//     );
+    
+//     const hasAnyRejectedReturn = formattedItems.some(item => item.returnRejected === true);
+   
+//     const isReturnEligible = formattedItems.some(
+//       item => item.status === 'Delivered' && item.isReturnEligible && !item.returnRejected
+//     );
+  
+//     const statusPriority = {
+//       'Placed': 1,
+//       'Confirmed': 2,
+//       'Processing': 3,
+//       'Shipped': 4,
+//       'OutForDelivery': 5,
+//       'Delivered': 6,
+//       'Cancelled': 7,
+//       'Return Request': 8,
+//       'Returned': 9
+//     };
+
+//     const activeStatuses = [...new Set(
+//       formattedItems
+//         .filter(item => !['Cancelled', 'Returned', 'Return Request'].includes(item.status))
+//         .map(item => item.status)
+//     )].sort((a, b) => statusPriority[a] - statusPriority[b]);
+
+//     res.render('orderDetails', {
+//       orderId: latestOrder.orderId || latestOrder._id,
+//       status: activeStatuses.join(', '),
+//       date: formattedDate,
+//       deliveryAddress: deliveryAddress,
+//       paymentMethod: latestOrder.paymentMethod || 'N/A',
+//       amount: latestOrder.finalAmount ? `₹${latestOrder.finalAmount.toFixed(2)}` : 'N/A',
+//       deliveryDate: latestOrder.estimatedDeliveryDate || 'N/A',
+//       items: formattedItems,
+//       canCancelEntireOrder,
+//       isReturnEligible,
+//       isShippedOrOut,
+//       hasAnyRejectedReturn, 
+//       activeStatuses,
+//       success: req.flash('success')
+//     });
+//   } catch (error) {
+//     console.error('Error fetching order details:', error);
+//     res.redirect('/pageNotFound');
+//   }
+// };
+
 const getOrderDetails = async (req, res) => {
   try {
     const user = req.session.user;
@@ -700,6 +970,19 @@ const getOrderDetails = async (req, res) => {
       pincode: 'N/A',
       phone: 'N/A',
     };
+
+    // ✅ CALCULATE AMOUNTS
+    const subtotal = latestOrder.totalPrice || 0;
+    const discount = latestOrder.discount || 0;
+    const finalAmount = latestOrder.finalAmount || 0;
+
+    console.log('💰 Order amounts:', {
+      subtotal,
+      discount,
+      finalAmount,
+      couponApplied: latestOrder.couponApplied,
+      couponCode: latestOrder.couponCode
+    });
 
     // MAP WITH INDEX - THIS IS KEY
     const formattedItems = latestOrder.orderItems.map((item, index) => {
@@ -734,11 +1017,11 @@ const getOrderDetails = async (req, res) => {
       };
 
       return {
-        itemIndex: index, // CRITICAL: Array index as unique identifier
+        itemIndex: index,
         productId: item.product?._id,
         productName: item.productName || item.product?.name || 'Unknown Product',
         variantSize: item.variantSize ? `${item.variantSize}ml` : 'N/A',
-        variantSizeRaw: item.variantSize || null, // Raw value for passing to backend
+        variantSizeRaw: item.variantSize || null,
         quantity: item.quantity || 1,
         price: item.price ? `₹${item.price.toFixed(2)}` : 'N/A',
         total: item.total ? `₹${item.total.toFixed(2)}` : 'N/A',
@@ -787,13 +1070,18 @@ const getOrderDetails = async (req, res) => {
         .map(item => item.status)
     )].sort((a, b) => statusPriority[a] - statusPriority[b]);
 
+    // ✅ PASS ALL AMOUNTS TO TEMPLATE
     res.render('orderDetails', {
       orderId: latestOrder.orderId || latestOrder._id,
       status: activeStatuses.join(', '),
       date: formattedDate,
       deliveryAddress: deliveryAddress,
       paymentMethod: latestOrder.paymentMethod || 'N/A',
-      amount: latestOrder.finalAmount ? `₹${latestOrder.finalAmount.toFixed(2)}` : 'N/A',
+      subtotal: `₹${subtotal.toFixed(2)}`,  // ✅ NEW
+      discount: `₹${discount.toFixed(2)}`,  // ✅ NEW
+      amount: `₹${finalAmount.toFixed(2)}`,
+      couponApplied: latestOrder.couponApplied || false,  // ✅ NEW
+      couponCode: latestOrder.couponCode || null,  // ✅ NEW
       deliveryDate: latestOrder.estimatedDeliveryDate || 'N/A',
       items: formattedItems,
       canCancelEntireOrder,

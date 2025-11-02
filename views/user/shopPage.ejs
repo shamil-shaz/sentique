@@ -388,6 +388,29 @@
     margin-left: 8px;
   }
 
+  /* Offer Badge */
+  .offer-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+    transform: rotate(-5deg);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: rotate(-5deg) scale(1); }
+    50% { transform: rotate(-5deg) scale(1.05); }
+    100% { transform: rotate(-5deg) scale(1); }
+  }
+
   /* Pagination */
   .pagination {
     display:flex;
@@ -762,6 +785,16 @@
                     
                   </div>
 
+                  <% 
+                    let discount = 0;
+                    if (product.regularPrice > product.salePrice) {
+                      discount = Math.round(((product.regularPrice - product.salePrice) / product.regularPrice) * 100);
+                    }
+                  %>
+                  <% if (discount > 0) { %>
+                    <div class="offer-badge"><%= discount %>% OFF</div>
+                  <% } %>
+
               </div>
 
               <div class="product-body">
@@ -771,17 +804,9 @@
                   <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "No Brand" %></div>
                   <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
                   <div>
-                    <% 
-                      let salePrice = 0; 
-                      let regularPrice = 0;
-                      if (product.variants && product.variants.length > 0) {
-                        salePrice = Math.min(...product.variants.map(v => v.salePrice || v.regularPrice));
-                        regularPrice = Math.max(...product.variants.map(v => v.regularPrice));
-                      }
-                    %>
-                    <span class="price">₹<%= salePrice %></span>
-                    <% if(regularPrice && regularPrice > salePrice){ %>
-                      <span class="old-price">₹<%= regularPrice %></span>
+                    <span class="price">₹<%= product.salePrice %></span>
+                    <% if(product.regularPrice && product.regularPrice > product.salePrice){ %>
+                      <span class="old-price">₹<%= product.regularPrice %></span>
                     <% } %>
                   </div>
                 </div>

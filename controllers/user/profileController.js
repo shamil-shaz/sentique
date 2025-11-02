@@ -425,76 +425,6 @@ const initChangePassword = async (req, res) => {
   }
 };
 
-// const loadOtpVerifyPage = (req, res) => {
-//   const { type } = req.query;
-//   const otpData = req.session.otpData;
-//    console.log(type)
-
-//   if (!otpData || otpData.type !== type || Date.now() > otpData.expiry) {
-//     req.flash("error", "Invalid or expired OTP session");
-//     return res.redirect("/profile");
-//   }
-
-//   res.render("change-email-otp", { type, token: otpData.token, message: "" });
-// };
-
-// const verifyOtp = async (req, res) => {
-//   try {
-//     const { otp, type, token } = req.body;
-//     const otpData = req.session.otpData;
-
-//     if (!otpData || otpData.type !== type || otpData.token !== token) {
-//       return res.json({ success: false, message: "Invalid OTP session or token" });
-//     }
-
-//     if (Date.now() > otpData.expiry) {
-//       return res.json({ success: false, message: "OTP expired" });
-//     }
-
-//     if (String(otp) !== String(otpData.otp)) {
-//       return res.json({ success: false, message: "Incorrect OTP" });
-//     }
-
-  
-//     if (type === "change-email") {
-//       await User.findByIdAndUpdate(req.session.user.id, { email: otpData.newEmail });
-//     } else if (type === "change-password") {
-//       const hashed = await bcrypt.hash(otpData.newPassword, 10);
-//       await User.findByIdAndUpdate(req.session.user.id, { password: hashed });
-//     }
-    
-//     delete req.session.otpData;
-
-//     res.json({ success: true, redirectUrl: "/profile", message: "Update successful" });
-//   } catch (err) {
-//     console.error("verifyOtp error:", err);
-//     res.json({ success: false, message: "Error verifying OTP" });
-//   }
-// };
-
-// const resendProfileOtp = async (req, res) => {
-//   try {
-//     const otpData = req.session.otpData;
-//     if (!otpData) return res.json({ success: false, message: "No OTP session found" });
-
-//     const otp = generateOtp();
-//     otpData.otp = otp;
-//     otpData.expiry = Date.now() + 3 * 60 * 1000; 
-
-//     const emailSent = await sendVerificationEmail(
-//       otpData.type === "change-password" ? otpData.email : otpData.newEmail,
-//       otp,
-//       `OTP for ${otpData.type === "change-password" ? "Password Change" : "Email Change"}`
-//     );
-
-//     if (!emailSent) return res.json({ success: false, message: "Failed to resend OTP" });
-
-//     res.json({ success: true, message: "OTP resent successfully", token: otpData.token, type: otpData.type });
-//   } catch (err) {
-//     console.error("resendOtp error:", err);
-//     res.json({ success: false, message: "Error resending OTP" });
-//   }
-// };
 
 
 
@@ -661,12 +591,74 @@ const resendProfileOtp = async (req, res) => {
   }
 };
 
+// const loadEditProfile = async (req, res) => {
+//   try {
+//     const userId = req.session.user?.id;
+//     const user = await User.findById(userId);
+//     if (!user) return res.redirect("/pageNotFound");
+
+//     res.render("profile-Edit", { user });
+//   } catch (error) {
+//     console.error(error);
+//     res.redirect("/pageNotFound");
+//   }
+// };
+
+// const updateProfile = async (req, res) => {
+//   try {
+//     const userId = req.session.user?.id;
+//     if (!userId) {
+//       return res.status(401).json({ success: false, message: "User not logged in" });
+//     }
+
+//     let { name, phone } = req.body;
+   
+//     name = name?.trim();
+//     phone = phone?.trim();
+
+//     if (!name || name.length < 3) {
+//       return res.status(400).json({ success: false, message: "Name must be at least 3 characters long." });
+//     }
+
+//     if (phone) {
+//       const phoneRegex = /^[0-9]{10}$/;
+//       if (!phoneRegex.test(phone)) {
+//         return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits." });
+//       }
+//     }
+
+//     let updateData = { name, phone };
+
+    
+//     if (req.file) {
+//       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "sentique/profile",
+//       });
+
+//       updateData.image = uploadResult.secure_url; 
+//     }
+
+
+//     const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+
+//     if (!updatedUser) {
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+
+//     res.json({ success: true, message: "Profile updated successfully", user: updatedUser });
+//   } catch (error) {
+//     console.error("Error updating profile:", error);
+//     res.status(500).json({ success: false, message: "Server error while updating profile" });
+//   }
+// };
+
+
+
 const loadEditProfile = async (req, res) => {
   try {
     const userId = req.session.user?.id;
     const user = await User.findById(userId);
     if (!user) return res.redirect("/pageNotFound");
-
     res.render("profile-Edit", { user });
   } catch (error) {
     console.error(error);
@@ -674,54 +666,195 @@ const loadEditProfile = async (req, res) => {
   }
 };
 
+// const updateProfile = async (req, res) => {
+//   try {
+//     const userId = req.session.user?.id;
+//     if (!userId) {
+//       return res.status(401).json({ success: false, message: "User not logged in" });
+//     }
+//     let { name, phone } = req.body;
+   
+//     name = name?.trim();
+//     phone = phone?.trim();
+
+//     // Name validation
+//     if (!name || name.length < 3 || name.length > 20) {
+//       return res.status(400).json({ success: false, message: "Name must be between 3 and 20 characters long." });
+//     }
+//     const nameRegex = /^[a-zA-Z\s'-]+$/;
+//     if (!nameRegex.test(name)) {
+//       return res.status(400).json({ success: false, message: "Name can only contain letters, spaces, apostrophes, and hyphens. No numbers allowed." });
+//     }
+
+//     // Phone validation
+//     if (phone) {
+//       if (phone.length !== 10) {
+//         return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits." });
+//       }
+//       const phoneRegex = /^[0-9]{10}$/;
+//       if (!phoneRegex.test(phone)) {
+//         return res.status(400).json({ success: false, message: "Phone number must contain only numbers." });
+//       }
+
+//       // Check for all same digits
+//       const digits = phone.split('').map(Number);
+//       const uniqueDigits = new Set(digits);
+//       if (uniqueDigits.size === 1) {
+//         return res.status(400).json({ success: false, message: "Phone number cannot consist of all identical digits (e.g., 1111111111)." });
+//       }
+
+//       // Check for ascending sequence (e.g., 1234567890)
+//       const isAscending = digits.every((d, i) => i === 0 || d === digits[i - 1] + 1);
+//       if (isAscending) {
+//         return res.status(400).json({ success: false, message: "Phone number cannot be in strictly ascending order (e.g., 1234567890)." });
+//       }
+
+//       // Check for descending sequence (e.g., 9876543210)
+//       const isDescending = digits.every((d, i) => i === 0 || d === digits[i - 1] - 1);
+//       if (isDescending) {
+//         return res.status(400).json({ success: false, message: "Phone number cannot be in strictly descending order (e.g., 9876543210)." });
+//       }
+
+//       // Check for consecutive repeated digits more than 2 (e.g., 000111)
+//       let maxConsecutive = 1;
+//       let currentConsecutive = 1;
+//       for (let i = 1; i < 10; i++) {
+//         if (digits[i] === digits[i - 1]) {
+//           currentConsecutive++;
+//           maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
+//         } else {
+//           currentConsecutive = 1;
+//         }
+//       }
+//       if (maxConsecutive > 2) {
+//         return res.status(400).json({ success: false, message: "Phone number cannot have more than 2 consecutive identical digits (e.g., no 000 or 111)." });
+//       }
+//     }
+
+//     let updateData = { name, phone };
+   
+//     if (req.file) {
+//       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "sentique/profile",
+//       });
+//       updateData.image = uploadResult.secure_url;
+//     }
+//     const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+//     if (!updatedUser) {
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+//     res.json({ success: true, message: "Profile updated successfully", user: updatedUser });
+//   } catch (error) {
+//     console.error("Error updating profile:", error);
+//     res.status(500).json({ success: false, message: "Server error while updating profile" });
+//   }
+// };
+
+
 const updateProfile = async (req, res) => {
   try {
     const userId = req.session.user?.id;
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not logged in" });
     }
-
     let { name, phone } = req.body;
    
     name = name?.trim();
     phone = phone?.trim();
 
-    if (!name || name.length < 3) {
-      return res.status(400).json({ success: false, message: "Name must be at least 3 characters long." });
+    // Name validation
+    if (!name || name.length < 3 || name.length > 20) {
+      return res.status(400).json({ success: false, message: "Name must be between 3 and 20 characters long." });
+    }
+    const nameRegex = /^[a-zA-Z\s'-]+$/;
+    if (!nameRegex.test(name)) {
+      return res.status(400).json({ success: false, message: "Name can only contain letters, spaces, apostrophes, and hyphens. No numbers allowed." });
     }
 
+    // Phone validation
     if (phone) {
+      if (phone.length !== 10) {
+        return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits." });
+      }
       const phoneRegex = /^[0-9]{10}$/;
       if (!phoneRegex.test(phone)) {
-        return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits." });
+        return res.status(400).json({ success: false, message: "Phone number must contain only numbers." });
+      }
+
+      // Check for all same digits
+      const digits = phone.split('').map(Number);
+      const uniqueDigits = new Set(digits);
+      if (uniqueDigits.size === 1) {
+        return res.status(400).json({ success: false, message: "Phone number cannot consist of all identical digits (e.g., 1111111111)." });
+      }
+
+      // Check for ascending sequence (e.g., 1234567890)
+      const isAscending = digits.every((d, i) => i === 0 || d === digits[i - 1] + 1);
+      if (isAscending) {
+        return res.status(400).json({ success: false, message: "Phone number cannot be in strictly ascending order (e.g., 1234567890)." });
+      }
+
+      // Check for descending sequence (e.g., 9876543210)
+      const isDescending = digits.every((d, i) => i === 0 || d === digits[i - 1] - 1);
+      if (isDescending) {
+        return res.status(400).json({ success: false, message: "Phone number cannot be in strictly descending order (e.g., 9876543210)." });
+      }
+
+      // Check for consecutive repeated digits more than 2 (e.g., 000111)
+      let maxConsecutive = 1;
+      let currentConsecutive = 1;
+      for (let i = 1; i < 10; i++) {
+        if (digits[i] === digits[i - 1]) {
+          currentConsecutive++;
+          maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
+        } else {
+          currentConsecutive = 1;
+        }
+      }
+      if (maxConsecutive > 2) {
+        return res.status(400).json({ success: false, message: "Phone number cannot have more than 2 consecutive identical digits (e.g., no 000 or 111)." });
       }
     }
 
     let updateData = { name, phone };
-
-    
+   
     if (req.file) {
       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
         folder: "sentique/profile",
       });
-
-      updateData.image = uploadResult.secure_url; 
+      updateData.image = uploadResult.secure_url;
     }
 
-
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
-
     if (!updatedUser) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    res.json({ success: true, message: "Profile updated successfully", user: updatedUser });
+    // ✅ KEY FIX: Update session with fresh data
+    req.session.user = {
+      id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      image: updatedUser.image,
+      // Add any other user fields that the sidebar needs
+    };
+
+    // ✅ Save session to ensure changes persist
+    await req.session.save();
+
+    res.json({ 
+      success: true, 
+      message: "Profile updated successfully", 
+      user: updatedUser 
+    });
   } catch (error) {
     console.error("Error updating profile:", error);
     res.status(500).json({ success: false, message: "Server error while updating profile" });
+  
+  
   }
 };
-
 const getSecurityPage = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;

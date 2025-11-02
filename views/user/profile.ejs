@@ -3,715 +3,743 @@
   <title>My Account - <%= user.name %></title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
- <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            color: #2d3748;
-        }
-
-        /* ========== MAIN CONTENT ========== */
-        .profile-section {
-            padding: 40px 20px;
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-        }
-
-        .breadcrumb {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            font-size: 14px;
-            color: #718096;
-            flex-wrap: wrap;
-        }
-
-        .breadcrumb a {
-            color: #4a5568;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .breadcrumb a:hover {
-            color: #667eea;
-        }
-
-        .welcome-header {
-            background: white;
-            padding: 25px 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .welcome-header h1 {
-            font-size: 28px;
-            color: #2d3748;
-            font-weight: 700;
-        }
-
-        .welcome-header span {
-            color: #3f979a;
-            font-weight: 600;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 30px;
-        }
-
-        /* ========== SIDEBAR ========== */
-        .sidebar {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            height: fit-content;
-        }
-
-        .profile-avatar-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #141a31 0%, #18342f 100%);
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 40px;
-            font-weight: 600;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-avatar-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .upload-btn-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-top: 10px;
-        }
-
-        .upload-btn {
-            padding: 8px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
-
-        .upload-btn:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-        }
-
-        .upload-btn-wrapper input[type=file] {
-            font-size: 100px;
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .profile-name {
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 30px;
-        }
-
-        .menu-section {
-            margin-bottom: 25px;
-        }
-
-        .menu-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #a0aec0;
-            font-weight: 600;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-        }
-
-        .menu-item {
-            padding: 12px 15px;
-            margin-bottom: 5px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #4a5568;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            text-decoration: none;
-        }
-
-        .menu-item:hover {
-            background: #f7fafc;
-            color: #2f656e;
-            transform: translateX(5px);
-        }
-
-        .menu-item.active {
-            background: linear-gradient(135deg, #183043 0%, #10262c 100%);
-            color: white;
-        }
-
-        /* ========== PROFILE CARD ========== */
-        .profile-card {
-            background: white;
-            border-radius: 15px;
-            padding: 35px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 35px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f7fafc;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .card-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .tab-group {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .tab {
-            padding: 10px 0;
-            cursor: pointer;
-            color: #718096;
-            font-weight: 500;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-            font-size: 15px;
-        }
-
-        .tab.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-        }
-
-        /* ========== TAB CONTENT ========== */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* ========== FORM ========== */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .form-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 8px;
-        }
-
-        .form-input, .form-select {
-            padding: 14px 18px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            font-size: 15px;
-            transition: all 0.3s;
-            background: #f9fafb;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-input:disabled {
-            background: #e2e8f0;
-            cursor: not-allowed;
-        }
-
-        /* ========== RADIO GROUP ========== */
-        .radio-group {
-            display: flex;
-            gap: 25px;
-            padding: 14px 0;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .radio-option input[type="radio"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .radio-option label {
-            cursor: pointer;
-            font-size: 15px;
-            color: #4a5568;
-        }
-
-        /* ========== REFERRAL BOX ========== */
-        .referral-box {
-            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
-            padding: 20px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 25px;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .referral-text {
-            color: #7c3aed;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .referral-code {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .code-display {
-            background: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            color: #7c3aed;
-            letter-spacing: 2px;
-            font-size: 14px;
-        }
-
-        .copy-btn {
-            padding: 12px 25px;
-            background: #7c3aed;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-
-        .copy-btn:hover {
-            background: #6d28d9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-        }
-
-        .copy-btn:active {
-            transform: translateY(0);
-        }
-
-        /* ========== SECURITY SECTION ========== */
-        .security-section {
-            padding: 30px;
-            background: #f9fafb;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .section-subtitle {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        /* ========== ALERT MESSAGES ========== */
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-
-        /* ========== GOOGLE AUTH ALERT ========== */
-        .alert-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #93c5fd;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-
-        .alert-info-content {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .alert-info-icon {
-            font-size: 24px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .alert-info-text {
-            flex: 1;
-        }
-
-        .alert-info-title {
-            font-weight: 700;
-            font-size: 16px;
-            margin-bottom: 6px;
-            color: #1e40af;
-        }
-
-        .alert-info-message {
-            font-size: 14px;
-            line-height: 1.5;
-            color: #1e40af;
-            margin-bottom: 10px;
-        }
-
-        .alert-info a {
-            color: #1e40af;
-            font-weight: 600;
-            text-decoration: underline;
-            transition: color 0.3s;
-        }
-
-        .alert-info a:hover {
-            color: #0c2340;
-        }
-
-        /* ========== BUTTON ========== */
-        .button-group {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-
-        .update-btn {
-            padding: 16px 40px;
-            background: linear-gradient(135deg, #619141 0%, #488e42 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .update-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .update-btn:active {
-            transform: translateY(0);
-        }
-
-        .cancel-btn {
-            padding: 16px 40px;
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .cancel-btn:hover {
-            background: #f7fafc;
-        }
-
-        /* ========== RESPONSIVE DESIGN ========== */
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 250px 1fr;
-                gap: 25px;
-            }
-
-            .profile-card {
-                padding: 30px;
-            }
-
-            .welcome-header h1 {
-                font-size: 24px;
-            }
-        }
-
-        @media (max-width: 868px) {
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .sidebar {
-                display: grid;
-                grid-template-columns: auto 1fr;
-                gap: 30px;
-                align-items: start;
-            }
-
-            .sidebar-left {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .sidebar-menu {
-                width: 100%;
-            }
-
-            .profile-avatar {
-                width: 80px;
-                height: 80px;
-                font-size: 32px;
-            }
-
-            .profile-name {
-                font-size: 16px;
-                margin-bottom: 0;
-            }
-
-            .menu-section {
-                margin-bottom: 20px;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .card-title {
-                font-size: 22px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .profile-section {
-                padding: 30px 15px;
-            }
-
-            .sidebar {
-                grid-template-columns: 1fr;
-                text-align: center;
-                padding: 25px;
-            }
-
-            .sidebar-left {
-                width: 100%;
-            }
-
-            .menu-item {
-                justify-content: center;
-            }
-
-            .welcome-header {
-                padding: 20px;
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-
-            .welcome-header h1 {
-                font-size: 20px;
-            }
-
-            .profile-card {
-                padding: 25px 20px;
-            }
-
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .tab-group {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .card-title {
-                font-size: 20px;
-            }
-
-            .referral-box {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px 15px;
-            }
-
-            .referral-code {
-                justify-content: center;
-            }
-
-            .button-group {
-                flex-direction: column-reverse;
-                width: 100%;
-            }
-
-            .update-btn,
-            .cancel-btn {
-                width: 100%;
-                padding: 14px;
-            }
-
-            .radio-group {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .alert-info-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .alert-info-icon {
-                margin-top: 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-avatar {
-                width: 70px;
-                height: 70px;
-                font-size: 28px;
-            }
-
-            .form-input, .form-select {
-                padding: 12px 15px;
-                font-size: 14px;
-            }
-
-            .form-label {
-                font-size: 13px;
-            }
-
-            .tab {
-                font-size: 14px;
-            }
-
-            .referral-text {
-                font-size: 13px;
-            }
-
-            .code-display {
-                padding: 10px 15px;
-                font-size: 13px;
-            }
-
-            .alert-info {
-                padding: 15px;
-            }
-
-            .alert-info-title {
-                font-size: 14px;
-            }
-
-            .alert-info-message {
-                font-size: 13px;
-            }
-        }
-    </style>
-
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      color: #2d3748;
+    }
+
+    .profile-section {
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .breadcrumb {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      font-size: 14px;
+      color: #718096;
+      flex-wrap: wrap;
+    }
+
+    .breadcrumb a {
+      color: #4a5568;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .breadcrumb a:hover {
+      color: #667eea;
+    }
+
+    .welcome-header {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .welcome-header h1 {
+      font-size: 28px;
+      color: #2d3748;
+      font-weight: 700;
+    }
+
+    .welcome-header span {
+      color: #3f979a;
+      font-weight: 600;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 30px;
+    }
+
+    .sidebar {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      height: fit-content;
+    }
+
+    .profile-avatar-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #141a31 0%, #18342f 100%);
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 40px;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+      overflow: hidden;
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-name {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 30px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+    }
+
+    .menu-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #a0aec0;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .menu-item {
+      padding: 12px 15px;
+      margin-bottom: 5px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #4a5568;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .menu-item:hover {
+      background: #f7fafc;
+      color: #2f656e;
+      transform: translateX(5px);
+    }
+
+    .menu-item.active {
+      background: linear-gradient(135deg, #183043 0%, #10262c 100%);
+      color: white;
+    }
+
+    .profile-card {
+      background: white;
+      border-radius: 15px;
+      padding: 35px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 35px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f7fafc;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 10px 0;
+      cursor: pointer;
+      color: #718096;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+      font-size: 15px;
+    }
+
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      padding: 14px 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      transition: all 0.3s;
+      background: #f9fafb;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-input:disabled {
+      background: #e2e8f0;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .update-btn {
+      padding: 16px 40px;
+      background: linear-gradient(135deg, #619141 0%, #488e42 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .update-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .referral-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px;
+      border-radius: 15px;
+      margin-top: 40px;
+      color: white;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .referral-header {
+      margin-bottom: 30px;
+    }
+
+    .referral-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .referral-description {
+      font-size: 16px;
+      opacity: 0.95;
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .referral-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .referral-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      opacity: 0.85;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .stat-subtext {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 8px;
+    }
+
+    .referral-code-box {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .code-label {
+      font-size: 13px;
+      color: #667eea;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .code-display-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .code-input {
+      flex: 1;
+      padding: 16px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+      letter-spacing: 2px;
+      text-align: center;
+      background: #f9fafb;
+      font-family: 'Courier New', monospace;
+      cursor: text;
+      user-select: all;
+    }
+
+    .code-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .copy-btn {
+      padding: 16px 28px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .copy-btn:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .share-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .share-btn {
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .share-whatsapp {
+      background: #25d366;
+      color: white;
+    }
+
+    .share-whatsapp:hover {
+      background: #1ea952;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    }
+
+    .share-email {
+      background: #EA4335;
+      color: white;
+    }
+
+    .share-email:hover {
+      background: #D33425;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+    }
+
+    .referral-details-section {
+      margin-top: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .referral-details-title {
+      padding: 20px 25px;
+      margin: 0;
+      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .referral-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .referral-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .referral-table thead {
+      background: #f8f9fa;
+    }
+
+    .referral-table th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 2px solid #e9ecef;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .referral-table td {
+      padding: 15px;
+      color: #555;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .referral-table tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .reward-amount {
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    @media (max-width: 1024px) {
+      .main-content {
+        grid-template-columns: 250px 1fr;
+        gap: 25px;
+      }
+
+      .profile-card {
+        padding: 30px;
+      }
+
+      .welcome-header h1 {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 868px) {
+      .main-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .sidebar {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 30px;
+        align-items: start;
+      }
+
+      .profile-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
+      }
+
+      .profile-name {
+        font-size: 16px;
+        margin-bottom: 0;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .referral-content {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .card-title {
+        font-size: 22px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .profile-section {
+        padding: 30px 15px;
+      }
+
+      .sidebar {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 25px;
+      }
+
+      .welcome-header {
+        padding: 20px;
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+
+      .welcome-header h1 {
+        font-size: 20px;
+      }
+
+      .profile-card {
+        padding: 25px 20px;
+      }
+
+      .card-title {
+        font-size: 20px;
+      }
+
+      .referral-section {
+        padding: 25px 20px;
+        margin-top: 30px;
+      }
+
+      .referral-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+
+      .referral-description {
+        font-size: 14px;
+      }
+
+      .code-display-wrapper {
+        flex-direction: column;
+      }
+
+      .copy-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .share-buttons {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .share-btn {
+        padding: 12px;
+        font-size: 13px;
+      }
+
+      .referral-code-box {
+        padding: 20px;
+      }
+
+      .code-input {
+        font-size: 16px;
+        padding: 14px 16px;
+      }
+
+      .update-btn {
+        width: 100%;
+        padding: 14px;
+      }
+
+      .button-group {
+        flex-direction: column-reverse;
+        width: 100%;
+      }
+
+      .stat-box {
+        padding: 15px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+      }
+
+      .referral-table th,
+      .referral-table td {
+        padding: 10px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-avatar {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+      }
+
+      .form-input {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+
+      .form-label {
+        font-size: 13px;
+      }
+
+      .referral-title {
+        font-size: 18px;
+      }
+
+      .referral-description {
+        font-size: 13px;
+      }
+
+      .code-input {
+        font-size: 14px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+      }
+
+      .stat-value {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
-<body>
 
+<body>
   <section class="profile-section">
     <div class="container">
       <% if (success_msg && success_msg.length > 0) { %>
@@ -731,56 +759,55 @@
 
       <div class="main-content">
         <aside class="sidebar">
-          <div class="sidebar-left">
-            <div class="profile-avatar-container">
-                <div class="profile-avatar">
-  <% if (user.image) { %>
-    <img src="<%= user.image %>" alt="Profile Picture">
-  <% } else { %>
-    <img src="/images/default-profile.png" alt="Default Picture">
-  <% } %>
-</div>
+          <div class="profile-avatar-container">
+            <div class="profile-avatar">
+              <% if (user.image) { %>
+                <img src="<%= user.image %>" alt="Profile Picture">
+              <% } else { %>
+                <img src="/images/default-profile.png" alt="Default Picture">
+              <% } %>
             </div>
-            <div class="profile-name"><%= user.name %></div>
+          </div>
+          <div class="profile-name"><%= user.name %></div>
+
+          <div class="menu-section">
+            <div class="menu-title">Account</div>
+            <a href="/profile" class="menu-item active">
+              <span>👤</span> My Profile
+            </a>
+            <a href="/profile/address" class="menu-item">
+              <span>📍</span> Address Book
+            </a>
           </div>
 
-          <div class="sidebar-menu">
-            <div class="menu-section">
-              <div class="menu-title">Account</div>
-              <a href="/profile" class="menu-item active">
-                <span>👤</span> My Profile
-              </a>
-              <a href="/profile/address" class="menu-item">
-                <span>📍</span> Address Book
-              </a>
-            </div>
-            <div class="menu-section">
-              <div class="menu-title">Shopping</div>
-              <a href="/profile/order-list" class="menu-item">
-                <span>📦</span> My Orders
-              </a>
-              <a href="/wishlist" class="menu-item">
-                <span>❤️</span> My Wishlist
-              </a>
-              <a href="/cart" class="menu-item">
-                <span>🛒</span> Shopping Cart
-              </a>
-            </div>
-            <div class="menu-section">
-              <div class="menu-title">Payments</div>
-              <a href="/profile/wallet" class="menu-item">
-                <span>💳</span> Wallet
-              </a>
-              <a href="/coupons" class="menu-item">
-                <span>🎟️</span> Coupons
-              </a>
-            </div>
-             <div class="menu-section">
-      <div class="menu-title">Security</div>
-      <a href="/profile/privacy-security" class="menu-item">
-        <span>🔒</span> Privacy & Security
-      </a>
-    </div>
+          <div class="menu-section">
+            <div class="menu-title">Shopping</div>
+            <a href="/profile/order-list" class="menu-item">
+              <span>📦</span> My Orders
+            </a>
+            <a href="/wishlist" class="menu-item">
+              <span>❤️</span> My Wishlist
+            </a>
+            <a href="/cart" class="menu-item">
+              <span>🛒</span> Shopping Cart
+            </a>
+          </div>
+
+          <div class="menu-section">
+            <div class="menu-title">Payments</div>
+            <a href="/profile/wallet" class="menu-item">
+              <span>💳</span> Wallet
+            </a>
+            <a href="/coupons" class="menu-item">
+              <span>🎟️</span> Coupons
+            </a>
+          </div>
+
+          <div class="menu-section">
+            <div class="menu-title">Security</div>
+            <a href="/profile/privacy-security" class="menu-item">
+              <span>🔒</span> Privacy & Security
+            </a>
           </div>
         </aside>
 
@@ -788,280 +815,324 @@
           <div class="profile-card">
             <div class="card-header">
               <h2 class="card-title">Account Settings</h2>
-              <div class="tab-group">
-                <div class="tab active" data-tab="profile">Personal Information</div>
-                
+            </div>
+
+            <div class="tab-content active" id="profile-tab">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" class="form-input" value="<%= user.name %>" disabled>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone</label>
+                  <input type="tel" class="form-input" value="<%= user.phone || '' %>" disabled>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-input" value="<%= user.email %>" disabled>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <a href="/profile-edit" class="update-btn">Edit Profile</a>
               </div>
             </div>
 
-        <div class="tab-content active" id="profile-tab">
-  <div class="form-grid">
-    <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input type="text" class="form-input" value="<%= user.name %>" disabled>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Phone</label>
-      <input type="tel" class="form-input" value="<%= user.phone || '' %>" disabled>
-    </div>
-    <div class="form-group full-width">
-      <label class="form-label">Email</label>
-      <input type="email" class="form-input" value="<%= user.email %>" disabled>
-    </div>
-  </div>
+            <div class="referral-section">
+              <div class="referral-header">
+                <h2 class="referral-title">🎁 Invite & Earn</h2>
+                <p class="referral-description">
+                  Share your unique referral code with friends and earn rewards! They get ₹50 on their first order above ₹1000, and you get ₹100.
+                </p>
+              </div>
 
-  <% if (user.referralCode) { %>
-  <div class="referral-box">
-    <span class="referral-text">Share your code with friends and earn rewards!</span>
-    <div class="referral-code">
-      <span class="code-display"><%= user.referralCode %></span>
-      <button type="button" class="copy-btn" onclick="copyCode('<%= user.referralCode %>')">COPY</button>
-    </div>
-  </div>
-  <% } %>
+              <div class="referral-content">
+                <div class="referral-stats">
+                  <div class="stat-box">
+                    <div class="stat-label">Total Referrals</div>
+                    <div class="stat-value" id="totalReferrals">0</div>
+                    <div class="stat-subtext">People invited</div>
+                  </div>
 
-  <div class="button-group">
-    <a href="/profile-edit" class="update-btn">Edit Profile</a>
-  </div>
-</div>
+                  <div class="stat-box">
+                    <div class="stat-label">Completed Referrals</div>
+                    <div class="stat-value" id="completedReferrals">0</div>
+                    <div class="stat-subtext">Orders above ₹1000</div>
+                  </div>
 
-<!-- SECURITY TAB CONTENT -->
-<div class="tab-content" id="security-tab">
-  
-  <!-- Check if user is authenticated via Google OAuth -->
-  <% const isGoogleOAuthUser = user.authProvider === 'google' || user.googleId; %>
-  
-  <% if (isGoogleOAuthUser) { %>
-    <!-- GOOGLE OAUTH USER MESSAGE -->
-    <div class="alert-info">
-      <div class="alert-info-content">
-        <div class="alert-info-icon">🔒</div>
-        <div class="alert-info-text">
-          <div class="alert-info-title">Google Account Linked</div>
-          <div class="alert-info-message">
-            Your account is connected to Google. You cannot change your password and email address through this portal. 
-            <br><br>
-            To change your password or email, please visit your <strong>Google Account settings</strong>.
-          </div>
-          <a href="https://myaccount.google.com/security" target="_blank">Go to Google Account Security →</a>
-        </div>
-      </div>
-    </div>
-  <% } else { %>
-    <!-- REGULAR USER - SHOW FORMS -->
-    
-    <!-- Change Password -->
-    <div class="security-section">
-      <h3 class="section-subtitle">Change Password</h3>
-      <form id="passwordForm">
-        <div class="form-grid">
-          <div class="form-group full-width">
-            <label class="form-label">Current Password</label>
-            <input type="password" name="currentPassword" class="form-input" placeholder="Enter current password" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">New Password</label>
-            <input type="password" name="newPassword" class="form-input" placeholder="Enter new password" required minlength="6">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Confirm Password</label>
-            <input type="password" name="confirmPassword" class="form-input" placeholder="Confirm new password" required minlength="6">
-          </div>
-        </div>
+                  <div class="stat-box">
+                    <div class="stat-label">Total Earnings</div>
+                    <div class="stat-value" id="totalEarnings">₹0</div>
+                    <div class="stat-subtext">From referrals</div>
+                  </div>
 
-        <div class="button-group">
-          <button type="button" class="cancel-btn" onclick="document.getElementById('passwordForm').reset()">Cancel</button>
-          <button type="submit" class="update-btn">Change Password</button>
-        </div>
-      </form>
-    </div>
+                  <div class="stat-box">
+                    <div class="stat-label">Pending Referrals</div>
+                    <div class="stat-value" id="pendingReferrals">0</div>
+                    <div class="stat-subtext">Waiting for orders</div>
+                  </div>
+                </div>
 
-    <!-- Change Email -->
-    <div class="security-section" style="margin-top: 40px;">
-      <h3 class="section-subtitle">Change Email Address</h3>
-      <form id="emailForm">
-        <div class="form-grid">
-          <div class="form-group full-width">
-            <label class="form-label">Current Email</label>
-            <input type="email" class="form-input" value="<%= user.email %>" disabled>
-          </div>
-          <div class="form-group full-width">
-            <label class="form-label">New Email Address</label>
-            <input type="email" name="newEmail" id="newEmail" class="form-input" placeholder="Enter new email address" required>
-          </div>
-          <div class="form-group full-width">
-            <label class="form-label">Confirm Password</label>
-            <input type="password" name="password" id="emailPassword" class="form-input" placeholder="Enter your password" required>
-          </div>
-        </div>
+                <div class="referral-code-box">
+                  <div class="code-label">Your Referral Code</div>
 
-        <div class="button-group">
-          <button type="button" class="cancel-btn" onclick="document.getElementById('emailForm').reset()">Cancel</button>
-          <button type="button" id="sendOtpBtn" class="update-btn">Send OTP</button>
-        </div>
-      </form>
-    </div>
-  <% } %>
+                  <% if (user && user.refferalCode) { %>
+                    <div class="code-display-wrapper">
+                      <input type="text" class="code-input" id="referralCode" value="<%= user.refferalCode %>" readonly>
+                      <button type="button" class="copy-btn" onclick="copyReferralCode()">
+                        <span>📋</span> Copy
+                      </button>
+                    </div>
 
-</div>
+                    <div class="share-buttons">
+                      <button type="button" class="share-btn share-whatsapp" onclick="shareViaWhatsApp('<%= user.refferalCode %>')">
+                        <span>💬</span> WhatsApp
+                      </button>
+                      
+                    </div>
+                  <% } %>
+                </div>
+              </div>
 
+              
+            </div>
           </div>
         </main>
       </div>
     </div>
   </section>
 
-
-
   <script>
-    function copyCode(code) {
-      const btn = event.target;
-      navigator.clipboard.writeText(code).then(() => {
-        const originalText = btn.textContent;
-        btn.textContent = "COPIED!";
-        btn.style.background = "#10b981";
+    console.log('='.repeat(60));
+    console.log('✅ REFERRAL SYSTEM LOADED');
+    console.log('='.repeat(60));
+
+    let isLoading = false;
+
+    async function fetchReferralStats() {
+      if (isLoading) {
+        console.log('⏳ Already loading, skipping duplicate request');
+        return;
+      }
+
+      isLoading = true;
+      try {
+        console.log('📡 Fetching referral data...');
+
+        const response = await fetch('/profile/referral/details', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
+          }
+        });
+
+        console.log('Response Status:', response.status);
+
+        if (!response.ok) {
+          throw new Error(`HTTP Error ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('📊 Response Data:', data);
+
+        if (data.success) {
+          console.log('✅ Updating UI...');
+
+          document.getElementById('totalReferrals').textContent = data.totalReferrals || 0;
+          document.getElementById('completedReferrals').textContent = data.completedReferrals || 0;
+          document.getElementById('totalEarnings').textContent = '₹' + (data.totalEarnings || 0);
+          document.getElementById('pendingReferrals').textContent = data.pendingReferrals || 0;
+
+          if (data.referralDetails && data.referralDetails.length > 0) {
+            updateReferralTable(data.referralDetails);
+          } else {
+            const tbody = document.getElementById('referralTableBody');
+            if (tbody) {
+              tbody.innerHTML = `
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 20px; color: #718096;">
+                    🚀 No referrals yet. Share your code to start earning!
+                  </td>
+                </tr>
+              `;
+            }
+          }
+
+          console.log('✅ UI Updated Successfully');
+        } else {
+          console.error('❌ API Error:', data.message);
+        }
+      } catch (err) {
+        console.error('❌ Error fetching data:', err.message);
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    function updateReferralTable(referralDetails) {
+      const tbody = document.getElementById('referralTableBody');
+      if (!tbody) return;
+
+      if (!referralDetails || referralDetails.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 20px; color: #718096;">
+              🚀 No referrals yet. Share your code to start earning!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = referralDetails.map(referral => {
+        const statusBadge = referral.status === 'completed'
+          ? '<span class="status-badge status-completed">✓ Completed</span>'
+          : '<span class="status-badge status-pending">⏳ Pending</span>';
+
+        let joinDate = 'N/A';
+        try {
+          const date = new Date(referral.joinDate);
+          if (!isNaN(date.getTime())) {
+            joinDate = date.toLocaleDateString('en-IN', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            });
+          }
+        } catch (e) {
+          console.error('Date format error:', e);
+        }
+
+        const reward = referral.status === 'completed' ? '₹' + referral.reward : '₹0';
+
+        return `
+          <tr>
+            <td><strong>${referral.name || 'N/A'}</strong></td>
+            <td>${referral.email || 'N/A'}</td>
+            <td>${statusBadge}</td>
+            <td><span class="reward-amount">${reward}</span></td>
+            <td>${joinDate}</td>
+          </tr>
+        `;
+      }).join('');
+
+      console.log(`✅ Table updated with ${referralDetails.length} referrals`);
+    }
+
+    function copyReferralCode() {
+      console.log('📋 Copying referral code...');
+
+      const codeInput = document.getElementById('referralCode');
+      const btn = event.target.closest('.copy-btn');
+
+      if (!codeInput || !btn) {
+        console.warn('⚠️ Element not found');
+        return;
+      }
+
+      codeInput.select();
+      navigator.clipboard.writeText(codeInput.value).then(() => {
+        const originalHTML = btn.innerHTML;
+        const originalBg = btn.style.background;
+
+        btn.innerHTML = '<span>✓</span> Copied!';
+        btn.style.background = '#10b981';
+
+        console.log('✅ Code copied:', codeInput.value);
+
         setTimeout(() => {
-          btn.textContent = originalText;
-          btn.style.background = "#7c3aed";
+          btn.innerHTML = originalHTML;
+          btn.style.background = originalBg;
         }, 2000);
+
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Copied!',
+            text: 'Referral code copied to clipboard',
+            timer: 1500,
+            toast: true,
+            position: 'top-end'
+          });
+        }
       }).catch(err => {
-        console.error("Failed to copy:", err);
-        Swal.fire({ icon: "error", title: "Error", text: "Failed to copy code" });
-      });
-    }
-
-    const tabs = document.querySelectorAll(".tab");
-    const contents = document.querySelectorAll(".tab-content");
-
-    const lastTab = localStorage.getItem("activeTab");
-    if (lastTab) {
-      tabs.forEach(t => t.classList.remove("active"));
-      contents.forEach(c => c.classList.remove("active"));
-      document.querySelector(`.tab[data-tab="${lastTab}"]`).classList.add("active");
-      document.getElementById(`${lastTab}-tab`).classList.add("active");
-    }
-
-    tabs.forEach(tab => {
-      tab.addEventListener("click", function () {
-        const tabName = this.dataset.tab;
-        localStorage.setItem("activeTab", tabName);
-        tabs.forEach(t => t.classList.remove("active"));
-        contents.forEach(c => c.classList.remove("active"));
-        this.classList.add("active");
-        document.getElementById(tabName + "-tab").classList.add("active");
-      });
-    });
-
-    document.querySelectorAll(".menu-item").forEach(item => {
-      item.addEventListener("click", function () {
-        document.querySelectorAll(".menu-item").forEach(i => i.classList.remove("active"));
-        this.classList.add("active");
-      });
-    });
-
-    function validatePassword(password) {
-      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
-      return regex.test(password);
-    }
-
-    function validateEmail(email) {
-      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return regex.test(email);
-    }
-
-    document.getElementById("passwordForm")?.addEventListener("submit", async e => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const body = Object.fromEntries(formData.entries());
-      body.currentPassword = body.currentPassword.trim();
-      body.newPassword = body.newPassword.trim();
-      body.confirmPassword = body.confirmPassword.trim();
-
-      if (!validatePassword(body.newPassword)) {
-        Swal.fire({ icon: "error", title: "Invalid Password", text: "Password must be at least 6 characters and include uppercase, lowercase, number, and special character." });
-        return;
-      }
-
-      if (body.newPassword !== body.confirmPassword) {
-        Swal.fire({ icon: "error", title: "Mismatch", text: "New password and confirm password do not match." });
-        return;
-      }
-
-      try {
-        Swal.fire({ title: "Initiating Change...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-        const res = await fetch("/profile/change-password-init", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
+        console.error('❌ Copy failed:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to copy code'
         });
-        Swal.close();
+      });
+    }
 
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Response:", res.status, text);
-          throw new Error("Server responded with status: " + res.status);
-        }
-
-        const data = await res.json();
-        if (data.success && data.token && data.type) {
-          Swal.fire({ icon: "success", title: "OTP Sent", text: data.message, timer: 1500 })
-            .then(() => {
-              window.location.href = `/profile/change-email-otp?type=${data.type}&token=${data.token}`;
-            });
-        } else {
-          Swal.fire({ icon: "error", title: "Error", text: data.message || "Failed to initiate password change" });
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-        Swal.fire({ icon: "error", title: "Error", text: "Failed to initiate password change: " + err.message });
-      }
-    });
-
-    document.getElementById("sendOtpBtn")?.addEventListener("click", async () => {
-      const newEmail = document.getElementById("newEmail").value.trim();
-      const password = document.getElementById("emailPassword").value.trim();
-
-      if (!newEmail || !password) {
-        Swal.fire({ icon: "error", title: "Missing Fields", text: "Please enter new email and password!" });
+    function shareViaWhatsApp(code) {
+      if (!code) {
+        console.warn('⚠️ No code provided');
         return;
       }
 
-      if (!validateEmail(newEmail)) {
-        Swal.fire({ icon: "error", title: "Invalid Email", text: "Please enter a valid email address!" });
+      const message = `Hey! 🎉 I'm using this amazing platform and earning rewards!\n\nUse my referral code: ${code}\n\n📌 You get ₹50 on your first order ≥ ₹1000\n📌 I get ₹100 when you order\n\nIt's a win-win! 🚀\n\nJoin now and start shopping!`;
+      const encodedMessage = encodeURIComponent(message);
+
+      console.log('📱 Opening WhatsApp...');
+      window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+    }
+
+    function shareViaEmail(code) {
+      if (!code) {
+        console.warn('⚠️ No code provided');
         return;
       }
 
-      try {
-        Swal.fire({ title: "Sending OTP...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-        const res = await fetch("/profile/change-email-init", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ newEmail, password }),
-        });
-        Swal.close();
+      const subject = encodeURIComponent('Join me and earn rewards!');
+      const body = encodeURIComponent(
+        `Hi,\n\nI'd like to invite you to join this amazing platform!\n\n` +
+        `My Referral Code: ${code}\n\n` +
+        `Benefits:\n` +
+        `✅ You get ₹50 on your first order ≥ ₹1000\n` +
+        `✅ I get ₹100 when you order\n` +
+        `✅ Both of us win!\n\n` +
+        `Join now and let's grow together! 🚀\n\n` +
+        `Best regards`
+      );
 
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Response:", res.status, text);
-          throw new Error("Server responded with status: " + res.status);
-        }
+      console.log('📧 Opening email...');
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    }
 
-        const data = await res.json();
-        if (data.success && data.token && data.type) {
-          Swal.fire({ icon: "success", title: "OTP Sent", text: data.message, timer: 1500 })
-            .then(() => {
-              window.location.href = `/profile/change-email-otp?type=${data.type}&token=${data.token}`;
-            });
-        } else {
-          Swal.fire({ icon: "error", title: "Error", text: data.message || "Failed to send OTP" });
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-        Swal.fire({ icon: "error", title: "Error", text: "Failed to send OTP: " + err.message });
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('📄 Page loaded, fetching referral data...');
+      fetchReferralStats();
+    });
+
+    window.addEventListener('load', function() {
+      console.log('📄 Window fully loaded, verifying data...');
+      fetchReferralStats();
+    });
+
+    let refreshInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        console.log('🔄 Auto-refresh triggered');
+        fetchReferralStats();
+      }
+    }, 30000);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ Tab visible, resuming refresh');
+        refreshInterval = setInterval(() => {
+          fetchReferralStats();
+        }, 30000);
+      } else {
+        console.log('👁️‍🗨️ Tab hidden, pausing refresh');
+        clearInterval(refreshInterval);
       }
     });
+
+    console.log('='.repeat(60));
+    console.log('✅ ALL SCRIPTS LOADED');
+    console.log('='.repeat(60));
   </script>
 </body>
 <%- include("../partials/user/footer.ejs") %>
-
-</document_content>

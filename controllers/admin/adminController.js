@@ -52,17 +52,7 @@ const verifyLogin = async (req, res) => {
 
 
 
-const loadDashboard = (req, res) => {
-  if (req.session.admin) {
-    try {
-       res.render("dashboard")
-    } catch (error) {
-      res.redirect("/pageerror")
-    }
-   
-  }
- 
-};
+
 
 
 const logout = (req, res) => {
@@ -85,7 +75,6 @@ const logout = (req, res) => {
 module.exports = {
   loadLogin,
   verifyLogin,
-  loadDashboard,
   logout,
   pageerror,
 };

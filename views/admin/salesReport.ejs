@@ -1,0 +1,1179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2d3748;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .sidebar-space {
+            width: 240px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            
+            z-index: 1000;
+        }
+
+        .main-layout {
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding-top: 90px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            color: #1a202c;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(56, 161, 105, 0.4);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 161, 105, 0.6);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(237, 137, 54, 0.4);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.6);
+        }
+
+        .filter-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-section h2 {
+            font-size: 1.25rem;
+            color: #1a202c;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .quick-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .filter-btn {
+            padding: 12px 16px;
+            border: 2px solid #cbd5e0;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #2d3748;
+            text-align: center;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 12px 14px;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-group input:disabled {
+            background-color: #edf2f7;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .filter-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .filter-btn-apply {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(56, 161, 105, 0.4);
+        }
+
+        .filter-btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 161, 105, 0.6);
+        }
+
+        .filter-btn-reset {
+            padding: 12px 20px;
+            background: #edf2f7;
+            color: #2d3748;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn-reset:hover {
+            background: #e2e8f0;
+            border-color: #a0aec0;
+        }
+
+        .filter-info {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
+            border-left: 4px solid #667eea;
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            color: #312e81;
+            font-size: 0.9rem;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .error-banner {
+            background: #fee;
+            border-left: 4px solid #f56565;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #742a2a;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .stat-card.revenue {
+            border-left-color: #38a169;
+        }
+
+        .stat-card.orders {
+            border-left-color: #667eea;
+        }
+
+        .stat-card.discount {
+            border-left-color: #ed8936;
+        }
+
+        .stat-card.coupons {
+            border-left-color: #9f7aea;
+        }
+
+        .export-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-section h2 {
+            font-size: 1.1rem;
+            color: #1a202c;
+            margin-bottom: 14px;
+            font-weight: 700;
+        }
+
+        .export-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.5s ease 0.1s both;
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .table-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .order-count {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #4a5568;
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background-color: #f7fafc;
+            box-shadow: inset 0 0 0 1px #e2e8f0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #0c4a6e;
+        }
+
+        .status-shipped {
+            background: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .status-delivered {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .status-returned {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
+
+        .amount-cell {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .qty-cell {
+            text-align: center;
+        }
+
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 24px;
+            background: #f7fafc;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .page-info {
+            color: #718096;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .pagination li {
+            display: flex;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 10px 14px;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #2d3748;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            min-height: 40px;
+            cursor: pointer;
+        }
+
+        .pagination a:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .pagination .active span {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .pagination .disabled span {
+            color: #a0aec0;
+            cursor: not-allowed;
+            opacity: 0.5;
+            border-color: #e2e8f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #a0aec0;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                margin-left: 0;
+            }
+
+            .sidebar-space {
+                width: 0;
+                display: none;
+            }
+
+            .quick-filters {
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            }
+
+            .filter-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .filter-section {
+                padding: 16px;
+            }
+
+            .quick-filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-btn-apply,
+            .filter-btn-reset {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .export-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .export-section .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            thead th, tbody td {
+                padding: 10px 8px;
+            }
+
+            .pagination-wrapper {
+                padding: 16px;
+            }
+
+            .pagination a,
+            .pagination span {
+                padding: 8px 10px;
+                min-width: 36px;
+                min-height: 36px;
+                font-size: 0.8rem;
+            }
+
+            .table-header {
+                padding: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-info {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .quick-filters {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+
+            .stat-value {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+            }
+
+            thead th, tbody td {
+                padding: 8px 6px;
+            }
+
+            .pagination a,
+            .pagination span {
+                padding: 6px 8px;
+                min-width: 32px;
+                min-height: 32px;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+            }
+        }
+
+        @media print {
+            .sidebar-space,
+            .header,
+            .filter-section,
+            .export-section,
+            .pagination-wrapper,
+            .error-banner {
+                display: none;
+            }
+
+            body {
+                background: white;
+            }
+
+            .table-wrapper {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-space">
+
+        <%- include("../partials/admin/header.ejs") %>
+    </div>
+
+    <div class="main-layout">
+        <div class="container">
+            <div class="header">
+                <h1>📊 Sales Report</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+                </div>
+            </div>
+
+            <% if (showError && errorMessage) { %>
+                <div class="error-banner">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+
+            <div class="filter-section">
+                <h2>📅 Generate Sales Report</h2>
+
+                <form method="GET" id="filterForm" onsubmit="handleFilterSubmit(event)">
+                    <div class="quick-filters">
+                        <button type="button" class="filter-btn <%= filterType === 'daily' ? 'active' : '' %>" onclick="setFilter('daily')">📅 Daily</button>
+                        <button type="button" class="filter-btn <%= filterType === 'weekly' ? 'active' : '' %>" onclick="setFilter('weekly')">📆 Weekly</button>
+                        <button type="button" class="filter-btn <%= filterType === 'monthly' ? 'active' : '' %>" onclick="setFilter('monthly')">📊 Monthly</button>
+                        <button type="button" class="filter-btn <%= filterType === 'yearly' ? 'active' : '' %>" onclick="setFilter('yearly')">📈 Yearly</button>
+                        <button type="button" class="filter-btn <%= filterType === 'custom' ? 'active' : '' %>" onclick="setFilter('custom')">📋 Custom</button>
+                    </div>
+
+                    <input type="hidden" id="filterType" name="filterType" value="<%= filterType %>">
+                    <input type="hidden" id="page" name="page" value="1">
+
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate" name="startDate" value="<%= startDate %>">
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate" name="endDate" value="<%= endDate %>">
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="limit">Records Per Page</label>
+                            <select id="limit" name="limit">
+                                <option value="10" <%= limit === 10 ? 'selected' : '' %>>10 Records</option>
+                                <option value="25" <%= limit === 25 ? 'selected' : '' %>>25 Records</option>
+                                <option value="50" <%= limit === 50 ? 'selected' : '' %>>50 Records</option>
+                                <option value="100" <%= limit === 100 ? 'selected' : '' %>>100 Records</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button type="submit" class="filter-btn-apply">🔍 Apply Filter</button>
+                        <button type="button" class="filter-btn-reset" onclick="resetFilter()">↺ Reset Filter</button>
+                    </div>
+                </form>
+
+                <div class="filter-info">
+                    📋 <strong><%= displayLabel %></strong><br>
+                    ℹ️ <strong>Date Range:</strong> <%= startDateDisplay %> to <%= endDateDisplay %><br>
+                    🕐 <strong>Generated:</strong> <%= reportGeneratedAt %>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card orders">
+                    <h3>📦 Total Orders</h3>
+                    <div class="stat-value"><%= totalOrders %></div>
+                </div>
+
+                <div class="stat-card revenue">
+                    <h3>💰 Total Sales</h3>
+                    <div class="stat-value">₹<%= totalRevenue.toLocaleString('en-IN') %></div>
+                </div>
+
+                <div class="stat-card discount">
+                    <h3>🏷️ Total Discount</h3>
+                    <div class="stat-value">₹<%= totalDiscount.toLocaleString('en-IN') %></div>
+                </div>
+
+                <div class="stat-card coupons">
+                    <h3>🎟️ Coupons Applied</h3>
+                    <div class="stat-value"><%= totalCouponsApplied %></div>
+                </div>
+            </div>
+
+            <div class="export-section">
+                <h2>📥 Download Report</h2>
+                <div class="export-buttons">
+                    <a href="/admin/salesReport/export-excel?filterType=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>" class="btn btn-success">📊 Excel</a>
+                    <a href="/admin/salesReport/export-pdf?filterType=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="table-header">
+                    <h2>Orders</h2>
+                    <span class="order-count"><%= totalOrders %> Total Orders</span>
+                </div>
+
+                <% if (orders.length > 0) { %>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 12%;">Order ID</th>
+                                    <th style="width: 12%;">Customer</th>
+                                    <th style="width: 10%;">Phone</th>
+                                    <th style="width: 18%;">Product</th>
+                                    <th style="width: 8%; text-align: center;">Items</th>
+                                    <th style="width: 10%; text-align: right;">Total</th>
+                                    <th style="width: 10%; text-align: right;">Discount</th>
+                                    <th style="width: 12%; text-align: right;">Amount</th>
+                                    <th style="width: 10%;">Coupon</th>
+                                    <th style="width: 12%;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% orders.forEach(order => { %>
+                                    <tr>
+                                        <td><strong>#<%= order.orderIdShort %></strong></td>
+                                        <td><%= order.user.name %></td>
+                                        <td><%= order.user.phone %></td>
+                                        <td><%= order.firstProduct %></td>
+                                        <td class="qty-cell"><%= order.totalItems %></td>
+                                        <td class="amount-cell">₹<%= order.totalPrice.toLocaleString('en-IN') %></td>
+                                        <td class="amount-cell"><span style="color: #ed8936;">-₹<%= order.discount.toLocaleString('en-IN') %></span></td>
+                                        <td class="amount-cell"><strong>₹<%= order.finalAmount.toLocaleString('en-IN') %></strong></td>
+                                        <td><%= order.couponCode %></td>
+                                        <td>
+                                            <span class="status-badge status-<%= order.status.toLowerCase().replace(/\s/g, '') %>">
+                                                <%= order.status %>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination-wrapper">
+                        <span class="page-info">Page <strong><%= currentPage %></strong> of <strong><%= totalPages %></strong></span>
+
+                        <ul class="pagination">
+                            <% if (hasPrevPage) { %>
+                                <li><a href="?filterType=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&page=1&limit=<%= limit %>">⬅️ First</a></li>
+                                <li><a href="?filterType=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&page=<%= currentPage - 1 %>&limit=<%= limit %>">❮ Prev</a></li>
+                            <% } else { %>
+                                <li class="disabled"><span>⬅️ First</span></li>
+                                <li class="disabled"><span>❮ Prev</span></li>
+                            <% } %>
+
+                            <%
+                                let startPage = Math.max(1, currentPage - 2);
+                                let endPage = Math.min(totalPages, currentPage + 2);
+
+                                for (let i = startPage; i <= endPage; i++) {
+                            %>
+                                <% if (i === currentPage) { %>
+                                    <li class="active"><span><%= i %></span></li>
+                                <% } else { %>
+                                    <li><a href="?filterType=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&page=<%= i %>&limit=<%= limit %>"><%= i %></a></li>
+                                <% } %>
+                            <% } %>
+
+                            <% if (hasNextPage) { %>
+                                <li><a href="?filterType=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&page=<%= currentPage + 1 %>&limit=<%= limit %>">Next ❯</a></li>
+                                <li><a href="?filterType=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&page=<%= totalPages %>&limit=<%= limit %>">Last ➡️</a></li>
+                            <% } else { %>
+                                <li class="disabled"><span>Next ❯</span></li>
+                                <li class="disabled"><span>Last ➡️</span></li>
+                            <% } %>
+                        </ul>
+
+                        <span class="page-info">Showing <strong><%= orders.length %></strong> of <strong><%= totalOrders %></strong> orders</span>
+                    </div>
+
+                <% } else { %>
+                    <div class="empty-state">
+                        <p>📭 No orders found for the selected period</p>
+                        <p style="font-size: 0.9rem; margin-top: 8px; color: #a0aec0;">Try adjusting your filters</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Set max date to today for date inputs
+         * This prevents selecting future dates in the date picker
+         */
+        function initializeDateInputs() {
+            const today = new Date();
+            const formattedToday = today.toISOString().split('T')[0];
+            
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            if (startDateInput) startDateInput.setAttribute('max', formattedToday);
+            if (endDateInput) endDateInput.setAttribute('max', formattedToday);
+        }
+
+        /**
+         * Set filter type and update UI
+         * Clears date inputs for non-custom filters
+         */
+        function setFilter(type) {
+            const filterTypeInput = document.getElementById('filterType');
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            filterTypeInput.value = type;
+
+            // Clear date inputs for non-custom filters
+            if (type !== 'custom') {
+                startDateInput.value = '';
+                endDateInput.value = '';
+                startDateInput.disabled = true;
+                endDateInput.disabled = true;
+            } else {
+                startDateInput.disabled = false;
+                endDateInput.disabled = false;
+            }
+
+            // Update active button styling
+            document.querySelectorAll('.quick-filters .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Reset to page 1
+            document.getElementById('page').value = '1';
+        }
+
+        /**
+         * Reset all filters to default (daily)
+         */
+        function resetFilter() {
+            document.getElementById('filterType').value = 'daily';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('limit').value = '10';
+            document.getElementById('page').value = '1';
+
+            // Reset button styles
+            document.querySelectorAll('.quick-filters .filter-btn').forEach((btn, index) => {
+                if (index === 0) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Disable date inputs
+            document.getElementById('startDate').disabled = true;
+            document.getElementById('endDate').disabled = true;
+
+            document.getElementById('filterForm').submit();
+        }
+
+        /**
+         * Handle filter form submission
+         * Validates date range for custom filter
+         */
+        function handleFilterSubmit(event) {
+            const filterType = document.getElementById('filterType').value;
+            const startDateInput = document.getElementById('startDate').value;
+            const endDateInput = document.getElementById('endDate').value;
+
+            // Only validate if custom filter is selected
+            if (filterType === 'custom') {
+                // Check if both dates are selected
+                if (!startDateInput || !endDateInput) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Incomplete Date Range',
+                        text: 'Please select both start and end dates for custom range.',
+                        confirmButtonColor: '#667eea',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                }
+
+                // Check if start date is after end date
+                const startDate = new Date(startDateInput);
+                const endDate = new Date(endDateInput);
+
+                if (startDate > endDate) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Date Range',
+                        text: 'Start date cannot be after end date. Please select valid dates.',
+                        confirmButtonColor: '#dc2626',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                }
+            }
+
+            document.getElementById('page').value = '1';
+            return true;
+        }
+
+        /**
+         * Automatically adjust end date when start date changes
+         * Prevents end date from being before start date
+         */
+        function syncDateInputs() {
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+
+            if (!startDateInput || !endDateInput) return;
+
+            startDateInput.addEventListener('change', function() {
+                if (this.value && endDateInput.value && this.value > endDateInput.value) {
+                    endDateInput.value = this.value;
+                }
+            });
+
+            endDateInput.addEventListener('change', function() {
+                if (this.value && startDateInput.value && this.value < startDateInput.value) {
+                    startDateInput.value = this.value;
+                }
+            });
+        }
+
+        /**
+         * Show error message if validation failed
+         */
+        function showErrorMessage() {
+            <% if (showError && errorMessage) { %>
+                window.addEventListener('load', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Date!',
+                        text: '<%= errorMessage %>',
+                        confirmButtonColor: '#dc2626',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            <% } %>
+        }
+
+        /**
+         * Initialize filter buttons on page load
+         */
+        function initializeFilterButtons() {
+            const filterType = '<%= filterType %>';
+            const filterBtns = document.querySelectorAll('.quick-filters .filter-btn');
+            const types = ['daily', 'weekly', 'monthly', 'yearly', 'custom'];
+
+            filterBtns.forEach((btn, index) => {
+                if (types[index] === filterType) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Enable/disable date inputs based on filter type
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            if (filterType === 'custom') {
+                startDateInput.disabled = false;
+                endDateInput.disabled = false;
+            } else {
+                startDateInput.disabled = true;
+                endDateInput.disabled = true;
+            }
+        }
+
+        /**
+         * Prevent double submission
+         */
+        function preventDoubleSubmit() {
+            let isSubmitting = false;
+            const form = document.getElementById('filterForm');
+
+            if (!form) return;
+
+            form.addEventListener('submit', function(e) {
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return false;
+                }
+                isSubmitting = true;
+                setTimeout(() => {
+                    isSubmitting = false;
+                }, 2000);
+            });
+        }
+
+        /**
+         * Handle pagination link clicks
+         */
+        function handlePagination() {
+            document.querySelectorAll('.pagination a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = new URL(this.href, window.location.origin);
+                    window.location.href = url.toString();
+                    setTimeout(() => {
+                        const tableWrapper = document.querySelector('.table-wrapper');
+                        if (tableWrapper) {
+                            tableWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 100);
+                });
+            });
+        }
+
+        /**
+         * Initialize all functionality on page load
+         */
+        window.addEventListener('load', function() {
+            initializeDateInputs();
+            initializeFilterButtons();
+            syncDateInputs();
+            showErrorMessage();
+            preventDoubleSubmit();
+            handlePagination();
+        });
+    </script>
+</body>
+</html>

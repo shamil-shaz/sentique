@@ -12,8 +12,10 @@ const productController = require("../controllers/admin/productController");
 const brandController = require('../controllers/admin/brandController');
 const adminOrderController=require('../controllers/admin/adminOrderController')
 const adminCouponsController=require('../controllers/admin/adminCouponsController')
+const dashboardController=require('../controllers/admin/dashboardController')
+const salesReportController=require('../controllers/admin/salesReportController')
 
-// Middlewares
+
 const { userAuth, adminAuth } = require('../middlewares/auth');
 const { uploadProductImage, uploadCategoryImage } = require("../middlewares/imageUpload");
 
@@ -38,7 +40,6 @@ router.get("/pageerror", adminController.pageerror);
 // -------------- LOGIN MANAGEMENT ---------------
 router.get("/login", adminController.loadLogin);
 router.post("/login", adminController.verifyLogin);
-router.get("/dashboard", adminAuth, adminController.loadDashboard);
 router.get("/logout", adminController.logout);
 
 // ---------------- CUSTOMER MANAGEMENT ----------------
@@ -106,11 +107,56 @@ router.post('/orders/:orderId/items/all/all/reject-return', adminAuth, adminOrde
 // // Toggle coupon status (active/inactive)
 // router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCouponStatus);
 
+// router.get('/couponsManaging', adminAuth, adminCouponsController.getCoupons);
+// router.get('/get-coupons', adminAuth, adminCouponsController.getAllCoupons);
+// router.post('/create-coupon', adminAuth, adminCouponsController.createCoupon);
+// router.put('/update-coupon/:id', adminAuth, adminCouponsController.updateCoupon);
+// router.delete('/delete-coupon/:id', adminAuth, adminCouponsController.deleteCoupon);
+// router.patch('/toggle-coupon-listing/:id', adminAuth, adminCouponsController.toggleCouponListing);
+// router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCouponStatus);
+
+
+
 router.get('/couponsManaging', adminAuth, adminCouponsController.getCoupons);
+
+// ✅ Fetch all coupons with usage tracking
 router.get('/get-coupons', adminAuth, adminCouponsController.getAllCoupons);
+
+// ✅ NEW: Get coupon statistics (dashboard overview)
+router.get('/coupons-stats', adminAuth, adminCouponsController.getCouponStats);
+
+// ✅ NEW: Get detailed usage for a specific coupon
+router.get('/coupon-usage/:id', adminAuth, adminCouponsController.getCouponUsageDetails);
+
+// ✅ Create new coupon
 router.post('/create-coupon', adminAuth, adminCouponsController.createCoupon);
+
+// ✅ Update coupon
 router.put('/update-coupon/:id', adminAuth, adminCouponsController.updateCoupon);
+
+// ✅ Delete coupon
 router.delete('/delete-coupon/:id', adminAuth, adminCouponsController.deleteCoupon);
+
+// ✅ Toggle coupon listing status
 router.patch('/toggle-coupon-listing/:id', adminAuth, adminCouponsController.toggleCouponListing);
+
+// ✅ Toggle coupon status (deprecated but kept for compatibility)
 router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCouponStatus);
+
+
+
+
+
+//----------------Dashboard Mangement-----------
+
+router.get("/dashboard", adminAuth, dashboardController.loadDashboard);
+
+
+//--------  Sales Report-----
+
+router.get('/salesReport', adminAuth, salesReportController.getSalesReport);
+router.get('/salesReport/export-excel', adminAuth, salesReportController.exportSalesReportToExcel);
+router.get('/salesReport/export-pdf', adminAuth, salesReportController.exportSalesReportToPDF);
+
+
 module.exports = router;

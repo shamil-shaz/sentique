@@ -243,26 +243,79 @@
     font-family: 'Inter', sans-serif;
   }
 
-  .payment-amount-row {
+  .price-breakdown {
     width: 100%;
-    background: linear-gradient(135deg, #15393c 0%, #638659 100%);
-    color: #fff;
+    background: #f5f5f5;
     border-radius: 12px;
-    padding: 18px 20px;
-    font-size: 1.05rem;
+    padding: 20px;
+    margin-bottom: 28px;
+    animation: fadeIn 1.1s 0.55s both;
+  }
+
+  .price-breakdown-title {
     font-weight: 600;
+    color: #18191f;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+  }
+
+  .price-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 28px;
-    animation: fadeIn 1.1s 0.6s both;
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e5e5;
   }
 
-  .amount-label {
-    font-weight: 400;
+  .price-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
 
-  .amount-value {
-    font-size: 1.1rem;
+  .price-row.subtotal-row .price-value {
+    color: #1a1d1f;
+    font-weight: 500;
+  }
+
+  .price-row.discount-row .price-value {
+    color: #10b981;
+    font-weight: 500;
+  }
+
+  .price-row.shipping-row .price-value {
+    color: #1a1d1f;
+    font-weight: 500;
+  }
+
+  .price-row.total-row {
+    background: linear-gradient(135deg, #15393c 0%, #638659 100%);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 0;
+    border: none;
+  }
+
+  .price-row.total-row .price-label {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .price-row.total-row .price-value {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  .price-label {
+    color: #6b7280;
+  }
+
+  .price-value {
+    font-weight: 500;
+    text-align: right;
   }
 
   .payment-action-buttons {
@@ -319,7 +372,7 @@
     }
 
     .order-items-box,
-    .payment-amount-row,
+    .price-breakdown,
     .order-summary {
       padding: 16px;
     }
@@ -357,22 +410,23 @@
       </div>
       <h2 class="order-status-title">Order Status</h2>
       <div class="order-status-subtitle">Your package is on the way</div>
-     <div class="order-items-box">
-  <% items.forEach((item) => { %>
-    <div class="order-item-row">
-      <img src="<%= item.productId && item.productId.images && item.productId.images[0] && item.productId.images[0].length > 2
-          ? (item.productId.images[0].startsWith('http')
-              ? item.productId.images[0]
-              : `/uploads/product-images/${item.productId.images[0]}`)
-          : 'https://via.placeholder.com/40x40?text=No+Image' %>"
-          alt="<%= item.productName || 'Unknown Product' %>"
-          class="order-item-image"
-          loading="lazy" />
-      <span class="order-item-details"><%= item.productName %> (<%= item.variantSize %>) x <%= item.quantity %></span>
-      <span><%= item.total %></span>
-    </div>
-  <% }); %>
-</div>
+      
+      <div class="order-items-box">
+        <% items.forEach((item) => { %>
+          <div class="order-item-row">
+            <img src="<%= item.productId && item.productId.images && item.productId.images[0] && item.productId.images[0].length > 2
+                ? (item.productId.images[0].startsWith('http')
+                    ? item.productId.images[0]
+                    : `/uploads/product-images/${item.productId.images[0]}`)
+                : 'https://via.placeholder.com/40x40?text=No+Image' %>"
+                alt="<%= item.productName || 'Unknown Product' %>"
+                class="order-item-image"
+                loading="lazy" />
+            <span class="order-item-details"><%= item.productName %> (<%= item.variantSize %>) x <%= item.quantity %></span>
+            <span><%= item.total %></span>
+          </div>
+        <% }); %>
+      </div>
 
       <div class="order-summary">
         <div class="os-row">
@@ -395,11 +449,39 @@
           <span class="os-label">Est. Delivery</span>
           <span class="os-value"><%= deliveryDate %></span>
         </div>
+        <% if (couponApplied && couponCode) { %>
+          <div class="os-row" style="background: #f0f9ff; padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+            <span class="os-label">Coupon Code Applied</span>
+            <span class="os-value" style="color: #10b981; font-weight: 600;"><%= couponCode %></span>
+          </div>
+        <% } %>
       </div>
-      <div class="payment-amount-row">
-        <span class="amount-label">Total Amount</span>
-        <span class="amount-value"><%= amount %></span>
+
+      <!-- Price Breakdown Section -->
+      <div class="price-breakdown">
+        <div class="price-breakdown-title">Price Breakdown</div>
+        
+        <div class="price-row subtotal-row">
+          <span class="price-label">Subtotal</span>
+          <span class="price-value"><%= subtotal %></span>
+        </div>
+
+        <div class="price-row discount-row">
+          <span class="price-label">Discount</span>
+          <span class="price-value <%= discount === '₹0' ? 'text-muted' : '' %>"><%= discount %></span>
+        </div>
+
+        <div class="price-row shipping-row">
+          <span class="price-label">Shipping</span>
+          <span class="price-value"><%= shipping %></span>
+        </div>
+
+        <div class="price-row total-row">
+          <span class="price-label">Total Amount</span>
+          <span class="price-value"><%= amount %></span>
+        </div>
       </div>
+
       <div class="payment-action-buttons">
         <button class="payment-btn payment-btn-secondary" onclick="viewOrder()">View Order</button>
         <button class="payment-btn payment-btn-primary" onclick="continueShopping()">Continue Shopping</button>

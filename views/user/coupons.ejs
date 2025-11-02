@@ -819,6 +819,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="main-container">
         <!-- Sidebar -->
@@ -897,6 +898,25 @@
         </div>
     </div>
 
+    <style>
+        /* ✅ NEW: Styles for 'used' status (faded) */
+        .coupon-card.used {
+            opacity: 0.5;
+            pointer-events: none; /* Disable interactions */
+        }
+        .status-badge.used {
+            background: var(--gray-light);
+            color: var(--text-muted);
+        }
+        .status-badge.used::before {
+            content: '✅ ';
+        }
+        .copy-btn.used, .modal-btn.used {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+
     <script>
         let currentPage = 1;
         let allCoupons = [];
@@ -917,6 +937,7 @@
 
             if (expireDate < today) return 'expired';
             if (activeDate > today) return 'upcoming';
+            if (coupon.usageType === 'once' && coupon.userHasUsed) return 'used';  // ✅ NEW: Faded for used one-time
             if (coupon.usageType === 'once') return 'premium';
             return 'regular';
         }
@@ -1013,7 +1034,7 @@
                     if (!e.target.closest('.copy-btn')) {
                         const couponId = card.dataset.couponId;
                         const status = card.dataset.status;
-                        if (status !== 'upcoming') {
+                        if (status !== 'upcoming' && status !== 'used') {  // ✅ Disable click for used
                             showCouponDetails(couponId);
                         }
                     }
@@ -1024,6 +1045,11 @@
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const code = btn.dataset.code;
+                    const status = btn.closest('.coupon-card').dataset.status;
+                    if (status === 'used') {  // ✅ Disable copy for used
+                        alert('You have already used this one-time coupon!');
+                        return;
+                    }
                     copyToClipboard(code, btn);
                 });
             });
@@ -1034,22 +1060,24 @@
             const today = new Date();
             const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
             
-            const usagePercent = (coupon.usageCount / coupon.limit) * 100;
+            const usagePercent = (coupon.used / coupon.limit) * 100;
             const discountDisplay = coupon.discountType === 'percentage' 
                 ? `${coupon.discountValue}%` 
                 : `₹${coupon.discountValue}`;
 
             const status = getStatus(coupon);
             const statusLabel = {
-                premium: '👑 Premium',
-                regular: '✓ Regular',
+                premium: '👑 Premium (One-Time)',
+                regular: '✓ Regular (Multiple)',
                 upcoming: '⏳ Upcoming',
-                expired: '⏱️ Expired'
+                expired: '⏱️ Expired',
+                used: '✅ Already Used'  // ✅ NEW: For faded one-time
             }[status];
 
             const isUpcoming = status === 'upcoming';
             const isExpired = status === 'expired';
-            const showCode = !isUpcoming;
+            const isUsed = status === 'used';  // ✅ NEW: Faded state
+            const showCode = !isUpcoming && !isUsed;
 
             return `
                 <div class="coupon-card ${status}" data-coupon-id="${coupon.id}" data-status="${status}">
@@ -1074,7 +1102,9 @@
                         </div>
                     ` : `
                         <div class="coupon-code-box" style="justify-content: center; border: none; background: transparent;">
-                            <span style="color: var(--text-secondary); font-style: italic;">Code will be visible after activation</span>
+                            <span style="color: var(--text-secondary); font-style: italic;">
+                                ${isUsed ? 'Already used - One-time only' : 'Code will be visible after activation'}
+                            </span>
                         </div>
                     `}
 
@@ -1085,13 +1115,13 @@
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Remaining</div>
-                            <div class="detail-value">${coupon.limit - coupon.usageCount}</div>
+                            <div class="detail-value">${coupon.remainingUses}</div>
                         </div>
                     </div>
 
                     <div class="coupon-meta">
-                        <span class="expiry-info ${!isExpired ? 'active' : ''}">
-                            ${isExpired ? '❌ Expired' : `Expires in ${daysLeft} days`}
+                        <span class="expiry-info ${!isExpired && !isUsed ? 'active' : ''}">
+                            ${isExpired ? '❌ Expired' : isUsed ? 'Already Used' : `Expires in ${daysLeft} days`}
                         </span>
                     </div>
                     
@@ -1136,23 +1166,22 @@
             const expiryDate = new Date(coupon.expireDate);
             const today = new Date();
             const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
-            const usagePercent = (coupon.usageCount / coupon.limit) * 100;
+            const usagePercent = (coupon.used / coupon.limit) * 100;
             const status = getStatus(coupon);
             const isUpcoming = status === 'upcoming';
             const isExpired = status === 'expired';
+            const isUsed = status === 'used';  // ✅ NEW: Handle used state
 
-            // Hide copy button for upcoming coupons
+            // ✅ UPDATED: Hide/disable for upcoming/used/expired
             const copyBtn = document.getElementById('copyBtn');
             const applyBtn = document.getElementById('applyBtn');
             
-            if (isUpcoming) {
+            if (isUpcoming || isUsed || isExpired) {
                 copyBtn.style.display = 'none';
                 applyBtn.disabled = true;
-                applyBtn.innerHTML = '<i class="fas fa-clock"></i> Coming Soon';
-            } else if (isExpired) {
-                copyBtn.style.display = 'none';
-                applyBtn.disabled = true;
-                applyBtn.innerHTML = '<i class="fas fa-times"></i> Expired';
+                applyBtn.innerHTML = isUsed ? '<i class="fas fa-check"></i> Already Used' : 
+                                         isUpcoming ? '<i class="fas fa-clock"></i> Coming Soon' : 
+                                         '<i class="fas fa-times"></i> Expired';
             } else {
                 copyBtn.style.display = 'flex';
                 applyBtn.disabled = false;
@@ -1162,7 +1191,7 @@
             modalBody.innerHTML = `
                 <div class="modal-section">
                     <div class="modal-section-title">📌 Coupon Code</div>
-                    <div class="modal-section-content">${isUpcoming ? 'Hidden until activation' : coupon.code}</div>
+                    <div class="modal-section-content">${isUpcoming || isUsed ? (isUsed ? 'Already used - One-time only' : 'Hidden until activation') : coupon.code}</div>
                 </div>
 
                 <div class="modal-section">
@@ -1185,16 +1214,13 @@
                     </div>
                     <div class="modal-detail">
                         <div class="modal-detail-label">📦 Remaining</div>
-                        <div class="modal-detail-value">${coupon.limit - coupon.usageCount}</div>
+                        <div class="modal-detail-value">${coupon.remainingUses}</div>
                     </div>
                     <div class="modal-detail">
                         <div class="modal-detail-label">⏰ Expires In</div>
-                        <div class="modal-detail-value">${isExpired ? 'Expired' : daysLeft + ' days'}</div>
+                        <div class="modal-detail-value">${isExpired ? 'Expired' : isUsed ? 'Already Used' : daysLeft + ' days'}</div>
                     </div>
-                    <div class="modal-detail">
-                        <div class="modal-detail-label">📈 Usage</div>
-                        <div class="modal-detail-value">${coupon.usageCount}/${coupon.limit}</div>
-                    </div>
+                   
                 </div>
 
                 <div class="modal-section" style="margin-top: 20px;">
@@ -1214,16 +1240,20 @@
         }
 
         function copyFromModal() {
-            if (currentCoupon) {
+            if (currentCoupon && !currentCoupon.userHasUsed) {  // ✅ Disable if used
                 const btn = document.querySelector('.modal-btn-copy');
                 copyToClipboard(currentCoupon.code, btn);
+            } else {
+                alert('You have already used this one-time coupon!');
             }
         }
 
         function applyFromModal() {
-            if (currentCoupon) {
+            if (currentCoupon && !currentCoupon.userHasUsed) {  // ✅ Disable if used
                 alert(`Coupon code ${currentCoupon.code} ready to apply at checkout!`);
                 closeModal();
+            } else {
+                alert('You have already used this one-time coupon!');
             }
         }
 
@@ -1286,5 +1316,4 @@
     </script>
 </body>
 </html>
-
 <%- include('../../views/partials/user/footer') %>

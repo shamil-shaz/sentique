@@ -513,6 +513,29 @@
     }
     .empty-state { text-align: center; padding: 60px; color: var(--text-muted); grid-column: 1/-1; }
 
+    /* Offer Badge */
+    .offer-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+      transform: rotate(-5deg);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: rotate(-5deg) scale(1); }
+      50% { transform: rotate(-5deg) scale(1.05); }
+      100% { transform: rotate(-5deg) scale(1); }
+    }
+
     @media (max-width: 1280px) {
       .products-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
       .brand-title { font-size: 62px; }
@@ -719,6 +742,27 @@
               <div id="productsGrid" class="products-grid" role="list">
                 <% if (products && products.length > 0) { %>
                   <% products.forEach(product => { %>
+                    <%
+                      let salePrice = 0, regularPrice = 0, discount = 0;
+                      if (product.variants && product.variants.length > 0) {
+                        const cheapestVariant = product.variants.reduce((minVar, currVar) => {
+                          const minP = minVar.salePrice || minVar.regularPrice || Infinity;
+                          const currP = currVar.salePrice || currVar.regularPrice || Infinity;
+                          return currP < minP ? currVar : minVar;
+                        }, { salePrice: Infinity, regularPrice: Infinity });
+                        salePrice = cheapestVariant.salePrice || cheapestVariant.regularPrice || 0;
+                        regularPrice = cheapestVariant.regularPrice || salePrice;
+                        if (regularPrice > salePrice) {
+                          discount = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+                        }
+                      } else {
+                        salePrice = product.salePrice || product.price || 0;
+                        regularPrice = product.regularPrice || product.price || 0;
+                        if (regularPrice > salePrice) {
+                          discount = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+                        }
+                      }
+                    %>
                     <article class="product-card" data-id="<%= product._id %>">
                       <div class="product-image-wrapper">
                         <a href="/productDetails?id=<%= product._id %>">
@@ -730,22 +774,14 @@
                           </button>
                           
                         </div>
+                        <% if (discount > 0) { %>
+                          <div class="offer-badge"><%= discount %>% OFF</div>
+                        <% } %>
                       </div>
                       <div class="product-info">                       
                         <div class="product-name"><%= product.productName %></div>
                         <div class="product-category"><%= product.category ? product.category.name : 'Perfume' %></div>
                        
-                        <%
-                          let salePrice = 0, regularPrice = 0;
-                          if (product.variants && product.variants.length > 0) {
-                            salePrice = Math.min(...product.variants.map(v => v.salePrice || v.regularPrice || 0));
-                            regularPrice = Math.max(...product.variants.map(v => v.regularPrice || 0));
-                          } else {
-                            salePrice = product.salePrice || product.price || 0;
-                            regularPrice = product.price || 0;
-                          }
-                          let discount = regularPrice > salePrice ? Math.round(((regularPrice - salePrice) / regularPrice) * 100) : 0;
-                        %>
                         <div class="product-pricing">
                           <div class="sale-price">₹<%= salePrice.toLocaleString('en-IN') %></div>
                           <% if (discount > 0) { %>
@@ -904,15 +940,25 @@
           : 'https://via.placeholder.com/400x400/1a1a1a/d4af37?text=No+Image';
 
         // Pricing
-        let salePrice = 0, regularPrice = 0;
+        let salePrice = 0, regularPrice = 0, discount = 0;
         if (product.variants && product.variants.length > 0) {
-          salePrice = Math.min(...product.variants.map(v => v.salePrice || v.regularPrice || 0));
-          regularPrice = Math.max(...product.variants.map(v => v.regularPrice || 0));
+          const cheapestVariant = product.variants.reduce((minVar, currVar) => {
+            const minP = minVar.salePrice || minVar.regularPrice || Infinity;
+            const currP = currVar.salePrice || currVar.regularPrice || Infinity;
+            return currP < minP ? currVar : minVar;
+          }, { salePrice: Infinity, regularPrice: Infinity });
+          salePrice = cheapestVariant.salePrice || cheapestVariant.regularPrice || 0;
+          regularPrice = cheapestVariant.regularPrice || salePrice;
+          if (regularPrice > salePrice) {
+            discount = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+          }
         } else {
           salePrice = product.salePrice || product.price || 0;
-          regularPrice = product.price || 0;
+          regularPrice = product.regularPrice || product.price || 0;
+          if (regularPrice > salePrice) {
+            discount = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+          }
         }
-        const discount = regularPrice > salePrice ? Math.round(((regularPrice - salePrice) / regularPrice) * 100) : 0;
 
         article.innerHTML = `
           <div class="product-image-wrapper">
@@ -923,8 +969,8 @@
               <button class="action-btn wishlist-btn" onclick="toggleWishlist('${product._id}')" title="Add to Wishlist">
                 <i class="fa fa-heart"></i>
               </button>
-              
             </div>
+           
           </div>
           <div class="product-info">
             <div class="product-name">${product.productName || 'Unnamed'}</div>
@@ -1185,4 +1231,3 @@ if (searchInput) {
 renderProducts(initialProducts);
   </script>
 </body>
-

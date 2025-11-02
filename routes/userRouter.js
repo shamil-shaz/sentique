@@ -16,7 +16,7 @@ const walletController=require('../controllers/user/walletController')
 const invoiceController=require('../controllers/user/invoiceController.js')
 const paymentController=require('../controllers/user/paymentController.js')
 const couponController=require('../controllers/user/couponController.js')
-
+const referralController=require('../controllers/user/referralController')
 
 
 const multer = require("multer");
@@ -68,12 +68,23 @@ router.get("/auth/google/callback", checkBlockedUser, (req, res, next) => {
     }
 
     try {
+      
+      
+      if (!user.refferalCode) {
+        const referralCode = await userController.generateUniqueReferralCode(user.name);
+        user.refferalCode = referralCode;
+        await user.save();
+        console.log(`Generated referral code for Google user: ${referralCode}`);
+      }
+
       req.session.user = {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: "user",
       };
+
+        console.log("Google user logged in with referral code:", user.refferalCode);
       return res.redirect("/home");
     } catch (err) {
       console.error("Session creation error:", err);
@@ -180,11 +191,23 @@ router.get('/orders/:orderId/invoice', userAuth,invoiceController.generateInvoic
 ////-------wallet----
 
 
-router.get('/profile/wallet', userAuth, walletController.getWalletPage);
-router.get('/api/wallet/data', userAuth,walletController. getWalletData);
-router.get('/api/wallet/transactions', userAuth,walletController. getPaginatedTransactions);
-router.post('/api/wallet/test-transaction', userAuth, walletController.addTestTransaction);
+// router.get('/profile/wallet', userAuth, walletController.getWalletPage);
+// router.get('/api/wallet/data', userAuth,walletController. getWalletData);
+// router.get('/api/wallet/transactions', userAuth,walletController. getPaginatedTransactions);
+// router.post('/api/wallet/test-transaction', userAuth, walletController.addTestTransaction);
 
+
+// Wallet page and data
+router.get('/profile/wallet', userAuth, walletController.getWalletPage);
+router.get('/api/wallet/data', userAuth, walletController.getWalletData);
+router.get('/api/wallet/transactions', userAuth, walletController.getPaginatedTransactions);
+
+// Add Money endpoints
+router.post('/api/wallet/create-add-money-order', userAuth, walletController.createAddMoneyOrder);
+router.post('/api/wallet/verify-add-money-payment', userAuth, walletController.verifyAddMoneyPayment);
+router.post('/api/wallet/record-failed-payment', userAuth, walletController.recordFailedPayment);
+// Test transaction endpoint (for testing only)
+router.post('/api/wallet/test-transaction', userAuth, walletController.addTestTransaction);
 
 ///------------------payment-----------------
 
@@ -193,23 +216,28 @@ router.get('/payment/check-auth', paymentController.checkAuth);
 router.post('/payment/create-razorpay-order', apiAuth, paymentController.createRazorpayOrder);
 router.post('/payment/verify-razorpay-payment', apiAuth, paymentController.verifyRazorpayPayment);
 //router.post('/payment/place-order', apiAuth, paymentController.placeOrder);
-
+router.get('/orderFailure',userAuth,paymentController.getOrderFailure)
 
 ///----------coupns------------
 
-// ==================== API ROUTES (JSON) ====================
-router.get('/api/coupons', couponController.getAvailableCouponsJSON);
 
-// ==================== VIEW ROUTES (HTML) ====================
-router.get('/coupons', couponController.getAvailableCouponsHTML);
+router.get('/api/coupons',userAuth, couponController.getAvailableCouponsJSON);
 
-// ==================== PROTECTED ROUTES ====================
-router.get('/api/coupons/:couponId', couponController.getCouponDetails);
+router.get('/coupons', userAuth,couponController.getAvailableCouponsHTML);
+
+router.get('/api/coupons/:couponId',userAuth, couponController.getCouponDetails);
 router.get('/api/coupons/search', userAuth, couponController.searchCoupons);
 router.get('/api/coupons/validate/:code', userAuth, couponController.validateCouponCode);
-router.post('/api/coupons/apply', userAuth, couponController.applyCouponAtCheckout);
+// router.post('/api/coupons/apply', userAuth, couponController.applyCouponAtCheckout);
+
+router.post('/coupon/apply', userAuth, couponController.applyCouponAtCheckout);
 router.post('/api/coupons/record-usage', userAuth, couponController.recordCouponUsage);
 
-module.exports = router;
 
+
+router.get("/profile/referral/stats", userAuth, referralController.getReferralStats);
+router.get("/profile/referral/details", userAuth, referralController.getReferralDetails);
+router.get("/profile/referral/referred-users", userAuth, referralController.getReferredUsers);
+router.post("/profile/referral/apply", userAuth, referralController.applyReferralCode);
+router.get("/profile/referral/leaderboard", referralController.getReferralLeaderboard);
 module.exports = router;

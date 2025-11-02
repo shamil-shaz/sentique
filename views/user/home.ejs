@@ -634,6 +634,29 @@ input[type="radio"]:checked + .zodiac-slide {
   }
 }
 
+/* Offer Badge */
+.offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+  transform: rotate(-5deg);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: rotate(-5deg) scale(1); }
+  50% { transform: rotate(-5deg) scale(1.05); }
+  100% { transform: rotate(-5deg) scale(1); }
+}
+
 @media (max-width:768px) {
   .slider-container { padding: 0 40px; }
   .brand, .category { min-width: 140px; }
@@ -706,6 +729,27 @@ input[type="radio"]:checked + .zodiac-slide {
   <div class="product-grid">
     <% if (products && products.length > 0) { %>
       <% products.forEach(product => { %>
+        <%
+          let salePrice = 0, regularPrice = 0, discount = 0;
+          if (product.variants && product.variants.length > 0) {
+            const cheapestVariant = product.variants.reduce((minVar, currVar) => {
+              const minP = minVar.salePrice || minVar.regularPrice || Infinity;
+              const currP = currVar.salePrice || currVar.regularPrice || Infinity;
+              return currP < minP ? currVar : minVar;
+            }, { salePrice: Infinity, regularPrice: Infinity });
+            salePrice = cheapestVariant.salePrice || cheapestVariant.regularPrice || 0;
+            regularPrice = cheapestVariant.regularPrice || salePrice;
+            if (regularPrice > salePrice) {
+              discount = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+            }
+          } else {
+            salePrice = product.salePrice || 0;
+            regularPrice = product.regularPrice || 0;
+            if (regularPrice > salePrice) {
+              discount = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+            }
+          }
+        %>
         <div class="product">
           <div class="product-image-container">
             <a href="/shopPage?id=<%= product._id %>">
@@ -716,12 +760,15 @@ input[type="radio"]:checked + .zodiac-slide {
                 <i class="fas fa-heart"></i>
               </button>
             </div>
+            <% if (discount > 0) { %>
+              <div class="offer-badge"><%= discount %>% OFF</div>
+            <% } %>
           </div>
           <div class="product-details">
             <p><strong><%= product.productName %></strong></p>
             <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "No Brand" %></div>
             <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
-            <p><span class="sale-price">₹<%= product.salePrice %></span><span class="regular-price">₹<%= product.regularPrice %></span></p>
+            <p><span class="sale-price">₹<%= salePrice %></span><% if (discount > 0) { %><span class="regular-price">₹<%= regularPrice %></span><% } %></p>
           </div>
         </div>
       <% }) %>
@@ -781,6 +828,27 @@ input[type="radio"]:checked + .zodiac-slide {
   <div class="product-grid">
     <% if (newArrivals && newArrivals.length > 0) { %>
       <% newArrivals.forEach(product => { %>
+        <%
+          let salePriceNew = 0, regularPriceNew = 0, discountNew = 0;
+          if (product.variants && product.variants.length > 0) {
+            const cheapestVariant = product.variants.reduce((minVar, currVar) => {
+              const minP = minVar.salePrice || minVar.regularPrice || Infinity;
+              const currP = currVar.salePrice || currVar.regularPrice || Infinity;
+              return currP < minP ? currVar : minVar;
+            }, { salePrice: Infinity, regularPrice: Infinity });
+            salePriceNew = cheapestVariant.salePrice || cheapestVariant.regularPrice || 0;
+            regularPriceNew = cheapestVariant.regularPrice || salePriceNew;
+            if (regularPriceNew > salePriceNew) {
+              discountNew = Math.round(((regularPriceNew - salePriceNew) / regularPriceNew) * 100);
+            }
+          } else {
+            salePriceNew = product.salePrice || 0;
+            regularPriceNew = product.regularPrice || 0;
+            if (regularPriceNew > salePriceNew) {
+              discountNew = Math.round(((regularPriceNew - salePriceNew) / regularPriceNew) * 100);
+            }
+          }
+        %>
         <div class="product">
           <div class="product-image-container">
             <a href="/shopPage?id=<%= product._id %>">
@@ -791,12 +859,15 @@ input[type="radio"]:checked + .zodiac-slide {
                 <i class="fas fa-heart"></i>
               </button>
             </div>
+            <% if (discountNew > 0) { %>
+              <div class="offer-badge"><%= discountNew %>% OFF</div>
+            <% } %>
           </div>
           <div class="product-details">
             <p><strong><%= product.productName %></strong></p>
             <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "No Brand" %></div>
             <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
-            <p><span class="sale-price">₹<%= product.salePrice %></span><span class="regular-price">₹<%= product.regularPrice %></span></p>
+            <p><span class="sale-price">₹<%= salePriceNew %></span><% if (discountNew > 0) { %><span class="regular-price">₹<%= regularPriceNew %></span><% } %></p>
           </div>
         </div>
       <% }) %>
@@ -812,6 +883,27 @@ input[type="radio"]:checked + .zodiac-slide {
   <div class="product-grid">
     <% if (bestSelling && bestSelling.length > 0) { %>
       <% bestSelling.forEach(product => { %>
+        <%
+          let salePriceBest = 0, regularPriceBest = 0, discountBest = 0;
+          if (product.variants && product.variants.length > 0) {
+            const cheapestVariant = product.variants.reduce((minVar, currVar) => {
+              const minP = minVar.salePrice || minVar.regularPrice || Infinity;
+              const currP = currVar.salePrice || currVar.regularPrice || Infinity;
+              return currP < minP ? currVar : minVar;
+            }, { salePrice: Infinity, regularPrice: Infinity });
+            salePriceBest = cheapestVariant.salePrice || cheapestVariant.regularPrice || 0;
+            regularPriceBest = cheapestVariant.regularPrice || salePriceBest;
+            if (regularPriceBest > salePriceBest) {
+              discountBest = Math.round(((regularPriceBest - salePriceBest) / regularPriceBest) * 100);
+            }
+          } else {
+            salePriceBest = product.salePrice || 0;
+            regularPriceBest = product.regularPrice || 0;
+            if (regularPriceBest > salePriceBest) {
+              discountBest = Math.round(((regularPriceBest - salePriceBest) / regularPriceBest) * 100);
+            }
+          }
+        %>
         <div class="product">
           <div class="product-image-container">
             <a href="/shopPage?id=<%= product._id %>">
@@ -822,12 +914,15 @@ input[type="radio"]:checked + .zodiac-slide {
                 <i class="fas fa-heart"></i>
               </button>
             </div>
+            <% if (discountBest > 0) { %>
+              <div class="offer-badge"><%= discountBest %>% OFF</div>
+            <% } %>
           </div>
           <div class="product-details">
             <p><strong><%= product.productName %></strong></p>
             <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "No Brand" %></div>
             <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
-            <p><span class="sale-price">₹<%= product.salePrice %></span><span class="regular-price">₹<%= product.regularPrice %></span></p>
+            <p><span class="sale-price">₹<%= salePriceBest %></span><% if (discountBest > 0) { %><span class="regular-price">₹<%= regularPriceBest %></span><% } %></p>
           </div>
         </div>
       <% }) %>

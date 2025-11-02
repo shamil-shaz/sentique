@@ -1,7 +1,3 @@
-
-
-
-
 const mongoose = require("mongoose")
 const { Schema } = mongoose
 
@@ -78,7 +74,7 @@ const couponSchema = new Schema(
     discountPrice: {
       type: Number,
       required: true,
-      min: 0,
+      min: [0.01, "Discount must be greater than 0"],  // ✅ FIX: Prevent 0 discounts
     },
     minimumPrice: {
       type: Number,
@@ -96,7 +92,7 @@ const couponSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["active", "inactive", "upcoming"],
+      enum: ["active", "inactive", "upcoming", "expired"],  // ✅ FIX: Add "expired" for consistency
       default: "active",
     },
   },
@@ -136,4 +132,3 @@ couponSchema.index({ isListed: 1, activeDate: 1 })
 const Coupon = mongoose.model("Coupon", couponSchema)
 
 module.exports = Coupon
-
