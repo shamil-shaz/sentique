@@ -235,16 +235,13 @@ async function generateUniqueReferralCode(userName) {
       throw new Error('Could not generate unique referral code');
     }
 
-    console.log("✅ Generated unique referral code:", referralCode);
+    console.log(" Generated unique referral code:", referralCode);
     return referralCode;
   } catch (err) {
-    console.error('❌ Error generating referral code:', err);
+    console.error(' Error generating referral code:', err);
     throw err;
   }
 }
-
-
-
 
 
 const loadVerifyOtpPage = async (req, res) => {
@@ -257,91 +254,6 @@ const loadVerifyOtpPage = async (req, res) => {
         return res.status(500).send("Server Error");
     }
 };
-
-// const verifyOtp = async (req, res) => {
-//     try {
-//         const { otp } = req.body;
-
-//         // Check if session data exists
-//         if (!req.session.userOtp || !req.session.userData) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Session expired. Please sign up again.",
-//             });
-//         }
-
-//         // CHECK IF OTP HAS EXPIRED
-//         const currentTime = Date.now();
-//         const otpExpirationTime = req.session.otpExpirationTime;
-
-//         if (!otpExpirationTime || currentTime > otpExpirationTime) {
-//             // OTP has expired
-//             req.session.userOtp = null;
-//             req.session.userData = null;
-//             req.session.otpExpirationTime = null;
-
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "OTP has expired. Please request a new OTP.",
-//             });
-//         }
-
-//         // Check if OTP matches
-//         if (otp.toString() === req.session.userOtp.toString()) {
-//             const user = req.session.userData;
-
-//             if (!user.password) {
-//                 return res.status(400).json({
-//                     success: false,
-//                     message: "Password missing. Please sign up again.",
-//                 });
-//             }
-
-//             const hashedPassword = await securePassword(user.password);
-//             const newUser = new User({
-//                 name: user.fullName,
-//                 email: user.email,
-//                 phone: user.phone,
-//                 password: hashedPassword,
-//             });
-
-//             await newUser.save();
-
-//             req.session.user = {
-//                 _id: newUser._id,
-//                 id: newUser._id,
-//                 name: newUser.name,
-//                 email: newUser.email,
-//                 phone: newUser.phone
-//             };
-
-//             // Clear OTP data
-//             req.session.userOtp = null;
-//             req.session.userData = null;
-//             req.session.otpExpirationTime = null;
-
-//             console.log("OTP verified successfully - sending redirect to /home");
-
-//             return res.status(200).json({
-//                 success: true,
-//                 redirectUrl: "/home",
-//             });
-
-//         } else {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Invalid OTP. Please try again.",
-//             });
-//         }
-
-//     } catch (error) {
-//         console.error("Error verifying OTP:", error);
-//         return res.status(500).json({
-//             success: false,
-//             message: "An error occurred while verifying OTP.",
-//         });
-//     }
-// };
 
 
 const verifyOtp = async (req, res) => {
@@ -381,7 +293,7 @@ const verifyOtp = async (req, res) => {
 
             const hashedPassword = await securePassword(user.password);
             
-            // ✅ GENERATE REFERRAL CODE
+         
             const referralCode = await generateUniqueReferralCode(user.fullName);
             
             const newUser = new User({
@@ -394,26 +306,26 @@ const verifyOtp = async (req, res) => {
                 redeemedUsers: []
             });
 
-            // ✅ HANDLE REFERRAL CODE FROM SIGNUP AND CREDIT REFERRER
+           
             if (user.referral) {
                 try {
-                    console.log('🎁 Processing referral:', user.referral);
+                    console.log(' Processing referral:', user.referral);
                     
                     const referrerUser = await User.findOne({ 
                         refferalCode: user.referral 
                     });
                     
                     if (referrerUser) {
-                        console.log('✅ Referrer found:', referrerUser.name);
+                        console.log(' Referrer found:', referrerUser.name);
                         
                         newUser.redeemed = true;
                         referrerUser.redeemedUsers.push(newUser._id);
                         await referrerUser.save();
                         
-                        // ✅ CREDIT REFERRER ₹100 IMMEDIATELY ON SIGNUP
+                       
                         let referrerWallet = await Wallet.findOne({ user: referrerUser._id });
                         if (!referrerWallet) {
-                            console.log('📝 Creating new wallet for referrer:', referrerUser._id);
+                            console.log(' Creating new wallet for referrer:', referrerUser._id);
                             referrerWallet = new Wallet({ user: referrerUser._id });
                         }
                         
@@ -427,20 +339,20 @@ const verifyOtp = async (req, res) => {
                         });
                         
                         await referrerWallet.save();
-                        console.log("✅ Referrer wallet credited with ₹100 on signup");
-                        console.log('💰 Referrer new balance:', referrerWallet.balance);
+                        console.log(" Referrer wallet credited with ₹100 on signup");
+                        console.log(' Referrer new balance:', referrerWallet.balance);
                     } else {
-                        console.log('⚠️ Referrer not found for code:', user.referral);
+                        console.log('⚠ Referrer not found for code:', user.referral);
                     }
                 } catch (referralErr) {
-                    console.error("❌ Error processing referral:", referralErr.message);
-                    // Don't fail signup if referral processing fails
+                    console.error(" Error processing referral:", referralErr.message);
+                    
                 }
             }
 
             await newUser.save();
             
-            // ✅ CREATE WALLET FOR NEW USER
+         
             try {
                 let newUserWallet = await Wallet.findOne({ user: newUser._id });
                 if (!newUserWallet) {
@@ -451,10 +363,10 @@ const verifyOtp = async (req, res) => {
                         transactions: []
                     });
                     await newUserWallet.save();
-                    console.log('✅ Wallet created for new user');
+                    console.log(' Wallet created for new user');
                 }
             } catch (walletErr) {
-                console.error('⚠️ Error creating wallet for new user:', walletErr.message);
+                console.error(' Error creating wallet for new user:', walletErr.message);
             }
 
             req.session.user = {
@@ -469,7 +381,7 @@ const verifyOtp = async (req, res) => {
             req.session.userData = null;
             req.session.otpExpirationTime = null;
 
-            console.log("✅ OTP verified successfully - User created with referral code:", referralCode);
+            console.log(" OTP verified successfully - User created with referral code:", referralCode);
 
             return res.status(200).json({
                 success: true,
@@ -484,7 +396,7 @@ const verifyOtp = async (req, res) => {
         }
 
     } catch (error) {
-        console.error("❌ Error verifying OTP:", error);
+        console.error(" Error verifying OTP:", error);
         return res.status(500).json({
             success: false,
             message: "An error occurred while verifying OTP.",
@@ -564,7 +476,7 @@ const resendOtp = async (req, res) => {
         
        
         req.session.userOtp = otp;
-        req.session.otpExpirationTime = Date.now() + 600000; // 10 minutes
+        req.session.otpExpirationTime = Date.now() + 600000; 
 
         const emailSent = await sendVerificationEmail(userData.email, otp);
 
@@ -666,134 +578,6 @@ const logout = async (req, res) => {
 };
 
 
-// const loadShopingPage = async (req, res) => {
-//   try {
-//     const categories = await Category.find({ isListed: true }).lean();
-//     const listedCategoryIds = categories.map(cat => cat._id.toString());
-
-//     const brands = await Brand.find({ isBlocked: false }).lean();
-//     const unblockedBrandIds = brands.map(b => b._id.toString());
-
-//     const selectedCategories = Array.isArray(req.query.categorys)
-//       ? req.query.categorys.filter(catId => listedCategoryIds.includes(catId))
-//       : req.query.categorys && listedCategoryIds.includes(req.query.categorys)
-//       ? [req.query.categorys]
-//       : [];
-
-//     const selectedBrands = Array.isArray(req.query.brands)
-//       ? req.query.brands.filter(id => unblockedBrandIds.includes(id))
-//       : req.query.brands && unblockedBrandIds.includes(req.query.brands)
-//       ? [req.query.brands]
-//       : [];
-
-//     const sort = req.query.sort || "newest";
-//     const priceRange = req.query.priceRange || "";
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = 9;
-//     const skip = (page - 1) * limit;
-
-//     const filterQuery = {
-//       isBlocked: false,
-//       "variants.stock": { $gt: 0 }
-//     };
-
-//     const search = req.query.search ? req.query.search.trim() : "";
-//     if (search) filterQuery.productName = { $regex: search, $options: "i" };
-
-//     filterQuery.category = {
-//       $in:
-//         selectedCategories.length > 0
-//           ? selectedCategories.map(id => new mongoose.Types.ObjectId(id))
-//           : listedCategoryIds.map(id => new mongoose.Types.ObjectId(id))
-//     };
-
-//     if (selectedBrands.length > 0) {
-//       filterQuery.brand = {
-//         $in: selectedBrands.map(id => new mongoose.Types.ObjectId(id))
-//       };
-//     } else {
-//       filterQuery.brand = {
-//         $in: unblockedBrandIds.map(id => new mongoose.Types.ObjectId(id))
-//       };
-//     }
-
-//     if (priceRange) {
-//       switch (priceRange) {
-//         case "below1000":
-//           filterQuery["variants.salePrice"] = { $lt: 1000 };
-//           break;
-//         case "1000-2000":
-//           filterQuery["variants.salePrice"] = { $gte: 1000, $lte: 2000 };
-//           break;
-//         case "2000-3000":
-//           filterQuery["variants.salePrice"] = { $gte: 2000, $lte: 3000 };
-//           break;
-//         case "above5000":
-//           filterQuery["variants.salePrice"] = { $gt: 5000 };
-//           break;
-//       }
-//     }
-
-  
-//     let sortOption = {};
-//     if (sort === "priceLow") {
-//       sortOption = { "variants.salePrice": 1 };
-//     } else if (sort === "priceHigh") {
-//       sortOption = { "variants.salePrice": -1 };
-//     } else if (sort === "nameAZ") {
-//       sortOption = { productName: 1 }; 
-//     } else if (sort === "nameZA") {
-//       sortOption = { productName: -1 };
-//     } else {
-//       sortOption = { createdAt: -1 }; 
-//     }
-
-    
-//     let products = await Product.find(filterQuery)
-//       .populate("brand")
-//       .populate("category")
-//       .sort(sortOption)
-//       .skip(skip)
-//       .limit(limit)
-//       .lean();
-
-//     products = products.filter(
-//       p => p.category && p.category.isListed && p.brand && !p.brand.isBlocked
-//     );
-
-//     products.forEach(p => {
-//       if (p.variants && p.variants.length > 0) {
-//         p.salePrice = Math.min(...p.variants.map(v => v.salePrice || v.regularPrice));
-//         p.regularPrice = Math.max(...p.variants.map(v => v.regularPrice || v.salePrice));
-//       } else {
-//         p.salePrice = p.salePrice || 0;
-//         p.regularPrice = p.regularPrice || 0;
-//       }
-//     });
-
-//     const totalProducts = await Product.countDocuments(filterQuery);
-//     const totalPages = Math.ceil(totalProducts / limit);
-
-//     res.render("shopPage", {
-//       products,
-//       categories,
-//       brands,
-//       totalProducts,
-//       currentPage: page,
-//       totalPages,
-//       selectedCategories,
-//       selectedBrands,
-//       sort,
-//       search,
-//       priceRange,
-//     });
-//   } catch (error) {
-//     console.error("Error in loadShopingPage:", error);
-//     res.redirect("/pageNotFound");
-//   }
-// };
-
-
 const loadShopingPage = async (req, res) => {
   try {
     const categories = await Category.find({ isListed: true }).lean();
@@ -862,7 +646,7 @@ const loadShopingPage = async (req, res) => {
       }
     }
 
-    // Use aggregation for proper sorting by min salePrice
+  
     let productsAggregation = [
       { $match: filterQuery },
       {
@@ -900,8 +684,7 @@ const loadShopingPage = async (req, res) => {
       },
       { $unwind: "$category" }
     ];
-
-    // Set sort based on sort parameter
+    
     let sortStage = {};
     if (sort === "priceLow") {
       sortStage.minSalePrice = 1;
@@ -918,16 +701,15 @@ const loadShopingPage = async (req, res) => {
 
     let products = await Product.aggregate(productsAggregation).exec();
 
-    // Convert to lean-like and filter
+   
     products = products.map(p => ({ ...p, _id: p._id.toString() }));
     products = products.filter(
       p => p.category && p.category.isListed && p.brand && !p.brand.isBlocked
     );
 
-    // Set consistent salePrice and regularPrice from the cheapest variant
+   
     products.forEach(p => {
       if (p.variants && p.variants.length > 0) {
-        // Find the variant with the minimum salePrice (or regularPrice if salePrice is not set)
         const cheapestVariant = p.variants.reduce((minVariant, currentVariant) => {
           const minPrice = minVariant.salePrice || minVariant.regularPrice || Infinity;
           const currentPrice = currentVariant.salePrice || currentVariant.regularPrice || Infinity;
@@ -942,7 +724,7 @@ const loadShopingPage = async (req, res) => {
       }
     });
 
-    // For total count, use the original filterQuery since price range is on any variant
+   
     const totalProducts = await Product.countDocuments(filterQuery);
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -1034,7 +816,6 @@ module.exports = {
     sendOtp,
     ensureUserHasReferralCode,
     generateUniqueReferralCode
-    
    
 };
 

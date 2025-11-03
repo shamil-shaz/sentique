@@ -5,9 +5,7 @@ const bcrypt = require('bcrypt');
 
 const pageerror=async(req,res)=>{
   res.render('pageerror')
- 
 }
-
 
 const loadLogin = (req, res) => {
   if (req.session.admin) {
@@ -15,7 +13,6 @@ const loadLogin = (req, res) => {
   }
   res.render('admin-login', { message: null });
 };
-
 const verifyLogin = async (req, res) => {
   const { email, password } = req.body;
 

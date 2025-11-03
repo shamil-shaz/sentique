@@ -3,7 +3,6 @@ const Order = require('../../models/orderSchema');
 const Wallet = require('../../models/walletSchema');
 const mongoose = require('mongoose');
 
-// Helper to extract user ID safely
 function getUserId(req) {
   let userId = null;
   
@@ -47,7 +46,7 @@ const getReferralStats = async (req, res) => {
       });
     }
 
-    console.log('📊 Fetching referral stats for user:', userId);
+    console.log(' Fetching referral stats for user:', userId);
 
     const user = await User.findById(userId)
       .select('refferalCode redeemed redeemedUsers')
@@ -83,9 +82,9 @@ const getReferralStats = async (req, res) => {
           if (order) {
             completedReferrals++;
             totalEarnings += 100;
-            console.log(`✅ Completed referral found for user ${referredUserId}`);
+            console.log(` Completed referral found for user ${referredUserId}`);
           } else {
-            console.log(`⏳ No qualifying order yet for user ${referredUserId}`);
+            console.log(` No qualifying order yet for user ${referredUserId}`);
           }
         } catch (err) {
           console.error(`Error checking order for ${referredUserId}:`, err.message);
@@ -126,7 +125,7 @@ const getReferralDetails = async (req, res) => {
       });
     }
 
-    console.log('📋 Fetching referral details for user:', userId);
+    console.log(' Fetching referral details for user:', userId);
 
     const user = await User.findById(userId)
       .select('refferalCode redeemed redeemedUsers')
@@ -174,7 +173,7 @@ const getReferralDetails = async (req, res) => {
               orderDate: order.createdOn,
               joinDate: referredUser.createdOn
             });
-            console.log(`✅ ${referredUser.name} - Completed`);
+            console.log(` ${referredUser.name} - Completed`);
           } else {
             pendingReferrals++;
             referralDetails.push({
@@ -187,7 +186,7 @@ const getReferralDetails = async (req, res) => {
               message: 'Waiting for first order ≥ ₹1000',
               joinDate: referredUser.createdOn
             });
-            console.log(`⏳ ${referredUser.name} - Pending`);
+            console.log(` ${referredUser.name} - Pending`);
           }
         } catch (err) {
           console.error(`Error checking referral ${referredUser.name}:`, err.message);

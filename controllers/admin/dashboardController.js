@@ -9,12 +9,12 @@ const Wallet = require('../../models/walletSchema');
 const loadDashboard = async (req, res) => {
   if (req.session.admin) {
     try {
-      // Get date filter from query
+     
       const dateFilter = req.query.filter || 'monthly';
       const customStartDate = req.query.startDate ? new Date(req.query.startDate) : null;
       const customEndDate = req.query.endDate ? new Date(req.query.endDate) : null;
 
-      // ✅ VALIDATION FOR FUTURE DATES
+    
       const today = new Date();
       today.setHours(23, 59, 59, 999);
       
@@ -27,8 +27,7 @@ const loadDashboard = async (req, res) => {
           error = 'Invalid date range. Start date cannot be after end date.';
         }
       }
-
-      // ✅ If there's an error, render with error message
+   
       if (error) {
         return res.render('dashboard', {
           error,
@@ -57,7 +56,6 @@ const loadDashboard = async (req, res) => {
         });
       }
 
-      // Calculate date range based on filter
       let startDate, endDate;
 
       switch(dateFilter) {
@@ -73,20 +71,20 @@ const loadDashboard = async (req, res) => {
           startDate = customStartDate || new Date(today.getFullYear(), today.getMonth(), 1);
           endDate = customEndDate || new Date(today.getFullYear(), today.getMonth() + 1, 0);
           break;
-        default: // monthly
+        default: 
           startDate = new Date(today.getFullYear(), today.getMonth(), 1);
           endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
       }
 
-      // ✅ TOTAL USERS
+ 
       const totalUsers = await User.countDocuments();
 
-      // ✅ TOTAL ORDERS (within date range)
+     
       const totalOrders = await Order.countDocuments({
         createdOn: { $gte: startDate, $lte: endDate }
       });
 
-      // ✅ TOTAL SALES
+      
       const salesAggregation = await Order.aggregate([
         {
           $match: {
@@ -102,36 +100,35 @@ const loadDashboard = async (req, res) => {
       ]);
       const totalSales = salesAggregation[0]?.totalSales || 0;
 
-      // ✅ PENDING ORDERS
       const pendingOrders = await Order.countDocuments({
         status: { $in: ['Placed', 'Confirmed', 'Processing', 'Shipped'] },
         createdOn: { $gte: startDate, $lte: endDate }
       });
 
-      // ✅ DELIVERED ORDERS
+    
       const deliveredOrders = await Order.countDocuments({
         status: 'Delivered',
         createdOn: { $gte: startDate, $lte: endDate }
       });
 
-      // ✅ CANCELLED ORDERS
+     
       const cancelledOrders = await Order.countDocuments({
         status: 'Cancelled',
         createdOn: { $gte: startDate, $lte: endDate }
       });
 
-      // ✅ RETURN REQUESTS
+     
       const returnRequests = await Order.countDocuments({
         status: 'Return Request',
         createdOn: { $gte: startDate, $lte: endDate }
       });
 
-      // ✅ SALES CHART DATA - Different formats based on filter
+      
       let monthSalesData = [];
       let chartDateFormat = '';
       
       if (dateFilter === 'daily') {
-        // Hourly data for daily view
+       
         chartDateFormat = '%H:00';
         monthSalesData = await Order.aggregate([
           {
@@ -149,7 +146,7 @@ const loadDashboard = async (req, res) => {
           { $sort: { _id: 1 } }
         ]);
       } else if (dateFilter === 'yearly') {
-        // Monthly data for yearly view
+        
         chartDateFormat = '%Y-%m';
         monthSalesData = await Order.aggregate([
           {
@@ -167,7 +164,7 @@ const loadDashboard = async (req, res) => {
           { $sort: { _id: 1 } }
         ]);
       } else {
-        // Daily data for monthly/weekly/custom views
+
         chartDateFormat = '%Y-%m-%d';
         monthSalesData = await Order.aggregate([
           {
@@ -189,7 +186,7 @@ const loadDashboard = async (req, res) => {
       const chartLabels = monthSalesData.map(d => d._id);
       const chartData = monthSalesData.map(d => d.sales);
 
-      // ✅ PREVIOUS PERIOD COMPARISON
+
       const periodLength = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
       const previousStartDate = new Date(startDate.getTime() - periodLength * 24 * 60 * 60 * 1000);
       const previousEndDate = new Date(startDate.getTime());
@@ -212,7 +209,7 @@ const loadDashboard = async (req, res) => {
         ? (((totalSales - previousSalesTotal) / previousSalesTotal) * 100).toFixed(1)
         : 0;
 
-      // ✅ ORDERS GROWTH
+    
       const previousPeriodOrders = await Order.countDocuments({
         createdOn: { $gte: previousStartDate, $lte: previousEndDate }
       });
@@ -220,7 +217,7 @@ const loadDashboard = async (req, res) => {
         ? (((totalOrders - previousPeriodOrders) / previousPeriodOrders) * 100).toFixed(1)
         : 0;
 
-      // ✅ RECENT ORDERS (CUSTOMER NAMES ONLY)
+    
       const recentOrders = await Order.find({
         createdOn: { $gte: startDate, $lte: endDate }
       })
@@ -242,7 +239,7 @@ const loadDashboard = async (req, res) => {
         itemsCount: order.orderItems?.length || 0
       }));
 
-      // ✅ TOP PRODUCTS
+    
       const topProducts = await Order.aggregate([
         {
           $match: {
@@ -261,8 +258,7 @@ const loadDashboard = async (req, res) => {
         { $sort: { totalSold: -1 } },
         { $limit: 5 }
       ]);
-
-      // ✅ TOP BRANDS (with proper names - using 'brandName' field from brand schema)
+    
       const topBrandsByOrders = await Order.aggregate([
         {
           $match: {
@@ -305,7 +301,6 @@ const loadDashboard = async (req, res) => {
         revenue: `₹${(item.totalRevenue || 0).toFixed(2)}`
       }));
 
-      // ✅ TOP CATEGORIES (with proper names - using 'name' field from category schema)
       const topCategoriesByOrders = await Order.aggregate([
         {
           $match: {
@@ -348,7 +343,7 @@ const loadDashboard = async (req, res) => {
         revenue: `₹${(item.totalRevenue || 0).toFixed(2)}`
       }));
 
-      // ✅ PAYMENT METHODS
+     
       const paymentMethods = await Order.aggregate([
         {
           $match: {
@@ -365,7 +360,7 @@ const loadDashboard = async (req, res) => {
         { $sort: { count: -1 } }
       ]);
 
-      // ✅ CONVERSION RATE & AOV
+      
       const conversionRate = totalUsers > 0
         ? ((totalOrders / totalUsers) * 100).toFixed(2)
         : 0;
@@ -374,7 +369,7 @@ const loadDashboard = async (req, res) => {
         ? (totalSales / totalOrders).toFixed(2)
         : 0;
 
-      console.log('✅ Dashboard data prepared:', {
+      console.log(' Dashboard data prepared:', {
         dateFilter,
         startDate,
         endDate,
@@ -388,7 +383,6 @@ const loadDashboard = async (req, res) => {
 
       res.render('dashboard', {
         error: null,
-        // KPI Metrics
         totalUsers,
         totalOrders,
         totalSales: totalSales.toFixed(2),
@@ -396,26 +390,16 @@ const loadDashboard = async (req, res) => {
         deliveredOrders,
         cancelledOrders,
         returnRequests,
-        
-        // Growth Metrics
         ordersGrowth,
         salesGrowth,
-        
-        // Chart Data
         chartLabels,
         chartData,
         currentMonth: startDate.toLocaleString('default', { month: 'long', year: 'numeric' }),
-        
-        // Additional Metrics
         conversionRate,
         averageOrderValue,
-        
-        // Date Filter
         dateFilter,
         startDateFormatted: startDate.toISOString().split('T')[0],
         endDateFormatted: endDate.toISOString().split('T')[0],
-        
-        // Tables Data
         recentOrders: formattedRecentOrders,
         topProducts: topProducts.map(p => ({
           name: p.productName,

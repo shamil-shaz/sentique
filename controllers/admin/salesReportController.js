@@ -1,23 +1,18 @@
-// ========== FILE: controllers/admin/salesReportController.js ==========
+
 const mongoose = require('mongoose');
 const Order = require('../../models/orderSchema');
 const User = require('../../models/userSchema');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 
-/**
- * Normalize date to midnight (00:00:00)
- */
+
 const normalizeDate = (date) => {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
     return d;
 };
 
-/**
- * Get date range based on filter type
- * For custom range, makes the end date inclusive (adds 1 day)
- */
+
 const getDateRange = (filterType, customStartDate = null, customEndDate = null) => {
     const now = new Date();
     const today = normalizeDate(now);
@@ -31,7 +26,6 @@ const getDateRange = (filterType, customStartDate = null, customEndDate = null) 
             break;
 
         case 'weekly':
-            // Current week (Monday to Sunday)
             const dayOfWeek = today.getDay();
             const diffToMonday = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
             startDate = new Date(today.getFullYear(), today.getMonth(), diffToMonday);
@@ -42,7 +36,6 @@ const getDateRange = (filterType, customStartDate = null, customEndDate = null) 
             break;
 
         case 'monthly':
-            // Current month only
             startDate = new Date(now.getFullYear(), now.getMonth(), 1);
             startDate = normalizeDate(startDate);
             endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -51,7 +44,6 @@ const getDateRange = (filterType, customStartDate = null, customEndDate = null) 
             break;
 
         case 'yearly':
-            // Current year only
             startDate = new Date(now.getFullYear(), 0, 1);
             startDate = normalizeDate(startDate);
             endDate = new Date(now.getFullYear() + 1, 0, 1);
@@ -65,7 +57,6 @@ const getDateRange = (filterType, customStartDate = null, customEndDate = null) 
             startDate = normalizeDate(new Date(customStartDate));
             const endDateNormalized = normalizeDate(new Date(customEndDate));
             
-            // Make end date inclusive by adding 1 day
             endDate = new Date(endDateNormalized.getTime() + 24 * 60 * 60 * 1000);
             
             displayLabel = `Custom Range: ${startDate.toLocaleDateString('en-IN')} – ${endDateNormalized.toLocaleDateString('en-IN')}`;
@@ -80,23 +71,18 @@ const getDateRange = (filterType, customStartDate = null, customEndDate = null) 
     return { startDate, endDate, displayLabel };
 };
 
-/**
- * Validate date range
- * Ensures no future dates and start date <= end date
- */
+
 const validateDateRange = (startDate, endDate = null) => {
     const today = normalizeDate(new Date());
     const start = normalizeDate(new Date(startDate));
-
-    // Check if start date is in future
+   
     if (start > today) {
         return {
             valid: false,
-            error: '⚠️ Start date cannot be in the future. Please select a valid date.'
+            error: ' Start date cannot be in the future. Please select a valid date.'
         };
     }
-
-    // If end date provided, validate it
+  
     if (endDate) {
         const end = normalizeDate(new Date(endDate));
 
@@ -118,10 +104,7 @@ const validateDateRange = (startDate, endDate = null) => {
     return { valid: true };
 };
 
-/**
- * Main Sales Report Controller
- * Handles GET request for sales report view
- */
+
 const getSalesReport = async (req, res) => {
     try {
         const { filterType = 'daily', startDate = null, endDate = null, page = 1, limit = 10 } = req.query;
@@ -130,7 +113,6 @@ const getSalesReport = async (req, res) => {
         let validationError = null;
 
         try {
-            // For custom filter, validate dates first
             if (filterType === 'custom') {
                 if (!startDate || !endDate) {
                     return res.status(400).render('error', {
@@ -157,7 +139,7 @@ const getSalesReport = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        // Build query filter for MongoDB
+       
         const dateFilter = {
             createdOn: {
                 $gte: queryStartDate,
@@ -165,11 +147,10 @@ const getSalesReport = async (req, res) => {
             }
         };
 
-        // Get total count of orders in date range
+   
         const totalOrders = await Order.countDocuments(dateFilter);
         const totalPages = Math.ceil(totalOrders / limit) || 1;
-
-        // Fetch paginated orders
+      
         let orders = [];
         if (totalOrders > 0 && !validationError) {
             orders = await Order.find(dateFilter)
@@ -183,8 +164,7 @@ const getSalesReport = async (req, res) => {
                 .limit(limit)
                 .lean();
         }
-
-        // Format orders for display
+    
         const formattedOrders = orders.map(order => {
             const userData = order.user
                 ? {
@@ -225,14 +205,13 @@ const getSalesReport = async (req, res) => {
                 totalItems: totalItems
             };
         });
-
-        // Get all orders for the period to calculate summary statistics
+        
         let allOrdersInPeriod = [];
         if (totalOrders > 0 && !validationError) {
             allOrdersInPeriod = await Order.find(dateFilter).lean();
         }
 
-        // Calculate summary statistics
+  
         const totalRevenue = allOrdersInPeriod.reduce((sum, order) => sum + (order.finalAmount || 0), 0);
         const totalDiscountAmount = allOrdersInPeriod.reduce((sum, order) => sum + (order.discount || 0), 0);
         const totalCouponsApplied = allOrdersInPeriod.filter(o => o.couponApplied).length;
@@ -245,8 +224,7 @@ const getSalesReport = async (req, res) => {
             cancelled: allOrdersInPeriod.filter(o => o.status === 'Cancelled').length,
             returned: allOrdersInPeriod.filter(o => o.status === 'Returned').length
         };
-
-        // Format dates for display
+   
         const startDateDisplay = queryStartDate.toLocaleDateString('en-IN');
         const endDateDisplay = new Date(queryEndDate.getTime() - 1).toLocaleDateString('en-IN');
 
@@ -283,10 +261,7 @@ const getSalesReport = async (req, res) => {
     }
 };
 
-/**
- * Export Sales Report to Excel
- * Downloads filtered data as .xlsx file
- */
+
 const exportSalesReportToExcel = async (req, res) => {
     try {
         const { filterType = 'daily', startDate = null, endDate = null } = req.query;
@@ -337,17 +312,17 @@ const exportSalesReportToExcel = async (req, res) => {
             });
         }
 
-        // Create Excel workbook
+      
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
 
-        // Add title
+       
         worksheet.mergeCells('A1:J1');
         worksheet.getCell('A1').value = 'SALES REPORT';
         worksheet.getCell('A1').font = { size: 16, bold: true };
         worksheet.getCell('A1').alignment = { horizontal: 'center' };
 
-        // Add report type and date range
+     
         worksheet.mergeCells('A2:J2');
         worksheet.getCell('A2').value = displayLabel;
         worksheet.getCell('A2').font = { size: 12, bold: true };
@@ -363,12 +338,12 @@ const exportSalesReportToExcel = async (req, res) => {
         worksheet.getCell('A4').font = { size: 10, italic: true };
         worksheet.getCell('A4').alignment = { horizontal: 'center' };
 
-        // Calculate summary statistics
+        
         const totalRevenue = orders.reduce((sum, order) => sum + (order.finalAmount || 0), 0);
         const totalDiscount = orders.reduce((sum, order) => sum + (order.discount || 0), 0);
         const totalCouponsApplied = orders.filter(o => o.couponApplied).length;
 
-        // Add summary section
+  
         worksheet.addRow([]);
         worksheet.addRow(['SUMMARY STATISTICS']);
         worksheet.getCell('A6').font = { bold: true, size: 12 };
@@ -379,12 +354,11 @@ const exportSalesReportToExcel = async (req, res) => {
         worksheet.addRow(['Coupons Applied:', totalCouponsApplied]);
         worksheet.addRow(['Average Order Value:', `₹${(totalRevenue / (orders.length || 1)).toFixed(2)}`]);
 
-        // Add order details header
         worksheet.addRow([]);
         worksheet.addRow(['ORDER DETAILS']);
         worksheet.getCell('A12').font = { bold: true, size: 12 };
 
-        // Set column widths
+      
         worksheet.columns = [
             { width: 12 },
             { width: 18 },
@@ -398,15 +372,14 @@ const exportSalesReportToExcel = async (req, res) => {
             { width: 12 }
         ];
 
-        // Add table headers
+ 
         const headers = ['Order ID', 'Customer Name', 'Phone', 'Product', 'Items', 'Total Price', 'Discount', 'Coupon', 'Final Amount', 'Status'];
         const headerRow = worksheet.addRow(headers);
 
         headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
         headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3182CE' } };
         headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-
-        // Add data rows
+      
         orders.forEach(order => {
             const userData = order.user?.name || order.deliveryAddress?.name || 'Guest';
             const phone = order.user?.phone || order.deliveryAddress?.phone || 'N/A';
@@ -449,10 +422,7 @@ const exportSalesReportToExcel = async (req, res) => {
     }
 };
 
-/**
- * Export Sales Report to PDF
- * Downloads filtered data as .pdf file with clear headers
- */
+
 const exportSalesReportToPDF = async (req, res) => {
     try {
         const { filterType = 'daily', startDate = null, endDate = null } = req.query;
@@ -502,14 +472,13 @@ const exportSalesReportToPDF = async (req, res) => {
                 error: 'No data available for export.'
             });
         }
-
-        // Calculate summary statistics
+     
         const totalRevenue = orders.reduce((sum, order) => sum + (order.finalAmount || 0), 0);
         const totalDiscount = orders.reduce((sum, order) => sum + (order.discount || 0), 0);
         const totalCouponsApplied = orders.filter(o => o.couponApplied).length;
         const averageOrderValue = (totalRevenue / (orders.length || 1)).toFixed(2);
 
-        // Create PDF document
+        
         const doc = new PDFDocument({ margin: 40 });
 
         res.setHeader('Content-Type', 'application/pdf');
@@ -517,15 +486,13 @@ const exportSalesReportToPDF = async (req, res) => {
 
         doc.pipe(res);
 
-        // PDF Header Section
         doc.fontSize(20).font('Helvetica-Bold').text('SALES REPORT', { align: 'center' });
         doc.moveDown(0.2);
-
-        // Display label with filter type and date range
+       
         doc.fontSize(14).font('Helvetica-Bold').text(displayLabel, { align: 'center' });
         doc.moveDown(0.1);
 
-        // Period information
+       
         doc.fontSize(11).font('Helvetica').text(
             `Period: ${queryStartDate.toLocaleDateString('en-IN')} to ${new Date(queryEndDate.getTime() - 1).toLocaleDateString('en-IN')}`,
             { align: 'center' }
@@ -539,7 +506,7 @@ const exportSalesReportToPDF = async (req, res) => {
         doc.moveTo(40, doc.y).lineTo(550, doc.y).stroke();
         doc.moveDown(0.5);
 
-        // Summary Statistics Section
+        
         doc.fontSize(12).font('Helvetica-Bold').text('SUMMARY STATISTICS', { underline: true });
         doc.moveDown(0.3);
 
@@ -554,13 +521,13 @@ const exportSalesReportToPDF = async (req, res) => {
         doc.moveTo(40, doc.y).lineTo(550, doc.y).stroke();
         doc.moveDown(0.5);
 
-        // Order Details Header
+    
         doc.fontSize(12).font('Helvetica-Bold').text('ORDER DETAILS', { underline: true });
         doc.moveDown(0.3);
 
-        // Table column positions
+     
         const tableTop = doc.y;
-        const col1 = 50;    // Order ID
+        const col1 = 50;    // Order 
         const col2 = 130;   // Customer
         const col3 = 220;   // Product
         const col4 = 290;   // Items
@@ -568,7 +535,7 @@ const exportSalesReportToPDF = async (req, res) => {
         const col6 = 430;   // Discount
         const col7 = 500;   // Status
 
-        // Table headers
+       
         doc.fontSize(9).font('Helvetica-Bold');
         doc.text('Order ID', col1, tableTop);
         doc.text('Customer', col2, tableTop);
@@ -578,23 +545,22 @@ const exportSalesReportToPDF = async (req, res) => {
         doc.text('Discount', col6, tableTop);
         doc.text('Status', col7, tableTop);
 
-        // Header underline
+        
         doc.moveTo(40, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
-        // Table data rows
+        
         doc.fontSize(8).font('Helvetica');
         let yPosition = tableTop + 25;
         const pageHeight = doc.page.height;
         const bottomMargin = 40;
 
         orders.forEach((order) => {
-            // Check if we need a new page
+            
             if (yPosition > pageHeight - bottomMargin - 20) {
                 doc.addPage();
                 yPosition = 50;
             }
-
-            // Get user name from user object or delivery address
+           
             const userData = order.user?.name || order.deliveryAddress?.name || 'Guest User';
             const product = order.orderItems?.[0]?.productName || 'N/A';
             const items = order.orderItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;

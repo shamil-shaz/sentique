@@ -252,8 +252,7 @@ const addProductOffer = async (req, res) => {
         }
       }
     );
-
-    //console.log(`Product offer added: ${productId} - ${percentNum}%`);
+ 
 
     res.json({ status: true, message: "Product offer added successfully" });
   } catch (error) {

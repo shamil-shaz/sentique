@@ -90,67 +90,20 @@ router.post('/orders/:orderId/items/all/all/reject-return', adminAuth, adminOrde
 
 ////-------------COUPONS MANAGEMENT-------------
 
-// router.get('/couponsManaging', adminAuth, adminCouponsController.getCoupons);
-
-// // Get all coupons (API)
-// router.get('/get-coupons', adminAuth, adminCouponsController.getAllCoupons);
-
-// // Create new coupon
-// router.post('/create-coupon', adminAuth, adminCouponsController.createCoupon);
-
-// // Update coupon
-// router.put('/update-coupon/:id', adminAuth, adminCouponsController.updateCoupon);
-
-// // Delete coupon
-// router.delete('/delete-coupon/:id', adminAuth, adminCouponsController.deleteCoupon);
-
-// // Toggle coupon status (active/inactive)
-// router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCouponStatus);
-
-// router.get('/couponsManaging', adminAuth, adminCouponsController.getCoupons);
-// router.get('/get-coupons', adminAuth, adminCouponsController.getAllCoupons);
-// router.post('/create-coupon', adminAuth, adminCouponsController.createCoupon);
-// router.put('/update-coupon/:id', adminAuth, adminCouponsController.updateCoupon);
-// router.delete('/delete-coupon/:id', adminAuth, adminCouponsController.deleteCoupon);
-// router.patch('/toggle-coupon-listing/:id', adminAuth, adminCouponsController.toggleCouponListing);
-// router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCouponStatus);
-
-
-
 router.get('/couponsManaging', adminAuth, adminCouponsController.getCoupons);
-
-// ✅ Fetch all coupons with usage tracking
 router.get('/get-coupons', adminAuth, adminCouponsController.getAllCoupons);
-
-// ✅ NEW: Get coupon statistics (dashboard overview)
 router.get('/coupons-stats', adminAuth, adminCouponsController.getCouponStats);
-
-// ✅ NEW: Get detailed usage for a specific coupon
 router.get('/coupon-usage/:id', adminAuth, adminCouponsController.getCouponUsageDetails);
-
-// ✅ Create new coupon
 router.post('/create-coupon', adminAuth, adminCouponsController.createCoupon);
-
-// ✅ Update coupon
 router.put('/update-coupon/:id', adminAuth, adminCouponsController.updateCoupon);
-
-// ✅ Delete coupon
 router.delete('/delete-coupon/:id', adminAuth, adminCouponsController.deleteCoupon);
-
-// ✅ Toggle coupon listing status
 router.patch('/toggle-coupon-listing/:id', adminAuth, adminCouponsController.toggleCouponListing);
-
-// ✅ Toggle coupon status (deprecated but kept for compatibility)
 router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCouponStatus);
-
-
-
 
 
 //----------------Dashboard Mangement-----------
 
 router.get("/dashboard", adminAuth, dashboardController.loadDashboard);
-
 
 //--------  Sales Report-----
 

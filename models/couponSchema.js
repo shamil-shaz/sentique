@@ -74,7 +74,7 @@ const couponSchema = new Schema(
     discountPrice: {
       type: Number,
       required: true,
-      min: [0.01, "Discount must be greater than 0"],  // ✅ FIX: Prevent 0 discounts
+      min: [0.01, "Discount must be greater than 0"],  
     },
     minimumPrice: {
       type: Number,
@@ -92,26 +92,24 @@ const couponSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["active", "inactive", "upcoming", "expired"],  // ✅ FIX: Add "expired" for consistency
+      enum: ["active", "inactive", "upcoming", "expired"], 
       default: "active",
     },
   },
   { timestamps: true },
 )
 
-// Setter for automatic uppercase on couponCode
+
 couponSchema.path("couponCode").set((v) => (v ? v.trim().toUpperCase() : v))
 
-// Virtual for computed 'used' count
+
 couponSchema.virtual("used").get(function () {
   return this.appliedUsers ? this.appliedUsers.length : 0
 })
 
-// Ensure virtuals are included
 couponSchema.set("toJSON", { virtuals: true })
 couponSchema.set("toObject", { virtuals: true })
 
-// Pre-save middleware to validate dates
 couponSchema.pre("save", function (next) {
   if (this.isModified("activeDate") || this.isModified("expireDate")) {
     if (this.activeDate >= this.expireDate) {
@@ -122,7 +120,7 @@ couponSchema.pre("save", function (next) {
   next()
 })
 
-// Indexes
+
 couponSchema.index({ status: 1, activeDate: 1, expireDate: 1 })
 couponSchema.index({ couponCode: 1 }, { unique: true, sparse: true })
 couponSchema.index({ couponName: 1 }, { unique: true, sparse: true, collation: { locale: "en", strength: 2 } })

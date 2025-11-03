@@ -1,17 +1,14 @@
 
-
 const Coupon = require('../../models/couponSchema');
 const User = require('../../models/userSchema');
 
-// ✅ Helper function to format coupon with usage details
 const formatCouponWithUsage = (coupon, currentUserId = null) => {
   const appliedUsersArray = Array.isArray(coupon.appliedUsers) ? coupon.appliedUsers : [];
   const usedCount = appliedUsersArray.length;
   const limitNum = Number(coupon.limit) || 0;
   const usagePercentage = limitNum > 0 ? Math.round((usedCount / limitNum) * 100) : 0;
   const remainingUses = Math.max(0, limitNum - usedCount);
-
-  // ✅ NEW: Per-user check for one-time coupons
+  
   const userHasUsed = currentUserId ? appliedUsersArray.some(applied => 
     applied.userId && applied.userId._id.toString() === currentUserId.toString()
   ) : false;
@@ -21,7 +18,7 @@ const formatCouponWithUsage = (coupon, currentUserId = null) => {
     usagePercentage: usagePercentage,
     remainingUses: remainingUses,
     limit: limitNum,
-    userHasUsed: userHasUsed  // Flag for frontend to fade/disable
+    userHasUsed: userHasUsed  
   };
 };
 
@@ -41,7 +38,7 @@ const getAvailableCouponsJSON = async (req, res) => {
 
     const totalPages = Math.ceil(totalCoupons / limit);
 
-    const userId = req.session.user?._id || req.session.user?.id;  // Current user
+    const userId = req.session.user?._id || req.session.user?.id;  
 
     const coupons = await Coupon.find({
       isListed: true,
@@ -63,8 +60,7 @@ const getAvailableCouponsJSON = async (req, res) => {
       if (expireDate >= today) {
         status = activeDate > today ? 'upcoming' : 'active';
       }
-
-      // ✅ Get usage data with per-user check
+    
       const usageData = formatCouponWithUsage(coupon, userId);
 
       return {
@@ -79,12 +75,11 @@ const getAvailableCouponsJSON = async (req, res) => {
         maxDiscount: coupon.maxDiscountAmount || 0,
         usageType: coupon.usageType || 'once',
         limit: coupon.limit || 100,
-        // ✅ NEW: Add usage tracking with per-user flag
         usageCount: usageData.used,
         used: usageData.used,
         usagePercentage: usageData.usagePercentage,
         remainingUses: usageData.remainingUses,
-        userHasUsed: usageData.userHasUsed,  // Key for fading one-time coupons
+        userHasUsed: usageData.userHasUsed,  
         activeDate: coupon.activeDate,
         status: status,
         isUsable: status === 'active' && !(coupon.usageType === 'once' && usageData.userHasUsed)
@@ -101,99 +96,13 @@ const getAvailableCouponsJSON = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('❌ Error fetching available coupons:', err);
+    console.error(' Error fetching available coupons:', err);
     res.status(500).json({
       success: false,
       message: 'Error loading coupons'
     });
   }
 };
-
-// const getAvailableCouponsHTML = async (req, res) => {
-//   try {
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = parseInt(req.query.limit) || 6;
-//     const skip = (page - 1) * limit;
-
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0);
-
-//     const totalCoupons = await Coupon.countDocuments({
-//       isListed: true,
-//       expireDate: { $gte: today }
-//     });
-
-//     const totalPages = Math.ceil(totalCoupons / limit);
-
-//     const userId = req.session.user?._id || req.session.user?.id;  // Current user
-
-//     const coupons = await Coupon.find({
-//       isListed: true,
-//       expireDate: { $gte: today }
-//     })
-//       .populate('appliedUsers.userId', 'email')
-//       .sort({ createdAt: -1 })
-//       .skip(skip)
-//       .limit(limit)
-//       .lean();
-
-//     const formattedCoupons = coupons.map(coupon => {
-//       const activeDate = new Date(coupon.activeDate);
-//       activeDate.setHours(0, 0, 0, 0);
-//       const expireDate = new Date(coupon.expireDate);
-//       expireDate.setHours(0, 0, 0, 0);
-
-//       let status = 'expired';
-//       if (expireDate >= today) {
-//         status = activeDate > today ? 'upcoming' : 'active';
-//       }
-
-//       // ✅ Get usage data with per-user check
-//       const usageData = formatCouponWithUsage(coupon, userId);
-
-//       return {
-//         id: coupon._id,
-//         code: coupon.couponCode,
-//         title: coupon.couponName,
-//         description: coupon.description,
-//         discountType: coupon.discountType || 'flat',
-//         discountValue: coupon.discountPrice,
-//         expiryDate: coupon.expireDate,
-//         minPurchase: coupon.minimumPrice || 0,
-//         maxDiscount: coupon.maxDiscountAmount || 0,
-//         usageType: coupon.usageType || 'once',
-//         limit: coupon.limit || 100,
-//         // ✅ NEW: Add usage tracking with per-user flag
-//         usageCount: usageData.used,
-//         used: usageData.used,
-//         usagePercentage: usageData.usagePercentage,
-//         remainingUses: usageData.remainingUses,
-//         userHasUsed: usageData.userHasUsed,  // Key for fading one-time coupons
-//         activeDate: coupon.activeDate,
-//         status: status,
-//         isUsable: status === 'active' && !(coupon.usageType === 'once' && usageData.userHasUsed)
-//       };
-//     });
-
-//     res.render('Coupons', {
-//       coupons: formattedCoupons,
-//       currentPage: page,
-//       totalPages: totalPages,
-//       hasNextPage: page < totalPages,
-//       hasPrevPage: page > 1,
-//       user: req.session.user || null,
-//       couponsJSON: JSON.stringify(formattedCoupons)
-//     });
-
-//   } catch (err) {
-//     console.error('❌ Error fetching available coupons:', err);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error loading coupons'
-//     });
-//   }
-// };
-
 
 const getAvailableCouponsHTML = async (req, res) => {
   try {
@@ -233,8 +142,7 @@ const getAvailableCouponsHTML = async (req, res) => {
       if (expireDate >= today) {
         status = activeDate > today ? 'upcoming' : 'active';
       }
-      
-      // ✅ Get usage data with per-user check
+    
       const usageData = formatCouponWithUsage(coupon, userId);
       
       return {
@@ -259,15 +167,13 @@ const getAvailableCouponsHTML = async (req, res) => {
         isUsable: status === 'active' && !(coupon.usageType === 'once' && usageData.userHasUsed)
       };
     });
-
-    // ✅ FIX: Get fresh user data from database, don't rely on stale session
+   
     let user = null;
     
     if (userId) {
-      // Always fetch fresh user data from DB
-      user = await User.findById(userId).select('name email image phone').lean();
       
-      // Update session with fresh data for consistency
+      user = await User.findById(userId).select('name email image phone').lean();
+  
       if (user) {
         req.session.user = {
           id: user._id,
@@ -277,12 +183,11 @@ const getAvailableCouponsHTML = async (req, res) => {
           image: user.image,
           phone: user.phone
         };
-        
-        // Save session to persist changes
+       
         await req.session.save();
       }
     } else {
-      // Fallback to session user if userId not available
+  
       user = req.session.user || null;
     }
 
@@ -292,20 +197,18 @@ const getAvailableCouponsHTML = async (req, res) => {
       totalPages: totalPages,
       hasNextPage: page < totalPages,
       hasPrevPage: page > 1,
-      user: user,  // Fresh user data
+      user: user,  
       couponsJSON: JSON.stringify(formattedCoupons)
     });
     
   } catch (err) {
-    console.error('❌ Error fetching available coupons:', err);
+    console.error(' Error fetching available coupons:', err);
     res.status(500).json({
       success: false,
       message: 'Error loading coupons'
     });
   }
 };
-
-module.exports = getAvailableCouponsHTML;
 
 
 const getCouponDetails = async (req, res) => {
@@ -319,7 +222,7 @@ const getCouponDetails = async (req, res) => {
       });
     }
 
-    const userId = req.session.user?._id || req.session.user?.id;  // Current user
+    const userId = req.session.user?._id || req.session.user?.id;  
 
     const coupon = await Coupon.findById(couponId)
       .populate('appliedUsers.userId', 'email name')
@@ -347,8 +250,7 @@ const getCouponDetails = async (req, res) => {
     const activeDate = new Date(coupon.activeDate);
     activeDate.setHours(0, 0, 0, 0);
     const status = activeDate > today ? 'upcoming' : 'active';
-
-    // ✅ Get usage data with per-user check
+    
     const usageData = formatCouponWithUsage(coupon, userId);
 
     res.json({
@@ -366,12 +268,11 @@ const getCouponDetails = async (req, res) => {
         expireDate: coupon.expireDate,
         usageType: coupon.usageType,
         limit: coupon.limit,
-        // ✅ NEW: Add usage tracking with per-user flag
         usageCount: usageData.used,
         used: usageData.used,
         usagePercentage: usageData.usagePercentage,
         remainingUses: usageData.remainingUses,
-        userHasUsed: usageData.userHasUsed,  // Key for fading/disabling
+        userHasUsed: usageData.userHasUsed,  
         isLimitReached: usageData.used >= coupon.limit,
         status: status,
         isUsable: status === 'active' && !(coupon.usageType === 'once' && usageData.userHasUsed)
@@ -379,7 +280,7 @@ const getCouponDetails = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('❌ Error fetching coupon details:', err);
+    console.error(' Error fetching coupon details:', err);
     res.status(500).json({
       success: false,
       message: 'Error fetching coupon details'
@@ -389,7 +290,7 @@ const getCouponDetails = async (req, res) => {
 
 const applyCouponAtCheckout = async (req, res) => {
   try {
-    console.log('\n ========== APPLY COUPON ==========');
+   
     console.log('Request body:', req.body);
     
     const { couponCode, cartTotal, cartItems } = req.body;
@@ -413,7 +314,7 @@ const applyCouponAtCheckout = async (req, res) => {
     const coupon = await Coupon.findOne({
       couponCode: couponCode.toUpperCase(),
       isListed: true
-    }).populate('appliedUsers.userId');  // Populate for per-user check
+    }).populate('appliedUsers.userId');  
     if (!coupon) {
       return res.status(404).json({ success: false, message: 'Invalid coupon code' });
     }
@@ -453,7 +354,7 @@ const applyCouponAtCheckout = async (req, res) => {
       });
     }
 
-    const usageData = formatCouponWithUsage(coupon, userId);  // Use helper for per-user check
+    const usageData = formatCouponWithUsage(coupon, userId);  
     const limit = coupon.limit || Infinity;
     
     if (usageData.used >= limit) {
@@ -533,7 +434,7 @@ const applyCouponAtCheckout = async (req, res) => {
 
     const finalTotal = Math.max(0, (cartTotalPaise - totalDiscountPaise) / 100);
 
-    console.log('✅ COUPON APPLIED!');
+    console.log(' COUPON APPLIED!');
     console.log('   Total Discount:', totalDiscountPaise / 100);
     console.log('   Final Total:', finalTotal);
     if (updatedCartItems.length > 0) {
@@ -556,7 +457,7 @@ const applyCouponAtCheckout = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('❌ COUPON ERROR:', err);
+    console.error(' COUPON ERROR:', err);
     res.status(500).json({ success: false, message: 'Error applying coupon' });
   }
 };
@@ -566,13 +467,13 @@ const recordCouponUsage = async (req, res) => {
     const { couponId, orderId } = req.body;
     const userId = req.session.user?._id || req.session.user?.id;
 
-    console.log('📝 ===== RECORD COUPON USAGE =====');
+    console.log(' RECORD COUPON USAGE ');
     console.log('Coupon ID:', couponId);
     console.log('User ID:', userId);
     console.log('Order ID:', orderId);
 
     if (!userId || !couponId || !orderId) {
-      console.error('❌ Missing required fields');
+      console.error(' Missing required fields');
       return res.status(400).json({
         success: false,
         message: 'User ID, Coupon ID, and Order ID are required'
@@ -582,7 +483,7 @@ const recordCouponUsage = async (req, res) => {
     const coupon = await Coupon.findById(couponId);
 
     if (!coupon) {
-      console.error('❌ Coupon not found');
+      console.error(' Coupon not found');
       return res.status(404).json({
         success: false,
         message: 'Coupon not found'
@@ -591,14 +492,13 @@ const recordCouponUsage = async (req, res) => {
 
     console.log('Current usage before:', coupon.appliedUsers.length);
 
-    // ✅ Add to appliedUsers - Use 'appliedDate' to match schema
+   
     coupon.appliedUsers.push({
       userId: userId,
       orderId: orderId,
-      appliedDate: new Date()  // Fixed: Match schema field
+      appliedDate: new Date() 
     });
-
-    // ✅ SAVE TO DATABASE - THIS IS CRITICAL!
+  
     await coupon.save();
 
     console.log('Current usage after save:', coupon.appliedUsers.length);
@@ -611,7 +511,7 @@ const recordCouponUsage = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('❌ Error recording coupon usage:', err);
+    console.error(' Error recording coupon usage:', err);
     res.status(500).json({
       success: false,
       message: 'Error recording coupon usage'
@@ -633,7 +533,7 @@ const searchCoupons = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const userId = req.session.user?._id || req.session.user?.id;  // Current user
+    const userId = req.session.user?._id || req.session.user?.id;  
 
     const coupons = await Coupon.find({
       isListed: true,
@@ -645,7 +545,7 @@ const searchCoupons = async (req, res) => {
       ]
     })
       .select('couponCode couponName description discountPrice discountType minimumPrice maxDiscountAmount limit activeDate expireDate appliedUsers')
-      .populate('appliedUsers.userId', 'email')  // For per-user check
+      .populate('appliedUsers.userId', 'email')  
       .limit(10)
       .lean();
 
@@ -659,8 +559,7 @@ const searchCoupons = async (req, res) => {
       if (expireDate >= today) {
         status = activeDate > today ? 'upcoming' : 'active';
       }
-
-      // ✅ Get usage data with per-user check
+     
       const usageData = formatCouponWithUsage(coupon, userId);
 
       return {
@@ -673,11 +572,10 @@ const searchCoupons = async (req, res) => {
         minPurchase: coupon.minimumPrice,
         maxDiscount: coupon.maxDiscountAmount,
         limit: coupon.limit,
-        // ✅ NEW: Add usage tracking with per-user flag
         used: usageData.used,
         usagePercentage: usageData.usagePercentage,
         remainingUses: usageData.remainingUses,
-        userHasUsed: usageData.userHasUsed,  // Key for fading one-time coupons
+        userHasUsed: usageData.userHasUsed,  
         status: status,
         isUsable: status === 'active' && !(coupon.usageType === 'once' && usageData.userHasUsed)
       };
@@ -689,7 +587,7 @@ const searchCoupons = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('❌ Error searching coupons:', err);
+    console.error(' Error searching coupons:', err);
     res.status(500).json({
       success: false,
       message: 'Error searching coupons'
@@ -708,12 +606,12 @@ const validateCouponCode = async (req, res) => {
       });
     }
 
-    const userId = req.session.user?._id || req.session.user?.id;  // Current user
+    const userId = req.session.user?._id || req.session.user?.id;  
 
     const coupon = await Coupon.findOne({
       couponCode: code.toUpperCase(),
       isListed: true
-    }).populate('appliedUsers.userId');  // For per-user check
+    }).populate('appliedUsers.userId');  
 
     if (!coupon) {
       return res.status(404).json({
@@ -745,10 +643,8 @@ const validateCouponCode = async (req, res) => {
       });
     }
 
-    // ✅ Get usage data with per-user check
     const usageData = formatCouponWithUsage(coupon, userId);
-
-    // Check limits with per-user logic
+ 
     if (usageData.used >= coupon.limit) {
       return res.status(400).json({ success: false, message: 'This coupon has reached its usage limit' });
     }
@@ -768,18 +664,17 @@ const validateCouponCode = async (req, res) => {
         maxDiscountAmount: coupon.maxDiscountAmount,
         usageType: coupon.usageType,
         isValid: true,
-        // ✅ NEW: Add usage tracking with per-user flag
         used: usageData.used,
         usageCount: usageData.used,
         usagePercentage: usageData.usagePercentage,
         limit: coupon.limit,
         remainingUses: usageData.remainingUses,
-        userHasUsed: usageData.userHasUsed  // Key for fading/disabling
+        userHasUsed: usageData.userHasUsed  
       }
     });
 
   } catch (err) {
-    console.error('❌ Error validating coupon:', err);
+    console.error(' Error validating coupon:', err);
     res.status(500).json({
       success: false,
       message: 'Error validating coupon'

@@ -99,8 +99,6 @@ const deleteAddress = async (req, res) => {
 };
 
 
-
-// Validation helper for Indian PIN codes
 const isValidIndianPincode = (pincode) => {
   if (!/^\d{6}$/.test(pincode)) {
     return { valid: false, message: 'PIN code must be exactly 6 digits' };
@@ -135,32 +133,31 @@ const isValidIndianPincode = (pincode) => {
   return { valid: true, message: 'Valid PIN code' };
 };
 
-// Comprehensive validation helper
+
 const validateAddressInput = (data) => {
   const errors = [];
 
-  // 1. Address Type
   if (!data.addressType || !data.addressType.trim()) {
     errors.push("Address type is required");
   } else if (!['Home', 'Work', 'Other'].includes(data.addressType.trim())) {
     errors.push("Address type must be Home, Work, or Other");
   }
 
-  // 2. Full Name (3-50 chars, letters and spaces only)
+
   if (!data.name || !data.name.trim()) {
     errors.push("Full name is required");
   } else {
     const name = data.name.trim();
     if (name.length < 3) {
       errors.push("Full name must be at least 3 characters");
-    } else if (name.length > 50) {
+    } else if (name.length > 20) {
       errors.push("Full name cannot exceed 50 characters");
     } else if (!/^[a-zA-Z\s]+$/.test(name)) {
       errors.push("Full name can only contain letters and spaces");
     }
   }
 
-  // 3. Phone Number (exactly 10 digits)
+  
   if (!data.phone || !data.phone.trim()) {
     errors.push("Phone number is required");
   } else {
@@ -170,7 +167,7 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // 4. House/Building Name (min 2 chars, no only-spaces)
+
   if (!data.houseName || !data.houseName.trim()) {
     errors.push("House/Building name is required");
   } else {
@@ -180,7 +177,7 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // 5. Building Number (optional but validate if provided)
+ 
   if (data.buildingNumber && data.buildingNumber.trim()) {
     const building = data.buildingNumber.trim();
     if (building.length < 1) {
@@ -188,7 +185,7 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // 6. Landmark (min 3 chars, no only-spaces)
+ 
   if (!data.landmark || !data.landmark.trim()) {
     errors.push("Landmark is required");
   } else {
@@ -198,19 +195,18 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // 7. Alternative Phone (optional but validate if provided)
+
   if (data.altPhone && data.altPhone.trim()) {
     const altPhone = data.altPhone.trim();
     if (!/^\d{10}$/.test(altPhone)) {
       errors.push("Alternative phone number must be exactly 10 digits");
     }
-    // Check for duplicate phone numbers
+   
     if (data.phone && data.phone.trim() === altPhone) {
       errors.push("Alternative phone number cannot be same as main phone number");
     }
   }
 
-  // 8. Nationality (letters and spaces only, min 2 chars)
   if (!data.nationality || !data.nationality.trim()) {
     errors.push("Nationality is required");
   } else {
@@ -222,7 +218,7 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // 9. City (min 2 chars, letters and spaces)
+ 
   if (!data.city || !data.city.trim()) {
     errors.push("City is required");
   } else {
@@ -234,7 +230,6 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // 10. State (from predefined list)
   if (!data.state || !data.state.trim()) {
     errors.push("State is required");
   } else {
@@ -251,7 +246,7 @@ const validateAddressInput = (data) => {
     }
   }
 
-  // 11. PIN Code (6 digits with validation)
+
   if (!data.pincode || !data.pincode.trim()) {
     errors.push("PIN code is required");
   } else {
@@ -264,7 +259,7 @@ const validateAddressInput = (data) => {
   return errors;
 };
 
-// Add Address
+
 const addAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id;
@@ -302,12 +297,11 @@ const addAddress = async (req, res) => {
       userAddress = new Address({ userId, address: [] });
     }
 
-    // Handle default address - unset previous default
+ 
     if (isDefault) {
       console.log('AddAddress - Setting as default, unsetting previous defaults');
       userAddress.address.forEach(addr => addr.isDefault = false);
     } else if (userAddress.address.length === 0) {
-      // First address should be default
       console.warn('AddAddress - First address not marked as default');
       return res.status(400).json({ 
         success: false, 
@@ -345,7 +339,7 @@ const addAddress = async (req, res) => {
   }
 };
 
-// Edit Address
+
 const editAddress = async (req, res) => {
   try {
     const userId = req.session.user?.id;
@@ -384,8 +378,7 @@ const editAddress = async (req, res) => {
     if (!addr) {
       return res.status(404).json({ success: false, message: "Address not found" });
     }
-
-    // Handle default address
+   
     if (isDefault) {
       userAddress.address.forEach(a => a.isDefault = false);
     }
@@ -411,7 +404,7 @@ const editAddress = async (req, res) => {
   }
 };
 
-// Get location by PIN code - Real API integration
+
 const getLocationByPincode = async (req, res) => {
   try {
     const { pincode } = req.params;
@@ -421,15 +414,14 @@ const getLocationByPincode = async (req, res) => {
     if (!/^\d{6}$/.test(pincode)) {
       return res.json({ success: false, message: "Invalid PIN code format" });
     }
-
-    // Validate PIN code format first
+ 
     const validation = isValidIndianPincode(pincode);
     if (!validation.valid) {
       return res.json({ success: false, message: validation.message });
     }
 
     try {
-      // Try with axios first if available, otherwise use fetch
+      
       const apiUrl = `https://api.postalpincode.in/pincode/${pincode}`;
       console.log('API URL:', apiUrl);
 

@@ -447,8 +447,7 @@ const getCartCount = async (req, res) => {
 const checkProductStock = async (req, res) => {
   try {
     const { productId, variantSize } = req.body;
-
-    // Validate input parameters
+   
     if (!productId || variantSize === undefined || variantSize === null) {
       return res.status(400).json({ 
         success: false, 
@@ -457,8 +456,6 @@ const checkProductStock = async (req, res) => {
         isValid: false
       });
     }
-
-    // Validate product ID format
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({ 
         success: false, 
@@ -468,7 +465,7 @@ const checkProductStock = async (req, res) => {
       });
     }
 
-    // Fetch product from database
+ 
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ 
@@ -479,16 +476,15 @@ const checkProductStock = async (req, res) => {
       });
     }
 
-    // Find variant with matching size
+
     const variant = product.variants?.find(v => v.size === Number(variantSize));
     
-    // Get stock from variant if exists, otherwise from product
+    
     const availableStock = variant ? (variant.stock || 0) : (product.stock || 0);
 
-    // Check if product or variant is blocked
+  
     const isBlocked = product.isBlocked || (variant && variant.isBlocked);
 
-    // Determine if item can be purchased
     const isValid = availableStock > 0 && !isBlocked;
 
     res.json({ 

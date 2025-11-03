@@ -214,7 +214,7 @@ const generateInvoice = async (req, res) => {
         .text(`-₹${cancelledTotal.toFixed(2)}`, 500, summaryY + 18, { align: 'right', width: 60 });
     }
   
-    // ✅ FIX: Calculate discount amount safely
+   
     const discountAmount = parseFloat(order.discount || 0);
     let discountY = summaryY + 36;
     
@@ -230,8 +230,7 @@ const generateInvoice = async (req, res) => {
       .text('Shipping:', summaryX, discountY, { width: 150 });
     doc.fontSize(9).fillColor(darkGray).font('Helvetica')
       .text('₹0.00', 500, discountY, { align: 'right', width: 60 });
-
-    // ✅ FIX: Calculate final total by subtracting discount
+    
     const finalTotal = Math.max(0, deliveredTotal - discountAmount);
  
     const totalBoxY = discountY + 21;

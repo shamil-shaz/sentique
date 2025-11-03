@@ -136,54 +136,6 @@ const handleForgotPassword = async (req, res) => {
   }
 };
 
-// const loadForgotPageOtp = async (req, res) => {
-//   try {
-//     if (!req.session.forgotOtp || !req.session.forgotEmail) {
-//       return res.redirect("/forgot-password");
-//     }
-//     res.render("forgotPassword-otp", { message: "" });
-//   } catch (err) {
-//     console.error("Error loading forgotPasswor-otp:", err);
-//     res.status(500).send("Server Error");
-//   }
-// };
-
-// const verifyForgotOtp = async (req, res) => {
-//   try {
-//      const enterdOtp = req.body.otp;
-//      if(enterdOtp==req.session.forgotOtp){
-//         res.json({success:true,redirectUrl:"/reset-password"})
-//      }else{
-//         res.json({success:false,message:"Invalid OTP"})
-//      }
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: "An error occurred while verifying OTP." });
-//   }
-// }
-
-// const resendOtp = async (req, res) => {
-//     try{
-
-//          const otp= generateOtp();
-//          req.session.forgotOtp=otp;
-//          const email=req.session.forgotEmail;
-//          console.log("Resend OTP email:", email);
-
-//          const emailSent=await sendVerificationEmail(email,otp);
-//          if(emailSent){
-//             console.log(" Resend OTP :", otp);
-//             res.status(200).json({success:true,message:"OTP resent successfully"})
-//          }
-
-//     }catch(error){
-
-//         console.error("Error resending OTP:", error);
-//         res.status(500).json({success:false,message:"Error resending OTP. Please try again later."})
-
-//     }
-// }
-
-// Backend - Updated Controllers
 
 const OTP_EXPIRY_TIME = 60000; 
 
@@ -203,26 +155,24 @@ const verifyForgotOtp = async (req, res) => {
   try {
     const enteredOtp = req.body.otp;
 
-    // Check if OTP exists in session
+   
     if (!req.session.forgotOtp) {
       return res.json({ success: false, message: "OTP not found. Please request a new OTP." });
     }
 
-    // Check if OTP has expired
     const currentTime = Date.now();
     const otpGeneratedTime = req.session.forgotOtpTime;
     const timeDifference = currentTime - otpGeneratedTime;
 
     if (timeDifference > OTP_EXPIRY_TIME) {
-      // OTP has expired
+     
       delete req.session.forgotOtp;
       delete req.session.forgotOtpTime;
       return res.json({ success: false, message: "OTP has expired. Please request a new OTP." });
     }
 
-    // Verify OTP
+   
     if (enteredOtp == req.session.forgotOtp) {
-      // Clear OTP from session after successful verification
       delete req.session.forgotOtp;
       delete req.session.forgotOtpTime;
       res.json({ success: true, redirectUrl: "/reset-password" });
@@ -240,9 +190,8 @@ const resendOtp = async (req, res) => {
     const otp = generateOtp();
     const email = req.session.forgotEmail;
     
-    // Store OTP with timestamp
     req.session.forgotOtp = otp;
-    req.session.forgotOtpTime = Date.now(); // Store current time
+    req.session.forgotOtpTime = Date.now(); 
     
     console.log("Resend OTP email:", email);
 
@@ -263,8 +212,7 @@ const resendOtp = async (req, res) => {
 const sendForgotPasswordOtp = async (req, res) => {
   try {
     const { email } = req.body;
-    
-    // Verify email exists in database
+  
     const user = await User.findOne({ email });
     if (!user) {
       return res.json({ success: false, message: "Email not found" });
@@ -272,10 +220,10 @@ const sendForgotPasswordOtp = async (req, res) => {
 
     const otp = generateOtp();
     
-    // Store OTP and timestamp in session
+
     req.session.forgotEmail = email;
     req.session.forgotOtp = otp;
-    req.session.forgotOtpTime = Date.now(); // Store timestamp when OTP is generated
+    req.session.forgotOtpTime = Date.now(); 
     
     console.log("Generated OTP:", otp);
 
@@ -426,33 +374,30 @@ const initChangePassword = async (req, res) => {
 };
 
 
-
-
 const loadOtpVerifyPage = (req, res) => {
   const { type } = req.query;
   const otpData = req.session.otpData;
   
   console.log("Loading OTP page for type:", type);
 
-  // Check if OTP session exists and matches the type
+
   if (!otpData || otpData.type !== type) {
     req.flash("error", "Invalid OTP session");
     return res.redirect("/profile");
   }
 
-  // Check if OTP is already expired
   if (Date.now() > otpData.expiry) {
     delete req.session.otpData;
     req.flash("error", "OTP has expired. Please request a new one.");
     return res.redirect("/profile");
   }
 
-  // PASS expiryTime to template
+
   res.render("change-email-otp", {
     type,
     token: otpData.token,
     message: "",
-    expiryTime: otpData.expiry  // ADD THIS LINE
+    expiryTime: otpData.expiry  
   });
 };
 
@@ -463,7 +408,7 @@ const verifyOtp = async (req, res) => {
 
     console.log("Verifying OTP - Type:", type);
 
-    // Check if session exists
+
     if (!otpData || otpData.type !== type || otpData.token !== token) {
       return res.json({
         success: false,
@@ -471,7 +416,7 @@ const verifyOtp = async (req, res) => {
       });
     }
 
-    // CHECK IF OTP IS EXPIRED
+  
     const currentTime = Date.now();
     if (currentTime > otpData.expiry) {
       console.warn("OTP expired");
@@ -482,7 +427,7 @@ const verifyOtp = async (req, res) => {
       });
     }
 
-    // Check if OTP matches
+ 
     if (String(otp) !== String(otpData.otp)) {
       console.warn("OTP mismatch");
       return res.json({
@@ -491,7 +436,7 @@ const verifyOtp = async (req, res) => {
       });
     }
 
-    // OTP is valid - proceed with update
+
     console.log("OTP verified successfully");
 
     try {
@@ -508,7 +453,7 @@ const verifyOtp = async (req, res) => {
         console.log("Password updated successfully");
       }
 
-      // Clear OTP data
+ 
       delete req.session.otpData;
 
       return res.json({
@@ -544,16 +489,16 @@ const resendProfileOtp = async (req, res) => {
       });
     }
 
-    // Generate new OTP
+    
     const otp = generateOtp();
-    const newExpiry = Date.now() + 1 * 60 * 1000; // 3 minutes
+    const newExpiry = Date.now() + 1 * 60 * 1000; 
 
     otpData.otp = otp;
     otpData.expiry = newExpiry;
 
     console.log("New OTP generated for type:", type);
 
-    // Determine email and subject
+   
     let emailAddress, emailSubject;
 
     if (type === "change-email") {
@@ -580,7 +525,7 @@ const resendProfileOtp = async (req, res) => {
       message: "OTP resent successfully",
       token: otpData.token,
       type: otpData.type,
-      expiryTime: newExpiry  // SEND NEW EXPIRY TIME TO FRONTEND
+      expiryTime: newExpiry  
     });
   } catch (err) {
     console.error("resendOtp error:", err);
@@ -590,68 +535,6 @@ const resendProfileOtp = async (req, res) => {
     });
   }
 };
-
-// const loadEditProfile = async (req, res) => {
-//   try {
-//     const userId = req.session.user?.id;
-//     const user = await User.findById(userId);
-//     if (!user) return res.redirect("/pageNotFound");
-
-//     res.render("profile-Edit", { user });
-//   } catch (error) {
-//     console.error(error);
-//     res.redirect("/pageNotFound");
-//   }
-// };
-
-// const updateProfile = async (req, res) => {
-//   try {
-//     const userId = req.session.user?.id;
-//     if (!userId) {
-//       return res.status(401).json({ success: false, message: "User not logged in" });
-//     }
-
-//     let { name, phone } = req.body;
-   
-//     name = name?.trim();
-//     phone = phone?.trim();
-
-//     if (!name || name.length < 3) {
-//       return res.status(400).json({ success: false, message: "Name must be at least 3 characters long." });
-//     }
-
-//     if (phone) {
-//       const phoneRegex = /^[0-9]{10}$/;
-//       if (!phoneRegex.test(phone)) {
-//         return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits." });
-//       }
-//     }
-
-//     let updateData = { name, phone };
-
-    
-//     if (req.file) {
-//       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-//         folder: "sentique/profile",
-//       });
-
-//       updateData.image = uploadResult.secure_url; 
-//     }
-
-
-//     const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
-
-//     if (!updatedUser) {
-//       return res.status(404).json({ success: false, message: "User not found" });
-//     }
-
-//     res.json({ success: true, message: "Profile updated successfully", user: updatedUser });
-//   } catch (error) {
-//     console.error("Error updating profile:", error);
-//     res.status(500).json({ success: false, message: "Server error while updating profile" });
-//   }
-// };
-
 
 
 const loadEditProfile = async (req, res) => {
@@ -666,91 +549,6 @@ const loadEditProfile = async (req, res) => {
   }
 };
 
-// const updateProfile = async (req, res) => {
-//   try {
-//     const userId = req.session.user?.id;
-//     if (!userId) {
-//       return res.status(401).json({ success: false, message: "User not logged in" });
-//     }
-//     let { name, phone } = req.body;
-   
-//     name = name?.trim();
-//     phone = phone?.trim();
-
-//     // Name validation
-//     if (!name || name.length < 3 || name.length > 20) {
-//       return res.status(400).json({ success: false, message: "Name must be between 3 and 20 characters long." });
-//     }
-//     const nameRegex = /^[a-zA-Z\s'-]+$/;
-//     if (!nameRegex.test(name)) {
-//       return res.status(400).json({ success: false, message: "Name can only contain letters, spaces, apostrophes, and hyphens. No numbers allowed." });
-//     }
-
-//     // Phone validation
-//     if (phone) {
-//       if (phone.length !== 10) {
-//         return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits." });
-//       }
-//       const phoneRegex = /^[0-9]{10}$/;
-//       if (!phoneRegex.test(phone)) {
-//         return res.status(400).json({ success: false, message: "Phone number must contain only numbers." });
-//       }
-
-//       // Check for all same digits
-//       const digits = phone.split('').map(Number);
-//       const uniqueDigits = new Set(digits);
-//       if (uniqueDigits.size === 1) {
-//         return res.status(400).json({ success: false, message: "Phone number cannot consist of all identical digits (e.g., 1111111111)." });
-//       }
-
-//       // Check for ascending sequence (e.g., 1234567890)
-//       const isAscending = digits.every((d, i) => i === 0 || d === digits[i - 1] + 1);
-//       if (isAscending) {
-//         return res.status(400).json({ success: false, message: "Phone number cannot be in strictly ascending order (e.g., 1234567890)." });
-//       }
-
-//       // Check for descending sequence (e.g., 9876543210)
-//       const isDescending = digits.every((d, i) => i === 0 || d === digits[i - 1] - 1);
-//       if (isDescending) {
-//         return res.status(400).json({ success: false, message: "Phone number cannot be in strictly descending order (e.g., 9876543210)." });
-//       }
-
-//       // Check for consecutive repeated digits more than 2 (e.g., 000111)
-//       let maxConsecutive = 1;
-//       let currentConsecutive = 1;
-//       for (let i = 1; i < 10; i++) {
-//         if (digits[i] === digits[i - 1]) {
-//           currentConsecutive++;
-//           maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
-//         } else {
-//           currentConsecutive = 1;
-//         }
-//       }
-//       if (maxConsecutive > 2) {
-//         return res.status(400).json({ success: false, message: "Phone number cannot have more than 2 consecutive identical digits (e.g., no 000 or 111)." });
-//       }
-//     }
-
-//     let updateData = { name, phone };
-   
-//     if (req.file) {
-//       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-//         folder: "sentique/profile",
-//       });
-//       updateData.image = uploadResult.secure_url;
-//     }
-//     const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
-//     if (!updatedUser) {
-//       return res.status(404).json({ success: false, message: "User not found" });
-//     }
-//     res.json({ success: true, message: "Profile updated successfully", user: updatedUser });
-//   } catch (error) {
-//     console.error("Error updating profile:", error);
-//     res.status(500).json({ success: false, message: "Server error while updating profile" });
-//   }
-// };
-
-
 const updateProfile = async (req, res) => {
   try {
     const userId = req.session.user?.id;
@@ -762,7 +560,6 @@ const updateProfile = async (req, res) => {
     name = name?.trim();
     phone = phone?.trim();
 
-    // Name validation
     if (!name || name.length < 3 || name.length > 20) {
       return res.status(400).json({ success: false, message: "Name must be between 3 and 20 characters long." });
     }
@@ -770,8 +567,7 @@ const updateProfile = async (req, res) => {
     if (!nameRegex.test(name)) {
       return res.status(400).json({ success: false, message: "Name can only contain letters, spaces, apostrophes, and hyphens. No numbers allowed." });
     }
-
-    // Phone validation
+    
     if (phone) {
       if (phone.length !== 10) {
         return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits." });
@@ -781,26 +577,25 @@ const updateProfile = async (req, res) => {
         return res.status(400).json({ success: false, message: "Phone number must contain only numbers." });
       }
 
-      // Check for all same digits
+     
       const digits = phone.split('').map(Number);
       const uniqueDigits = new Set(digits);
       if (uniqueDigits.size === 1) {
         return res.status(400).json({ success: false, message: "Phone number cannot consist of all identical digits (e.g., 1111111111)." });
       }
 
-      // Check for ascending sequence (e.g., 1234567890)
+      
       const isAscending = digits.every((d, i) => i === 0 || d === digits[i - 1] + 1);
       if (isAscending) {
         return res.status(400).json({ success: false, message: "Phone number cannot be in strictly ascending order (e.g., 1234567890)." });
       }
 
-      // Check for descending sequence (e.g., 9876543210)
+   
       const isDescending = digits.every((d, i) => i === 0 || d === digits[i - 1] - 1);
       if (isDescending) {
         return res.status(400).json({ success: false, message: "Phone number cannot be in strictly descending order (e.g., 9876543210)." });
       }
-
-      // Check for consecutive repeated digits more than 2 (e.g., 000111)
+  
       let maxConsecutive = 1;
       let currentConsecutive = 1;
       for (let i = 1; i < 10; i++) {
@@ -830,17 +625,16 @@ const updateProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // ✅ KEY FIX: Update session with fresh data
     req.session.user = {
       id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
       phone: updatedUser.phone,
       image: updatedUser.image,
-      // Add any other user fields that the sidebar needs
+ 
     };
 
-    // ✅ Save session to ensure changes persist
+   
     await req.session.save();
 
     res.json({ 
@@ -855,6 +649,7 @@ const updateProfile = async (req, res) => {
   
   }
 };
+
 const getSecurityPage = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
@@ -862,8 +657,7 @@ const getSecurityPage = async (req, res) => {
     if (!userId) {
       return res.redirect('/login');
     }
-
-    // Fetch user from database to get latest data
+   
     const user = await User.findById(userId);
     
     if (!user) {

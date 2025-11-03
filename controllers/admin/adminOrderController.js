@@ -53,7 +53,7 @@ const getAdminOrderList = async (req, res) => {
       }
     });
 
-    // MAP WITH INDEX - ADD itemIndex to each product
+
     const ordersData = orders.map(order => {
       console.log('Processing Order:', order.orderId, 'Items:', order.orderItems.length);
       const address = order.deliveryAddress
@@ -369,8 +369,7 @@ const approveReturn = async (req, res) => {
     let refundAmount = 0;
     let productName = 'N/A';
     const itemsToProcess = [];
-
-    // CASE 1: Specific item by itemIndex and variantSize
+    
     if (itemIndex !== undefined && variantSize !== undefined && itemIndex !== 'all' && variantSize !== 'all') {
       const idx = parseInt(itemIndex);
       if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
@@ -378,14 +377,13 @@ const approveReturn = async (req, res) => {
       }
 
       const item = order.orderItems[idx];
-
-      // ✅ FIX: Convert both to Number for proper comparison
+ 
       const itemVariantSize = Number(item.variantSize);
       const requestVariantSize = Number(variantSize);
 
       console.log(`Comparing variants: Item=${itemVariantSize}, Request=${requestVariantSize}`);
 
-      // ✅ CRITICAL: Verify variant matches EXACTLY
+    
       if (itemVariantSize !== requestVariantSize) {
         return res.status(400).json({ 
           success: false, 
@@ -393,7 +391,7 @@ const approveReturn = async (req, res) => {
         });
       }
 
-      // ✅ FIX: Check status AFTER variant verification
+   
       if (item.status !== 'Return Request') {
         console.log(`Item status is "${item.status}", not "Return Request"`);
         return res.status(400).json({ 
@@ -402,11 +400,10 @@ const approveReturn = async (req, res) => {
         });
       }
 
-      // UPDATE STATUS
 item.status = 'Returned';
       item.returnedAt = new Date();
 
-      // ✅ NEW: Calculate refund with discount deduction
+      
       const itemDiscount = item.discountApplied || 0;
       const itemOriginalTotal = (item.price || 0) * (item.quantity || 1);
       refundAmount = itemOriginalTotal - itemDiscount;
@@ -429,7 +426,7 @@ item.status = 'Returned';
       });
 
     } 
-    // CASE 2: Entire order (all items in Return Request)
+    
     else if (itemIndex === 'all' || itemIndex === undefined) {
       const returnItems = order.orderItems.filter(i => i.status === 'Return Request');
       if (returnItems.length === 0) {
@@ -441,8 +438,7 @@ item.status = 'Returned';
        returnItems.forEach(item => {
         item.status = 'Returned';
         item.returnedAt = new Date();
-        
-        // ✅ NEW: Calculate refund with discount deduction
+
         const itemDiscount = item.discountApplied || 0;
         const itemOriginalTotal = (item.price || 0) * (item.quantity || 1);
         const itemRefund = itemOriginalTotal - itemDiscount;
@@ -459,8 +455,7 @@ item.status = 'Returned';
         });
       });
     }
-
-    // RESTORE STOCK: Process each item
+ 
     for (const item of itemsToProcess) {
       try {
         const product = await Product.findById(item.productId);
@@ -495,7 +490,6 @@ item.status = 'Returned';
       }
     }
 
-    // PROCESS REFUND: Add to wallet
     let wallet = await Wallet.findOne({ user: order.user });
     if (!wallet) {
       wallet = new Wallet({
@@ -526,7 +520,6 @@ item.status = 'Returned';
 
     await wallet.save();
 
-    // UPDATE ORDER STATUS
     const statuses = order.orderItems.map(i => i.status);
     if (statuses.every(s => s === 'Returned' || s === 'Cancelled')) {
       order.status = 'Returned';
@@ -601,7 +594,6 @@ const rejectReturn = async (req, res) => {
 
     let rejectedProductName = '';
 
-    // CASE 1: Specific item by itemIndex and variantSize
     if (itemIndex !== undefined && variantSize !== undefined && itemIndex !== 'all' && variantSize !== 'all') {
       const idx = parseInt(itemIndex);
       if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
@@ -610,13 +602,13 @@ const rejectReturn = async (req, res) => {
 
       const item = order.orderItems[idx];
 
-      // ✅ FIX: Convert both to Number for proper comparison
+   
       const itemVariantSize = Number(item.variantSize);
       const requestVariantSize = Number(variantSize);
 
       console.log(`Comparing variants: Item=${itemVariantSize}, Request=${requestVariantSize}`);
 
-      // ✅ CRITICAL: Verify variant matches EXACTLY
+
       if (itemVariantSize !== requestVariantSize) {
         return res.status(400).json({ 
           success: false, 
@@ -643,7 +635,7 @@ const rejectReturn = async (req, res) => {
       console.log(`Rejecting return for single item: ${rejectedProductName}`);
 
     } 
-    // CASE 2: Entire order
+
     else if (itemIndex === 'all' || itemIndex === undefined) {
       const returnRequestedItems = order.orderItems.filter(i => i.status === 'Return Request');
 

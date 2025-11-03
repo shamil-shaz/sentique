@@ -3,8 +3,6 @@ const mongoose = require('mongoose');
 const User = require('../models/userSchema');
 
 
-
-
 const clearUserSession = (req) => {
   return new Promise((resolve) => {
     delete req.session.user;

@@ -242,6 +242,9 @@ const getWishlistCount = async (req, res) => {
     return res.json({ count: 0, error: err.message });
   }
 };
+
+
+
 module.exports = {
   loadWishlist,
   addToWishlist,

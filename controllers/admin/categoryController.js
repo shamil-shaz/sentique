@@ -186,7 +186,7 @@ const getListCategory = async (req, res) => {
       return res.json({ status: false, message: "Category ID is required" });
     }
 
-    await Category.updateOne({ _id: categoryId }, { $set: { isListed: true } }); // ✅ CORRECT
+    await Category.updateOne({ _id: categoryId }, { $set: { isListed: true } }); 
     res.json({ status: true, message: "Category listed successfully" });
   } catch (error) {
     console.error("Error in getListCategory:", error);
@@ -201,7 +201,7 @@ const getUnlistCategory = async (req, res) => {
       return res.json({ status: false, message: "Category ID is required" });
     }
 
-    await Category.updateOne({ _id: categoryId }, { $set: { isListed: false } }); // ✅ CORRECT
+    await Category.updateOne({ _id: categoryId }, { $set: { isListed: false } });
     res.json({ status: true, message: "Category unlisted successfully" });
   } catch (error) {
     console.error("Error in getUnlistCategory:", error);
