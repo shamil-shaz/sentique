@@ -122,7 +122,7 @@ router.post("/update-profile", userAuth, upload.single("image"), profileControll
 router.get("/profile/address", userAuth, addressController.getAddresses);
 router.post("/addresses/add", userAuth, addressController.addAddress);
 router.get('/addresses/edit-address/:id', userAuth, addressController.getEditAddress);
-router.get('/profile/order-list',userAuth,orderController.getOrderList)
+//router.get('/profile/order-list',userAuth,paymentController.getOrderList)
 router.get('/profile/privacy-security', userAuth, profileController.getSecurityPage);
 router.get("/addresses/list", userAuth, addressController.getAddressesJSON);
 
@@ -165,13 +165,15 @@ router.post('/checkout/edit-address/:id', userAuth, checkoutController.editAddre
 router.get("/orderSuccess",userAuth,orderController.getOrderSuccess)
 router.get('/orderDetails/:orderId', userAuth, orderController.getOrderDetails);
 router.post('/orders/:orderId/cancel', userAuth, orderController.cancelAllOrder);
-router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel', userAuth, orderController.cancelSingleOrder);
+//router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel', userAuth, orderController.cancelSingleOrder);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/return', userAuth, orderController.returnSingleOrder);
 router.post('/orders/:orderId/return',userAuth, orderController.returnAllOrder);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel-return', userAuth, orderController.cancelReturnSingleOrder);
 router.post('/orders/:orderId/cancel-return',userAuth, orderController.cancelReturnAllOrder);
 router.post('/orders/:orderId/items/:productName/status', orderController.updateItemStatusRoute);
 router.get('/orders/:orderId/invoice', userAuth,invoiceController.generateInvoice);
+router.post('/orders/:orderId/items/:itemIndex/:variantSize/check-cancel', userAuth, orderController.checkCancellationImpact);
+router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel',userAuth,orderController.cancelSingleOrderWithCouponCheck);
 
 
 ////-------wallet-------
@@ -185,13 +187,18 @@ router.post('/api/wallet/record-failed-payment', userAuth, walletController.reco
 router.post('/api/wallet/test-transaction', userAuth, walletController.addTestTransaction);
 
 
+
 ///------------------payment-----------------
 
-router.post('/order/place', userAuth, paymentController.placeOrder);
 router.get('/payment/check-auth', paymentController.checkAuth);
-router.post('/payment/create-razorpay-order', apiAuth, paymentController.createRazorpayOrder);
-router.post('/payment/verify-razorpay-payment', apiAuth, paymentController.verifyRazorpayPayment);
-router.get('/orderFailure',userAuth,paymentController.getOrderFailure)
+router.post('/order/place', userAuth, paymentController.placeOrder);
+router.post('/payment/create-razorpayOrder', userAuth, paymentController.createRazorpayOrder);
+router.post('/payment/verify-razorpay-payment', userAuth, paymentController.verifyRazorpayPayment);
+router.post('/payment/payment-failure', userAuth, paymentController.handlePaymentFailure);
+router.post('/payment/retry-failed-order', userAuth, paymentController.retryPaymentForFailedOrder);
+router.get('/orderFailure', paymentController.getOrderFailure);
+router.get('/order/get-payment-failure-details/:orderId', userAuth, paymentController.getPaymentFailureDetails);
+router.get('/profile/order-list', userAuth, paymentController.getOrderList);
 
 
 ///----------coupns------------

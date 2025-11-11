@@ -531,13 +531,16 @@
   <div class="content-grid">
     <div class="card">
       <div class="card-header">
-        <div class="card-title">📈 Sales Performance</div>
+        <div class="card-title">📈 Sales Performance (<span id="chartPeriod">Monthly</span>)</div>
+
         <div style="display: flex; gap: 8px;">
-          <button class="chart-filter-btn active" onclick="updateChart('daily')">📅 Daily</button>
-          <button class="chart-filter-btn" onclick="updateChart('weekly')">📊 Weekly</button>
-          <button class="chart-filter-btn" onclick="updateChart('monthly')">📈 Monthly</button>
-          <button class="chart-filter-btn" onclick="updateChart('yearly')">📆 Yearly</button>
-        </div>
+  <button class="chart-filter-btn active" onclick="updateChart('daily', this)">📅 Daily</button>
+  <button class="chart-filter-btn" onclick="updateChart('weekly', this)">📊 Weekly</button>
+  <button class="chart-filter-btn" onclick="updateChart('monthly', this)">📈 Monthly</button>
+  <button class="chart-filter-btn" onclick="updateChart('yearly', this)">📆 Yearly</button>
+</div>
+
+
       </div>
       <div class="chart-container">
         <canvas id="salesChart"></canvas>
@@ -750,182 +753,157 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-  // Show error alert if exists from controller
-  const errorMsg = '<%= typeof error !== "undefined" && error ? error.replace(/'/g, "\\'") : "" %>';
-  if (errorMsg) {
-    Swal.fire({
-      title: '⚠️ Invalid Date Range',
-      text: errorMsg,
-      icon: 'error',
-      confirmButtonColor: '#fc8181',
-      confirmButtonText: 'OK',
-      allowOutsideClick: false,
-      didClose: function() {
-        window.location.href = '?filter=monthly';
-      }
-    });
-  }
-
-  // Date Validation
-  const dateForm = document.getElementById('dateRangeForm');
-  if (dateForm) {
-    dateForm.addEventListener('submit', function(e) {
-      const startDate = new Date(document.getElementById('startDate').value);
-      const endDate = new Date(document.getElementById('endDate').value);
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-
-      if (startDate > today || endDate > today) {
-        e.preventDefault();
-        Swal.fire({
-          title: 'Invalid Date Range',
-          text: 'Please select past or current dates only. Future dates are not allowed.',
-          icon: 'error',
-          confirmButtonColor: '#fc8181',
-          confirmButtonText: 'OK'
-        });
-        return false;
-      }
-
-      if (startDate > endDate) {
-        e.preventDefault();
-        Swal.fire({
-          title: 'Invalid Date Range',
-          text: 'Start date cannot be after end date.',
-          icon: 'error',
-          confirmButtonColor: '#fc8181',
-          confirmButtonText: 'OK'
-        });
-        return false;
-      }
-    });
-  }
-
-  // Set max date to today
-  const today = new Date().toISOString().split('T')[0];
-  const startDateInput = document.getElementById('startDate');
-  const endDateInput = document.getElementById('endDate');
-  if (startDateInput) startDateInput.setAttribute('max', today);
-  if (endDateInput) endDateInput.setAttribute('max', today);
-
-  // Sales Chart
-  const chartLabels = <%- JSON.stringify(chartLabels) %>;
-  const chartData = <%- JSON.stringify(chartData) %>;
   let salesChart = null;
 
-  function initChart() {
-    const ctx = document.getElementById('salesChart');
-    if (ctx && !salesChart) {
-      const chartContext = ctx.getContext('2d');
-      salesChart = new Chart(chartContext, {
-        type: 'line',
-        data: {
-          labels: chartLabels.length > 0 ? chartLabels : ['No data'],
-          datasets: [{
-            label: 'Daily Sales (₹)',
-            data: chartData.length > 0 ? chartData : [0],
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+  // ✅ Function to safely render chart
+  function renderChart(labels, data, label = "Sales (₹)") {
+    const container = document.querySelector(".chart-container");
+    let oldCanvas = document.getElementById("salesChart");
+
+    // 🔥 Completely remove and recreate the canvas element to prevent reuse errors
+    if (oldCanvas) oldCanvas.remove();
+    const newCanvas = document.createElement("canvas");
+    newCanvas.id = "salesChart";
+    container.appendChild(newCanvas);
+
+    const ctx = newCanvas.getContext("2d");
+
+    // ✅ Create fresh chart
+    salesChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels.length > 0 ? labels : ["No data"],
+        datasets: [
+          {
+            label,
+            data: data.length > 0 ? data : [0],
+            borderColor: "#667eea",
+            backgroundColor: "rgba(102, 126, 234, 0.1)",
             borderWidth: 3,
             fill: true,
             tension: 0.4,
             pointRadius: 5,
-            pointBackgroundColor: '#667eea',
-            pointBorderColor: '#fff',
+            pointBackgroundColor: "#667eea",
+            pointBorderColor: "#fff",
             pointBorderWidth: 2,
             pointHoverRadius: 8,
-            pointHoverBackgroundColor: '#764ba2',
-            segment: {
-              borderColor: ctx => {
-                return '#667eea';
-              }
+            pointHoverBackgroundColor: "#764ba2"
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              font: { size: 12, weight: "bold" },
+              color: "#7a8293",
+              usePointStyle: true
             }
-          }]
+          },
+          tooltip: {
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            padding: 12,
+            titleFont: { size: 14, weight: "bold" },
+            bodyFont: { size: 13 },
+            borderColor: "#667eea",
+            borderWidth: 1,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: ctx =>
+                "₹" +
+                ctx.parsed.y.toLocaleString("en-IN", {
+                  maximumFractionDigits: 2
+                })
+            }
+          }
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: {
-            mode: 'index',
-            intersect: false,
-          },
-          plugins: {
-            legend: { 
-              display: true,
-              labels: {
-                font: { size: 12, weight: 'bold' },
-                color: '#7a8293',
-                padding: 20,
-                usePointStyle: true
-              }
-            },
-            tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.9)',
-              padding: 12,
-              titleFont: { size: 14, weight: 'bold' },
-              bodyFont: { size: 13 },
-              borderColor: '#667eea',
-              borderWidth: 1,
-              cornerRadius: 8,
-              displayColors: false,
-              callbacks: {
-                label: function(context) {
-                  return '₹' + context.parsed.y.toLocaleString('en-IN', { maximumFractionDigits: 2 });
-                }
-              }
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: "rgba(0, 0, 0, 0.05)", drawBorder: false },
+            ticks: {
+              callback: value => "₹" + value.toLocaleString("en-IN"),
+              font: { size: 12, weight: "600" },
+              color: "#7a8293"
             }
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0, 0, 0, 0.05)',
-                drawBorder: false
-              },
-              ticks: {
-                callback: function(value) {
-                  return '₹' + value.toLocaleString('en-IN');
-                },
-                font: { size: 12, weight: '600' },
-                color: '#7a8293',
-                padding: 12
-              }
-            },
-            x: {
-              grid: {
-                display: false,
-                drawBorder: false
-              },
-              ticks: {
-                font: { size: 11, weight: '600' },
-                color: '#7a8293',
-                padding: 8,
-                maxRotation: 45,
-                minRotation: 0
-              }
+          x: {
+            grid: { display: false, drawBorder: false },
+            ticks: {
+              font: { size: 11, weight: "600" },
+              color: "#7a8293",
+              maxRotation: 45,
+              minRotation: 0
             }
           }
         }
+      }
+    });
+  }
+
+  // ✅ Initialize chart on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    const chartLabels = <%- JSON.stringify(chartLabels) %>;
+    const chartData = <%- JSON.stringify(chartData) %>;
+    renderChart(chartLabels, chartData, "Monthly Sales (₹)");
+
+    const chartPeriodEl = document.getElementById("chartPeriod");
+    if (chartPeriodEl) chartPeriodEl.textContent = "Monthly";
+  });
+
+  // ✅ Update chart dynamically (no reload)
+  async function updateChart(period, el) {
+    try {
+      // Toggle active buttons
+      document
+        .querySelectorAll(".chart-filter-btn")
+        .forEach(btn => btn.classList.remove("active"));
+      el.classList.add("active");
+
+      // Show loading
+      Swal.fire({
+        title: "Loading Chart...",
+        html: "Fetching latest sales data...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
       });
+
+      // Fetch new data
+      const response = await fetch(`/admin/dashboard-chart-data?period=${period}`);
+      const data = await response.json();
+      Swal.close();
+
+      if (!data.success) {
+        Swal.fire("Error", "Failed to load chart data", "error");
+        return;
+      }
+
+      // ✅ Recreate and re-render chart safely
+      renderChart(
+        data.labels,
+        data.sales,
+        `Sales (${period.charAt(0).toUpperCase() + period.slice(1)})`
+      );
+
+      const chartPeriodEl = document.getElementById("chartPeriod");
+      if (chartPeriodEl)
+        chartPeriodEl.textContent =
+          period.charAt(0).toUpperCase() + period.slice(1);
+    } catch (err) {
+      Swal.close();
+      console.error("Chart update error:", err);
+      Swal.fire("Error", "Something went wrong while updating chart", "error");
     }
   }
-
-  function updateChart(period) {
-    // Update button states
-    document.querySelectorAll('.chart-filter-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-
-    // Redirect to dashboard with new filter
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    window.location.href = `?filter=${period}&startDate=${startDate}&endDate=${endDate}`;
-  }
-
-  // Initialize chart on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    initChart();
-  });
 </script>
+
+
 
 <%- include("../partials/admin/scriptfooter.ejs") %>

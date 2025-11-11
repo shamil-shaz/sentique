@@ -940,92 +940,155 @@
         }
 
         function renderTransactions(transactions) {
-            const tbody = document.getElementById('transactionBody');
-            
-            if (!transactions || transactions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">📭 No transactions</div></td></tr>';
-                return;
-            }
+  const tbody = document.getElementById('transactionBody');
 
-            let html = '';
-            transactions.forEach(t => {
-                const amountClass = t.type === 'credit' ? 'amount-credit' : t.type === 'failed' ? 'amount-failed' : 'amount-debit';
-                const amountSign = t.type === 'credit' ? '+' : t.type === 'failed' ? '' : '-';
-                const statusClass = t.type === 'credit' ? '' : t.type === 'failed' ? 'failed' : 'debit';
+  if (!transactions || transactions.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">📭 No transactions</div>
+        </td>
+      </tr>`;
+    return;
+  }
 
-                let transactionType = '';
-                let descriptionText = '';
+  let html = '';
+  transactions.forEach(t => {
+    const amountClass =
+      t.type === 'credit'
+        ? 'amount-credit'
+        : t.type === 'failed'
+        ? 'amount-failed'
+        : 'amount-debit';
+    const amountSign =
+      t.type === 'credit'
+        ? '+'
+        : t.type === 'failed'
+        ? ''
+        : '-';
+    const statusClass =
+      t.type === 'credit'
+        ? ''
+        : t.type === 'failed'
+        ? 'failed'
+        : 'debit';
 
-                switch(t.description) {
-                    case 'Add Money':
-                        transactionType = 'Wallet Top-up';
-                        descriptionText = 'Money added to wallet';
-                        break;
-                    case 'Payment Failed':
-                        transactionType = 'Payment Failed';
-                        descriptionText = `Failed to add ₹${t.amount}`;
-                        break;
-                    case 'Purchase':
-                        transactionType = 'Product Purchase';
-                        descriptionText = `Order ID: ${t.orderId}`;
-                        break;
-                    case 'Refund':
-                        transactionType = 'Product Refund';
-                        descriptionText = `${t.productName || 'Product'} refunded`;
-                        break;
-                    case 'Return':
-                        transactionType = 'Product Return';
-                        descriptionText = `${t.productName || 'Product'} returned`;
-                        break;
-                    case 'Order Cancellation':
-                        transactionType = 'Order Cancelled';
-                        descriptionText = `${t.productName || 'Order'} cancelled`;
-                        break;
-                    case 'Referral':
-                        transactionType = 'Referral Bonus';
-                        descriptionText = `Referred by ${t.reason || 'User'}`;
-                        break;
-                    case 'Cashback':
-                        transactionType = 'Cashback';
-                        descriptionText = `Cashback on ${t.productName || 'purchase'}`;
-                        break;
-                    case 'Adjustment':
-                        transactionType = 'Account Adjustment';
-                        descriptionText = t.reason || 'Account adjustment';
-                        break;
-                    default:
-                        transactionType = t.description;
-                        descriptionText = t.details || '-';
-                }
+    // 🧩 Fallback values
+    const productName = t.productName && t.productName !== 'null' ? t.productName : '—';
+    const productId = t.productId && t.productId !== 'null' ? t.productId : '—';
+    const orderId = t.orderId && t.orderId !== 'N/A' ? t.orderId : '—';
+    const reason = t.reason && t.reason !== 'null' ? t.reason : '';
+    const details = t.details && t.details !== 'null' ? t.details : '';
 
-                let badgeClass = 'badge-credit';
-                if (t.description === 'Purchase' || t.description === 'Return') {
-                    badgeClass = 'badge-debit';
-                }
+    // 🧠 Determine transaction type and description
+    let transactionType = '';
+    let descriptionText = '';
 
-                html += `
-                    <tr>
-                        <td class="serial-no">${t.serialNo}</td>
-                        <td><span class="badge ${badgeClass}">${transactionType}</span></td>
-                        <td>
-                            <div><strong>${descriptionText}</strong></div>
-                            ${t.details && t.details !== descriptionText ? `<div style="font-size: 11px; color: #999;">${t.details}</div>` : ''}
-                        </td>
-                        <td>
-                            <div>${t.date}</div>
-                            <div style="font-size: 11px; color: #999;">${t.time}</div>
-                        </td>
-                        <td class="amount ${amountClass}">
-                            ${amountSign}₹${t.amount}
-                        </td>
-                        <td>
-                            <span class="status-badge ${statusClass}">${t.type === 'credit' ? 'Credited' : t.type === 'failed' ? 'Failed' : 'Debited'}</span>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
+    switch (t.description) {
+      case 'Add Money':
+        transactionType = 'Wallet Top-up';
+        descriptionText = 'Money added to wallet';
+        break;
+
+      case 'Purchase':
+        transactionType = 'Product Purchase';
+        descriptionText = `${productName !== '—' ? productName : 'Product purchased'}`;
+        break;
+
+      case 'Refund':
+      case 'Order cancellation refund':
+      case 'Refund after coupon revocation':
+        transactionType = 'Refund';
+        descriptionText = `${productName || 'Product'} refunded`;
+        break;
+
+      case 'Order Cancellation':
+      case 'Order Cancellation (Coupon Revoked)':
+      case 'Order Cancellation (Coupon Revoked - Min. Purchase)':
+      case 'Order Cancellation & Coupon Revoked':
+      case 'Order Cancellation & Coupon Revoked (Min. Purchase)':
+        transactionType = 'Order Cancelled';
+        descriptionText = `${productName || 'Order'} cancelled`;
+        break;
+
+      case 'Return':
+        transactionType = 'Product Return';
+        descriptionText = `${productName || 'Product'} returned`;
+        break;
+
+      case 'Payment Failed':
+        transactionType = 'Payment Failed';
+        descriptionText = `Failed to add ₹${t.amount}`;
+        break;
+
+      case 'Referral':
+        transactionType = 'Referral Bonus';
+        descriptionText = `Referred by ${reason || 'User'}`;
+        break;
+
+      case 'Cashback':
+        transactionType = 'Cashback';
+        descriptionText = `Cashback on ${productName || 'purchase'}`;
+        break;
+
+      case 'Adjustment':
+        transactionType = 'Account Adjustment';
+        descriptionText = reason || 'Account adjusted';
+        break;
+
+      default:
+        transactionType = t.description || 'Transaction';
+        descriptionText = details || '-';
+    }
+
+    // 🏷️ Badge color
+    let badgeClass = 'badge-credit';
+    if (t.type === 'debit') badgeClass = 'badge-debit';
+    if (t.type === 'failed') badgeClass = 'badge-failed';
+
+    // 🧾 Build HTML row
+    html += `
+      <tr>
+        <td class="serial-no">${t.serialNo}</td>
+        <td><span class="badge ${badgeClass}">${transactionType}</span></td>
+        <td>
+          <div><strong>${descriptionText}</strong></div>
+          ${
+            productId && productId !== '—'
+              ? `<div style="font-size: 11px; color: #777;"> Product ID: ${productId}</div>`
+              : ''
+          }
+          ${
+            orderId && orderId !== '—'
+              ? `<div style="font-size: 11px; color: #999;"> Order ID: ${orderId}</div>`
+              : ''
+          }
+          ${
+            reason
+              ? `<div style="font-size: 11px; color: #999;">Reason: ${reason}</div>`
+              : ''
+          }
+        </td>
+        <td>
+          <div>${t.date}</div>
+          <div style="font-size: 11px; color: #999;">${t.time}</div>
+        </td>
+        <td class="amount ${amountClass}">
+          ${amountSign}₹${t.amount}
+        </td>
+        <td>
+          <span class="status-badge ${statusClass}">
+            ${t.type === 'credit' ? 'Credited' : t.type === 'failed' ? 'Failed' : 'Debited'}
+          </span>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+
 
         function renderPagination() {
             const container = document.getElementById('paginationContainer');

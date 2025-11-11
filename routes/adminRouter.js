@@ -104,6 +104,7 @@ router.patch('/toggle-coupon/:id', adminAuth, adminCouponsController.toggleCoupo
 //----------------Dashboard Mangement-----------
 
 router.get("/dashboard", adminAuth, dashboardController.loadDashboard);
+router.get('/dashboard-chart-data',adminAuth, dashboardController. getDashboardChartData);
 
 //--------  Sales Report-----
 

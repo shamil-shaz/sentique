@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,7 +30,6 @@
             left: 0;
             top: 0;
             height: 100vh;
-            
             z-index: 1000;
         }
 
@@ -41,7 +39,7 @@
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
             padding-top: 90px;
         }
@@ -129,6 +127,23 @@
         .btn-warning:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(237, 137, 54, 0.6);
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn-view:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.5);
         }
 
         .filter-section {
@@ -488,6 +503,30 @@
             color: #7f1d1d;
         }
 
+        .payment-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .payment-cod {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .payment-wallet {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .payment-online {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
         .amount-cell {
             text-align: right;
             font-weight: 600;
@@ -495,6 +534,238 @@
 
         .qty-cell {
             text-align: center;
+        }
+
+        /* Product Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: calc(90vh - 120px);
+            overflow-y: auto;
+        }
+
+        .order-info {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .order-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .order-info-label {
+            font-size: 0.8rem;
+            color: #4a5568;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .order-info-value {
+            font-size: 1rem;
+            color: #1a202c;
+            font-weight: 600;
+        }
+
+        .products-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .product-item {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .product-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .product-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a202c;
+            flex: 1;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #38a169;
+            white-space: nowrap;
+        }
+
+        .product-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .product-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .product-detail-label {
+            font-size: 0.75rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .product-detail-value {
+            font-size: 0.9rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .variant-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .product-total {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border-left: 4px solid #38a169;
+        }
+
+        .product-total-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .product-total-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .product-total-label {
+            font-size: 0.85rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .product-total-value {
+            font-size: 1.2rem;
+            color: #1a202c;
+            font-weight: 700;
         }
 
         .pagination-wrapper {
@@ -579,22 +850,6 @@
                 width: 0;
                 display: none;
             }
-
-            .quick-filters {
-                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-            }
-
-            .filter-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
         }
 
         @media (max-width: 768px) {
@@ -602,122 +857,18 @@
                 padding: 12px;
             }
 
-            .header {
-                padding: 16px;
+            .modal-content {
+                max-width: 100%;
+            }
+
+            .product-header {
                 flex-direction: column;
-                align-items: flex-start;
             }
 
-            .header h1 {
-                font-size: 1.3rem;
-            }
-
-            .filter-section {
-                padding: 16px;
-            }
-
-            .quick-filters {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .filter-grid {
+            .order-info-grid,
+            .product-details,
+            .product-total-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .filter-buttons {
-                grid-template-columns: 1fr;
-            }
-
-            .filter-btn-apply,
-            .filter-btn-reset {
-                width: 100%;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-value {
-                font-size: 1.5rem;
-            }
-
-            .export-buttons {
-                grid-template-columns: 1fr;
-            }
-
-            .export-section .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            table {
-                font-size: 0.8rem;
-            }
-
-            thead th, tbody td {
-                padding: 10px 8px;
-            }
-
-            .pagination-wrapper {
-                padding: 16px;
-            }
-
-            .pagination a,
-            .pagination span {
-                padding: 8px 10px;
-                min-width: 36px;
-                min-height: 36px;
-                font-size: 0.8rem;
-            }
-
-            .table-header {
-                padding: 16px;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .page-info {
-                font-size: 0.8rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.1rem;
-            }
-
-            .quick-filters {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-
-            .filter-btn {
-                padding: 10px 12px;
-                font-size: 0.8rem;
-            }
-
-            .stat-value {
-                font-size: 1.3rem;
-            }
-
-            .btn {
-                padding: 10px 14px;
-                font-size: 0.85rem;
-            }
-
-            thead th, tbody td {
-                padding: 8px 6px;
-            }
-
-            .pagination a,
-            .pagination span {
-                padding: 6px 8px;
-                min-width: 32px;
-                min-height: 32px;
-            }
-
-            .empty-state {
-                padding: 40px 20px;
             }
         }
 
@@ -727,8 +878,10 @@
             .filter-section,
             .export-section,
             .pagination-wrapper,
-            .error-banner {
-                display: none;
+            .error-banner,
+            .btn-view,
+            .modal {
+                display: none !important;
             }
 
             body {
@@ -743,7 +896,6 @@
 </head>
 <body>
     <div class="sidebar-space">
-
         <%- include("../partials/admin/header.ejs") %>
     </div>
 
@@ -853,16 +1005,17 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="width: 12%;">Order ID</th>
+                                    <th style="width: 10%;">Order ID</th>
                                     <th style="width: 12%;">Customer</th>
                                     <th style="width: 10%;">Phone</th>
-                                    <th style="width: 18%;">Product</th>
-                                    <th style="width: 8%; text-align: center;">Items</th>
+                                    <th style="width: 15%;">Products</th>
+                                    <th style="width: 7%; text-align: center;">Items</th>
                                     <th style="width: 10%; text-align: right;">Total</th>
-                                    <th style="width: 10%; text-align: right;">Discount</th>
-                                    <th style="width: 12%; text-align: right;">Amount</th>
-                                    <th style="width: 10%;">Coupon</th>
-                                    <th style="width: 12%;">Status</th>
+                                    <th style="width: 9%; text-align: right;">Discount</th>
+                                    <th style="width: 10%; text-align: right;">Amount</th>
+                                    <th style="width: 9%;">Coupon</th>
+                                    <th style="width: 11%;">Payment</th>
+                                    <th style="width: 10%;">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -871,12 +1024,43 @@
                                         <td><strong>#<%= order.orderIdShort %></strong></td>
                                         <td><%= order.user.name %></td>
                                         <td><%= order.user.phone %></td>
-                                        <td><%= order.firstProduct %></td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    <%= order.firstProduct %>
+                                                </span>
+                                                <% if (order.productCount > 1) { %>
+                                                    <button class="btn-view" onclick="showProductModal('<%= order._id %>')">
+                                                        +<%= order.productCount - 1 %> View
+                                                    </button>
+                                                <% } else if (order.productCount === 1) { %>
+                                                    <button class="btn-view" onclick="showProductModal('<%= order._id %>')">
+                                                        View
+                                                    </button>
+                                                <% } %>
+                                            </div>
+                                        </td>
                                         <td class="qty-cell"><%= order.totalItems %></td>
                                         <td class="amount-cell">₹<%= order.totalPrice.toLocaleString('en-IN') %></td>
                                         <td class="amount-cell"><span style="color: #ed8936;">-₹<%= order.discount.toLocaleString('en-IN') %></span></td>
                                         <td class="amount-cell"><strong>₹<%= order.finalAmount.toLocaleString('en-IN') %></strong></td>
                                         <td><%= order.couponCode %></td>
+                                        <td>
+                                            <% 
+                                            let paymentClass = 'payment-cod';
+                                            if (order.paymentMethodRaw) {
+                                                const method = order.paymentMethodRaw.toLowerCase();
+                                                if (method === 'wallet') {
+                                                    paymentClass = 'payment-wallet';
+                                                } else if (method === 'razorpay' || method === 'online') {
+                                                    paymentClass = 'payment-online';
+                                                }
+                                            }
+                                            %>
+                                            <span class="payment-badge <%= paymentClass %>">
+                                                <%= order.paymentMethod %>
+                                            </span>
+                                        </td>
                                         <td>
                                             <span class="status-badge status-<%= order.status.toLowerCase().replace(/\s/g, '') %>">
                                                 <%= order.status %>
@@ -935,11 +1119,147 @@
         </div>
     </div>
 
+    <!-- Product Details Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📦 Order Details</h2>
+                <button class="modal-close" onclick="closeProductModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
     <script>
-        /**
-         * Set max date to today for date inputs
-         * This prevents selecting future dates in the date picker
-         */
+        // Store orders data for modal
+        const ordersData = <%- JSON.stringify(orders) %>;
+
+        function showProductModal(orderId) {
+            const order = ordersData.find(o => o._id === orderId);
+            if (!order) return;
+
+            const modal = document.getElementById('productModal');
+            const modalBody = document.getElementById('modalBody');
+
+            let productsHtml = '';
+            order.orderItems.forEach((item, index) => {
+                productsHtml += `
+                    <div class="product-item">
+                        <div class="product-header">
+                            <div class="product-name">${index + 1}. ${item.productName}</div>
+                            <div class="product-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                        </div>
+                        <div class="product-details">
+                            <div class="product-detail">
+                                <div class="product-detail-label">Quantity</div>
+                                <div class="product-detail-value">${item.quantity} pcs</div>
+                            </div>
+                            <div class="product-detail">
+                                <div class="product-detail-label">Unit Price</div>
+                                <div class="product-detail-value">₹${item.price.toLocaleString('en-IN')}</div>
+                            </div>
+                            ${item.variant ? `
+                            <div class="product-detail">
+                                <div class="product-detail-label">Variant</div>
+                                <div class="product-detail-value">
+                                    <span class="variant-badge">${item.variant}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Format payment method
+            let paymentMethodDisplay = order.paymentMethod;
+            let paymentClass = 'payment-cod';
+            if (order.paymentMethodRaw) {
+                const method = order.paymentMethodRaw.toLowerCase();
+                if (method === 'wallet') {
+                    paymentClass = 'payment-wallet';
+                } else if (method === 'razorpay' || method === 'online') {
+                    paymentClass = 'payment-online';
+                }
+            }
+
+            modalBody.innerHTML = `
+                <div class="order-info">
+                    <div class="order-info-grid">
+                        <div class="order-info-item">
+                            <div class="order-info-label">Order ID</div>
+                            <div class="order-info-value">#${order.orderIdShort}</div>
+                        </div>
+                        <div class="order-info-item">
+                            <div class="order-info-label">Customer</div>
+                            <div class="order-info-value">${order.user.name}</div>
+                        </div>
+                        <div class="order-info-item">
+                            <div class="order-info-label">Order Date</div>
+                            <div class="order-info-value">${order.orderDate}</div>
+                        </div>
+                        <div class="order-info-item">
+                            <div class="order-info-label">Payment Method</div>
+                            <div class="order-info-value">
+                                <span class="payment-badge ${paymentClass}">${paymentMethodDisplay}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="products-title">📦 Products (${order.orderItems.length})</div>
+                
+                ${productsHtml}
+
+                <div class="product-total">
+                    <div class="product-total-grid">
+                        <div class="product-total-item">
+                            <div class="product-total-label">Total Items</div>
+                            <div class="product-total-value">${order.totalItems}</div>
+                        </div>
+                        <div class="product-total-item">
+                            <div class="product-total-label">Subtotal</div>
+                            <div class="product-total-value">₹${order.totalPrice.toLocaleString('en-IN')}</div>
+                        </div>
+                        <div class="product-total-item">
+                            <div class="product-total-label">Discount</div>
+                            <div class="product-total-value" style="color: #ed8936;">-₹${order.discount.toLocaleString('en-IN')}</div>
+                        </div>
+                        <div class="product-total-item">
+                            <div class="product-total-label">Final Amount</div>
+                            <div class="product-total-value" style="color: #38a169; font-size: 1.4rem;">₹${order.finalAmount.toLocaleString('en-IN')}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('productModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target === modal) {
+                closeProductModal();
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeProductModal();
+            }
+        });
+
         function initializeDateInputs() {
             const today = new Date();
             const formattedToday = today.toISOString().split('T')[0];
@@ -951,10 +1271,6 @@
             if (endDateInput) endDateInput.setAttribute('max', formattedToday);
         }
 
-        /**
-         * Set filter type and update UI
-         * Clears date inputs for non-custom filters
-         */
         function setFilter(type) {
             const filterTypeInput = document.getElementById('filterType');
             const startDateInput = document.getElementById('startDate');
@@ -962,7 +1278,6 @@
             
             filterTypeInput.value = type;
 
-            // Clear date inputs for non-custom filters
             if (type !== 'custom') {
                 startDateInput.value = '';
                 endDateInput.value = '';
@@ -973,19 +1288,14 @@
                 endDateInput.disabled = false;
             }
 
-            // Update active button styling
             document.querySelectorAll('.quick-filters .filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
 
-            // Reset to page 1
             document.getElementById('page').value = '1';
         }
 
-        /**
-         * Reset all filters to default (daily)
-         */
         function resetFilter() {
             document.getElementById('filterType').value = 'daily';
             document.getElementById('startDate').value = '';
@@ -993,7 +1303,6 @@
             document.getElementById('limit').value = '10';
             document.getElementById('page').value = '1';
 
-            // Reset button styles
             document.querySelectorAll('.quick-filters .filter-btn').forEach((btn, index) => {
                 if (index === 0) {
                     btn.classList.add('active');
@@ -1002,25 +1311,18 @@
                 }
             });
 
-            // Disable date inputs
             document.getElementById('startDate').disabled = true;
             document.getElementById('endDate').disabled = true;
 
             document.getElementById('filterForm').submit();
         }
 
-        /**
-         * Handle filter form submission
-         * Validates date range for custom filter
-         */
         function handleFilterSubmit(event) {
             const filterType = document.getElementById('filterType').value;
             const startDateInput = document.getElementById('startDate').value;
             const endDateInput = document.getElementById('endDate').value;
 
-            // Only validate if custom filter is selected
             if (filterType === 'custom') {
-                // Check if both dates are selected
                 if (!startDateInput || !endDateInput) {
                     event.preventDefault();
                     Swal.fire({
@@ -1033,7 +1335,6 @@
                     return false;
                 }
 
-                // Check if start date is after end date
                 const startDate = new Date(startDateInput);
                 const endDate = new Date(endDateInput);
 
@@ -1054,10 +1355,6 @@
             return true;
         }
 
-        /**
-         * Automatically adjust end date when start date changes
-         * Prevents end date from being before start date
-         */
         function syncDateInputs() {
             const startDateInput = document.getElementById('startDate');
             const endDateInput = document.getElementById('endDate');
@@ -1077,9 +1374,6 @@
             });
         }
 
-        /**
-         * Show error message if validation failed
-         */
         function showErrorMessage() {
             <% if (showError && errorMessage) { %>
                 window.addEventListener('load', function() {
@@ -1094,9 +1388,6 @@
             <% } %>
         }
 
-        /**
-         * Initialize filter buttons on page load
-         */
         function initializeFilterButtons() {
             const filterType = '<%= filterType %>';
             const filterBtns = document.querySelectorAll('.quick-filters .filter-btn');
@@ -1110,7 +1401,6 @@
                 }
             });
 
-            // Enable/disable date inputs based on filter type
             const startDateInput = document.getElementById('startDate');
             const endDateInput = document.getElementById('endDate');
             
@@ -1123,9 +1413,6 @@
             }
         }
 
-        /**
-         * Prevent double submission
-         */
         function preventDoubleSubmit() {
             let isSubmitting = false;
             const form = document.getElementById('filterForm');
@@ -1144,9 +1431,6 @@
             });
         }
 
-        /**
-         * Handle pagination link clicks
-         */
         function handlePagination() {
             document.querySelectorAll('.pagination a').forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -1163,9 +1447,6 @@
             });
         }
 
-        /**
-         * Initialize all functionality on page load
-         */
         window.addEventListener('load', function() {
             initializeDateInputs();
             initializeFilterButtons();

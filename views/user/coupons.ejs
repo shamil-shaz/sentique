@@ -181,7 +181,7 @@
 
         /* Status-based styling */
         .coupon-card.premium {
-            background: linear-gradient(135deg, #1a0f0a 0%, #2c1810 100%);
+            background: linear-gradient(135deg, #133436 0%, #153d27 100%);
             border-color: var(--premium-light);
         }
 
@@ -1170,9 +1170,9 @@
             const status = getStatus(coupon);
             const isUpcoming = status === 'upcoming';
             const isExpired = status === 'expired';
-            const isUsed = status === 'used';  // ✅ NEW: Handle used state
+            const isUsed = status === 'used';  
 
-            // ✅ UPDATED: Hide/disable for upcoming/used/expired
+            
             const copyBtn = document.getElementById('copyBtn');
             const applyBtn = document.getElementById('applyBtn');
             

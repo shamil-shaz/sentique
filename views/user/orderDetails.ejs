@@ -6,1126 +6,935 @@
     <title>Order Details - Sentique</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
 <style>
+    /* ... (All your CSS styles go here) ...
+       ... (I've hidden it for brevity, but your full CSS from the prompt goes here) ...
+    */
 
-* {
+    * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #fff5f0 0%, #fff8f0 50%, #fff0f5 100%);
-    min-height: 100vh;
-}
-
-/* Header/Footer Space */
-.header-space {
-    height: 100px;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.footer-space {
-    height: 300px;
-    background: #1a1a1a;
-    margin-top: 40px;
-}
-
-/* Container */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 30px 20px;
-}
-
-/* Breadcrumb */
-.breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-}
-
-.breadcrumb a {
-    color: #666;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
-.breadcrumb a:hover {
-    color: #ff6b35;
-}
-
-.breadcrumb .active {
-    color: #ff6b35;
-    font-weight: 600;
-}
-
-/* Order Header */
-.order-header {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    margin-bottom: 25px;
-}
-
-.order-header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.order-title-section h1 {
-    font-size: 28px;
-    color: #333;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.status-badge {
-    padding: 8px 20px;
-    background: linear-gradient(135deg, #ffc107 0%, #ff6b35 100%);
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    border-radius: 25px;
-    letter-spacing: 0.5px;
-}
-
-.order-meta {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    font-size: 14px;
-    color: #666;
-}
-
-.order-meta-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.order-meta-item strong {
-    color: #333;
-}
-
-.invoice-btn {
-    padding: 14px 30px;
-    background: linear-gradient(135deg, #ff8c42 0%, #ffc107 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(255,140,66,0.3);
-    transition: all 0.3s;
-    font-size: 15px;
-}
-
-.invoice-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255,140,66,0.4);
-}
-
-/* Grid Layout */
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-    margin-bottom: 25px;
-}
-
-.info-card {
-    background: white;
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    transition: all 0.3s;
-}
-
-.info-card:hover {
-    box-shadow: 0 6px 30px rgba(0,0,0,0.15);
-    transform: translateY(-2px);
-}
-
-.info-card-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.icon-box {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-}
-
-.icon-orange {
-    background: linear-gradient(135deg, #ffe5d9 0%, #ffc8a8 100%);
-}
-
-.icon-amber {
-    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
-}
-
-.icon-rose {
-    background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
-}
-
-.info-card-header h2 {
-    font-size: 18px;
-    color: #333;
-    font-weight: 700;
-}
-
-.info-card-content {
-    color: #666;
-    line-height: 1.8;
-}
-
-.info-card-content p {
-    margin-bottom: 8px;
-}
-
-.info-card-content .name {
-    font-weight: 700;
-    color: #333;
-    font-size: 16px;
-}
-
-.contact-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
-    font-weight: 600;
-    color: #333;
-}
-
-.payment-method {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px;
-    background: linear-gradient(135deg, #fff8f0 0%, #ffe8d9 100%);
-    border-radius: 12px;
-}
-
-.payment-icon {
-    width: 40px;
-    height: 40px;
-    background: white;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    color: #666;
-}
-
- .summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.95rem;
-    color: #666;
-  }
-
-  .summary-row.discount-row {
-    background: #f0fdf4;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 6px;
-    border-left: 3px solid #10b981;
-    border-bottom: none;
-  }
-
-  .summary-row strong {
-    font-weight: 600;
-    color: #333;
-  }
-
-  .summary-divider {
-    margin: 12px 0;
-    border: none;
-    border-top: 1px solid #e0e0e0;
-  }
-
-  .grand-total {
-    display: flex;
-    justify-content: space-between;
-    padding: 16px 0;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #1f2937;
-  }
-
-  .grand-total span:last-child {
-    color: #22c55e;
-  }
-
-.summary-row strong {
-    color: #333;
-    font-weight: 600;
-}
-
-.summary-divider {
-    border: none;
-    border-top: 2px solid #f0f0f0;
-    margin: 15px 0;
-}
-
-.grand-total {
-    display: flex;
-    justify-content: space-between;
-    font-size: 20px;
-    font-weight: 700;
-    color: #ff6b35;
-    padding-top: 10px;
-}
-
-/* Order Items */
-.order-items {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
-}
-
-.order-items-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.order-items-header h2 {
-    font-size: 20px;
-    color: #333;
-    font-weight: 700;
-}
-
-.item-card {
-    border: 2px solid #f0f0f0;
-    border-radius: 16px;
-    padding: 25px;
-    margin-bottom: 20px;
-    transition: all 0.3s;
-}
-
-.item-card:last-child {
-    margin-bottom: 0;
-}
-
-.item-card:hover {
-    border-color: #ff6b35;
-}
-
-.item-content {
-    display: flex;
-    gap: 25px;
-    flex-wrap: wrap;
-}
-
-.item-image {
-    width: 130px;
-    height: 130px;
-    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-    border-radius: 12px;
-    flex-shrink: 0;
-    overflow: hidden;
-}
-
-.item-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.item-details {
-    flex: 1;
-    min-width: 200px;
-}
-
-.item-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.item-price {
-    font-size: 26px;
-    font-weight: 700;
-    color: #ff6b35;
-}
-
-.item-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 160px;
-}
-
-.btn {
-    padding: 14px 24px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.btn-track {
-    background: linear-gradient(135deg, #ff8c42 0%, #ffc107 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(255,140,66,0.3);
-}
-
-.btn-track:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255,140,66,0.4);
-}
-
-.btn-cancel-item {
-    background: linear-gradient(135deg, #e63946 0%, #f72585 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(230,57,70,0.3);
-}
-
-.btn-cancel-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(230,57,70,0.4);
-}
-
-.btn-return-item {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(59,130,246,0.3);
-}
-
-
-
-.btn-return-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59,130,246,0.4);
-}
-
-.btn-cancel-return {
-    background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(109,40,217,0.3);
-}
-
-.btn-cancel-return:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(109,40,217,0.4);
-}
-
-.cancelled-message {
-    font-size: 16px;
-    font-weight: 600;
-    color: #e63946;
-    min-width: 160px;
-    display: flex;
-    align-items: center;
-}
-
-.returned-message {
-    font-size: 16px;
-    font-weight: 600;
-    color: #6d28d9;
-    min-width: 160px;
-    display: flex;
-    align-items: center;
-}
-
-.item-status {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #666;
-}
-
-.item-status-badge {
-    padding: 4px 12px;
-    background: #e0e0e0;
-    color: #666;
-    font-size: 12px;
-    font-weight: 700;
-    border-radius: 12px;
-    letter-spacing: 0.5px;
-    margin-left: 10px;
-}
-
-/* Cancel Order Button */
-.cancel-order-section {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.btn-cancel-order {
-    padding: 18px 40px;
-    background: linear-gradient(135deg, #e63946 0%, #dc2f02 100%);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(230,57,70,0.3);
-    transition: all 0.3s;
-}
-
-.btn-cancel-order:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(230,57,70,0.4);
-}
-
-.btn-return-order {
-    padding: 18px 40px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(59,130,246,0.3);
-    transition: all 0.3s;
-}
-
-.btn-return-order:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(59,130,246,0.4);
-}
-
-.btn-cancel-return-order {
-    padding: 18px 40px;
-    background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(109,40,217,0.3);
-    transition: all 0.3s;
-}
-
-.btn-cancel-return-order:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(109,40,217,0.4);
-}
-
-.btn-continue-shopping {
-    padding: 18px 40px;
-    background: linear-gradient(135deg, #ff8c42 0%, #ffc107 100%);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(255,140,66,0.3);
-    transition: all 0.3s;
-}
-
-.btn-continue-shopping:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(255,140,66,0.4);
-}
-
-/* Cancel Modal */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 500px;
-    width: 100%;
-    box-shadow: 0 10px 50px rgba(0,0,0,0.3);
-    text-align: center;
-}
-
-.modal-icon {
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    font-size: 32px;
-}
-
-.modal-icon-return {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-}
-
-.modal-icon-cancel-return {
-    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
-}
-
-.modal-content h3 {
-    font-size: 24px;
-    color: #333;
-    margin-bottom: 12px;
-}
-
-.modal-content p {
-    color: #666;
-    margin-bottom: 20px;
-    line-height: 1.6;
-}
-
-.reason-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.reason-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    color: #333;
-}
-
-.reason-option input[type="radio"] {
-    accent-color: #ff6b35;
-}
-
-.reason-textarea {
-    width: 100%;
-    min-height: 100px;
-    padding: 12px;
-    border: 2px solid #f0f0f0;
-    border-radius: 12px;
-    font-size: 14px;
-    color: #333;
-    resize: vertical;
-    margin-bottom: 20px;
-}
-
-.reason-textarea:focus {
-    outline: none;
-    border-color: #ff6b35;
-}
-
-.modal-buttons {
-    display: flex;
-    gap: 12px;
-}
-
-.btn-keep {
-    flex: 1;
-    padding: 14px;
-    background: #e0e0e0;
-    color: #333;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-keep:hover {
-    background: #d0d0d0;
-}
-
-.btn-confirm-cancel {
-    flex: 1;
-    padding: 14px;
-    background: linear-gradient(135deg, #e63946 0%, #dc2f02 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(230,57,70,0.3);
-    transition: all 0.3s;
-}
-
-.btn-confirm-cancel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(230,57,70,0.4);
-}
-
-.btn-confirm-return {
-    flex: 1;
-    padding: 14px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(59,130,246,0.3);
-    transition: all 0.3s;
-}
-
-.btn-confirm-return:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59,130,246,0.4);
-}
-
-.btn-confirm-cancel-return {
-    flex: 1;
-    padding: 14px;
-    background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(109,40,217,0.3);
-    transition: all 0.3s;
-}
-
-.btn-confirm-cancel-return:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(109,40,217,0.4);
-}
-.return-rejected-message {
-    background: linear-gradient(135deg, #fee 0%, #fdd 100%);
-    color: #c33;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 600;
-    border: 2px solid #fcc;
-    box-shadow: 0 2px 8px rgba(204, 51, 51, 0.1);
-}
-
-.return-rejected-message div {
-    font-size: 12px;
-    font-weight: normal;
-    margin-top: 5px;
-    color: #666;
-}
-
-/* Tracking Modal */
-.tracking-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    z-index: 1001;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    backdrop-filter: blur(5px);
-}
-
-.tracking-modal.active {
-    display: flex;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.tracking-modal-content {
-    background: white;
-    border-radius: 24px;
-    padding: 40px;
-    max-width: 700px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    position: relative;
-    animation: slideUp 0.4s ease;
-}
-
-@keyframes slideUp {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.tracking-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #f5f5f5;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: #666;
-    transition: all 0.3s;
-}
-
-.tracking-close:hover {
-    background: #ff6b35;
-    color: white;
-    transform: rotate(90deg);
-}
-
-.tracking-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.tracking-icon-box {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #ffe5d9 0%, #ffc8a8 100%);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    font-size: 40px;
-}
-
-.tracking-header h2 {
-    font-size: 28px;
-    color: #333;
-    margin-bottom: 8px;
-}
-
-.tracking-order-id {
-    font-size: 14px;
-    color: #666;
-}
-
-.tracking-order-id strong {
-    color: #ff6b35;
-    font-weight: 600;
-}
-
-.tracking-item-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.tracking-item-header img {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    object-fit: cover;
-}
-
-.tracking-item-header h3 {
-    font-size: 18px;
-    color: #333;
-    font-weight: 700;
-}
-
-/* Tracking Timeline */
-.tracking-timeline {
-    position: relative;
-    padding: 20px 0;
-}
-
-.timeline-item {
-    position: relative;
-    padding-left: 90px;
-    margin-bottom: 50px;
-}
-
-.timeline-item:last-child {
-    margin-bottom: 0;
-}
-
-.timeline-icon-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 70px;
-    height: 70px;
-    background: #f5f5f5;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    transition: all 0.4s ease;
-    z-index: 2;
-}
-
-.timeline-item.active .timeline-icon-container {
-    background: linear-gradient(135deg, #ff6b35 0%, #e63946 100%);
-    box-shadow: 0 8px 25px rgba(255,107,53,0.4);
-    animation: pulse 2s infinite;
-}
-
-.timeline-item.completed .timeline-icon-container {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    box-shadow: 0 4px 15px rgba(16,185,129,0.3);
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.timeline-line {
-    position: absolute;
-    left: 35px;
-    top: 70px;
-    width: 3px;
-    height: calc(100% - 20px);
-    background: #e0e0e0;
-    z-index: 1;
-}
-
-.timeline-item:last-child .timeline-line {
-    display: none;
-}
-
-.timeline-item.completed .timeline-line {
-    background: linear-gradient(to bottom, #10b981 0%, #e0e0e0 100%);
-}
-
-.timeline-content {
-    background: #fafafa;
-    padding: 20px;
-    border-radius: 16px;
-    border-left: 4px solid #e0e0e0;
-    transition: all 0.3s;
-}
-
-.timeline-item.active .timeline-content {
-    background: linear-gradient(135deg, #fff5f0 0%, #ffe8d9 100%);
-    border-left-color: #ff6b35;
-    box-shadow: 0 4px 15px rgba(255,107,53,0.1);
-}
-
-.timeline-item.completed .timeline-content {
-    border-left-color: #10b981;
-}
-
-.timeline-item.pending .timeline-content {
-    opacity: 0.6;
-    background: #f5f5f5;
-    border-left-color: #ccc;
-}
-
-.timeline-item.pending .timeline-status,
-.timeline-item.pending .timeline-date,
-.timeline-item.pending .timeline-description,
-.timeline-item.pending .timeline-location {
-    color: #999;
-}
-
-.timeline-item.pending .timeline-icon-container {
-    background: #e0e0e0;
-    box-shadow: none;
-}
-
-.timeline-item.pending .timeline-line {
-    background: #ccc;
-}
-
-.timeline-status {
-    font-size: 18px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.timeline-item.active .timeline-status {
-    color: #ff6b35;
-}
-
-.timeline-item.completed .timeline-status {
-    color: #10b981;
-}
-
-.status-badge-inline {
-    padding: 4px 12px;
-    background: #e0e0e0;
-    color: #666;
-    font-size: 11px;
-    font-weight: 700;
-    border-radius: 12px;
-    letter-spacing: 0.5px;
-}
-
-.timeline-item.active .status-badge-inline {
-    background: linear-gradient(135deg, #ffc107 0%, #ff6b35 100%);
-    color: white;
-}
-
-.timeline-item.completed .status-badge-inline {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-}
-
-.timeline-item.pending .status-badge-inline {
-    display: none;
-}
-
-.timeline-date {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.timeline-description {
-    font-size: 14px;
-    color: #666;
-    line-height: 1.6;
-}
-
-.timeline-location {
-    font-size: 13px;
-    color: #888;
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.timeline-item.pending .timeline-location {
-    display: none;
-}
-
-/* Estimated Delivery */
-.estimated-delivery {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 16px;
-    text-align: center;
-    margin-top: 30px;
-    box-shadow: 0 4px 20px rgba(16,185,129,0.2);
-}
-
-.estimated-delivery-label {
-    font-size: 14px;
-    opacity: 0.9;
-    margin-bottom: 8px;
-}
-
-.estimated-delivery-date {
-    font-size: 24px;
-    font-weight: 700;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .container { padding: 20px 15px; }
-    .order-header { padding: 20px; }
-    .order-header-top { flex-direction: column; }
-    .order-title-section h1 { font-size: 22px; }
-    .info-grid { grid-template-columns: 1fr; }
-    .order-items { padding: 20px; }
-    .item-content { flex-direction: column; }
-    .item-actions { width: 100%; }
-    .modal-content { padding: 30px 20px; }
-    .invoice-btn { width: 100%; }
-    .tracking-modal-content { padding: 30px 20px; }
-    .tracking-header h2 { font-size: 24px; }
-    .timeline-item { padding-left: 80px; margin-bottom: 40px; }
-    .timeline-icon-container { width: 60px; height: 60px; font-size: 28px; }
-    .timeline-line { left: 30px; top: 60px; }
-    .timeline-status { font-size: 16px; }
-    .tracking-item-header img { width: 50px; height: 50px; }
-}
-
-@media (max-width: 480px) {
-    .order-title-section h1 { font-size: 20px; flex-direction: column; align-items: flex-start; }
-    .item-name { font-size: 18px; }
-    .item-price { font-size: 22px; }
-    .btn-cancel-order, .btn-continue-shopping { width: 100%; }
-    .modal-content { padding: 25px 15px; }
-    .tracking-icon-box { width: 70px; height: 70px; font-size: 35px; }
-    .tracking-header h2 { font-size: 22px; }
-    .timeline-item { padding-left: 70px; }
-    .timeline-icon-container { width: 50px; height: 50px; font-size: 24px; }
-    .timeline-line { left: 25px; top: 50px; }
-    .estimated-delivery-date { font-size: 20px; }
-    .tracking-item-header img { width: 40px; height: 40px; }
-}
-
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #fff5f0 0%, #fff8f0 50%, #fff0f5 100%);
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+    .breadcrumb a {
+        color: #666;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    .breadcrumb a:hover { color: #ff6b35; }
+    .breadcrumb .active {
+        color: #ff6b35;
+        font-weight: 600;
+    }
+
+    /* Order Header */
+    .order-header {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 25px;
+    }
+    .order-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .order-title-section h1 {
+        font-size: 28px;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .status-badge {
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #ffc107 0%, #ff6b35 100%);
+        color: white;
+        font-size: 13px;
+        font-weight: 700;
+        border-radius: 25px;
+        letter-spacing: 0.5px;
+    }
+    .order-meta {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+        font-size: 14px;
+        color: #666;
+    }
+    .order-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .order-meta-item strong { color: #333; }
+    .invoice-btn {
+        padding: 14px 30px;
+        background: linear-gradient(135deg, #ff8c42 0%, #ffc107 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(255,140,66,0.3);
+        transition: all 0.3s;
+        font-size: 15px;
+    }
+    .invoice-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255,140,66,0.4);
+    }
+
+    /* Grid Layout */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+    .info-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+    .info-card:hover {
+        box-shadow: 0 6px 30px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    .info-card-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    .icon-orange { background: linear-gradient(135deg, #ffe5d9 0%, #ffc8a8 100%); }
+    .icon-amber { background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%); }
+    .icon-rose { background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%); }
+    .info-card-header h2 {
+        font-size: 18px;
+        color: #333;
+        font-weight: 700;
+    }
+    .info-card-content {
+        color: #666;
+        line-height: 1.8;
+    }
+    .info-card-content p { margin-bottom: 8px; }
+    .info-card-content .name {
+        font-weight: 700;
+        color: #333;
+        font-size: 16px;
+    }
+    .contact-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+        font-weight: 600;
+        color: #333;
+    }
+    .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: linear-gradient(135deg, #fff8f0 0%, #ffe8d9 100%);
+        border-radius: 12px;
+    }
+    .payment-icon {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Summary */
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.95rem;
+        color: #666;
+    }
+    .summary-row.discount-row {
+        background: #f0fdf4;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 6px;
+        border-left: 3px solid #10b981;
+        border-bottom: none;
+    }
+    .summary-row strong {
+        font-weight: 600;
+        color: #333;
+    }
+    .summary-divider {
+        margin: 12px 0;
+        border: none;
+        border-top: 1px solid #e0e0e0;
+    }
+    .grand-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 16px 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .grand-total span:last-child {
+        color: #22c55e;
+    }
+
+    /* Order Items */
+    .order-items {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    .order-items-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    .order-items-header h2 {
+        font-size: 20px;
+        color: #333;
+        font-weight: 700;
+    }
+    .item-card {
+        border: 2px solid #f0f0f0;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+    .item-card:last-child { margin-bottom: 0; }
+    .item-card:hover { border-color: #ff6b35; }
+    .item-content {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+    }
+    .item-image {
+        width: 130px;
+        height: 130px;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+        border-radius: 12px;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .item-details {
+        flex: 1;
+        min-width: 200px;
+    }
+    .item-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    /* Item Pricing Breakdown */
+    .item-pricing {
+        margin: 8px 0;
+        font-size: 14px;
+    }
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+        color: #666;
+    }
+    .price-label {
+        font-weight: 500;
+        color: #666;
+    }
+    .price-value {
+        font-weight: 600;
+        color: #333;
+    }
+    .discount-row { color: #10b981; }
+    .discount-row .price-label { color: #10b981; }
+    .discount-value {
+        color: #10b981;
+        font-weight: 600;
+    }
+    .final-row {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 6px;
+        margin-top: 6px;
+        font-size: 15px;
+    }
+    .final-row .price-label {
+        color: #333;
+        font-weight: 600;
+    }
+    .final-value {
+        color: #1f2937;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    /* Item Actions */
+    .item-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 160px;
+    }
+    .btn {
+        padding: 14px 24px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn-track {
+        background: linear-gradient(135deg, #ff8c42 0%, #ffc107 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255,140,66,0.3);
+    }
+    .btn-track:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255,140,66,0.4);
+    }
+    .btn-cancel-item {
+        background: linear-gradient(135deg, #e63946 0%, #f72585 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(230,57,70,0.3);
+    }
+    .btn-cancel-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(230,57,70,0.4);
+    }
+    .btn-return-item {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+    }
+    .btn-return-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+    }
+    .btn-cancel-return {
+        background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(109,40,217,0.3);
+    }
+    .btn-cancel-return:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(109,40,217,0.4);
+    }
+    .cancelled-message {
+        font-size: 16px;
+        font-weight: 600;
+        color: #e63946;
+        min-width: 160px;
+        display: flex;
+        align-items: center;
+    }
+    .returned-message {
+        font-size: 16px;
+        font-weight: 600;
+        color: #6d28d9;
+        min-width: 160px;
+        display: flex;
+        align-items: center;
+    }
+    .item-status {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #666;
+    }
+    .item-status-badge {
+        padding: 4px 12px;
+        background: #e0e0e0;
+        color: #666;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 12px;
+        letter-spacing: 0.5px;
+        margin-left: 10px;
+    }
+    .return-rejected-message {
+        background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+        color: #c33;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 600;
+        border: 2px solid #fcc;
+        box-shadow: 0 2px 8px rgba(204, 51, 51, 0.1);
+    }
+
+    /* Main Action Buttons */
+    .cancel-order-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .btn-cancel-order {
+        padding: 18px 40px;
+        background: linear-gradient(135deg, #e63946 0%, #dc2f02 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(230,57,70,0.3);
+        transition: all 0.3s;
+    }
+    .btn-cancel-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(230,57,70,0.4);
+    }
+    .btn-return-order {
+        padding: 18px 40px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+        transition: all 0.3s;
+    }
+    .btn-return-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(59,130,246,0.4);
+    }
+    .btn-cancel-return-order {
+        padding: 18px 40px;
+        background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(109,40,217,0.3);
+        transition: all 0.3s;
+    }
+    .btn-cancel-return-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(109,40,217,0.4);
+    }
+    .btn-continue-shopping {
+        padding: 18px 40px;
+        background: linear-gradient(135deg, #ff8c42 0%, #ffc107 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(255,140,66,0.3);
+        transition: all 0.3s;
+    }
+    .btn-continue-shopping:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(255,140,66,0.4);
+    }
+
+    /* Modals */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        text-align: center;
+    }
+    .modal-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 32px;
+    }
+    .modal-icon-return { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
+    .modal-icon-cancel-return { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
+    .modal-content h3 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 12px;
+    }
+    .modal-content p {
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+    .reason-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .reason-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #333;
+    }
+    .reason-option input[type="radio"] { accent-color: #ff6b35; }
+    .reason-textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 12px;
+        border: 2px solid #f0f0f0;
+        border-radius: 12px;
+        font-size: 14px;
+        color: #333;
+        resize: vertical;
+        margin-bottom: 20px;
+    }
+    .reason-textarea:focus {
+        outline: none;
+        border-color: #ff6b35;
+    }
+    .modal-buttons {
+        display: flex;
+        gap: 12px;
+    }
+    .btn-keep {
+        flex: 1;
+        padding: 14px;
+        background: #e0e0e0;
+        color: #333;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-keep:hover { background: #d0d0d0; }
+    .btn-confirm-cancel {
+        flex: 1;
+        padding: 14px;
+        background: linear-gradient(135deg, #e63946 0%, #dc2f02 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(230,57,70,0.3);
+        transition: all 0.3s;
+    }
+    .btn-confirm-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(230,57,70,0.4);
+    }
+    .btn-confirm-return {
+        flex: 1;
+        padding: 14px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+        transition: all 0.3s;
+    }
+    .btn-confirm-return:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+    }
+    .btn-confirm-cancel-return {
+        flex: 1;
+        padding: 14px;
+        background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(109,40,217,0.3);
+        transition: all 0.3s;
+    }
+    .btn-confirm-cancel-return:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(109,40,217,0.4);
+    }
+
+    /* Tracking Modal */
+    .tracking-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1001;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        backdrop-filter: blur(5px);
+    }
+    .tracking-modal.active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .tracking-modal-content {
+        background: white;
+        border-radius: 24px;
+        padding: 40px;
+        max-width: 700px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        position: relative;
+        animation: slideUp 0.4s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .tracking-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f5f5f5;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #666;
+        transition: all 0.3s;
+    }
+    .tracking-close:hover {
+        background: #ff6b35;
+        color: white;
+        transform: rotate(90deg);
+    }
+    .tracking-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .tracking-icon-box {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #ffe5d9 0%, #ffc8a8 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 40px;
+    }
+    .tracking-header h2 {
+        font-size: 28px;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    .tracking-order-id {
+        font-size: 14px;
+        color: #666;
+    }
+    .tracking-order-id strong {
+        color: #ff6b35;
+        font-weight: 600;
+    }
+    .tracking-item-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .tracking-item-header img {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+    .tracking-item-header h3 {
+        font-size: 18px;
+        color: #333;
+        font-weight: 700;
+    }
+
+    /* Tracking Timeline */
+    .tracking-timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 90px;
+        margin-bottom: 50px;
+    }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-icon-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 70px;
+        height: 70px;
+        background: #f5f5f5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        transition: all 0.4s ease;
+        z-index: 2;
+    }
+    .timeline-item.active .timeline-icon-container {
+        background: linear-gradient(135deg, #ff6b35 0%, #e63946 100%);
+        box-shadow: 0 8px 25px rgba(255,107,53,0.4);
+        animation: pulse 2s infinite;
+    }
+    .timeline-item.completed .timeline-icon-container {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+    }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .timeline-line {
+        position: absolute;
+        left: 35px;
+        top: 70px;
+        width: 3px;
+        height: calc(100% - 20px);
+        background: #e0e0e0;
+        z-index: 1;
+    }
+    .timeline-item:last-child .timeline-line { display: none; }
+    .timeline-item.completed .timeline-line { background: linear-gradient(to bottom, #10b981 0%, #e0e0e0 100%); }
+    .timeline-content {
+        background: #fafafa;
+        padding: 20px;
+        border-radius: 16px;
+        border-left: 4px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    .timeline-item.active .timeline-content {
+        background: linear-gradient(135deg, #fff5f0 0%, #ffe8d9 100%);
+        border-left-color: #ff6b35;
+        box-shadow: 0 4px 15px rgba(255,107,53,0.1);
+    }
+    .timeline-item.completed .timeline-content { border-left-color: #10b981; }
+    .timeline-item.pending .timeline-content {
+        opacity: 0.6;
+        background: #f5f5f5;
+        border-left-color: #ccc;
+    }
+    .timeline-item.pending .timeline-status,
+    .timeline-item.pending .timeline-date,
+    .timeline-item.pending .timeline-description,
+    .timeline-item.pending .timeline-location { color: #999; }
+    .timeline-item.pending .timeline-icon-container {
+        background: #e0e0e0;
+        box-shadow: none;
+    }
+    .timeline-item.pending .timeline-line { background: #ccc; }
+    .timeline-status {
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .timeline-item.active .timeline-status { color: #ff6b35; }
+    .timeline-item.completed .timeline-status { color: #10b981; }
+    .status-badge-inline {
+        padding: 4px 12px;
+        background: #e0e0e0;
+        color: #666;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 12px;
+        letter-spacing: 0.5px;
+    }
+    .timeline-item.active .status-badge-inline {
+        background: linear-gradient(135deg, #ffc107 0%, #ff6b35 100%);
+        color: white;
+    }
+    .timeline-item.completed .status-badge-inline {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    .timeline-item.pending .status-badge-inline { display: none; }
+    .timeline-date {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .timeline-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+    }
+    .timeline-location {
+        font-size: 13px;
+        color: #888;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .timeline-item.pending .timeline-location { display: none; }
+
+    /* Estimated Delivery */
+    .estimated-delivery {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 16px;
+        text-align: center;
+        margin-top: 30px;
+        box-shadow: 0 4px 20px rgba(16,185,129,0.2);
+    }
+    .estimated-delivery-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+    }
+    .estimated-delivery-date {
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container { padding: 20px 15px; }
+        .order-header { padding: 20px; }
+        .order-header-top { flex-direction: column; }
+        .order-title-section h1 { font-size: 22px; }
+        .info-grid { grid-template-columns: 1fr; }
+        .order-items { padding: 20px; }
+        .item-content { flex-direction: column; }
+        .item-actions { width: 100%; }
+        .modal-content { padding: 30px 20px; }
+        .invoice-btn { width: 100%; }
+        .tracking-modal-content { padding: 30px 20px; }
+        .tracking-header h2 { font-size: 24px; }
+        .timeline-item { padding-left: 80px; margin-bottom: 40px; }
+        .timeline-icon-container { width: 60px; height: 60px; font-size: 28px; }
+        .timeline-line { left: 30px; top: 60px; }
+        .timeline-status { font-size: 16px; }
+        .tracking-item-header img { width: 50px; height: 50px; }
+    }
+    @media (max-width: 480px) {
+        .order-title-section h1 { font-size: 20px; flex-direction: column; align-items: flex-start; }
+        .item-name { font-size: 18px; }
+        .btn-cancel-order, .btn-continue-shopping { width: 100%; }
+        .modal-content { padding: 25px 15px; }
+        .tracking-icon-box { width: 70px; height: 70px; font-size: 35px; }
+        .tracking-header h2 { font-size: 22px; }
+        .timeline-item { padding-left: 70px; }
+        .timeline-icon-container { width: 50px; height: 50px; font-size: 24px; }
+        .timeline-line { left: 25px; top: 50px; }
+        .estimated-delivery-date { font-size: 20px; }
+        .tracking-item-header img { width: 40px; height: 40px; }
+    }
 </style>
-
 
 </head>
 <body>
-   
+    
     <%- include('../../views/partials/user/header') %>
 
-   
+    
     <div class="container">
-       
+        
         <div class="breadcrumb">
             <a href="/">Home</a>
             <span>/</span>
@@ -1136,7 +945,7 @@ body {
             <span class="active">Order Details</span>
         </div>
 
-       
+        
         <% if (success && success.length > 0) { %>
           <div class="alert alert-success" style="background: #10b981; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
             <%= success %>
@@ -1167,9 +976,7 @@ body {
             </div>
         </div>
 
-        <!-- Info Grid -->
         <div class="info-grid">
-            <!-- Shipping Address -->
             <div class="info-card">
                 <div class="info-card-header">
                     <div class="icon-box icon-orange">📍</div>
@@ -1187,7 +994,6 @@ body {
                 </div>
             </div>
 
-            <!-- Payment Method -->
             <div class="info-card">
                 <div class="info-card-header">
                     <div class="icon-box icon-amber">💳</div>
@@ -1201,28 +1007,40 @@ body {
                 </div>
             </div>
 
-            <!-- Order Summary -->
             <div class="info-card">
     <div class="info-card-header">
         <div class="icon-box icon-rose">📄</div>
         <h2>Order Summary</h2>
     </div>
     <div class="info-card-content">
-        <!-- ✅ SUBTOTAL ROW -->
         <div class="summary-row">
             <span>Items Subtotal</span>
             <strong><%= subtotal %></strong>
         </div>
         
-        <!-- ✅ DISCOUNT ROW (CONDITIONAL) -->
-        <% if (couponApplied && discount !== '₹0.00') { %>
+        <% 
+        const showDiscount = couponApplied && !couponRevoked && discount !== '₹0.00' && discount !== '₹0';
+        %>
+        
+        <% if (showDiscount) { %>
             <div class="summary-row discount-row">
-                <span>Coupon Discount <% if (couponCode) { %><span style="font-size: 0.85em; color: #10b981;">(<%- couponCode %>)</span><% } %></span>
+                <span>Coupon Discount 
+                    <% if (couponCode) { %>
+                        <span style="font-size: 0.85em; color: #10b981;">(<%= couponCode %>)</span>
+                    <% } %>
+                </span>
                 <strong style="color: #10b981;">-<%= discount %></strong>
             </div>
         <% } %>
 
-        <!-- Shipping Charge -->
+        <% if (couponRevoked) { %>
+            <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 4px; margin: 12px 0;">
+                <p style="margin: 0; color: #991b1b; font-weight: 500; font-size: 14px;">
+                    ⚠️ Coupon Discount Revoked
+                </p>
+            </div>
+        <% } %>
+
         <div class="summary-row">
             <span>Shipping Charge</span>
             <strong>₹0.00</strong>
@@ -1230,20 +1048,23 @@ body {
 
         <hr class="summary-divider">
 
-        <!-- ✅ FINAL TOTAL -->
         <div class="grand-total">
-            <span>Grand Total</span>
-            <span><%= amount %></span>
+            <span>
+                Current Amount
+                <% 
+                const cancelledCount = items.filter(i => !i.isActive).length;
+                const activeCount = items.filter(i => i.isActive).length;
+                %>
+                <% if (cancelledCount > 0) { %>
+                    <span style="font-size: 0.85em; color: #ef4444;"> (<%= activeCount %>/<%= items.length %> items active)</span>
+                <% } %>
+            </span>
+            <span style="color: #10b981; font-weight: 700;"><%= amount %></span>
         </div>
     </div>
 </div>
-
         </div>
 
-        <!-- Order Items -->
-       <!-- FIND THIS SECTION IN YOUR orderDetails.ejs AND REPLACE THE ENTIRE THING -->
-
-<!-- Order Items -->
 <div class="order-items">
     <div class="order-items-header">
         <div class="icon-box icon-orange">📦</div>
@@ -1258,18 +1079,48 @@ body {
                     </div>
                     <div class="item-details">
                         <div class="item-name"><%= item.productName %> (<%= item.variantSize %>) x <%= item.quantity %></div>
-                        <div class="item-price"><%= item.total %></div>
+                        
+                        <div class="item-pricing">
+                            <% 
+                            const itemIsCancelled = item.status === 'Cancelled';
+                            const itemDiscountAmount = item.calculatedDiscount || 0;
+                            const hasDiscount = itemDiscountAmount > 0 && !itemIsCancelled && !couponRevoked;
+                            %>
+                            
+                            <div class="price-row">
+                                <span class="price-label">Price:</span>
+                                <span class="price-value"><%= item.subtotal %></span>
+                            </div>
+                            
+                            <% if (hasDiscount) { %>
+                                <div class="price-row discount-row">
+                                    <span class="price-label">Discount:</span>
+                                    <span class="price-value discount-value">-₹<%= itemDiscountAmount.toFixed(2) %></span>
+                                </div>
+                            <% } %>
+                            
+                            <div class="price-row final-row">
+                                <span class="price-label">Total:</span>
+                                <% if (itemIsCancelled || couponRevoked) { %>
+                                    <span class="price-value final-value"><%= item.subtotal %></span>
+                                <% } else { %>
+                                    <span class="price-value final-value">₹<%= (parseFloat(item.subtotal.replace('₹', '')) - itemDiscountAmount).toFixed(2) %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                        
                         <div class="item-status">
                             Status: <span class="item-status-badge"><%= item.status %></span>
                         </div>
                     </div>
+
                     <div class="item-actions" data-actions-id="<%= item.itemIndex %>-<%= item.variantSizeRaw %>">
                         <% 
                         const isItemCancelled = item.status === 'Cancelled';
                         const isItemReturned = item.status === 'Returned';
                         const isItemReturnRequest = item.status === 'Return Request';
                         const isItemDelivered = item.status === 'Delivered';
-                        const isItemShippedOrOut = item.status === 'Shipped' || item.status === 'OutForDelivery';
+                        const isItemShippedOrOut = item.status === 'Shipped' || item.status === 'OutForDelivery' || item.status === 'Out for Delivery';
                         const isReturnRejected = item.returnRejected === true;
                         %>
                         
@@ -1282,22 +1133,18 @@ body {
                                 🔙 Returned
                             </div>
                         <% } else if (isReturnRejected) { %>
-                            <!-- SHOW REJECTION MESSAGE (NOT A BUTTON) -->
                             <div class="return-rejected-message">
                                 Return rejected by admin
                             </div>
                         <% } else if (isItemReturnRequest) { %>
-                            <!-- PASS itemIndex, variantSize to cancel return -->
                             <button class="btn btn-cancel-return" onclick="openCancelReturnModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>')">Cancel Return</button>
                         <% } else if (isItemDelivered && item.isReturnEligible) { %>
                             <button class="btn btn-track" onclick="openTrackingModal('<%= item.productName %>')">🚚 Track Order</button>
-                            <!-- PASS itemIndex, variantSize to return -->
                             <button class="btn btn-return-item" onclick="openReturnModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>')">🔙 Return Item</button>
                         <% } else { %>
                             <button class="btn btn-track" onclick="openTrackingModal('<%= item.productName %>')">🚚 Track Order</button>
                             <% if (!isItemShippedOrOut && !isItemDelivered) { %>
-                                <!-- PASS itemIndex, variantSize to cancel -->
-                                <button class="btn btn-cancel-item" onclick="openModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>')">Cancel Item</button>
+                                <button class="btn btn-cancel-item" onclick="openModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>', '<%= item.subtotal %>')">Cancel Item</button>
                             <% } %>
                         <% } %>
                     </div>
@@ -1307,618 +1154,850 @@ body {
     <% } %>
 </div>
 
-<!-- CANCEL ORDER SECTION -->
-<div class="cancel-order-section" id="cancelOrderSection">
-    <% 
-    const hasRejectedReturn = items && items.length > 0 && items.some(item => item.returnRejected === true);
-    const cancellableStatuses = ['Placed', 'Confirmed', 'Processing'];
-    const allItemsCancellable = items && items.length > 0 && items.every(item => cancellableStatuses.includes(item.status));
-    const anyItemCancellable = items && items.length > 0 && items.some(item => cancellableStatuses.includes(item.status));
-    const allItemsCancelled = items && items.length > 0 && items.every(item => item.status === 'Cancelled');
-    const allItemsReturned = items && items.length > 0 && items.every(item => item.status === 'Returned');
-    const allItemsReturnRequest = items && items.length > 0 && items.every(item => item.status === 'Return Request');
-    const allNonCancelledDelivered = items && items.length > 0 && items.every(item => item.status === 'Delivered' || item.status === 'Cancelled');
-    const allNonCancelledReturnEligible = items && items.length > 0 && items.every(item => item.isReturnEligible || item.status === 'Cancelled');
-    %>
-
-    <% if (allItemsCancelled || allItemsReturned) { %>
-        <!-- Order fully cancelled or returned - Show continue shopping -->
-        <button class="btn-continue-shopping" onclick="continueShopping()">Continue Shopping</button>
-        
-    <% } else if (allItemsReturnRequest) { %>
-        <!-- All items in Return Request - Show cancel return button (Entire Order) -->
-        <button class="btn-cancel-return-order" onclick="openCancelReturnModal('Entire Order', 'all', 'all')">Cancel Return</button>
-        
-    <% } else if (hasRejectedReturn) { %>
-        <!-- PRIORITY 1: Return was rejected - Show rejection message, NO return button -->
-        <div class="return-rejected-message">
-            <div style="color: #d32f2f; font-weight: 600; margin-bottom: 8px;">❌ Return Request Rejected</div>
-            <div style="color: #666; font-size: 14px;">
-                Admin has rejected your return request. You cannot request return again for this order.
-            </div>
-        </div>
-        
-    <% } else if (allNonCancelledDelivered && allNonCancelledReturnEligible && isReturnEligible && !hasRejectedReturn) { %>
-        <!-- PRIORITY 2: All delivered and return eligible - Show return button (Entire Order) -->
-        <button class="btn-return-order" onclick="openReturnModal('Entire Order', 'all', 'all')">Return Entire Order</button>
-        
-    <% } else if (allItemsCancellable && anyItemCancellable) { %>
-        <!-- PRIORITY 3: ALL items are in cancellable status - Show cancel entire order button -->
-        <button class="btn-cancel-order" onclick="openModal('Entire Order', 'all', 'all')">Cancel Entire Order</button>
-        
-    <% } else if (anyItemCancellable && !allItemsCancellable) { %>
-        <!-- PRIORITY 4: Some items are cancellable but not all - Show info message -->
-        <div class="status-message" style="color: #f57c00; font-size: 14px; padding: 12px; background: #fff3e0; border-radius: 6px; border-left: 4px solid #f57c00;">
-            ℹ️ You can only cancel the entire order if all items have the same status. Some items have different statuses.
-        </div>
-    <% } %>
-</div>
-
-<!-- Cancel Modal -->
-<div class="modal" id="cancelModal">
-    <div class="modal-content">
-        <div class="modal-icon">✕</div>
-        <h3>Cancel <span id="cancelItemName">Order</span>?</h3>
-        <p>Please select a reason for cancelling this order.</p>
-        <div class="reason-options">
-            <div class="reason-option">
-                <input type="radio" id="reason1" name="cancelReason" value="Changed my mind" required>
-                <label for="reason1">Changed my mind</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="reason2" name="cancelReason" value="Found a better price elsewhere">
-                <label for="reason2">Found a better price elsewhere</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="reason3" name="cancelReason" value="Order placed by mistake">
-                <label for="reason3">Order placed by mistake</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="reason4" name="cancelReason" value="Other">
-                <label for="reason4">Other</label>
-            </div>
-        </div>
-        <textarea class="reason-textarea" id="additionalDetails" placeholder="Please provide additional details (optional)"></textarea>
-        <div class="modal-buttons">
-            <button class="btn-keep" onclick="closeModal()">Keep Order</button>
-            <button class="btn-confirm-cancel" onclick="confirmCancel()">Submit</button>
-        </div>
-    </div>
-</div>
-
-<!-- Return Modal (add if not already present) -->
-<div class="modal" id="returnModal">
-    <div class="modal-content">
-        <div class="modal-icon">🔙</div>
-        <h3>Return <span id="returnItemName">Order</span>?</h3>
-        <p>Please select a reason for returning this order.</p>
-        <div class="reason-options">
-            <div class="reason-option">
-                <input type="radio" id="returnReason1" name="returnReason" value="Defective product" required>
-                <label for="returnReason1">Defective product</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="returnReason2" name="returnReason" value="Not as described">
-                <label for="returnReason2">Not as described</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="returnReason3" name="returnReason" value="Changed my mind">
-                <label for="returnReason3">Changed my mind</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="returnReason4" name="returnReason" value="Other">
-                <label for="returnReason4">Other</label>
-            </div>
-        </div>
-        <textarea class="reason-textarea" id="returnAdditionalDetails" placeholder="Please provide additional details (optional)"></textarea>
-        <div class="modal-buttons">
-            <button class="btn-keep" onclick="closeReturnModal()">Keep Item</button>
-            <button class="btn-confirm-return" onclick="confirmReturn()">Submit Return</button>
-        </div>
-    </div>
-</div>
-
-<!-- Cancel Return Modal (add if not already present) -->
-<div class="modal" id="cancelReturnModal">
-    <div class="modal-content">
-        <div class="modal-icon">⚠️</div>
-        <h3>Cancel Return for <span id="cancelReturnItemName">Order</span>?</h3>
-        <p>Are you sure you want to cancel this return request?</p>
-        <div class="modal-buttons">
-            <button class="btn-keep" onclick="closeCancelReturnModal()">No, Keep Return</button>
-            <button class="btn-confirm-cancel-return" onclick="confirmCancelReturn()">Yes, Cancel Return</button>
-        </div>
-    </div>
-</div>
-
-<!-- Return Modal -->
-<div class="modal" id="returnModal">
-    <div class="modal-content">
-        <div class="modal-icon modal-icon-return">🔙</div>
-        <h3>Return <span id="returnItemName">Order</span>?</h3>
-        <p>Please select a reason for returning this order.</p>
-        <div class="reason-options">
-            <div class="reason-option">
-                <input type="radio" id="returnReason1" name="returnReason" value="Product not as described" required>
-                <label for="returnReason1">Product not as described</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="returnReason2" name="returnReason" value="Damaged product">
-                <label for="returnReason2">Damaged product</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="returnReason3" name="returnReason" value="Wrong product received">
-                <label for="returnReason3">Wrong product received</label>
-            </div>
-            <div class="reason-option">
-                <input type="radio" id="returnReason4" name="returnReason" value="Other">
-                <label for="returnReason4">Other</label>
-            </div>
-        </div>
-        <textarea class="reason-textarea" id="returnAdditionalDetails" placeholder="Please provide additional details (optional)"></textarea>
-        <div class="modal-buttons">
-            <button class="btn-keep" onclick="closeReturnModal()">Keep Order</button>
-            <button class="btn-confirm-return" onclick="confirmReturn()">Submit</button>
-        </div>
-    </div>
-</div>
-
-<!-- Cancel Return Modal -->
-<div class="modal" id="cancelReturnModal">
-    <div class="modal-content">
-        <div class="modal-icon modal-icon-cancel-return">✕</div>
-        <h3>Cancel Return <span id="cancelReturnItemName">Order</span>?</h3>
-        <p>Are you sure you want to cancel the return request?</p>
-        <div class="modal-buttons">
-            <button class="btn-keep" onclick="closeCancelReturnModal()">No, Keep Return</button>
-            <button class="btn-confirm-cancel-return" onclick="confirmCancelReturn()">Yes, Cancel Return</button>
-        </div>
-    </div>
-</div>
-<!-- Tracking Modal -->
-<div class="tracking-modal" id="trackingModal">
-  <div class="tracking-modal-content">
-    <button class="tracking-close" onclick="closeTrackingModal()">✕</button>
-    <div class="tracking-header">
-      <div class="tracking-icon-box">📦</div>
-      <h2>Track Your Order</h2>
-      <p class="tracking-order-id">Order ID: <strong>#<%= orderId %></strong></p>
-    </div>
-
-    <% if (items && items.length > 0) { %>
-      <% items.forEach(item => { %>
-        <% if (!['Cancelled', 'Returned', 'Return Request'].includes(item.status)) { %>
-          <div class="tracking-item">
-            <div class="tracking-item-header">
-              <img src="<%= item.image %>" alt="<%= item.productName %>">
-              <h3><%= item.productName %> (<%= item.variantSize %>)</h3>
-            </div>
+        <div class="cancel-order-section" id="cancelOrderSection">
             <% 
-            const statusPriority = {
-              'Placed': 1,
-              'Confirmed': 2,
-              'Processing': 3,
-              'Shipped': 4,
-              'OutForDelivery': 5,
-              'Delivered': 6
-            };
-            const trackingDetails = [
-              {
-                key: 'Placed',
-                status: 'Order Placed',
-                date: item.tracking.placedDate,
-                time: item.tracking.placedTime,
-                description: 'Your order has been successfully placed and payment confirmed.',
-                icon: '✓',
-                location: null
-              },
-              {
-                key: 'Confirmed',
-                status: 'Order Confirmed',
-                date: item.tracking.confirmedDate,
-                time: item.tracking.confirmedTime,
-                description: 'Your order has been confirmed and is being prepared for shipment.',
-                icon: '✓',
-                location: null
-              },
-              {
-                key: 'Processing',
-                status: 'Processing',
-                date: item.tracking.processingDate,
-                time: item.tracking.processingTime,
-                description: 'Your order is being processed and packaged with care.',
-                icon: '⚙️',
-                location: null
-              },
-              {
-                key: 'Shipped',
-                status: 'Shipped',
-                date: item.tracking.shippedDate,
-                time: item.tracking.shippedTime,
-                description: 'Your order has been picked up by our delivery partner and is on its way!',
-                icon: '📦',
-                location: item.tracking.shippedLocation
-              },
-              {
-                key: 'OutForDelivery',
-                status: 'Out for Delivery',
-                date: item.tracking.outForDeliveryDate,
-                time: item.tracking.outForDeliveryTime,
-                description: 'Your order is out for delivery and will arrive at your doorstep soon.',
-                icon: '🚚',
-                location: item.tracking.outForDeliveryLocation
-              },
-              {
-                key: 'Delivered',
-                status: 'Delivered',
-                date: item.tracking.deliveredDate,
-                time: item.tracking.deliveredTime,
-                description: 'Your order has been successfully delivered to your doorstep.',
-                icon: '🏠',
-                location: null
-              }
-            ];
-            const currentPriority = statusPriority[item.status] || 0;
+            const hasRejectedReturn = items && items.length > 0 && items.some(item => item.returnRejected === true);
+            const cancellableStatuses = ['Placed', 'Confirmed', 'Processing'];
+            const allItemsCancellable = items && items.length > 0 && items.every(item => cancellableStatuses.includes(item.status));
+            const anyItemCancellable = items && items.length > 0 && items.some(item => cancellableStatuses.includes(item.status));
+            const allItemsCancelled = items && items.length > 0 && items.every(item => item.status === 'Cancelled');
+            const allItemsReturned = items && items.length > 0 && items.every(item => item.status === 'Returned');
+            const allItemsReturnRequest = items && items.length > 0 && items.every(item => item.status === 'Return Request');
+            const allNonCancelledDelivered = items && items.length > 0 && items.every(item => item.status === 'Delivered' || item.status === 'Cancelled');
+            const allNonCancelledReturnEligible = items && items.length > 0 && items.every(item => item.isReturnEligible || item.status === 'Cancelled');
             %>
-            <div class="tracking-timeline">
-              <% trackingDetails.forEach(detail => { 
-                const itemPriority = statusPriority[detail.key] || 0;
-                let itemClass = 'pending';
-                if (itemPriority < currentPriority && detail.date) {
-                  itemClass = 'completed';
-                } else if (itemPriority === currentPriority && detail.date) {
-                  itemClass = 'active';
-                }
-              %>
-                <div class="timeline-item <%= itemClass %>">
-                  <div class="timeline-icon-container"><%= detail.icon %></div>
-                  <div class="timeline-line"></div>
-                  <div class="timeline-content">
-                    <div class="timeline-status">
-                      <%= detail.status %>
-                      <% if (itemClass === 'completed') { %>
-                        <span class="status-badge-inline">COMPLETED</span>
-                      <% } else if (itemClass === 'active') { %>
-                        <span class="status-badge-inline">IN PROGRESS</span>
-                      <% } %>
+
+            <% if (allItemsCancelled || allItemsReturned) { %>
+                <button class="btn-continue-shopping" onclick="continueShopping()">Continue Shopping</button>
+            <% } else if (allItemsReturnRequest) { %>
+                <button class="btn-cancel-return-order" onclick="openCancelReturnModal('Entire Order', 'all', 'all')">Cancel Return</button>
+            <% } else if (hasRejectedReturn) { %>
+                <div class="return-rejected-message">
+                    <div style="color: #d32f2f; font-weight: 600; margin-bottom: 8px;">❌ Return Request Rejected</div>
+                    <div style="color: #666; font-size: 14px;">
+                        Admin has rejected your return request. You cannot request return again for this order.
                     </div>
-                    <div class="timeline-date">
-                      <% if (!detail.date) { %>
-                        📅 Pending
-                      <% } else { %>
-                        📅 <%= detail.date %> • <%= detail.time || 'N/A' %>
-                      <% } %>
-                    </div>
-                    <div class="timeline-description"><%= detail.description %></div>
-                    <% if (detail.location && (itemClass === 'completed' || itemClass === 'active')) { %>
-                      <div class="timeline-location">📍 <%= detail.location %></div>
-                    <% } %>
-                  </div>
                 </div>
-              <% }) %>
+            <% } else if (allNonCancelledDelivered && allNonCancelledReturnEligible && isReturnEligible && !hasRejectedReturn) { %>
+                <button class="btn-return-order" onclick="openReturnModal('Entire Order', 'all', 'all')">Return Entire Order</button>
+            <% } else if (allItemsCancellable && anyItemCancellable) { %>
+                <button class="btn-cancel-order" onclick="openModal('Entire Order', 'all', 'all')">Cancel Entire Order</button>
+            <% } else if (anyItemCancellable && !allItemsCancellable) { %>
+                <div class="status-message" style="color: #f57c00; font-size: 14px; padding: 12px; background: #fff3e0; border-radius: 6px; border-left: 4px solid #f57c00;">
+                    ℹ️ You can only cancel the entire order if all items have the same status. Some items have different statuses.
+                </div>
+            <% } %>
+        </div>
+
+        <div class="modal" id="cancelModal">
+            <div class="modal-content">
+                <div class="modal-icon">✕</div>
+                <h3>Cancel <span id="cancelItemName">Order</span>?</h3>
+                <p>Please select a reason for cancelling this order.</p>
+                <div class="reason-options">
+                    <div class="reason-option">
+                        <input type="radio" id="reason1" name="cancelReason" value="Changed my mind" required>
+                        <label for="reason1">Changed my mind</label>
+                    </div>
+                    <div class="reason-option">
+                        <input type="radio" id="reason2" name="cancelReason" value="Found a better price elsewhere">
+                        <label for="reason2">Found a better price elsewhere</label>
+                    </div>
+                    <div class="reason-option">
+                        <input type="radio" id="reason3" name="cancelReason" value="Order placed by mistake">
+                        <label for="reason3">Order placed by mistake</label>
+                    </div>
+                    <div class="reason-option">
+                        <input type="radio" id="reason4" name="cancelReason" value="Other">
+                        <label for="reason4">Other</label>
+                    </div>
+                </div>
+                <textarea class="reason-textarea" id="additionalDetails" placeholder="Please provide additional details (optional)"></textarea>
+                <div class="modal-buttons">
+                    <button class="btn-keep" onclick="closeModal()">Keep Order</button>
+                    <button class="btn-confirm-cancel" onclick="confirmCancel()">Submit</button>
+                </div>
             </div>
-            <!-- Delivery Date Section -->
-            <div class="estimated-delivery">
-              <div class="estimated-delivery-label">
-                <%= item.status === 'Delivered' ? 'Delivered on' : 'Estimated Delivery' %>
-              </div>
-              <div class="estimated-delivery-date">
-                <% if (item.status === 'Delivered' && item.tracking.deliveredDate) { %>
-                  <%= item.tracking.deliveredDate %> • <%= item.tracking.deliveredTime || 'N/A' %>
+        </div>
+
+        <div class="modal" id="returnModal">
+            <div class="modal-content">
+                <div class="modal-icon modal-icon-return">🔙</div>
+                <h3>Return <span id="returnItemName">Order</span>?</h3>
+                <p>Please select a reason for returning this order.</p>
+                <div class="reason-options">
+                    <div class="reason-option">
+                        <input type="radio" id="returnReason1" name="returnReason" value="Product not as described" required>
+                        <label for="returnReason1">Product not as described</label>
+                    </div>
+                    <div class="reason-option">
+                        <input type="radio" id="returnReason2" name="returnReason" value="Damaged product">
+                        <label for="returnReason2">Damaged product</label>
+                    </div>
+                    <div class="reason-option">
+                        <input type="radio" id="returnReason3" name="returnReason" value="Wrong product received">
+                        <label for="returnReason3">Wrong product received</label>
+                    </div>
+                    <div class="reason-option">
+                        <input type="radio" id="returnReason4" name="returnReason" value="Other">
+                        <label for="returnReason4">Other</label>
+                    </div>
+                </div>
+                <textarea class="reason-textarea" id="returnAdditionalDetails" placeholder="Please provide additional details (optional)"></textarea>
+                <div class="modal-buttons">
+                    <button class="btn-keep" onclick="closeReturnModal()">Keep Order</button>
+                    <button class="btn-confirm-return" onclick="confirmReturn()">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="cancelReturnModal">
+            <div class="modal-content">
+                <div class="modal-icon modal-icon-cancel-return">✕</div>
+                <h3>Cancel Return <span id="cancelReturnItemName">Order</span>?</h3>
+                <p>Are you sure you want to cancel the return request?</p>
+                <div class="modal-buttons">
+                    <button class="btn-keep" onclick="closeCancelReturnModal()">No, Keep Return</button>
+                    <button class="btn-confirm-cancel-return" onclick="confirmCancelReturn()">Yes, Cancel Return</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tracking-modal" id="trackingModal">
+            <div class="tracking-modal-content">
+                <button class="tracking-close" onclick="closeTrackingModal()">✕</button>
+                <div class="tracking-header">
+                    <div class="tracking-icon-box">📦</div>
+                    <h2>Track Your Order</h2>
+                    <p class="tracking-order-id">Order ID: <strong>#<%= orderId %></strong></p>
+                </div>
+
+                <% if (items && items.length > 0) { %>
+                    <% items.forEach(item => { %>
+                        <% if (!['Cancelled', 'Returned', 'Return Request'].includes(item.status)) { %>
+                            <div class="tracking-item" style="display: none;"> <div class="tracking-item-header">
+                                    <img src="<%= item.image %>" alt="<%= item.productName %>">
+                                    <h3><%= item.productName %> (<%= item.variantSize %>)</h3>
+                                </div>
+                                <% 
+                                const statusPriority = {
+                                    'Placed': 1,
+                                    'Confirmed': 2,
+                                    'Processing': 3,
+                                    'Shipped': 4,
+                                    'OutForDelivery': 5,
+                                    'Delivered': 6
+                                };
+                                const trackingDetails = [
+                                    {
+                                        key: 'Placed',
+                                        status: 'Order Placed',
+                                        date: item.tracking.placedDate,
+                                        time: item.tracking.placedTime,
+                                        description: 'Your order has been successfully placed and payment confirmed.',
+                                        icon: '✓',
+                                        location: null
+                                    },
+                                    {
+                                        key: 'Confirmed',
+                                        status: 'Order Confirmed',
+                                        date: item.tracking.confirmedDate,
+                                        time: item.tracking.confirmedTime,
+                                        description: 'Your order has been confirmed and is being prepared for shipment.',
+                                        icon: '✓',
+                                        location: null
+                                    },
+                                    {
+                                        key: 'Processing',
+                                        status: 'Processing',
+                                        date: item.tracking.processingDate,
+                                        time: item.tracking.processingTime,
+                                        description: 'Your order is being processed and packaged with care.',
+                                        icon: '⚙️',
+                                        location: null
+                                    },
+                                    {
+                                        key: 'Shipped',
+                                        status: 'Shipped',
+                                        date: item.tracking.shippedDate,
+                                        time: item.tracking.shippedTime,
+                                        description: 'Your order has been picked up by our delivery partner and is on its way!',
+                                        icon: '📦',
+                                        location: item.tracking.shippedLocation
+                                    },
+                                    {
+                                        key: 'OutForDelivery',
+                                        status: 'Out for Delivery',
+                                        date: item.tracking.outForDeliveryDate,
+                                        time: item.tracking.outForDeliveryTime,
+                                        description: 'Your order is out for delivery and will arrive at your doorstep soon.',
+                                        icon: '🚚',
+                                        location: item.tracking.outForDeliveryLocation
+                                    },
+                                    {
+                                        key: 'Delivered',
+                                        status: 'Delivered',
+                                        date: item.tracking.deliveredDate,
+                                        time: item.tracking.deliveredTime,
+                                        description: 'Your order has been successfully delivered to your doorstep.',
+                                        icon: '🏠',
+                                        location: null
+                                    }
+                                ];
+                                const currentPriority = statusPriority[item.status] || 0;
+                                %>
+                                <div class="tracking-timeline">
+                                    <% trackingDetails.forEach(detail => { 
+                                        const itemPriority = statusPriority[detail.key] || 0;
+                                        let itemClass = 'pending';
+                                        if (itemPriority < currentPriority && detail.date) {
+                                            itemClass = 'completed';
+                                        } else if (itemPriority === currentPriority && detail.date) {
+                                            itemClass = 'active';
+                                        }
+                                    %>
+                                        <div class="timeline-item <%= itemClass %>">
+                                            <div class="timeline-icon-container"><%= detail.icon %></div>
+                                            <div class="timeline-line"></div>
+                                            <div class="timeline-content">
+                                                <div class="timeline-status">
+                                                    <%= detail.status %>
+                                                    <% if (itemClass === 'completed') { %>
+                                                        <span class="status-badge-inline">COMPLETED</span>
+                                                    <% } else if (itemClass === 'active') { %>
+                                                        <span class="status-badge-inline">IN PROGRESS</span>
+                                                    <% } %>
+                                                </div>
+                                                <div class="timeline-date">
+                                                    <% if (!detail.date) { %>
+                                                        📅 Pending
+                                                    <% } else { %>
+                                                        📅 <%= detail.date %> • <%= detail.time || 'N/A' %>
+                                                    <% } %>
+                                                </div>
+                                                <div class="timeline-description"><%= detail.description %></div>
+                                                <% if (detail.location && (itemClass === 'completed' || itemClass === 'active')) { %>
+                                                    <div class="timeline-location">📍 <%= detail.location %></div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                                <div class="estimated-delivery">
+                                    <div class="estimated-delivery-label">
+                                        <%= item.status === 'Delivered' ? 'Delivered on' : 'Estimated Delivery' %>
+                                    </div>
+                                    <div class="estimated-delivery-date">
+                                        <% if (item.status === 'Delivered' && item.tracking.deliveredDate) { %>
+                                            <%= item.tracking.deliveredDate %> • <%= item.tracking.deliveredTime || 'N/A' %>
+                                        <% } else { %>
+                                            <%= item.tracking.estimatedDeliveryDate || 'Pending' %>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% }) %>
                 <% } else { %>
-                  <%= item.tracking.estimatedDeliveryDate || 'Pending' %>
+                    <div class="tracking-unavailable" style="padding: 60px 30px; text-align: center; color: #5f6368;">
+                        <p>Tracking information is currently unavailable for this order.</p>
+                    </div>
                 <% } %>
-              </div>
             </div>
-          </div>
-        <% } %>
-      <% }) %>
-    <% } else { %>
-      <div class="tracking-unavailable" style="padding: 60px 30px; text-align: center; color: #5f6368;">
-        <p>Tracking information is currently unavailable for this order.</p>
-      </div>
-    <% } %>
-  </div>
-</div>
+        </div>
+
     </div>
 
-    <!-- Footer -->
     <%- include('../../views/partials/user/footer') %>
 
 
+<script>
 
 
-    <script>
-      let currentItem = '';
+let currentItem = '';
 let currentItemIndex = '';
 let currentVariantSize = '';
+let currentItemFullPrice = '';
 
-// Open cancel modal with item index and variant
-function openModal(itemName, itemIndex, variantSize) {
-    currentItem = itemName;
-    currentItemIndex = itemIndex;
-    currentVariantSize = variantSize;
-    
-    document.getElementById('cancelItemName').textContent = `${itemName} (${variantSize}ml)`;
-    document.getElementById('cancelModal').classList.add('active');
-    document.querySelectorAll('input[name="cancelReason"]').forEach(radio => radio.checked = false);
-    document.getElementById('additionalDetails').value = '';
+function openModal(itemName, itemIndex, variantSize, fullPrice) {
+  currentItem = itemName;
+  currentItemIndex = itemIndex;
+  currentVariantSize = variantSize;
+  currentItemFullPrice = fullPrice;
+
+  const modalTitle = (String(variantSize) === 'all' || !variantSize) 
+    ? itemName 
+    : `${itemName}`;
+
+  document.getElementById('cancelItemName').textContent = modalTitle;
+  document.getElementById('cancelModal').classList.add('active');
+
+  document.querySelectorAll('input[name="cancelReason"]').forEach(radio => {
+    radio.checked = false;
+  });
+  document.getElementById('additionalDetails').value = '';
 }
 
 function closeModal() {
-    document.getElementById('cancelModal').classList.remove('active');
+  document.getElementById('cancelModal').classList.remove('active');
 }
 
+
+function formatCurrency(amount) {
+  if (isNaN(amount) || amount === null || amount === undefined) {
+    return '₹0.00';
+  }
+  return `₹${Math.abs(parseFloat(amount)).toFixed(2)}`;
+}
+
+
 function confirmCancel() {
-    const reason = document.querySelector('input[name="cancelReason"]:checked');
-    const details = document.getElementById('additionalDetails').value.trim();
+  const reasonInput = document.querySelector('input[name="cancelReason"]:checked');
+  const details = document.getElementById('additionalDetails').value.trim();
 
-    if (!reason) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Please select a reason',
-            text: 'You must select a reason for cancellation.',
-            confirmButtonColor: '#ff6b35',
-        });
-        return;
-    }
+  if (!reasonInput) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Please Select a Reason',
+      text: 'You must select a reason for cancellation.',
+      confirmButtonColor: '#ff6b35',
+      confirmButtonText: 'OK'
+    });
+    return;
+  }
 
-    const isEntireOrder = currentItem === 'Entire Order';
-    const orderId = "<%= orderId %>";
+  const reason = reasonInput.value;
+  const orderId = "<%= orderId %>";
+  const isEntireOrder = currentItem === 'Entire Order';
 
-    // Use itemIndex and variantSize for single items
-    const url = isEntireOrder
-        ? `/orders/${orderId}/cancel`
-        : `/orders/${orderId}/items/${currentItemIndex}/${currentVariantSize}/cancel`;
+  if (isEntireOrder) {
+    showEntireOrderConfirmation(reason, details);
+    return;
+  }
 
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: reason.value, details }),
-    })
+  const checkUrl = `/orders/${orderId}/items/${currentItemIndex}/${currentVariantSize}/check-cancel`;
+
+  const confirmBtn = document.querySelector('.btn-confirm-cancel');
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  console.log("🔍 Checking cancellation impact...");
+  console.log("URL:", checkUrl);
+  console.log("Item:", currentItem);
+  console.log("Item Index:", currentItemIndex);
+  console.log("Variant Size:", currentVariantSize);
+
+  fetch(checkUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  })
     .then(res => res.json())
     .then(data => {
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: isEntireOrder ? 'Order Cancelled' : `${currentItem} Cancelled`,
-                text: `Reason: ${reason.value}${details ? ' - ' + details : ''}`,
-                confirmButtonColor: '#ff6b35',
-            }).then(() => {
-                closeModal();
-                window.location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Failed to Cancel',
-                text: data.error || 'Unable to cancel item/order.',
-                confirmButtonColor: '#ff6b35',
-            });
-        }
+      if (confirmBtn) confirmBtn.disabled = false;
+
+      console.log("✅ Cancellation check response:", data);
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to check cancellation.');
+      }
+
+      // ✅ IMPORTANT: Check couponRevoked from response
+      if (data.couponRevoked) {
+        console.log("🟥 Coupon will be revoked!");
+        showCouponRevokedWarning(data, reason, details);
+      } else {
+        console.log("🟩 Coupon will stay valid!");
+        showNormalCancellationConfirmation(data, reason, details);
+      }
     })
     .catch(error => {
-        console.error('Error cancelling:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An error occurred while cancelling. Please try again.',
-            confirmButtonColor: '#ff6b35',
-        });
+      if (confirmBtn) confirmBtn.disabled = false;
+      console.error('❌ Error checking cancellation:', error);
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'An error occurred. Please try again.',
+        confirmButtonColor: '#ff6b35',
+        confirmButtonText: 'OK'
+      });
     });
 }
 
-// Open return modal with item index and variant
+
+function showCouponRevokedWarning(data, reason, details) {
+  console.log("=== COUPON REVOKED WARNING DATA ===", data);
+
+  // ✅ Use new backend-sent values
+  const totalDiscount = parseFloat(data.totalDiscount) || 0;
+  const revokedDiscountOnOtherItems = parseFloat(data.revokedDiscountOnOtherItems) || 0;
+  const remainingFullPrice = parseFloat(data.remainingFullPrice) || 0;
+  const remainingCurrentlyPay = parseFloat(data.remainingCurrentlyPay) || 0;
+  const balanceDue = parseFloat(data.balanceDue) || 0;
+  const itemUserPaid = parseFloat(data.itemUserPaid) || 0;
+  const refundAmount = parseFloat(data.refundAmount) || 0;
+  const minPurchase = parseFloat(data.minPurchase) || 0;
+
+  console.log("Parsed values → Paid:", itemUserPaid, "| BalanceDue:", balanceDue, "| Refund:", refundAmount);
+
+  const formatCurrency = (amt) => `₹${(amt || 0).toFixed(2)}`;
+
+  // ✅ Build the HTML content
+  let html = `
+    <div style="text-align: left; font-size: 15px; line-height: 1.8; color: #333;">
+      <p style="margin-bottom: 16px; padding: 12px; background: #fee2e2; border-left: 4px solid #dc2626; border-radius: 4px; color: #7f1d1d;">
+        <strong>⚠️ WARNING:</strong> Cancelling <strong style="color: #dc2626;">${currentItem}</strong> will drop your order total below the minimum purchase requirement of 
+        <strong>${formatCurrency(minPurchase)}</strong>. 
+        This will <strong>automatically revoke</strong> your coupon discount.
+      </p>
+
+      <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 4px; margin: 12px 0;">
+        <p style="margin: 0; color: #991b1b; font-weight: 600; font-size: 14px;">🎟️ Coupon Discount Will Be Removed</p>
+        <p style="margin: 6px 0 0; color: #7f1d1d; font-size: 13px;">Total discount revoked on order: <strong>${formatCurrency(totalDiscount)}</strong></p>
+        <p style="margin: 2px 0 0; color: #7f1d1d; font-size: 13px;">Discount on other items being revoked: <strong>${formatCurrency(revokedDiscountOnOtherItems)}</strong></p>
+      </div>
+
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px; margin: 12px 0;">
+        <p style="margin: 0; color: #92400e; font-weight: 600; font-size: 14px;">📌 Other Items Will Become Full Price</p>
+        <div style="margin-top: 8px; color: #78350f; font-size: 13px; line-height: 1.6;">
+          <div>Other items full price: <strong>${formatCurrency(remainingFullPrice)}</strong></div>
+          <div>They currently pay (with discount): <strong>${formatCurrency(remainingCurrentlyPay)}</strong></div>
+          <div>They need to pay (full price): <strong>${formatCurrency(remainingFullPrice)}</strong></div>
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #fcd34d;">
+            <strong style="color: #92400e;">Additional amount they need to pay: ${formatCurrency(balanceDue)}</strong>
+          </div>
+          <div style="font-size: 12px; color: #92400e;">(This will be deducted from your refund)</div>
+        </div>
+      </div>
+
+      <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; border-radius: 4px; margin: 12px 0;">
+        <p style="margin: 0; color: #15803d; font-weight: 600; font-size: 14px;">💰 Your Refund Calculation</p>
+        <div style="margin: 8px 0 0; color: #166534; font-size: 13px; line-height: 1.6;">
+          <div>Item you're cancelling: <strong>${currentItem}</strong></div>
+          <div>Amount you paid (after discount): <strong>${formatCurrency(itemUserPaid)}</strong></div>
+          ${balanceDue > 0
+            ? `<div>Less: Balance due for other items: <strong style="color: #b91c1c;">−${formatCurrency(balanceDue)}</strong></div>`
+            : ""
+          }
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #dcfce7;">
+            <strong style="font-size: 1.05em; color: #15803d;">Net refund you'll receive: ${formatCurrency(refundAmount)}</strong>
+          </div>
+        </div>
+      </div>
+
+      <hr style="margin: 16px 0; border: none; border-top: 2px solid #e5e7eb;">
+      <p style="margin: 12px 0; font-size: 14px; color: #555; text-align: center;">
+        <strong>Do you still want to cancel this item?</strong>
+      </p>
+    </div>
+  `;
+
+  // ✅ SweetAlert confirmation
+  Swal.fire({
+    icon: 'warning',
+    title: '⚠️ Coupon Will Be Revoked',
+    html,
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Cancel Item',
+    cancelButtonText: 'No, Keep Item',
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#22c55e',
+    reverseButtons: true,
+    width: '600px'
+  }).then(result => {
+    if (result.isConfirmed) {
+      closeModal();
+      executeCancellation(reason, details);
+    } else {
+      closeModal();
+    }
+  });
+}
+
+
+
+function executeCancellation(reason, details) {
+  const orderId = "<%= orderId %>";
+  const isEntireOrder = currentItem === 'Entire Order';
+
+  const url = isEntireOrder
+    ? `/orders/${orderId}/cancel`
+    : `/orders/${orderId}/items/${currentItemIndex}/${currentVariantSize}/cancel`;
+
+  const confirmBtn = document.querySelector('.btn-confirm-cancel');
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason, details })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (confirmBtn) confirmBtn.disabled = false;
+
+      if (data.success) {
+        const successTitle = isEntireOrder 
+          ? 'Order Cancelled Successfully ✓' 
+          : `${currentItem} Cancelled Successfully ✓`;
+
+        const refundAmount = parseFloat(data.refundAmount) || 0;
+        const clawbackAmount = parseFloat(data.clawbackAmount) || 0;
+        const balanceDue = parseFloat(data.balanceDue) || 0;
+
+        let successHtml = `
+          <div style="text-align: left;">
+            <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
+              <p style="margin: 0; color: #15803d; font-weight: 600;">
+                💰 Wallet Credit
+              </p>
+              <p style="margin: 8px 0 0 0; color: #166534; font-size: 14px;">
+                <strong style="font-size: 1.1em;">₹${refundAmount.toFixed(2)}</strong> has been credited to your wallet
+              </p>
+            </div>
+        `;
+
+        if (data.couponRevoked && clawbackAmount > 0) {
+          successHtml += `
+            <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
+              <p style="margin: 0; color: #991b1b; font-weight: 600;">
+                ⚠️ Coupon Revoked
+              </p>
+              <p style="margin: 8px 0 0 0; color: #7f1d1d; font-size: 14px;">
+                Discount of <strong>₹${clawbackAmount.toFixed(2)}</strong> has been removed
+              </p>
+              ${balanceDue > 0 ? `
+              <p style="margin: 6px 0 0 0; color: #7f1d1d; font-size: 13px;">
+                Balance due deducted from refund: <strong>₹${balanceDue.toFixed(2)}</strong>
+              </p>
+              ` : ''}
+            </div>
+          `;
+        }
+
+        successHtml += `
+          <p style="font-size: 14px; color: #555; margin-top: 12px; text-align: center;">
+            ✓ Order updated successfully<br/>
+            Check your wallet for the refund
+          </p>
+          </div>
+        `;
+
+        Swal.fire({
+          icon: 'success',
+          title: successTitle,
+          html: successHtml,
+          confirmButtonColor: '#22c55e',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          window.location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to Cancel',
+          text: data.error || 'Unable to cancel item/order.',
+          confirmButtonColor: '#ff6b35',
+          confirmButtonText: 'OK'
+        });
+      }
+    })
+    .catch(error => {
+      if (confirmBtn) confirmBtn.disabled = false;
+      console.error('Error executing cancellation:', error);
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'An error occurred. Please try again.',
+        confirmButtonColor: '#ff6b35',
+        confirmButtonText: 'OK'
+      });
+    });
+}
+
+
+
+function showNormalCancellationConfirmation(data, reason, details) {
+  const refundAmount = parseFloat(data.refundAmount) || 0;
+  const itemPrice = parseFloat(data.itemPrice) || 0;
+  const discount = itemPrice - refundAmount;
+
+  Swal.fire({
+    icon: 'question',
+    title: `Cancel ${currentItem}?`,
+    html: `
+      <div style="text-align: left; font-size: 14px; line-height: 1.8;">
+        <p style="margin-bottom: 12px;">
+          You will receive <strong style="color: #22c55e; font-size: 1.05em;">₹${refundAmount.toFixed(2)}</strong> as a refund to your wallet.
+        </p>
+        ${discount > 0 ? `
+        <p style="color: #555; margin-bottom: 0;">
+          This includes the discount of <strong>₹${discount.toFixed(2)}</strong> applied to this item.
+        </p>
+        ` : ''}
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Cancel',
+    cancelButtonText: 'No, Keep Item',
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#22c55e'
+  }).then(result => {
+    if (result.isConfirmed) {
+      closeModal();
+      executeCancellation(reason, details);
+    } else {
+      closeModal();
+    }
+  });
+}
+
+
+function showEntireOrderConfirmation(reason, details) {
+  Swal.fire({
+    icon: 'question',
+    title: 'Cancel Entire Order?',
+    html: `
+      <p style="font-size: 15px;">
+        Are you sure? This will cancel all cancellable items in the order.
+      </p>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Cancel Order',
+    cancelButtonText: 'No, Keep Order',
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#22c55e'
+  }).then(result => {
+    if (result.isConfirmed) {
+      closeModal();
+      executeCancellation(reason, details);
+    } else {
+      closeModal();
+    }
+  });
+}
+
+
 function openReturnModal(itemName, itemIndex, variantSize) {
-    currentItem = itemName;
-    currentItemIndex = itemIndex;
-    currentVariantSize = variantSize;
-    
-    document.getElementById('returnItemName').textContent = `${itemName} (${variantSize}ml)`;
-    document.getElementById('returnModal').classList.add('active');
-    document.querySelectorAll('input[name="returnReason"]').forEach(radio => radio.checked = false);
-    document.getElementById('returnAdditionalDetails').value = '';
+  currentItem = itemName;
+  currentItemIndex = itemIndex;
+  currentVariantSize = variantSize;
+
+  document.getElementById('returnItemName').textContent = itemName;
+  document.getElementById('returnModal').classList.add('active');
+
+  document.querySelectorAll('input[name="returnReason"]').forEach(radio => {
+    radio.checked = false;
+  });
+  document.getElementById('returnAdditionalDetails').value = '';
 }
 
 function closeReturnModal() {
-    document.getElementById('returnModal').classList.remove('active');
+  document.getElementById('returnModal').classList.remove('active');
 }
 
 function confirmReturn() {
-    const reason = document.querySelector('input[name="returnReason"]:checked');
-    const details = document.getElementById('returnAdditionalDetails').value.trim();
+  const reason = document.querySelector('input[name="returnReason"]:checked');
+  const details = document.getElementById('returnAdditionalDetails').value.trim();
 
-    if (!reason) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Please select a reason',
-            text: 'You must select a reason for return.',
-            confirmButtonColor: '#3b82f6',
-        });
-        return;
-    }
+  if (!reason) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Please Select a Reason',
+      text: 'You must select a reason for return.',
+      confirmButtonColor: '#3b82f6'
+    });
+    return;
+  }
 
-    const isEntireOrder = currentItem === 'Entire Order';
-    const orderId = "<%= orderId %>";
+  const isEntireOrder = currentItem === 'Entire Order';
+  const orderId = "<%= orderId %>";
 
-    // Use itemIndex and variantSize for single items
-    const url = isEntireOrder
-        ? `/orders/${orderId}/return`
-        : `/orders/${orderId}/items/${currentItemIndex}/${currentVariantSize}/return`;
+  const url = isEntireOrder
+    ? `/orders/${orderId}/return`
+    : `/orders/${orderId}/items/${currentItemIndex}/${currentVariantSize}/return`;
 
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: reason.value, details }),
-    })
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason: reason.value, details })
+  })
     .then(res => res.json())
     .then(data => {
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: isEntireOrder ? 'Return Confirmed' : `${currentItem} Return Confirmed`,
-                text: `Reason: ${reason.value}${details ? ' - ' + details : ''}`,
-                confirmButtonColor: '#3b82f6',
-            }).then(() => {
-                closeReturnModal();
-                window.location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Failed to Return',
-                text: data.error || 'Unable to process return.',
-                confirmButtonColor: '#3b82f6',
-            });
-        }
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: isEntireOrder ? 'Return Request Submitted' : `${currentItem} Return Submitted`,
+          text: `Your return request has been submitted. Reason: ${reason.value}`,
+          confirmButtonColor: '#3b82f6'
+        }).then(() => {
+          closeReturnModal();
+          window.location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to Request Return',
+          text: data.error || 'Unable to process return request.',
+          confirmButtonColor: '#3b82f6'
+        });
+      }
     })
     .catch(error => {
-        console.error('Error returning:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An error occurred while processing return. Please try again.',
-            confirmButtonColor: '#3b82f6',
-        });
+      console.error('Error returning:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'An error occurred. Please try again.',
+        confirmButtonColor: '#3b82f6'
+      });
     });
 }
 
-// Open cancel return modal with item index and variant
 function openCancelReturnModal(itemName, itemIndex, variantSize) {
-    currentItem = itemName;
-    currentItemIndex = itemIndex;
-    currentVariantSize = variantSize;
-    
-    document.getElementById('cancelReturnItemName').textContent = `${itemName} (${variantSize}ml)`;
-    document.getElementById('cancelReturnModal').classList.add('active');
+  currentItem = itemName;
+  currentItemIndex = itemIndex;
+  currentVariantSize = variantSize;
+
+  document.getElementById('cancelReturnItemName').textContent = itemName;
+  document.getElementById('cancelReturnModal').classList.add('active');
 }
 
 function closeCancelReturnModal() {
-    document.getElementById('cancelReturnModal').classList.remove('active');
+  document.getElementById('cancelReturnModal').classList.remove('active');
 }
 
 function confirmCancelReturn() {
-    const isEntireOrder = currentItem === 'Entire Order';
-    const orderId = "<%= orderId %>";
+  const isEntireOrder = currentItem === 'Entire Order';
+  const orderId = "<%= orderId %>";
 
-    // Use itemIndex and variantSize for single items
-    const url = isEntireOrder
-        ? `/orders/${orderId}/cancel-return`
-        : `/orders/${orderId}/items/${currentItemIndex}/${currentVariantSize}/cancel-return`;
+  const url = isEntireOrder
+    ? `/orders/${orderId}/cancel-return`
+    : `/orders/${orderId}/items/${currentItemIndex}/${currentVariantSize}/cancel-return`;
 
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-    })
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
     .then(res => res.json())
     .then(data => {
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: isEntireOrder ? 'Return Cancelled' : `${currentItem} Return Cancelled`,
-                confirmButtonColor: '#6d28d9',
-            }).then(() => {
-                closeCancelReturnModal();
-                window.location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Failed to Cancel Return',
-                text: data.error || 'Unable to cancel return.',
-                confirmButtonColor: '#6d28d9',
-            });
-        }
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: isEntireOrder ? 'Return Cancelled' : `${currentItem} Return Cancelled`,
+          confirmButtonColor: '#6d28d9'
+        }).then(() => {
+          closeCancelReturnModal();
+          window.location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to Cancel Return',
+          text: data.error || 'Unable to cancel return.',
+          confirmButtonColor: '#6d28d9'
+        });
+      }
     })
     .catch(error => {
-        console.error('Error cancelling return:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An error occurred while cancelling return. Please try again.',
-            confirmButtonColor: '#6d28d9',
-        });
+      console.error('Error cancelling return:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'An error occurred. Please try again.',
+        confirmButtonColor: '#6d28d9'
+      });
     });
 }
-       function openTrackingModal(productName) {
-    const trackingModal = document.getElementById('trackingModal');
-    const allItems = document.querySelectorAll('.tracking-item');
-    allItems.forEach(item => {
-        const itemName = item.querySelector('.tracking-item-header h3').textContent.split(' (')[0];
-        item.style.display = itemName === productName ? 'block' : 'none';
-    });
-    trackingModal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+
+function openTrackingModal(productName) {
+  const trackingModal = document.getElementById('trackingModal');
+  const allItems = document.querySelectorAll('.tracking-item');
+
+  let itemFound = false;
+  allItems.forEach(item => {
+    const itemName = item.querySelector('.tracking-item-header h3').textContent.split(' (')[0];
+    if (itemName === productName && !itemFound) {
+      item.style.display = 'block';
+      itemFound = true;
+    } else {
+      item.style.display = 'none';
+    }
+  });
+
+  trackingModal.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeTrackingModal() {
-    document.getElementById('trackingModal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-    document.querySelectorAll('.tracking-item').forEach(item => {
-        item.style.display = 'block';
-    });
+  document.getElementById('trackingModal').classList.remove('active');
+  document.body.style.overflow = 'auto';
 }
 
 function downloadInvoice() {
-    const orderId = "<%= orderId %>";
-    fetch(`/orders/${orderId}/invoice`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-    })
+  const orderId = "<%= orderId %>";
+  fetch(`/orders/${orderId}/invoice`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  })
     .then(res => {
-        if (!res.ok) {
-            return res.json().then(data => {
-                throw new Error(data.error);
-            });
-        }
-        return res.blob();
+      if (!res.ok) {
+        return res.json().then(data => {
+          throw new Error(data.error || 'Failed to generate invoice.');
+        });
+      }
+      return res.blob();
     })
     .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Invoice_${orderId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Invoice_${orderId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
     })
     .catch(error => {
-        console.error('Error downloading invoice:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Invoice can only be downloaded when all items are delivered, cancelled, or returned.',
-            confirmButtonColor: '#ff6b35',
-        });
+      console.error('Error downloading invoice:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Invoice download failed.',
+        confirmButtonColor: '#ff6b35'
+      });
     });
 }
 
 function continueShopping() {
-    window.location.href = '/shopPage';
+  window.location.href = '/shopPage';
 }
 
 window.onclick = function(event) {
-    const cancelModal = document.getElementById('cancelModal');
-    const returnModal = document.getElementById('returnModal');
-    const cancelReturnModal = document.getElementById('cancelReturnModal');
-    const trackingModal = document.getElementById('trackingModal');
-    
-    if (event.target === cancelModal) closeModal();
-    if (event.target === returnModal) closeReturnModal();
-    if (event.target === cancelReturnModal) closeCancelReturnModal();
-    if (event.target === trackingModal) closeTrackingModal();
-}
+  const cancelModal = document.getElementById('cancelModal');
+  const returnModal = document.getElementById('returnModal');
+  const cancelReturnModal = document.getElementById('cancelReturnModal');
+  const trackingModal = document.getElementById('trackingModal');
+
+  if (event.target === cancelModal) closeModal();
+  if (event.target === returnModal) closeReturnModal();
+  if (event.target === cancelReturnModal) closeCancelReturnModal();
+  if (event.target === trackingModal) closeTrackingModal();
+};
 
 document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeModal();
-        closeReturnModal();
-        closeCancelReturnModal();
-        closeTrackingModal();
-    }
+  if (event.key === 'Escape') {
+    closeModal();
+    closeReturnModal();
+    closeCancelReturnModal();
+    closeTrackingModal();
+  }
 });
-    </script>
 
-</body>
+
+
+</script>
+
+    </body>
 </html>

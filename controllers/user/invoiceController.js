@@ -1,11 +1,8 @@
-
-
 const PDFDocument = require('pdfkit');
 const mongoose = require('mongoose');
-const Order = require("../../models/orderSchema");
+const Order = require('../../models/orderSchema');
 const path = require('path');
 const fs = require('fs');
-
 
 const generateInvoice = async (req, res) => {
   try {
@@ -25,27 +22,28 @@ const generateInvoice = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-   
-    const allItemsCompleted = order.orderItems.every(item => 
-      item.status === 'Delivered' || item.status === 'Cancelled' || item.status === 'Returned'
+    const allItemsCompleted = order.orderItems.every(
+      (item) =>
+        item.status === 'Delivered' ||
+        item.status === 'Cancelled' ||
+        item.status === 'Returned'
     );
 
     if (!allItemsCompleted) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invoice can only be downloaded when all items are either Delivered, Cancelled, or Returned' 
+      return res.status(400).json({
+        success: false,
+        error:
+          'Invoice can only be downloaded when all items are either Delivered, Cancelled, or Returned',
       });
     }
 
-   
-    const doc = new PDFDocument({
-      size: 'A4',
-      margin: 50
-    });
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-    
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="Invoice_${orderId}.pdf"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="Invoice_${orderId}.pdf"`
+    );
     doc.pipe(res);
 
     const primaryColor = '#000000';
@@ -53,228 +51,333 @@ const generateInvoice = async (req, res) => {
     const darkGray = '#333333';
     const lightGray = '#f5f5f5';
     const textColor = '#000000';
-
     const pageWidth = doc.page.width;
     const pageHeight = doc.page.height;
+    const margin = 50;
 
-
-    const correctLogoPath = path.join(__dirname, '../../public/photos/zodiac perfume/brand logo.png');
-    if (fs.existsSync(correctLogoPath)) {
-      doc.image(correctLogoPath, 50, 35, { width: 100, height: 100 });
+    const logoPath = path.join(
+      __dirname,
+      '../../public/photos/zodiac perfume/brand logo.png'
+    );
+    if (fs.existsSync(logoPath)) {
+      doc.image(logoPath, 50, 35, { width: 100, height: 100 });
     }
 
-    doc.fontSize(16).fillColor(primaryColor).font('Helvetica-Bold')
+    doc
+      .fontSize(16)
+      .fillColor(primaryColor)
+      .font('Helvetica-Bold')
       .text('SENTIQUE', 160, 45);
-    doc.fontSize(11).fillColor(accentColor).font('Helvetica')
+    doc
+      .fontSize(11)
+      .fillColor(accentColor)
+      .font('Helvetica')
       .text('SCENT YOUR SIGNATURE', 160, 65);
-    
-    doc.fontSize(9).fillColor(darkGray).font('Helvetica')
+    doc
+      .fontSize(9)
+      .fillColor(darkGray)
+      .font('Helvetica')
       .text('Email: support@sentique.com', 160, 85)
       .text('Phone: +91-8606621947', 160, 100)
       .text('Address: City, State - Pincode', 160, 115);
 
-    doc.fontSize(20).fillColor(primaryColor).font('Helvetica-Bold')
-      .text('INVOICE', pageWidth - 150, 40, { align: 'right' });
-
+    doc
+      .fontSize(20)
+      .fillColor(primaryColor)
+      .font('Helvetica-Bold')
+      .text('INVOICE', margin, 40, { align: 'right' });
     doc.fontSize(9).fillColor(darkGray).font('Helvetica');
-    doc.text(`Invoice #: ${orderId}`, pageWidth - 280, 70, { width: 230, align: 'right' });
-    doc.text(`Invoice Date: ${new Date(order.createdOn).toLocaleDateString('en-IN')}`, pageWidth - 280, 85, { width: 230, align: 'right' });
-    doc.text(`Order Status: ${order.status}`, pageWidth - 280, 100, { width: 230, align: 'right' });
-    doc.text(`Payment: ${order.paymentStatus}`, pageWidth - 280, 115, { width: 230, align: 'right' });
+    doc.text(`Invoice #: ${orderId}`, margin, 70, { align: 'right' });
+    doc.text(
+      `Invoice Date: ${new Date(order.createdOn).toLocaleDateString('en-IN')}`,
+      margin,
+      85,
+      { align: 'right' }
+    );
+    doc.text(`Order Status: ${order.status}`, margin, 100, { align: 'right' });
+    doc.text(`Payment: ${order.paymentStatus}`, margin, 115, { align: 'right' });
 
-    doc.strokeColor(accentColor).lineWidth(2);
-    doc.moveTo(50, 150).lineTo(pageWidth - 50, 150).stroke();
+    doc
+      .strokeColor(accentColor)
+      .lineWidth(2)
+      .moveTo(margin, 150)
+      .lineTo(pageWidth - margin, 150)
+      .stroke();
 
     const billingY = 170;
-    
-    doc.fontSize(11).fillColor(primaryColor).font('Helvetica-Bold')
+    doc
+      .fontSize(11)
+      .fillColor(primaryColor)
+      .font('Helvetica-Bold')
       .text('BILL TO:', 50, billingY);
-    
-    doc.fontSize(9).fillColor(textColor).font('Helvetica')
+    doc
+      .fontSize(9)
+      .fillColor(textColor)
+      .font('Helvetica')
       .text(order.deliveryAddress.name, 50, billingY + 20)
       .text(order.deliveryAddress.houseName, 50, billingY + 35);
-    
+    let currentY = billingY + 35;
     if (order.deliveryAddress.landmark) {
-      doc.text(`${order.deliveryAddress.landmark}`, 50, billingY + 50);
+      currentY += 15;
+      doc.text(order.deliveryAddress.landmark, 50, currentY);
     }
-    
-    doc.text(`${order.deliveryAddress.city}, ${order.deliveryAddress.state} ${order.deliveryAddress.pincode}`, 
-      50, order.deliveryAddress.landmark ? billingY + 65 : billingY + 50);
-    
-    doc.text(`Phone: ${order.deliveryAddress.phone}`, 
-      50, order.deliveryAddress.landmark ? billingY + 80 : billingY + 65);
+    currentY += 15;
+    doc.text(
+      `${order.deliveryAddress.city}, ${order.deliveryAddress.state} ${order.deliveryAddress.pincode}`,
+      50,
+      currentY
+    );
+    currentY += 15;
+    doc.text(`Phone: ${order.deliveryAddress.phone}`, 50, currentY);
 
-    doc.fontSize(11).fillColor(primaryColor).font('Helvetica-Bold')
+    doc
+      .fontSize(11)
+      .fillColor(primaryColor)
+      .font('Helvetica-Bold')
       .text('SHIP TO:', 320, billingY);
-    
-    doc.fontSize(9).fillColor(textColor).font('Helvetica')
+    doc
+      .fontSize(9)
+      .fillColor(textColor)
+      .font('Helvetica')
       .text(order.deliveryAddress.name, 320, billingY + 20)
       .text(order.deliveryAddress.houseName, 320, billingY + 35);
-    
+    currentY = billingY + 35;
     if (order.deliveryAddress.landmark) {
-      doc.text(`${order.deliveryAddress.landmark}`, 320, billingY + 50);
+      currentY += 15;
+      doc.text(order.deliveryAddress.landmark, 320, currentY);
     }
-    
-    doc.text(`${order.deliveryAddress.city}, ${order.deliveryAddress.state}`, 
-      320, order.deliveryAddress.landmark ? billingY + 65 : billingY + 50);
+    currentY += 15;
+    doc.text(
+      `${order.deliveryAddress.city}, ${order.deliveryAddress.state}`,
+      320,
+      currentY
+    );
 
-  
     const tableStartY = billingY + 130;
     const tableHeight = 25;
+    const col1X = 50,
+      col1Width = 200;
+    const col2X = 250,
+      col2Width = 50;
+    const col3X = 300,
+      col3Width = 40;
+    const col4X = 340,
+      col4Width = 60;
+    const col5X = 400,
+      col5Width = 70;
+    const col6X = 470,
+      col6Width = 75;
+    const tableEndX = 545;
 
-    doc.rect(50, tableStartY, pageWidth - 100, tableHeight)
-      .fillAndStroke(primaryColor, primaryColor);
+    const drawTableHeader = (y) => {
+      doc
+        .rect(col1X, y, tableEndX - col1X, tableHeight)
+        .fillAndStroke(primaryColor, primaryColor);
+      doc.fontSize(10).fillColor('#FFFFFF').font('Helvetica-Bold');
+      doc.text('DESCRIPTION', col1X + 10, y + 8, { width: col1Width - 10 });
+      doc.text('SIZE', col2X, y + 8, { width: col2Width });
+      doc.text('QTY', col3X, y + 8, { width: col3Width, align: 'center' });
+      doc.text('STATUS', col4X, y + 8, { width: col4Width });
+      doc.text('UNIT PRICE', col5X, y + 8, { width: col5Width, align: 'right' });
+      doc.text('AMOUNT', col6X, y + 8, { width: col6Width, align: 'right' });
+    };
 
-    doc.fontSize(10).fillColor('#FFFFFF').font('Helvetica-Bold');
-    doc.text('DESCRIPTION', 60, tableStartY + 5);
-    doc.text('SIZE', 260, tableStartY + 5);
-    doc.text('QTY', 310, tableStartY + 5);
-    doc.text('STATUS', 360, tableStartY + 5);
-    doc.text('UNIT PRICE', 420, tableStartY + 5);
-    doc.text('AMOUNT', 500, tableStartY + 5);
+    drawTableHeader(tableStartY);
 
     let tableY = tableStartY + tableHeight;
     const rowHeight = 40;
-    let deliveredTotal = 0;
+    let deliveredSubtotal = 0;
+    let deliveredDiscount = 0;
     let cancelledTotal = 0;
 
     order.orderItems.forEach((item, index) => {
-      if (index % 2 === 0) {
-        doc.rect(50, tableY, pageWidth - 100, rowHeight).fill(lightGray);
+      if (tableY + rowHeight > pageHeight - 150) {
+        doc.addPage();
+        tableY = margin;
+        drawTableHeader(tableY);
+        tableY += tableHeight;
       }
 
-      doc.fontSize(9).fillColor(textColor).font('Helvetica');
-      
+      if (index % 2 === 0) {
+        doc.rect(col1X, tableY, tableEndX - col1X, rowHeight).fill(lightGray);
+      }
+
+      const rowContentY = tableY + 10;
       const itemName = item.productName || 'N/A';
       const variant = item.variantSize ? `${item.variantSize}ml` : 'N/A';
       const qty = item.quantity || 1;
       const price = parseFloat(item.price || 0).toFixed(2);
       const total = parseFloat(item.total || 0).toFixed(2);
       const status = item.status || 'Pending';
+      const itemDiscount = parseFloat(
+        item.discountApplied || item.couponDiscount || 0
+      );
+      const itemFinalAmount = parseFloat(total) - itemDiscount;
 
-      
-      doc.text(itemName, 60, tableY + 5, { width: 190, ellipsis: true });
-      
-  
-      doc.text(variant, 260, tableY + 5, { width: 45 });
-      
-     
-      doc.text(qty.toString(), 310, tableY + 5, { width: 40, align: 'center' });
-      
-      
-      let statusColor = '#f39c12'; 
-      if (status === 'Delivered') {
-        statusColor = '#27ae60'; 
-      } else if (status === 'Cancelled') {
-        statusColor = '#e74c3c'; 
-      } else if (status === 'Returned') {
-        statusColor = '#3498db'; 
-      }
-      doc.fillColor(statusColor).font('Helvetica-Bold')
-        .text(status, 360, tableY + 5, { width: 50 });
-      
-      
+      doc.fontSize(9).fillColor(textColor).font('Helvetica');
+      doc.text(itemName, col1X + 10, rowContentY, {
+        width: col1Width - 15,
+        ellipsis: true,
+      });
+      doc.text(variant, col2X, rowContentY, { width: col2Width });
+      doc.text(qty.toString(), col3X, rowContentY, {
+        width: col3Width,
+        align: 'center',
+      });
+
+      let statusColor = '#f39c12';
+      if (status === 'Delivered') statusColor = '#27ae60';
+      else if (status === 'Cancelled') statusColor = '#e74c3c';
+      else if (status === 'Returned') statusColor = '#3498db';
+      doc.fillColor(statusColor).font('Helvetica-Bold');
+      doc.text(status, col4X, rowContentY, { width: col4Width });
       doc.fillColor(textColor).font('Helvetica');
-      
-     
-      if (status !== 'Cancelled') {
-        doc.text(`₹${price}`, 420, tableY + 5, { width: 75, align: 'right' });
-        doc.text(`₹${total}`, 500, tableY + 5, { width: 60, align: 'right' });
-        deliveredTotal += parseFloat(total);
-      } else {
-        doc.fillColor('#999999')
-          .text('CANCELLED', 420, tableY + 5, { width: 75, align: 'right' })
-          .text('-', 500, tableY + 5, { width: 60, align: 'right' });
+
+      if (
+        status !== 'Cancelled' &&
+        status !== 'Returned' &&
+        status !== 'Return Request'
+      ) {
+        doc.text(`₹${price}`, col5X, rowContentY, {
+          width: col5Width,
+          align: 'right',
+        });
+        doc.text(`₹${itemFinalAmount.toFixed(2)}`, col6X, rowContentY, {
+          width: col6Width,
+          align: 'right',
+        });
+        deliveredSubtotal += parseFloat(total);
+        deliveredDiscount += itemDiscount;
+      } else if (status === 'Cancelled' || status === 'Returned') {
+        doc.fillColor('#999999');
+        doc.text('N/A', col5X, rowContentY, { width: col5Width, align: 'right' });
+        doc.text('-', col6X, rowContentY, { width: col6Width, align: 'right' });
         cancelledTotal += parseFloat(total);
       }
 
       tableY += rowHeight;
     });
 
-    doc.strokeColor(accentColor).lineWidth(1);
-    doc.moveTo(50, tableY).lineTo(pageWidth - 50, tableY).stroke();
+    doc
+      .strokeColor(accentColor)
+      .lineWidth(1)
+      .moveTo(margin, tableY)
+      .lineTo(pageWidth - margin, tableY)
+      .stroke();
 
-   
+    if (tableY + 150 > pageHeight - margin) {
+      doc.addPage();
+      tableY = margin;
+    }
+
     const summaryY = tableY + 20;
-    const summaryX = 350;
+    const summaryLabelX = 350;
+    const summaryValueX = 485;
+    let summaryRowY = summaryY;
 
-    doc.fontSize(10).fillColor(darkGray).font('Helvetica');
-    
-   
-    doc.fontSize(9).fillColor(primaryColor).font('Helvetica-Bold')
-      .text('Delivered Items Subtotal:', summaryX, summaryY, { width: 150 });
-    doc.fontSize(9).fillColor('#27ae60').font('Helvetica-Bold')
-      .text(`₹${deliveredTotal.toFixed(2)}`, 500, summaryY, { align: 'right', width: 60 });
+    doc.fontSize(9).fillColor(primaryColor).font('Helvetica-Bold');
+    doc.text('Active Items Subtotal:', summaryLabelX, summaryRowY);
+    doc.fillColor('#27ae60').font('Helvetica-Bold');
+    doc.text(`₹${deliveredSubtotal.toFixed(2)}`, summaryValueX, summaryRowY, {
+      align: 'right',
+    });
+    summaryRowY += 18;
 
- 
     if (cancelledTotal > 0) {
-      doc.fontSize(9).fillColor(primaryColor).font('Helvetica')
-        .text('Cancelled Items:', summaryX, summaryY + 18, { width: 150 });
-      doc.fontSize(9).fillColor('#e74c3c').font('Helvetica')
-        .text(`-₹${cancelledTotal.toFixed(2)}`, 500, summaryY + 18, { align: 'right', width: 60 });
+      doc.fillColor(primaryColor).font('Helvetica');
+      doc.text('Cancelled/Returned Items:', summaryLabelX, summaryRowY);
+      doc.fillColor('#e74c3c').font('Helvetica');
+      doc.text(`-₹${cancelledTotal.toFixed(2)}`, summaryValueX, summaryRowY, {
+        align: 'right',
+      });
+      summaryRowY += 18;
     }
-  
-   
-    const discountAmount = parseFloat(order.discount || 0);
-    let discountY = summaryY + 36;
-    
-    if (discountAmount > 0) {
-      doc.fontSize(9).fillColor(primaryColor).font('Helvetica')
-        .text('Discount:', summaryX, discountY, { width: 150 });
-      doc.fontSize(9).fillColor('#27ae60').font('Helvetica')
-        .text(`-₹${discountAmount.toFixed(2)}`, 500, discountY, { align: 'right', width: 60 });
-      discountY += 18;
+
+    if (deliveredDiscount > 0) {
+      doc.fillColor(primaryColor).font('Helvetica');
+      doc.text('Item Discount:', summaryLabelX, summaryRowY);
+      doc.fillColor('#27ae60').font('Helvetica');
+      doc.text(`-₹${deliveredDiscount.toFixed(2)}`, summaryValueX, summaryRowY, {
+        align: 'right',
+      });
+      summaryRowY += 18;
     }
- 
-    doc.fontSize(9).fillColor(primaryColor).font('Helvetica')
-      .text('Shipping:', summaryX, discountY, { width: 150 });
-    doc.fontSize(9).fillColor(darkGray).font('Helvetica')
-      .text('₹0.00', 500, discountY, { align: 'right', width: 60 });
-    
-    const finalTotal = Math.max(0, deliveredTotal - discountAmount);
- 
-    const totalBoxY = discountY + 21;
-    doc.rect(summaryX - 10, totalBoxY, 200, 40)
+
+    doc.fillColor(primaryColor).font('Helvetica');
+    doc.text('Shipping:', summaryLabelX, summaryRowY);
+    doc.fillColor(darkGray).font('Helvetica');
+    doc.text('₹0.00', summaryValueX, summaryRowY, { align: 'right' });
+
+    const finalTotal = Math.max(0, deliveredSubtotal - deliveredDiscount);
+
+    const totalBoxY = summaryRowY + 21;
+    doc
+      .rect(summaryLabelX - 10, totalBoxY, 205, 40)
       .fillAndStroke(primaryColor, primaryColor);
 
     doc.fontSize(12).fillColor('#FFFFFF').font('Helvetica-Bold');
-    doc.text('TOTAL DUE:', summaryX, totalBoxY + 12, { width: 100 });
-    doc.text(`₹${finalTotal.toFixed(2)}`, summaryX + 110, totalBoxY + 12, { align: 'right', width: 80 });
+    doc.text('TOTAL AMOUNT:', summaryLabelX, totalBoxY + 12, { width: 100 });
+    doc.text(`₹${finalTotal.toFixed(2)}`, summaryLabelX + 110, totalBoxY + 12, {
+      align: 'right',
+      width: 85,
+    });
 
-   
     const paymentY = totalBoxY + 60;
-    
-    doc.fontSize(10).fillColor(primaryColor).font('Helvetica-Bold')
+    doc
+      .fontSize(10)
+      .fillColor(primaryColor)
+      .font('Helvetica-Bold')
       .text('PAYMENT DETAILS', 50, paymentY);
-    
-    doc.fontSize(9).fillColor(textColor).font('Helvetica')
+    doc
+      .fontSize(9)
+      .fillColor(textColor)
+      .font('Helvetica')
       .text(`Payment Method: ${order.paymentMethod}`, 50, paymentY + 20)
       .text(`Payment Status: ${order.paymentStatus}`, 50, paymentY + 35);
 
     if (order.couponApplied && order.couponCode) {
       doc.text(`Coupon Applied: ${order.couponCode}`, 50, paymentY + 50);
+      doc.text(
+        `Total Coupon Discount: ₹${order.discount.toFixed(2)}`,
+        50,
+        paymentY + 65
+      );
     }
-  
+
     const footerY = pageHeight - 80;
-    
     doc.strokeColor(accentColor).lineWidth(1);
-    doc.moveTo(50, footerY).lineTo(pageWidth - 50, footerY).stroke();
-
-    doc.fontSize(9).fillColor(textColor).font('Helvetica')
-      .text('Thank you for your purchase!', 50, footerY + 10, { align: 'center' });
-
-    doc.fontSize(8).fillColor(darkGray).font('Helvetica')
-      .text('For any queries, contact: support@sentique.com | +91-9876543210', 50, footerY + 25, { align: 'center' })
-      .text('This is a computer-generated invoice. No signature required.', 50, footerY + 40, { align: 'center' });
+    doc.moveTo(margin, footerY).lineTo(pageWidth - margin, footerY).stroke();
+    doc
+      .fontSize(9)
+      .fillColor(textColor)
+      .font('Helvetica')
+      .text('Thank you for your purchase!', margin, footerY + 10, {
+        align: 'center',
+      });
+    doc
+      .fontSize(8)
+      .fillColor(darkGray)
+      .font('Helvetica')
+      .text(
+        'For any queries, contact: support@sentique.com | +91-8606621947',
+        margin,
+        footerY + 25,
+        { align: 'center' }
+      )
+      .text(
+        'This is a computer-generated invoice. No signature required.',
+        margin,
+        footerY + 40,
+        { align: 'center' }
+      );
 
     doc.end();
-
   } catch (error) {
     console.error('Error generating invoice:', error);
-    res.status(500).json({ success: false, error: 'Failed to generate invoice' });
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to generate invoice' });
   }
 };
 
-module.exports = {
-  generateInvoice,
-};
+module.exports = { generateInvoice };

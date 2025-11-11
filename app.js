@@ -8,6 +8,8 @@ const nocache = require('nocache');
 const MongoStore = require('connect-mongo');
 const passport = require('./config/passport');
 const db = require('./config/db');
+const cors = require('cors');
+
 
 const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
@@ -18,6 +20,13 @@ const adminRouter = require('./routes/adminRouter');
     const app = express();
 
     // --------------- MIDDLEWARE ---------------
+       
+    app.use(cors({
+      origin: 'http://localhost:5173', 
+      credentials: true
+    }));
+
+
     app.use(express.static(path.join(__dirname, 'public')));
     app.use(express.json({ limit: '50mb' }));
     app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -43,13 +52,18 @@ const adminRouter = require('./routes/adminRouter');
 
 
     // --------------- USER SESSION ---------------
-    app.use("/", session({
+    app.use(session({
       name: "userSession",
       secret: process.env.SESSION_SECRET || "super_secret_sentique_key",
       resave: false,
       saveUninitialized: false,
       store: sessionStore,
-      cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true, sameSite: "lax" }
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true,
+        sameSite: 'none', // ✅ Important for localhost:5173
+        secure: false
+      }
     }));
 
 

@@ -571,6 +571,219 @@
       display: block;
     }
   }
+
+
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    margin-bottom: 12px;
+    min-width: 320px;
+    max-width: 420px;
+    overflow: hidden;
+    pointer-events: auto;
+    animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+  }
+
+  .toast.removing {
+    animation: slideOut 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .toast-indicator {
+    width: 5px;
+    height: 100%;
+    flex-shrink: 0;
+  }
+
+  .toast.success .toast-indicator {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  }
+
+  .toast.info .toast-indicator {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  }
+
+  .toast.error .toast-indicator {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  }
+
+  .toast-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-left: 12px;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+
+  .toast.success .toast-icon {
+    background: #ecfdf5;
+    color: #10b981;
+  }
+
+  .toast.info .toast-icon {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+
+  .toast.error .toast-icon {
+    background: #fef2f2;
+    color: #ef4444;
+  }
+
+  .toast-content {
+    flex: 1;
+    padding: 16px 12px;
+  }
+
+  .toast-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .toast.success .toast-title {
+    color: #059669;
+  }
+
+  .toast.info .toast-title {
+    color: #2563eb;
+  }
+
+  .toast.error .toast-title {
+    color: #dc2626;
+  }
+
+  .toast-message {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+  }
+
+  .toast-close {
+    width: 32px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #9ca3af;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+    flex-shrink: 0;
+    margin-right: 4px;
+    font-size: 16px;
+  }
+
+  .toast-close:hover {
+    color: #6b7280;
+    transform: scale(1.1);
+  }
+
+  .toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    animation: progress 3s linear forwards;
+  }
+
+  .toast.success .toast-progress {
+    background: linear-gradient(90deg, #10b981, transparent);
+  }
+
+  .toast.info .toast-progress {
+    background: linear-gradient(90deg, #3b82f6, transparent);
+  }
+
+  .toast.error .toast-progress {
+    background: linear-gradient(90deg, #ef4444, transparent);
+  }
+
+  @keyframes progress {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0;
+    }
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 480px) {
+    .toast-container {
+      left: 12px;
+      right: 12px;
+      top: auto;
+      bottom: 20px;
+    }
+
+    .toast {
+      min-width: auto;
+      max-width: 100%;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+    }
+  }
 </style>
 <body>
 
@@ -846,6 +1059,50 @@
 </div>
 
 <script>
+  // Toast notification function
+  function showToast(type, title, message, duration = 3000) {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const icons = {
+      success: 'fas fa-check-circle',
+      info: 'fas fa-info-circle',
+      error: 'fas fa-times-circle'
+    };
+
+    toast.innerHTML = `
+      <div class="toast-indicator"></div>
+      <div class="toast-icon">
+        <i class="${icons[type]}"></i>
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+      <button class="toast-close" onclick="this.closest('.toast').remove()">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="toast-progress"></div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, duration);
+  }
+
   // Filter Toggle
   (function(){
     const toggleBtn = document.getElementById('toggleFilters');
@@ -888,22 +1145,15 @@
     window.location.href = "/shopPage";
   }
 
-  // Wishlist functionality
+  // Wishlist functionality with improved toast notifications
   document.addEventListener('click', async (e) => {
     if (e.target.closest('.wishlist-icon')) {
       e.preventDefault();
       const icon = e.target.closest('.wishlist-icon');
       const productId = icon.dataset.id;
-      console.log('Adding to wishlist, productId:', productId);
 
       if (!productId || productId.length !== 24) {
-        console.error('Invalid productId:', productId);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Invalid product ID',
-          confirmButtonColor: '#667eea'
-        });
+        showToast('error', '⚠️ Error', 'Invalid product ID');
         return;
       }
 
@@ -914,38 +1164,29 @@
           body: JSON.stringify({ productId })
         });
 
-        console.log('Wishlist add response status:', res.status);
         const data = await res.json();
-        console.log('Wishlist add response data:', data);
 
         if (data.success) {
           icon.querySelector('i').style.color = 'red';
-          Swal.fire({
-            icon: 'success',
-            title: 'Added to Wishlist!',
-            text: 'Product added to your wishlist.',
-            confirmButtonColor: '#667eea',
-            timer: 2000,
-            showConfirmButton: false
-          });
+          showToast(
+            'success',
+            '❤️ Added to Wishlist',
+            'Product added to your wishlist successfully!'
+          );
         } else {
-          Swal.fire({
-            icon: 'info',
-            title: 'Already in Wishlist',
-            text: data.message || 'This product is already in your wishlist.',
-            confirmButtonColor: '#667eea',
-            timer: 2000,
-            showConfirmButton: false
-          });
+          showToast(
+            'info',
+            '💝 Already in Wishlist',
+            'This product is already in your wishlist.'
+          );
         }
       } catch (err) {
-        console.error('Wishlist add error:', err.message, err.stack);
-        Swal.fire({
-          icon: 'error',
-          title: 'Server Error',
-          text: 'Failed to add to wishlist. Please try again.',
-          confirmButtonColor: '#667eea'
-        });
+        console.error('Wishlist error:', err);
+        showToast(
+          'error',
+          '⚠️ Server Error',
+          'Failed to add to wishlist. Please try again.'
+        );
       }
     }
   });
