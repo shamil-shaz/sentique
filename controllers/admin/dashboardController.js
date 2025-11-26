@@ -281,6 +281,13 @@ const loadDashboard = async (req, res) => {
         total: `₹${(p.total || 0).toFixed(2)}`
       }))
     });
+
+
+     
+     
+
+
+
   } catch (err) {
     console.error('Dashboard Error:', err);
     res.redirect('/pageerror');
@@ -293,6 +300,7 @@ const getDashboardChartData = async (req, res) => {
     const today = new Date();
     today.setHours(23, 59, 59, 999);
     let startDate, endDate, format;
+  
     switch (period) {
       case 'daily':
         startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -345,4 +353,9 @@ const getDashboardChartData = async (req, res) => {
   }
 };
 
-module.exports = { loadDashboard, getDashboardChartData };
+
+
+module.exports = {
+   loadDashboard, 
+   getDashboardChartData
+  };

@@ -124,178 +124,91 @@ const cancelAllOrder = async (req, res) => {
     const userId = user?._id || user?.id;
     const { orderId } = req.params;
     const { reason, details } = req.body;
+
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, error: "Unauthorized" });
     }
+
     const order = await Order.findOne({ orderId, user: userId });
-    if (!order) {
+    if (!order)
       return res.status(404).json({ success: false, error: "Order not found" });
-    }
-    if (order.status === "Delivered" || order.status === "Cancelled") {
-      return res
-        .status(400)
-        .json({ success: false, error: "Order cannot be cancelled" });
-    }
-    const hasShippedOrDeliveredItems = order.orderItems.some(
-      (item) =>
-        item.status === "Shipped" ||
-        item.status === "OutForDelivery" ||
-        item.status === "Out for Delivery" ||
-        item.status === "Delivered"
-    );
-    if (hasShippedOrDeliveredItems) {
-      return res.status(400).json({
-        success: false,
-        error:
-          "Cannot cancel entire order. Some items are already shipped or delivered. Please cancel individual items instead.",
-      });
-    }
+
+    let totalRefund = 0;
     let cancelledCount = 0;
-    let totalRestoredQuantity = 0;
-    let totalRefundAmount = 0;
-    for (const item of order.orderItems) {
+
+    order.orderItems.forEach((item) => {
       if (
         item.status !== "Shipped" &&
         item.status !== "OutForDelivery" &&
-        item.status !== "Out for Delivery" &&
         item.status !== "Delivered" &&
-        item.status !== "Cancelled"
+        item.status !== "Cancelled" &&
+        item.status !== "Returned"
       ) {
-        try {
-          const productId = item.product?._id || item.product || item.productId;
-          if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
-            console.warn(`Invalid product ID for ${item.productName}`);
-            continue;
-          }
-          const product = await Product.findById(productId);
-          if (!product) {
-            console.warn(`Product not found: ${productId}`);
-            continue;
-          }
-          const quantityToRestore = item.quantity || 1;
-          const variantSizeFromOrder = String(item.variantSize);
-          console.log(
-            `Restoring - Product: ${product.productName}, Size: ${variantSizeFromOrder}ml, Quantity: ${quantityToRestore}`
-          );
-          if (
-            variantSizeFromOrder &&
-            product.variants &&
-            Array.isArray(product.variants)
-          ) {
-            const variantIndex = product.variants.findIndex(
-              (v) => String(v.size) === variantSizeFromOrder
-            );
-            if (variantIndex !== -1) {
-              const oldStock = product.variants[variantIndex].stock;
-              const newStock = oldStock + quantityToRestore;
-              console.log(
-                `Stock update: ${oldStock} + ${quantityToRestore} = ${newStock}`
-              );
-              await Product.updateOne(
-                { _id: productId },
-                { $set: { [`variants.${variantIndex}.stock`]: newStock } }
-              );
-              totalRestoredQuantity += quantityToRestore;
-            } else {
-              console.warn(`Variant ${variantSizeFromOrder}ml not found`);
-            }
-          }
-        } catch (stockError) {
-          console.error(
-            `Error restoring stock for ${item.productName}:`,
-            stockError.message
-          );
-        }
-        const itemDiscount = item.discountApplied || 0;
-        const itemRefund = item.total - itemDiscount;
-        totalRefundAmount += itemRefund;
-        console.log(`Item ${item.productName}:
-        Original: ₹${item.total}
-        Discount: ₹${itemDiscount}
-        Refund: ₹${itemRefund}`);
+        const itemOriginalTotal = Number(item.total || 0);
+        const itemDiscount = Number(
+          item.originalCouponDiscount || item.couponDiscount || 0
+        );
+        const itemUserPaid =
+          Math.round((itemOriginalTotal - itemDiscount) * 100) / 100;
+
+        totalRefund += itemUserPaid;
         item.status = "Cancelled";
         item.cancelReason = reason;
         item.cancelDetails = details;
         item.cancelledAt = new Date();
-        order.finalAmount = Math.max(
-          0,
-          order.finalAmount - (item.finalSubtotal || item.total)
-        );
         cancelledCount++;
       }
-    }
+    });
+
     if (cancelledCount === 0) {
-      return res.status(400).json({
-        success: false,
-        error: "No items available to cancel",
-      });
+      return res
+        .status(400)
+        .json({ success: false, error: "No items available to cancel" });
     }
-    if (order.finalAmount < 0) order.finalAmount = 0;
-    const allCancelled = order.orderItems.every(
-      (item) =>
-        item.status === "Cancelled" ||
-        item.status === "Delivered" ||
-        item.status === "Shipped" ||
-        item.status === "OutForDelivery" ||
-        item.status === "Out for Delivery"
-    );
-    if (allCancelled) {
-      order.status = "Cancelled";
-      order.cancelReason = reason;
-      order.cancelDetails = details;
-      order.cancelledAt = new Date();
-    }
-    await order.save();
-    let walletCredited = false;
+
+    order.status = "Cancelled";
+    order.cancelReason = reason;
+    order.cancelDetails = details;
+    order.cancelledAt = new Date();
+
     if (
-      order.paymentMethod === "Online Payment" ||
-      order.paymentMethod === "Wallet"
+      totalRefund > 0 &&
+      ["Online Payment", "Wallet", "Razorpay", "UPI"].includes(
+        order.paymentMethod
+      )
     ) {
-      try {
-        let wallet = await Wallet.findOne({ user: userId });
-        if (!wallet) {
-          wallet = new Wallet({
-            user: userId,
-            balance: 0,
-            transactions: [],
-          });
-        }
-        wallet.balance += totalRefundAmount;
-        wallet.transactions.push({
-          type: "credit",
-          amount: totalRefundAmount,
-          description: "Order Cancellation",
-          orderId: orderId,
-          productName: `${cancelledCount} items`,
-          date: new Date(),
-        });
-        await wallet.save();
-        console.log(
-          `✅ Wallet credited: ₹${totalRefundAmount} to user ${userId}`
-        );
-        walletCredited = true;
-      } catch (walletError) {
-        console.error("Wallet credit error:", walletError.message);
-      }
+      let wallet = await Wallet.findOne({ user: userId });
+      if (!wallet)
+        wallet = new Wallet({ user: userId, balance: 0, transactions: [] });
+
+      wallet.balance =
+        Math.round((Number(wallet.balance || 0) + totalRefund) * 100) / 100;
+
+      wallet.transactions.push({
+        type: "credit",
+        amount: totalRefund,
+        description: "Order Cancellation",
+        reason: `Full order cancellation - ${cancelledCount} items`,
+        orderId: orderId,
+        date: new Date(),
+      });
+
+      await wallet.save();
     }
-    console.log(
-      `${cancelledCount} items cancelled, ${totalRestoredQuantity} quantity restored`
-    );
-    res.json({
+
+    await order.save();
+
+    return res.json({
       success: true,
-      message: `${cancelledCount} item(s) cancelled successfully. ${totalRestoredQuantity} total quantity restored to stock.`,
-      refunded: walletCredited,
-      refundAmount: totalRefundAmount,
-      paymentMethod: order.paymentMethod,
+      message: `Order cancelled. Full refund: ₹${totalRefund.toFixed(2)}`,
+      refundAmount: Math.round(totalRefund * 100) / 100,
+      cancelledCount,
     });
   } catch (error) {
-    console.error("Error cancelling order:", error.message);
-    res
+    console.error(" cancelAllOrderWithCouponCheck error:", error);
+    return res
       .status(500)
-      .json({
-        success: false,
-        error: `Failed to cancel order: ${error.message}`,
-      });
+      .json({ success: false, error: error.message || "Server error" });
   }
 };
 
@@ -369,25 +282,37 @@ const getOrderDetails = async (req, res) => {
         deliveredTime: item.tracking?.deliveredTime || null,
         estimatedDeliveryDate: item.tracking?.estimatedDeliveryDate || "N/A",
       };
+
       const itemOriginalPrice = item.total || 0;
       const itemRegularDiscount = item.discountApplied || 0;
       const itemCouponDiscount = item.couponDiscount || 0;
+
       let displaySubtotal = itemOriginalPrice;
       let displayDiscount = 0;
       let displayTotal = itemOriginalPrice;
+
       if (isCancelled) {
         displaySubtotal = itemOriginalPrice;
         displayDiscount = 0;
         displayTotal = itemOriginalPrice;
+      } else if (itemStatus === "Return Request") {
+        displaySubtotal = itemOriginalPrice;
+        if (couponRevoked) {
+          displayDiscount = itemRegularDiscount;
+        } else {
+          displayDiscount = itemRegularDiscount + itemCouponDiscount;
+        }
+        displayTotal = itemOriginalPrice - displayDiscount;
       } else if (couponRevoked) {
         displaySubtotal = itemOriginalPrice;
-        displayDiscount = 0;
-        displayTotal = itemOriginalPrice;
+        displayDiscount = itemRegularDiscount;
+        displayTotal = itemOriginalPrice - displayDiscount;
       } else {
         displaySubtotal = itemOriginalPrice;
         displayDiscount = itemRegularDiscount + itemCouponDiscount;
         displayTotal = itemOriginalPrice - displayDiscount;
       }
+
       return {
         itemIndex: index,
         productId: item.product?._id,
@@ -397,9 +322,15 @@ const getOrderDetails = async (req, res) => {
         variantSizeRaw: item.variantSize || null,
         quantity: item.quantity || 1,
         price: item.price ? `₹${item.price.toFixed(2)}` : "N/A",
+
+        itemOriginalPrice: itemOriginalPrice,
+        itemTotalDiscount: displayDiscount,
+        itemFinalPrice: displayTotal,
+
         subtotal: `₹${displaySubtotal.toFixed(2)}`,
         itemDiscount: `₹${displayDiscount.toFixed(2)}`,
         total: `₹${displayTotal.toFixed(2)}`,
+
         status: itemStatus,
         isReturnEligible: isItemReturnEligible && !isReturnRejected,
         returnRejected: isReturnRejected,
@@ -409,6 +340,15 @@ const getOrderDetails = async (req, res) => {
           itemStatus
         ),
         itemFinalPriceNumber: displayTotal,
+
+        couponDiscount: Number(item.couponDiscount || 0),
+        originalCouponDiscount:
+          item.originalCouponDiscount && item.originalCouponDiscount > 0
+            ? Number(item.originalCouponDiscount)
+            : Number(item.couponDiscount || 0),
+
+        subtotalNumber: Number(item.total || 0),
+
         image: item.product?.images?.[0]
           ? item.product.images[0].startsWith("http")
             ? item.product.images[0]
@@ -420,8 +360,9 @@ const getOrderDetails = async (req, res) => {
     let dynamicTotal = 0;
     let dynamicDiscount = 0;
     const activeNonCancelledItems = formattedItems.filter(
-      (item) => item.isActive && item.status !== "Cancelled"
+      (item) => item.status !== "Cancelled" && item.status !== "Return Request"
     );
+
     if (!couponRevoked && activeNonCancelledItems.length > 0) {
       const activeItemsTotal = activeNonCancelledItems.reduce((sum, item) => {
         return sum + parseFloat(item.subtotal.replace("₹", ""));
@@ -434,7 +375,6 @@ const getOrderDetails = async (req, res) => {
         dynamicDiscount += roundedDiscount;
         dynamicTotal += itemAmount - roundedDiscount;
         distributedDiscount += roundedDiscount;
-        item.calculatedDiscount = roundedDiscount;
       });
       const difference =
         Math.round((discount - distributedDiscount) * 100) / 100;
@@ -505,7 +445,7 @@ const getOrderDetails = async (req, res) => {
       displayStatus = "Payment Failed";
       showRetryButton = true;
       showPaymentFailedBadge = true;
-      console.log("✅ Showing payment failed badge and retry button");
+      console.log(" Showing payment failed badge and retry button");
     } else if (latestOrder.paymentStatus === "Completed") {
       displayStatus = activeStatuses.join(", ") || "Processing";
       showPaymentFailedBadge = false;
@@ -545,78 +485,6 @@ const getOrderDetails = async (req, res) => {
   }
 };
 
-const returnSingleOrder = async (req, res) => {
-  try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
-    const { orderId, itemIndex, variantSize } = req.params;
-    const { reason, details } = req.body;
-    if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ success: false, error: "Unauthorized" });
-    }
-    const order = await Order.findOne({ orderId, user: userId });
-    if (!order) {
-      return res.status(404).json({ success: false, error: "Order not found" });
-    }
-    const idx = parseInt(itemIndex);
-    if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Invalid item index" });
-    }
-    const item = order.orderItems[idx];
-    if (String(item.variantSize) !== String(variantSize)) {
-      return res.status(400).json({
-        success: false,
-        error: `Variant mismatch. Cannot process return.`,
-      });
-    }
-    if (item.status !== "Delivered") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "Return can only be requested for delivered items",
-        });
-    }
-    const deliveredDate =
-      item.deliveredAt || order.deliveredAt || order.createdOn;
-    const returnWindow = new Date(deliveredDate);
-    returnWindow.setDate(returnWindow.getDate() + 7);
-    if (Date.now() > returnWindow.getTime()) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Return window has expired" });
-    }
-    item.status = "Return Request";
-    item.returnReason = reason;
-    item.returnDetails = details;
-    item.returnRequestedAt = new Date();
-    const allNonCancelledReturnRequested = order.orderItems.every(
-      (i) =>
-        i.status === "Return Request" ||
-        i.status === "Returned" ||
-        i.status === "Cancelled"
-    );
-    if (allNonCancelledReturnRequested) {
-      order.status = "Return Request";
-      order.returnReason = reason;
-      order.returnDetails = details;
-      order.returnRequestedAt = new Date();
-    }
-    await order.save();
-    res.json({
-      success: true,
-      message: `Return request for ${item.productName} (${variantSize}ml) submitted successfully`,
-    });
-  } catch (error) {
-    console.error("Error submitting return request:", error.message);
-    res
-      .status(500)
-      .json({ success: false, error: "Failed to submit return request" });
-  }
-};
-
 const returnAllOrder = async (req, res) => {
   try {
     const user = req.session.user;
@@ -644,13 +512,11 @@ const returnAllOrder = async (req, res) => {
           status: i.status,
         }))
       );
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error:
-            "Return can only be requested when all non-cancelled items are delivered",
-        });
+      return res.status(400).json({
+        success: false,
+        error:
+          "Return can only be requested when all non-cancelled items are delivered",
+      });
     }
     const now = Date.now();
     const allWithinReturnWindow = order.orderItems.every((item) => {
@@ -669,12 +535,10 @@ const returnAllOrder = async (req, res) => {
           deliveredAt: i.deliveredAt,
         }))
       );
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "Return window has expired for some items",
-        });
+      return res.status(400).json({
+        success: false,
+        error: "Return window has expired for some items",
+      });
     }
     order.orderItems.forEach((item) => {
       if (item.status === "Delivered") {
@@ -732,12 +596,10 @@ const cancelReturnSingleOrder = async (req, res) => {
       });
     }
     if (item.status !== "Return Request") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "Can only cancel pending return requests",
-        });
+      return res.status(400).json({
+        success: false,
+        error: "Can only cancel pending return requests",
+      });
     }
     item.status = "Delivered";
     item.returnReason = undefined;
@@ -778,12 +640,10 @@ const cancelReturnAllOrder = async (req, res) => {
       return res.status(404).json({ success: false, error: "Order not found" });
     }
     if (order.status !== "Return Request") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "Can only cancel pending return requests",
-        });
+      return res.status(400).json({
+        success: false,
+        error: "Can only cancel pending return requests",
+      });
     }
     order.orderItems.forEach((item) => {
       if (item.status === "Return Request") {
@@ -988,40 +848,6 @@ const updateItemStatusRoute = async (req, res) => {
   }
 };
 
-const distributeDiscountProportionally = (items, totalDiscount) => {
-  if (!Array.isArray(items) || items.length === 0 || !totalDiscount || totalDiscount <= 0) {
-    return items.map(it => ({ ...it, couponDiscount: 0 }));
-  }
-  const normalized = items.map(it => {
-    const price = Number(it.price || 0);
-    const qty = Number(it.quantity != null ? it.quantity : 1);
-    const total = Number(it.total != null ? it.total : price * qty);
-    return { ...it, price, quantity: qty, total };
-  });
-  const grandTotal = normalized.reduce((s, it) => s + (it.total || 0), 0);
-  if (grandTotal <= 0) {
-    return normalized.map(it => ({ ...it, couponDiscount: 0 }));
-  }
-  const result = [];
-  let distributed = 0;
-  normalized.forEach((it) => {
-    const proportion = (it.total || 0) / grandTotal;
-    const disc = Math.round(proportion * totalDiscount * 100) / 100;
-    distributed += disc;
-    result.push({ ...it, couponDiscount: disc });
-  });
-  const diff = Math.round((totalDiscount - distributed) * 100) / 100;
-  if (Math.abs(diff) >= 0.01 && result.length > 0) {
-    let maxIdx = 0;
-    let maxTotal = -Infinity;
-    result.forEach((r, idx) => {
-      if ((r.total || 0) > maxTotal) { maxTotal = r.total || 0; maxIdx = idx; }
-    });
-    result[maxIdx].couponDiscount = Math.round((result[maxIdx].couponDiscount + diff) * 100) / 100;
-  }
-  return result.map(it => ({ ...it, couponDiscount: Number(it.couponDiscount || 0) }));
-};
-
 const formatCurrency = (amount) => {
   if (isNaN(amount) || amount === null || amount === undefined) {
     return "₹0.00";
@@ -1029,71 +855,176 @@ const formatCurrency = (amount) => {
   return `₹${Math.abs(parseFloat(amount)).toFixed(2)}`;
 };
 
+const distributeDiscountProportionally = (items, totalDiscount) => {
+  if (
+    !Array.isArray(items) ||
+    items.length === 0 ||
+    !totalDiscount ||
+    totalDiscount <= 0
+  ) {
+    return items.map((it) => ({ ...it, couponDiscount: 0 }));
+  }
+
+  const normalized = items.map((it) => {
+    const price = Number(it.price || 0);
+    const qty = Number(it.quantity != null ? it.quantity : 1);
+    const total = Number(it.total != null ? it.total : price * qty);
+    return { ...it, price, quantity: qty, total };
+  });
+
+  const grandTotal = normalized.reduce((s, it) => s + (it.total || 0), 0);
+
+  if (grandTotal <= 0) {
+    return normalized.map((it) => ({ ...it, couponDiscount: 0 }));
+  }
+
+  const result = [];
+  let distributed = 0;
+
+  normalized.forEach((it) => {
+    const proportion = (it.total || 0) / grandTotal;
+    const disc = Math.round(proportion * totalDiscount * 100) / 100;
+    distributed += disc;
+    result.push({ ...it, couponDiscount: disc });
+  });
+
+  const diff = Math.round((totalDiscount - distributed) * 100) / 100;
+
+  if (Math.abs(diff) >= 0.01 && result.length > 0) {
+    let maxIdx = 0;
+    let maxTotal = -Infinity;
+    result.forEach((r, idx) => {
+      if ((r.total || 0) > maxTotal) {
+        maxTotal = r.total || 0;
+        maxIdx = idx;
+      }
+    });
+    result[maxIdx].couponDiscount =
+      Math.round((result[maxIdx].couponDiscount + diff) * 100) / 100;
+  }
+
+  return result.map((it) => ({
+    ...it,
+    couponDiscount: Number(it.couponDiscount || 0),
+  }));
+};
+
 const checkCancellationImpact = async (req, res) => {
   try {
     const user = req.session.user;
     const userId = user?._id || user?.id;
     const { orderId, itemIndex, variantSize } = req.params;
+
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, error: "Unauthorized" });
     }
+
     const order = await Order.findOne({ orderId, user: userId });
-    if (!order) return res.status(404).json({ success: false, error: "Order not found" });
+    if (!order)
+      return res.status(404).json({ success: false, error: "Order not found" });
+
     const idx = parseInt(itemIndex);
     const item = order.orderItems[idx];
+
     if (!item || String(item.variantSize) !== String(variantSize)) {
-      return res.status(400).json({ success: false, error: "Invalid item or variant" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Invalid item or variant" });
     }
-    const orderItems = order.orderItems.map(it => ({
-      ...it.toObject?.() || it,
-      total: Number(it.total || (it.price || 0) * (it.quantity || 1)),
-      couponDiscount: Number(it.couponDiscount || 0)
-    }));
-    const orderDiscount = Number(order.discount || 0);
-    const hasPerItemDiscount = orderItems.some(it => it.couponDiscount > 0);
-    const itemsWithDiscount = hasPerItemDiscount
-      ? orderItems
-      : distributeDiscountProportionally(orderItems, orderDiscount);
-    const cancelledItem = itemsWithDiscount[idx];
-    const itemOriginalPrice = cancelledItem.total;
-    const itemDiscount = cancelledItem.couponDiscount;
-    const itemUserPaid = itemOriginalPrice - itemDiscount;
-    const remainingItems = itemsWithDiscount.filter((_, i) => i !== idx && _.status !== "Cancelled");
-    const remainingSubtotal = remainingItems.reduce((s, it) => s + it.total, 0);
+
+    const getEffectivePrice = (orderItem) => {
+      if (order.couponRevoked) {
+        return Number(orderItem.total || 0);
+      } else {
+        return Number(orderItem.total || 0);
+      }
+    };
+
+    const getEffectiveDiscount = (orderItem) => {
+      if (order.couponRevoked) {
+        return 0;
+      } else {
+        return Number(
+          orderItem.originalCouponDiscount || orderItem.couponDiscount || 0
+        );
+      }
+    };
+
+    const cancelledItem = item;
+    const itemOriginalPrice = getEffectivePrice(cancelledItem);
+    const itemDiscount = getEffectiveDiscount(cancelledItem);
+    const itemUserPaid =
+      Math.round((itemOriginalPrice - itemDiscount) * 100) / 100;
+
+    const remainingItems = order.orderItems.filter(
+      (it, i) =>
+        i !== idx && it.status !== "Cancelled" && it.status !== "Returned"
+    );
+
+    const remainingSubtotal = remainingItems.reduce(
+      (s, it) => s + getEffectivePrice(it),
+      0
+    );
+
     let refundAmount = itemUserPaid;
     let couponRevoked = false;
     let balanceDue = 0;
     let revokedDiscountOnOtherItems = 0;
     let minPurchase = 0;
-    if (order.couponApplied && order.couponCode && !order.couponRevoked && orderDiscount > 0) {
-      const coupon = await Coupon.findOne({ couponCode: order.couponCode.toUpperCase() });
+
+    if (order.couponApplied && order.couponCode && !order.couponRevoked) {
+      const coupon = await Coupon.findOne({
+        couponCode: order.couponCode.toUpperCase(),
+      });
+
       if (coupon) {
         minPurchase = coupon.minimumPrice;
+
         if (remainingSubtotal < minPurchase) {
           couponRevoked = true;
-          const remainingPaid = remainingItems.reduce((sum, it) => sum + (it.total - it.couponDiscount), 0);
-          const remainingFull = remainingItems.reduce((sum, it) => sum + it.total, 0);
-          balanceDue = remainingFull - remainingPaid;
-          revokedDiscountOnOtherItems = remainingItems.reduce((s, it) => s + it.couponDiscount, 0);
-          refundAmount = Math.max(0, Math.round((itemUserPaid - balanceDue) * 100) / 100);
+
+          revokedDiscountOnOtherItems =
+            Math.round(
+              remainingItems.reduce(
+                (s, it) =>
+                  s +
+                  Number(it.originalCouponDiscount || it.couponDiscount || 0),
+                0
+              ) * 100
+            ) / 100;
+
+          balanceDue = revokedDiscountOnOtherItems;
+
+          refundAmount = Math.max(
+            0,
+            Math.round((itemUserPaid - balanceDue) * 100) / 100
+          );
         }
       }
     }
+
     return res.json({
       success: true,
       couponRevoked,
       refundAmount,
       balanceDue,
       revokedDiscountOnOtherItems,
+      totalDiscount: Number(order.discount || 0),
+      remainingFullPrice: remainingItems.reduce(
+        (s, it) => s + getEffectivePrice(it),
+        0
+      ),
+      remainingCurrentlyPay: remainingItems.reduce(
+        (s, it) => s + (getEffectivePrice(it) - getEffectiveDiscount(it)),
+        0
+      ),
       minPurchase,
-      remainingOrderTotal: remainingSubtotal,
       itemPrice: itemOriginalPrice,
       itemUserPaid,
       remainingItemsCount: remainingItems.length,
-      remainingItemsCurrentlyPaid: remainingItems.reduce((s, it) => s + (it.total - it.couponDiscount), 0)
     });
   } catch (err) {
-    console.error("❌ checkCancellationImpact error:", err);
+    console.error(" checkCancellationImpact error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -1104,132 +1035,299 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
     const userId = user?._id || user?.id;
     const { orderId, itemIndex, variantSize } = req.params;
     const { reason, details } = req.body;
+
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ success: false, error: 'Unauthorized' });
+      return res.status(401).json({ success: false, error: "Unauthorized" });
     }
+
     const order = await Order.findOne({ orderId, user: userId });
-    if (!order) return res.status(404).json({ success: false, error: 'Order not found' });
+    if (!order)
+      return res.status(404).json({ success: false, error: "Order not found" });
+
     const idx = parseInt(itemIndex, 10);
     if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
-      return res.status(400).json({ success: false, error: 'Invalid item index' });
+      return res
+        .status(400)
+        .json({ success: false, error: "Invalid item index" });
     }
+
     const item = order.orderItems[idx];
     if (String(item.variantSize) !== String(variantSize)) {
-      return res.status(400).json({ success: false, error: 'Variant mismatch' });
+      return res
+        .status(400)
+        .json({ success: false, error: "Variant mismatch" });
     }
-    if (item.status === 'Cancelled') {
-      return res.status(400).json({ success: false, error: 'Item already cancelled' });
+
+    if (item.status === "Cancelled" || item.status === "Returned") {
+      return res
+        .status(400)
+        .json({ success: false, error: "Item already cancelled or returned" });
     }
+
+    const originalOrderDiscount = Number(order.discount || 0);
+    const orderMinPurchase = order.couponApplied
+      ? (await Coupon.findOne({ couponCode: order.couponCode?.toUpperCase() }))
+          ?.minimumPrice || 0
+      : 0;
+
+    const cancelledItemOriginalTotal = Number(item.total || 0);
+    let cancelledItemDiscount = 0;
+    let cancelledItemUserPaid = 0;
+
+    if (order.couponRevoked) {
+      cancelledItemDiscount = 0;
+      cancelledItemUserPaid = cancelledItemOriginalTotal;
+      console.log(
+        `✅ Coupon Already Revoked: Refunding full amount ₹${cancelledItemOriginalTotal}`
+      );
+    } else {
+      cancelledItemDiscount = Number(
+        item.originalCouponDiscount || item.couponDiscount || 0
+      );
+      cancelledItemUserPaid =
+        Math.round((cancelledItemOriginalTotal - cancelledItemDiscount) * 100) /
+        100;
+      console.log(
+        `✅ Coupon Active: Refunding ₹${cancelledItemUserPaid} (original: ₹${cancelledItemOriginalTotal}, discount: ₹${cancelledItemDiscount})`
+      );
+    }
+
+    const remainingItems = order.orderItems.filter(
+      (it, i) =>
+        i !== idx && it.status !== "Cancelled" && it.status !== "Returned"
+    );
+
+    const remainingSubtotal = remainingItems.reduce(
+      (sum, it) => sum + Number(it.total || 0),
+      0
+    );
+
+    let couponWillBeRevoked = false;
+    let repaymentOnRemaining = 0;
+    let refundAmount = cancelledItemUserPaid;
+
+    if (
+      order.couponApplied &&
+      !order.couponRevoked &&
+      order.couponCode &&
+      orderMinPurchase > 0
+    ) {
+      if (remainingSubtotal < orderMinPurchase) {
+        couponWillBeRevoked = true;
+
+        repaymentOnRemaining =
+          Math.round(
+            remainingItems.reduce(
+              (sum, it) =>
+                sum +
+                Number(it.originalCouponDiscount || it.couponDiscount || 0),
+              0
+            ) * 100
+          ) / 100;
+
+        refundAmount = Math.max(
+          0,
+          Math.round((cancelledItemUserPaid - repaymentOnRemaining) * 100) / 100
+        );
+
+        console.log(" Coupon Revocation on Cancellation:", {
+          cancelledItem: item.productName,
+          cancelledItemOriginal: cancelledItemOriginalTotal,
+          cancelledItemUserPaid: cancelledItemUserPaid,
+          remainingSubtotal: remainingSubtotal,
+          minPurchase: orderMinPurchase,
+          repaymentOnRemaining: repaymentOnRemaining,
+          refundAmount: refundAmount,
+        });
+
+        order.couponApplied = false;
+        order.couponRevoked = true;
+        order.couponCode = null;
+        order.discount = 0;
+        remainingItems.forEach((remItem) => {
+          const subItem = order.orderItems.find((oi) => oi._id === remItem._id);
+          if (subItem) {
+            subItem.couponDiscount = 0;
+          }
+        });
+
+        const newTotalPrice = Math.round(remainingSubtotal * 100) / 100;
+        order.totalPrice = newTotalPrice;
+        order.finalAmount = newTotalPrice;
+      } else {
+        const newOrderDiscount =
+          Math.round((originalOrderDiscount - cancelledItemDiscount) * 100) /
+          100;
+        order.discount = newOrderDiscount;
+        order.totalPrice =
+          Math.round((order.totalPrice - cancelledItemOriginalTotal) * 100) /
+          100;
+        order.finalAmount =
+          Math.round((order.totalPrice - order.discount) * 100) / 100;
+      }
+    } else {
+      order.totalPrice =
+        Math.round((order.totalPrice - cancelledItemOriginalTotal) * 100) / 100;
+      order.finalAmount = order.totalPrice;
+    }
+
+    item.status = "Cancelled";
+    item.cancelReason = reason || "";
+    item.cancelDetails = details || "";
+    item.cancelledAt = new Date();
+    item.refundAmount = refundAmount;
+    item.clawbackAmount = repaymentOnRemaining;
+
     try {
-      const productId = item.product?._id || item.product || item.productId;
+      const productId = item.product?._id || item.product;
       if (mongoose.Types.ObjectId.isValid(productId)) {
         const product = await Product.findById(productId);
         if (product && Array.isArray(product.variants)) {
-          const vi = product.variants.findIndex(v => String(v.size) === String(variantSize));
-          if (vi !== -1) {
-            product.variants[vi].stock = (product.variants[vi].stock || 0) + (item.quantity || 0);
+          const variantIdx = product.variants.findIndex(
+            (v) => String(v.size) === String(variantSize)
+          );
+          if (variantIdx !== -1) {
+            product.variants[variantIdx].stock =
+              (product.variants[variantIdx].stock || 0) + (item.quantity || 1);
             await product.save();
           }
         }
       }
-    } catch (err) { console.warn('Stock restore failed:', err.message); }
-    const rawItems = order.orderItems.map(it => {
-      const obj = it.toObject ? it.toObject() : { ...it };
-      obj.total = Number(obj.total != null ? obj.total : (obj.price || 0) * (obj.quantity || 1));
-      obj.couponDiscount = Number(obj.couponDiscount || 0);
-      return obj;
-    });
-    let itemsWithDiscount = rawItems;
-    const orderDiscount = Number(order.discount || 0);
-    const anyPerItemDiscount = rawItems.some(i => Number(i.couponDiscount || 0) > 0);
-    if (!anyPerItemDiscount && orderDiscount > 0) {
-      itemsWithDiscount = distributeDiscountProportionally(rawItems, orderDiscount);
-      itemsWithDiscount = itemsWithDiscount.map((it, i) => ({ ...it, _id: rawItems[i]._id }));
+    } catch (err) {
+      console.warn("Stock restore failed:", err.message);
     }
-    const cancelledItem = itemsWithDiscount.find(it => String(it._id) === String(item._id));
-    if (!cancelledItem) return res.status(500).json({ success: false, error: 'Internal mapping error' });
-    const cancelledOriginalTotal = Number(cancelledItem.total || 0);
-    const cancelledCouponDiscount = Number(cancelledItem.couponDiscount || 0);
-    const itemUserPaid = Math.round((cancelledOriginalTotal - cancelledCouponDiscount) * 100) / 100;
-    const remainingItems = itemsWithDiscount.filter(it => String(it._id) !== String(cancelledItem._id) && it.status !== 'Cancelled');
-    const remainingFullPrice = remainingItems.reduce((s, it) => s + Number(it.total || 0), 0);
-    const remainingCurrentlyPay = remainingItems.reduce((s, it) => s + (Number(it.total || 0) - Number(it.couponDiscount || 0)), 0);
-    let refundAmount = itemUserPaid;
-    let couponRevoked = false;
-    let clawbackOnRemaining = 0;
-    let balanceDue = 0;
-    if (order.couponApplied && order.couponCode && !order.couponRevoked && orderDiscount > 0) {
-      const coupon = await Coupon.findOne({ couponCode: String(order.couponCode).toUpperCase() });
-      if (coupon && typeof coupon.minimumPrice === 'number' && coupon.minimumPrice > 0) {
-        const min = Number(coupon.minimumPrice);
-        if (remainingFullPrice < min) {
-          couponRevoked = true;
-          clawbackOnRemaining = Math.round(remainingItems.reduce((s, it) => s + Number(it.couponDiscount || 0), 0) * 100) / 100;
-          balanceDue = Math.round((orderDiscount - clawbackOnRemaining) * 100) / 100;
-          refundAmount = Math.max(0, Math.round((itemUserPaid - balanceDue) * 100) / 100);
-          console.log("🟥 Coupon revoked!");
-          console.log(" Total Discount:", orderDiscount);
-          console.log(" Discount revoked from others:", clawbackOnRemaining);
-          console.log(" Deduction for cancelled item:", balanceDue);
-          console.log(" Final refund:", refundAmount);
-          order.couponApplied = false;
-          order.couponRevoked = true;
-          order.couponCode = null;
-          order.discount = 0;
-          remainingItems.forEach(rem => {
-            const sub = order.orderItems.id(rem._id);
-            if (sub) sub.couponDiscount = 0;
-          });
-          order.totalPrice = Math.round(remainingFullPrice * 100) / 100;
-          order.finalAmount = order.totalPrice;
-        } else {
-          order.discount = Math.round((Number(order.discount || 0) - cancelledCouponDiscount) * 100) / 100;
-          order.totalPrice = Math.round((Number(order.totalPrice || 0) - cancelledOriginalTotal) * 100) / 100;
-          order.finalAmount = Math.round((order.totalPrice - order.discount) * 100) / 100;
-          refundAmount = itemUserPaid;
-        }
-      }
-    }
-    item.status = 'Cancelled';
-    item.cancelReason = reason || '';
-    item.cancelDetails = details || '';
-    item.cancelledAt = new Date();
-    item.refundAmount = refundAmount;
-    item.clawbackAmount = clawbackOnRemaining;
-    await order.save();
-    let walletCredited = false;
-    if (['Online Payment', 'Wallet', 'Razorpay', 'UPI'].includes(order.paymentMethod) && refundAmount > 0) {
+
+    if (
+      refundAmount > 0 &&
+      ["Online Payment", "Wallet", "Razorpay", "UPI"].includes(
+        order.paymentMethod
+      )
+    ) {
       let wallet = await Wallet.findOne({ user: userId });
-      if (!wallet) wallet = new Wallet({ user: userId, balance: 0, transactions: [] });
-      wallet.balance = Math.round((Number(wallet.balance || 0) + refundAmount) * 100) / 100;
+      if (!wallet)
+        wallet = new Wallet({ user: userId, balance: 0, transactions: [] });
+
+      wallet.balance =
+        Math.round((Number(wallet.balance || 0) + refundAmount) * 100) / 100;
+
       wallet.transactions.push({
-        type: 'credit',
+        type: "credit",
         amount: refundAmount,
-        description: couponRevoked ? 'Order Cancellation (Coupon Revoked)' : 'Order Cancellation',
-        reason: `${item.productName} (${variantSize}) - ${reason || 'No reason provided'}`,
-        orderId,
-        date: new Date()
+        description: couponWillBeRevoked
+          ? "Order Cancellation (Coupon Revoked)"
+          : "Order Cancellation",
+        reason: `${item.productName} (${variantSize}ml) - ${
+          reason || "No reason provided"
+        }`,
+        orderId: orderId,
+        date: new Date(),
       });
+
       await wallet.save();
-      walletCredited = true;
     }
-    const responsePayload = {
+
+    await order.save();
+
+    return res.json({
       success: true,
-      couponRevoked,
-      refundAmount,
-      totalDiscount: Math.round(orderDiscount * 100) / 100,
-      revokedDiscountOnOtherItems: Math.round(clawbackOnRemaining * 100) / 100,
-      remainingFullPrice: Math.round(remainingFullPrice * 100) / 100,
-      remainingCurrentlyPay: Math.round(remainingCurrentlyPay * 100) / 100,
-      balanceDue: Math.round(balanceDue * 100) / 100,
-      itemUserPaid: Math.round(itemUserPaid * 100) / 100,
-      cancelledOriginalTotal: Math.round(cancelledOriginalTotal * 100) / 100,
-      refundedToWallet: walletCredited
-    };
-    return res.json(responsePayload);
+      couponRevoked: couponWillBeRevoked,
+      refundAmount: Math.round(refundAmount * 100) / 100,
+      repaymentOnRemaining: Math.round(repaymentOnRemaining * 100) / 100,
+      message: couponWillBeRevoked
+        ? `Item cancelled. Coupon revoked. Refund: ₹${refundAmount.toFixed(
+            2
+          )} (after ₹${repaymentOnRemaining.toFixed(
+            2
+          )} repayment on remaining items)`
+        : `Item cancelled. Refund: ₹${refundAmount.toFixed(2)}`,
+    });
   } catch (error) {
-    console.error('cancelSingleOrderWithCouponCheck error:', error);
-    return res.status(500).json({ success: false, error: error.message || 'Server error' });
+    console.error(" cancelSingleOrderWithCouponCheck error:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: error.message || "Server error" });
+  }
+};
+
+const returnSingleOrder = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userId = user?._id || user?.id;
+    const { orderId, itemIndex, variantSize } = req.params;
+    const { reason, details } = req.body;
+
+    if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
+
+    const order = await Order.findOne({ orderId, user: userId });
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    const idx = parseInt(itemIndex);
+    if (isNaN(idx) || idx < 0 || idx >= order.orderItems.length) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Invalid item index" });
+    }
+
+    const item = order.orderItems[idx];
+    if (String(item.variantSize) !== String(variantSize)) {
+      return res.status(400).json({
+        success: false,
+        error: `Variant mismatch. Cannot process return.`,
+      });
+    }
+
+    if (item.status !== "Delivered") {
+      return res.status(400).json({
+        success: false,
+        error: "Return can only be requested for delivered items",
+      });
+    }
+
+    const deliveredDate =
+      item.deliveredAt || order.deliveredAt || order.createdOn;
+    const returnWindow = new Date(deliveredDate);
+    returnWindow.setDate(returnWindow.getDate() + 7);
+
+    if (Date.now() > returnWindow.getTime()) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Return window has expired" });
+    }
+
+    item.status = "Return Request";
+    item.returnReason = reason;
+    item.returnDetails = details;
+    item.returnRequestedAt = new Date();
+
+    const allNonCancelledReturnRequested = order.orderItems.every(
+      (i) =>
+        i.status === "Return Request" ||
+        i.status === "Returned" ||
+        i.status === "Cancelled"
+    );
+
+    if (allNonCancelledReturnRequested) {
+      order.status = "Return Request";
+      order.returnReason = reason;
+      order.returnDetails = details;
+      order.returnRequestedAt = new Date();
+    }
+
+    await order.save();
+
+    res.json({
+      success: true,
+      message: `Return request for ${item.productName} (${variantSize}) submitted successfully`,
+    });
+  } catch (error) {
+    console.error("Error submitting return request:", error.message);
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to submit return request" });
   }
 };
 
@@ -1246,6 +1344,5 @@ module.exports = {
   updateItemStatusRoute,
   formatCurrency,
   distributeDiscountProportionally,
-  Coupon,
   cancelSingleOrderWithCouponCheck,
 };

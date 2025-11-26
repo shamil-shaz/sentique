@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 const orderSchema = new Schema({
   orderId: {
@@ -10,43 +10,60 @@ const orderSchema = new Schema({
   },
   user: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   orderItems: [
     {
-      product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+      product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
       productName: { type: String, required: true },
       variantSize: { type: String, default: null },
       quantity: { type: Number, required: true, min: 1 },
       price: { type: Number, required: true },
       total: { type: Number, required: true },
-      couponDiscount: { type: Number, default: 0 },
+
+      originalCouponDiscount: {
+        type: Number,
+        default: 0,
+        description:
+          "Original fixed discount applied at order creation - NEVER redistributed",
+      },
+
+      couponDiscount: {
+        type: Number,
+        default: 0,
+        description: "Current discount amount (0 if coupon is revoked)",
+      },
+
       originalPrice: Number,
       originalSubtotal: Number,
       discountApplied: { type: Number, default: 0 },
       discountPercentage: { type: Number, default: 0 },
       finalPrice: Number,
       finalSubtotal: Number,
+
       status: {
         type: String,
         enum: [
-          'Placed',
-          'Confirmed',
-          'Processing',
-          'Shipped',
-          'OutForDelivery',
-          'Delivered',
-          'Cancelled',
-          'Return Request',
-          'Returned',
-          'Payment Failed',
+          "Placed",
+          "Confirmed",
+          "Processing",
+          "Shipped",
+          "OutForDelivery",
+          "Delivered",
+          "Cancelled",
+          "Return Request",
+          "Returned",
+          "Payment Failed",
         ],
-        default: 'Placed',
+        default: "Placed",
       },
+
       cancelReason: String,
       cancelDetails: String,
       cancelledAt: Date,
+      refundAmount: Number,
+      clawbackAmount: Number,
       returnReason: String,
       returnDetails: String,
       returnRequestedAt: Date,
@@ -54,6 +71,7 @@ const orderSchema = new Schema({
       returnRejected: { type: Boolean, default: false },
       returnRejectedAt: Date,
       returnRejectionReason: String,
+
       tracking: {
         placedDate: String,
         placedTime: String,
@@ -71,6 +89,7 @@ const orderSchema = new Schema({
         deliveredTime: String,
         estimatedDeliveryDate: String,
       },
+
       isReturnEligible: { type: Boolean, default: true },
     },
   ],
@@ -81,14 +100,14 @@ const orderSchema = new Schema({
 
   coupon: {
     type: Schema.Types.ObjectId,
-    ref: 'Coupon',
+    ref: "Coupon",
     default: null,
-    description: 'Stores reference to applied coupon document',
+    description: "Stores reference to applied coupon document",
   },
   couponApplied: {
     type: Boolean,
     default: false,
-    description: 'Whether coupon is applied',
+    description: "Whether coupon is applied",
   },
   couponCode: {
     type: String,
@@ -97,22 +116,26 @@ const orderSchema = new Schema({
   },
   discountType: {
     type: String,
-    enum: ['flat', 'percentage', null],
+    enum: ["flat", "percentage", null],
     default: null,
   },
   discountDistributionMethod: {
     type: String,
-    default: 'proportional',
+    default: "fixed",
+    description:
+      "How discount is distributed: fixed (per-item) or proportional",
   },
   couponRevoked: {
     type: Boolean,
     default: false,
-    description: 'If coupon was revoked after cancellation',
+    description:
+      "If coupon was revoked after cancellation due to minimum purchase not met",
   },
   couponMinimumNotMet: {
     type: Boolean,
     default: false,
-    description: 'If minimum purchase condition was violated after cancellation',
+    description:
+      "If minimum purchase condition was violated after cancellation",
   },
 
   deliveryAddress: {
@@ -126,7 +149,7 @@ const orderSchema = new Schema({
     pincode: { type: String, required: true },
     addressType: {
       type: String,
-      enum: ['Home', 'Work', 'Other'],
+      enum: ["Home", "Work", "Other"],
       required: true,
     },
   },
@@ -134,31 +157,31 @@ const orderSchema = new Schema({
   paymentMethod: {
     type: String,
     required: true,
-    enum: ['COD', 'Online Payment', 'Wallet'],
+    enum: ["COD", "Online Payment", "Wallet", "Razorpay", "UPI"],
   },
 
   paymentStatus: {
     type: String,
-    enum: ['Pending', 'Completed', 'Failed', 'Refunded'],
-    default: 'Pending',
+    enum: ["Pending", "Completed", "Failed", "Refunded"],
+    default: "Pending",
   },
 
   status: {
     type: String,
     required: true,
     enum: [
-      'Pending',
-      'Processing',
-      'Shipped',
-      'OutForDelivery',
-      'Delivered',
-      'Cancelled',
-      'Partially Cancelled',
-      'Return Request',
-      'Returned',
-      'Payment Failed',
+      "Pending",
+      "Processing",
+      "Shipped",
+      "OutForDelivery",
+      "Delivered",
+      "Cancelled",
+      "Partially Cancelled",
+      "Return Request",
+      "Returned",
+      "Payment Failed",
     ],
-    default: 'Pending',
+    default: "Pending",
   },
 
   razorpayOrderId: String,
@@ -178,7 +201,6 @@ const orderSchema = new Schema({
   paymentFailedAt: Date,
   paymentRetryCount: { type: Number, default: 0 },
   lastPaymentAttemptAt: Date,
-
   cancelReason: String,
   cancelDetails: String,
   cancelledAt: Date,
@@ -186,7 +208,6 @@ const orderSchema = new Schema({
   returnDetails: String,
   returnRequestedAt: Date,
   returnedAt: Date,
-
   createdOn: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -194,8 +215,10 @@ const orderSchema = new Schema({
 orderSchema.index({ user: 1, createdOn: -1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ orderId: 1 });
-orderSchema.index({ 'orderItems.status': 1 });
+orderSchema.index({ "orderItems.status": 1 });
 orderSchema.index({ couponCode: 1 });
+orderSchema.index({ couponApplied: 1 });
+orderSchema.index({ couponRevoked: 1 });
 
-const Order = mongoose.model('Order', orderSchema);
+const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Details - Sentique</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Order Details - Sentique</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<style>
-    /* ... (All your CSS styles go here) ...
-       ... (I've hidden it for brevity, but your full CSS from the prompt goes here) ...
-    */
-
+        <style>
+   
     * {
     margin: 0;
     padding: 0;
@@ -927,492 +924,629 @@
     }
 </style>
 
-</head>
-<body>
-    
-    <%- include('../../views/partials/user/header') %>
+    </head>
+    <body>
 
-    
-    <div class="container">
-        
-        <div class="breadcrumb">
-            <a href="/">Home</a>
-            <span>/</span>
-            <a href="/profile">Account</a>
-            <span>/</span>
-            <a href="/profile/order-list">My Orders</a>
-            <span>/</span>
-            <span class="active">Order Details</span>
-        </div>
+        <%- include('../../views/partials/user/header') %>
 
-        
-        <% if (success && success.length > 0) { %>
-          <div class="alert alert-success" style="background: #10b981; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
-            <%= success %>
-          </div>
-        <% } %>
+        <div class="container">
 
-        <div class="order-header">
-            <div class="order-header-top">
-                <div class="order-title-section">
-                    <h1>
-                        Order Details
-                        <span class="status-badge"><%= status %></span>
-                    </h1>
-                    <div class="order-meta">
-                        <div class="order-meta-item">
-                            <span>📋</span>
-                            <strong>Order #:</strong>
-                            <span><%= orderId %></span>
-                        </div>
-                        <div class="order-meta-item">
-                            <span>📅</span>
-                            <strong>Ordered on:</strong>
-                            <span><%= date %></span>
-                        </div>
-                    </div>
-                </div>
-                <button class="invoice-btn" onclick="downloadInvoice()">📥 Invoice</button>
-            </div>
-        </div>
-
-        <div class="info-grid">
-            <div class="info-card">
-                <div class="info-card-header">
-                    <div class="icon-box icon-orange">📍</div>
-                    <h2>Shipping Address</h2>
-                </div>
-                <div class="info-card-content">
-                    <p class="name"><%= deliveryAddress.name %></p>
-                    <p><%= deliveryAddress.houseName %></p>
-                    <p><%= deliveryAddress.city %>, <%= deliveryAddress.state %></p>
-                    <p><%= deliveryAddress.pincode %></p>
-                    <div class="contact-info">
-                        <span>📞</span>
-                        <span><%= deliveryAddress.phone %></span>
-                    </div>
-                </div>
+            <div class="breadcrumb">
+                <a href="/">Home</a>
+                <span>/</span>
+                <a href="/profile">Account</a>
+                <span>/</span>
+                <a href="/profile/order-list">My Orders</a>
+                <span>/</span>
+                <span class="active">Order Details</span>
             </div>
 
-            <div class="info-card">
-                <div class="info-card-header">
-                    <div class="icon-box icon-amber">💳</div>
-                    <h2>Payment Method</h2>
-                </div>
-                <div class="info-card-content">
-                    <div class="payment-method">
-                        <div class="payment-icon">💵</div>
-                        <span style="font-weight: 600; color: #333;"><%= paymentMethod %></span>
-                    </div>
-                </div>
+            <% if (success && success.length > 0) { %>
+            <div class="alert alert-success"
+                style="background: #10b981; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                <%= success %>
             </div>
-
-            <div class="info-card">
-    <div class="info-card-header">
-        <div class="icon-box icon-rose">📄</div>
-        <h2>Order Summary</h2>
-    </div>
-    <div class="info-card-content">
-        <div class="summary-row">
-            <span>Items Subtotal</span>
-            <strong><%= subtotal %></strong>
-        </div>
-        
-        <% 
-        const showDiscount = couponApplied && !couponRevoked && discount !== '₹0.00' && discount !== '₹0';
-        %>
-        
-        <% if (showDiscount) { %>
-            <div class="summary-row discount-row">
-                <span>Coupon Discount 
-                    <% if (couponCode) { %>
-                        <span style="font-size: 0.85em; color: #10b981;">(<%= couponCode %>)</span>
-                    <% } %>
-                </span>
-                <strong style="color: #10b981;">-<%= discount %></strong>
-            </div>
-        <% } %>
-
-        <% if (couponRevoked) { %>
-            <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 4px; margin: 12px 0;">
-                <p style="margin: 0; color: #991b1b; font-weight: 500; font-size: 14px;">
-                    ⚠️ Coupon Discount Revoked
-                </p>
-            </div>
-        <% } %>
-
-        <div class="summary-row">
-            <span>Shipping Charge</span>
-            <strong>₹0.00</strong>
-        </div>
-
-        <hr class="summary-divider">
-
-        <div class="grand-total">
-            <span>
-                Current Amount
-                <% 
-                const cancelledCount = items.filter(i => !i.isActive).length;
-                const activeCount = items.filter(i => i.isActive).length;
-                %>
-                <% if (cancelledCount > 0) { %>
-                    <span style="font-size: 0.85em; color: #ef4444;"> (<%= activeCount %>/<%= items.length %> items active)</span>
-                <% } %>
-            </span>
-            <span style="color: #10b981; font-weight: 700;"><%= amount %></span>
-        </div>
-    </div>
-</div>
-        </div>
-
-<div class="order-items">
-    <div class="order-items-header">
-        <div class="icon-box icon-orange">📦</div>
-        <h2>Order Items</h2>
-    </div>
-    <% if (items && items.length > 0) { %>
-        <% items.forEach(item => { %>
-            <div class="item-card" data-item-id="<%= item.itemIndex %>" data-variant-size="<%= item.variantSizeRaw %>">
-                <div class="item-content">
-                    <div class="item-image">
-                        <img src="<%= item.image %>" alt="<%= item.productName %>">
-                    </div>
-                    <div class="item-details">
-                        <div class="item-name"><%= item.productName %> (<%= item.variantSize %>) x <%= item.quantity %></div>
-                        
-                        <div class="item-pricing">
-                            <% 
-                            const itemIsCancelled = item.status === 'Cancelled';
-                            const itemDiscountAmount = item.calculatedDiscount || 0;
-                            const hasDiscount = itemDiscountAmount > 0 && !itemIsCancelled && !couponRevoked;
-                            %>
-                            
-                            <div class="price-row">
-                                <span class="price-label">Price:</span>
-                                <span class="price-value"><%= item.subtotal %></span>
-                            </div>
-                            
-                            <% if (hasDiscount) { %>
-                                <div class="price-row discount-row">
-                                    <span class="price-label">Discount:</span>
-                                    <span class="price-value discount-value">-₹<%= itemDiscountAmount.toFixed(2) %></span>
-                                </div>
-                            <% } %>
-                            
-                            <div class="price-row final-row">
-                                <span class="price-label">Total:</span>
-                                <% if (itemIsCancelled || couponRevoked) { %>
-                                    <span class="price-value final-value"><%= item.subtotal %></span>
-                                <% } else { %>
-                                    <span class="price-value final-value">₹<%= (parseFloat(item.subtotal.replace('₹', '')) - itemDiscountAmount).toFixed(2) %></span>
-                                <% } %>
-                            </div>
-                        </div>
-                        
-                        <div class="item-status">
-                            Status: <span class="item-status-badge"><%= item.status %></span>
-                        </div>
-                    </div>
-
-                    <div class="item-actions" data-actions-id="<%= item.itemIndex %>-<%= item.variantSizeRaw %>">
-                        <% 
-                        const isItemCancelled = item.status === 'Cancelled';
-                        const isItemReturned = item.status === 'Returned';
-                        const isItemReturnRequest = item.status === 'Return Request';
-                        const isItemDelivered = item.status === 'Delivered';
-                        const isItemShippedOrOut = item.status === 'Shipped' || item.status === 'OutForDelivery' || item.status === 'Out for Delivery';
-                        const isReturnRejected = item.returnRejected === true;
-                        %>
-                        
-                        <% if (isItemCancelled) { %>
-                            <div class="cancelled-message">
-                                ✕ Cancelled
-                            </div>
-                        <% } else if (isItemReturned) { %>
-                            <div class="returned-message">
-                                🔙 Returned
-                            </div>
-                        <% } else if (isReturnRejected) { %>
-                            <div class="return-rejected-message">
-                                Return rejected by admin
-                            </div>
-                        <% } else if (isItemReturnRequest) { %>
-                            <button class="btn btn-cancel-return" onclick="openCancelReturnModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>')">Cancel Return</button>
-                        <% } else if (isItemDelivered && item.isReturnEligible) { %>
-                            <button class="btn btn-track" onclick="openTrackingModal('<%= item.productName %>')">🚚 Track Order</button>
-                            <button class="btn btn-return-item" onclick="openReturnModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>')">🔙 Return Item</button>
-                        <% } else { %>
-                            <button class="btn btn-track" onclick="openTrackingModal('<%= item.productName %>')">🚚 Track Order</button>
-                            <% if (!isItemShippedOrOut && !isItemDelivered) { %>
-                                <button class="btn btn-cancel-item" onclick="openModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>', '<%= item.subtotal %>')">Cancel Item</button>
-                            <% } %>
-                        <% } %>
-                    </div>
-                </div>
-            </div>
-        <% }) %>
-    <% } %>
-</div>
-
-        <div class="cancel-order-section" id="cancelOrderSection">
-            <% 
-            const hasRejectedReturn = items && items.length > 0 && items.some(item => item.returnRejected === true);
-            const cancellableStatuses = ['Placed', 'Confirmed', 'Processing'];
-            const allItemsCancellable = items && items.length > 0 && items.every(item => cancellableStatuses.includes(item.status));
-            const anyItemCancellable = items && items.length > 0 && items.some(item => cancellableStatuses.includes(item.status));
-            const allItemsCancelled = items && items.length > 0 && items.every(item => item.status === 'Cancelled');
-            const allItemsReturned = items && items.length > 0 && items.every(item => item.status === 'Returned');
-            const allItemsReturnRequest = items && items.length > 0 && items.every(item => item.status === 'Return Request');
-            const allNonCancelledDelivered = items && items.length > 0 && items.every(item => item.status === 'Delivered' || item.status === 'Cancelled');
-            const allNonCancelledReturnEligible = items && items.length > 0 && items.every(item => item.isReturnEligible || item.status === 'Cancelled');
-            %>
-
-            <% if (allItemsCancelled || allItemsReturned) { %>
-                <button class="btn-continue-shopping" onclick="continueShopping()">Continue Shopping</button>
-            <% } else if (allItemsReturnRequest) { %>
-                <button class="btn-cancel-return-order" onclick="openCancelReturnModal('Entire Order', 'all', 'all')">Cancel Return</button>
-            <% } else if (hasRejectedReturn) { %>
-                <div class="return-rejected-message">
-                    <div style="color: #d32f2f; font-weight: 600; margin-bottom: 8px;">❌ Return Request Rejected</div>
-                    <div style="color: #666; font-size: 14px;">
-                        Admin has rejected your return request. You cannot request return again for this order.
-                    </div>
-                </div>
-            <% } else if (allNonCancelledDelivered && allNonCancelledReturnEligible && isReturnEligible && !hasRejectedReturn) { %>
-                <button class="btn-return-order" onclick="openReturnModal('Entire Order', 'all', 'all')">Return Entire Order</button>
-            <% } else if (allItemsCancellable && anyItemCancellable) { %>
-                <button class="btn-cancel-order" onclick="openModal('Entire Order', 'all', 'all')">Cancel Entire Order</button>
-            <% } else if (anyItemCancellable && !allItemsCancellable) { %>
-                <div class="status-message" style="color: #f57c00; font-size: 14px; padding: 12px; background: #fff3e0; border-radius: 6px; border-left: 4px solid #f57c00;">
-                    ℹ️ You can only cancel the entire order if all items have the same status. Some items have different statuses.
-                </div>
             <% } %>
-        </div>
 
-        <div class="modal" id="cancelModal">
-            <div class="modal-content">
-                <div class="modal-icon">✕</div>
-                <h3>Cancel <span id="cancelItemName">Order</span>?</h3>
-                <p>Please select a reason for cancelling this order.</p>
-                <div class="reason-options">
-                    <div class="reason-option">
-                        <input type="radio" id="reason1" name="cancelReason" value="Changed my mind" required>
-                        <label for="reason1">Changed my mind</label>
+            <div class="order-header">
+                <div class="order-header-top">
+                    <div class="order-title-section">
+                        <h1>
+                            Order Details
+                            <span class="status-badge"><%= status %></span>
+                        </h1>
+                        <div class="order-meta">
+                            <div class="order-meta-item">
+                                <span>📋</span>
+                                <strong>Order #:</strong>
+                                <span><%= orderId %></span>
+                            </div>
+                            <div class="order-meta-item">
+                                <span>📅</span>
+                                <strong>Ordered on:</strong>
+                                <span><%= date %></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="reason-option">
-                        <input type="radio" id="reason2" name="cancelReason" value="Found a better price elsewhere">
-                        <label for="reason2">Found a better price elsewhere</label>
-                    </div>
-                    <div class="reason-option">
-                        <input type="radio" id="reason3" name="cancelReason" value="Order placed by mistake">
-                        <label for="reason3">Order placed by mistake</label>
-                    </div>
-                    <div class="reason-option">
-                        <input type="radio" id="reason4" name="cancelReason" value="Other">
-                        <label for="reason4">Other</label>
-                    </div>
-                </div>
-                <textarea class="reason-textarea" id="additionalDetails" placeholder="Please provide additional details (optional)"></textarea>
-                <div class="modal-buttons">
-                    <button class="btn-keep" onclick="closeModal()">Keep Order</button>
-                    <button class="btn-confirm-cancel" onclick="confirmCancel()">Submit</button>
+                    <button class="invoice-btn" onclick="downloadInvoice()">📥
+                        Invoice</button>
                 </div>
             </div>
-        </div>
 
-        <div class="modal" id="returnModal">
-            <div class="modal-content">
-                <div class="modal-icon modal-icon-return">🔙</div>
-                <h3>Return <span id="returnItemName">Order</span>?</h3>
-                <p>Please select a reason for returning this order.</p>
-                <div class="reason-options">
-                    <div class="reason-option">
-                        <input type="radio" id="returnReason1" name="returnReason" value="Product not as described" required>
-                        <label for="returnReason1">Product not as described</label>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <div class="icon-box icon-orange">📍</div>
+                        <h2>Shipping Address</h2>
                     </div>
-                    <div class="reason-option">
-                        <input type="radio" id="returnReason2" name="returnReason" value="Damaged product">
-                        <label for="returnReason2">Damaged product</label>
-                    </div>
-                    <div class="reason-option">
-                        <input type="radio" id="returnReason3" name="returnReason" value="Wrong product received">
-                        <label for="returnReason3">Wrong product received</label>
-                    </div>
-                    <div class="reason-option">
-                        <input type="radio" id="returnReason4" name="returnReason" value="Other">
-                        <label for="returnReason4">Other</label>
+                    <div class="info-card-content">
+                        <p class="name"><%= deliveryAddress.name %></p>
+                        <p><%= deliveryAddress.houseName %></p>
+                        <p><%= deliveryAddress.city %>, <%=
+                            deliveryAddress.state %></p>
+                        <p><%= deliveryAddress.pincode %></p>
+                        <div class="contact-info">
+                            <span>📞</span>
+                            <span><%= deliveryAddress.phone %></span>
+                        </div>
                     </div>
                 </div>
-                <textarea class="reason-textarea" id="returnAdditionalDetails" placeholder="Please provide additional details (optional)"></textarea>
-                <div class="modal-buttons">
-                    <button class="btn-keep" onclick="closeReturnModal()">Keep Order</button>
-                    <button class="btn-confirm-return" onclick="confirmReturn()">Submit</button>
+
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <div class="icon-box icon-amber">💳</div>
+                        <h2>Payment Method</h2>
+                    </div>
+                    <div class="info-card-content">
+                        <div class="payment-method">
+                            <div class="payment-icon">💵</div>
+                            <span style="font-weight: 600; color: #333;"><%=
+                                paymentMethod %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <div class="icon-box icon-rose">📄</div>
+                        <h2>Order Summary</h2>
+                    </div>
+                    <div class="info-card-content">
+                        <div class="summary-row">
+                            <span>Items Subtotal</span>
+                            <strong><%= subtotal %></strong>
+                        </div>
+
+                        <%
+                        const showDiscount = couponApplied && !couponRevoked &&
+                        discount !== '₹0.00' && discount !== '₹0';
+                        %>
+
+                        <% if (showDiscount) { %>
+                        <div class="summary-row discount-row">
+                            <span>Coupon Discount
+                                <% if (couponCode) { %>
+                                <span
+                                    style="font-size: 0.85em; color: #10b981;">(<%=
+                                    couponCode %>)</span>
+                                <% } %>
+                            </span>
+                            <strong style="color: #10b981;">-<%= discount
+                                %></strong>
+                        </div>
+                        <% } %>
+
+                        <% if (couponRevoked) { %>
+                        <div
+                            style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 4px; margin: 12px 0;">
+                            <p
+                                style="margin: 0; color: #991b1b; font-weight: 500; font-size: 14px;">
+                                ⚠️ Coupon Discount Revoked
+                            </p>
+                        </div>
+                        <% } %>
+
+                        <div class="summary-row">
+                            <span>Shipping Charge</span>
+                            <strong>₹0.00</strong>
+                        </div>
+
+                        <hr class="summary-divider">
+
+                        <div class="grand-total">
+                            <span>
+                                Current Amount
+                                <%
+                                const cancelledCount = items.filter(i =>
+                                !i.isActive).length;
+                                const activeCount = items.filter(i =>
+                                i.isActive).length;
+                                %>
+                                <% if (cancelledCount > 0) { %>
+                                <span
+                                    style="font-size: 0.85em; color: #ef4444;">
+                                    (<%= activeCount %>/<%= items.length %>
+                                    items active)</span>
+                                <% } %>
+                            </span>
+                            <span style="color: #10b981; font-weight: 700;"><%=
+                                amount %></span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="modal" id="cancelReturnModal">
-            <div class="modal-content">
-                <div class="modal-icon modal-icon-cancel-return">✕</div>
-                <h3>Cancel Return <span id="cancelReturnItemName">Order</span>?</h3>
-                <p>Are you sure you want to cancel the return request?</p>
-                <div class="modal-buttons">
-                    <button class="btn-keep" onclick="closeCancelReturnModal()">No, Keep Return</button>
-                    <button class="btn-confirm-cancel-return" onclick="confirmCancelReturn()">Yes, Cancel Return</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="tracking-modal" id="trackingModal">
-            <div class="tracking-modal-content">
-                <button class="tracking-close" onclick="closeTrackingModal()">✕</button>
-                <div class="tracking-header">
-                    <div class="tracking-icon-box">📦</div>
-                    <h2>Track Your Order</h2>
-                    <p class="tracking-order-id">Order ID: <strong>#<%= orderId %></strong></p>
+            <div class="order-items">
+                <div class="order-items-header">
+                    <div class="icon-box icon-orange">📦</div>
+                    <h2>Order Items</h2>
                 </div>
 
                 <% if (items && items.length > 0) { %>
-                    <% items.forEach(item => { %>
-                        <% if (!['Cancelled', 'Returned', 'Return Request'].includes(item.status)) { %>
-                            <div class="tracking-item" style="display: none;"> <div class="tracking-item-header">
-                                    <img src="<%= item.image %>" alt="<%= item.productName %>">
-                                    <h3><%= item.productName %> (<%= item.variantSize %>)</h3>
-                                </div>
-                                <% 
-                                const statusPriority = {
-                                    'Placed': 1,
-                                    'Confirmed': 2,
-                                    'Processing': 3,
-                                    'Shipped': 4,
-                                    'OutForDelivery': 5,
-                                    'Delivered': 6
+                <% items.forEach(item => { %>
+                <div class="item-card" data-item-id="<%= item.itemIndex %>"
+                    data-variant-size="<%= item.variantSizeRaw %>">
+                    <div class="item-content">
+                        <div class="item-image">
+                            <img src="<%= item.image %>"
+                                alt="<%= item.productName %>">
+                        </div>
+                        <div class="item-details">
+                            <div class="item-name"><%= item.productName %> (<%=
+                                item.variantSize %>) x <%= item.quantity
+                                %></div>
+
+                            <div class="item-pricing">
+                                <%
+                                const itemIsCancelled = item.status ===
+                                'Cancelled';
+                                const itemIsReturnRequest = item.status ===
+                                'Return Request';
+
+                                const parseAmount = (value) => {
+                                if (!value) return 0;
+                                return Number(String(value).replace(/₹/g,
+                                '').trim());
                                 };
-                                const trackingDetails = [
-                                    {
-                                        key: 'Placed',
-                                        status: 'Order Placed',
-                                        date: item.tracking.placedDate,
-                                        time: item.tracking.placedTime,
-                                        description: 'Your order has been successfully placed and payment confirmed.',
-                                        icon: '✓',
-                                        location: null
-                                    },
-                                    {
-                                        key: 'Confirmed',
-                                        status: 'Order Confirmed',
-                                        date: item.tracking.confirmedDate,
-                                        time: item.tracking.confirmedTime,
-                                        description: 'Your order has been confirmed and is being prepared for shipment.',
-                                        icon: '✓',
-                                        location: null
-                                    },
-                                    {
-                                        key: 'Processing',
-                                        status: 'Processing',
-                                        date: item.tracking.processingDate,
-                                        time: item.tracking.processingTime,
-                                        description: 'Your order is being processed and packaged with care.',
-                                        icon: '⚙️',
-                                        location: null
-                                    },
-                                    {
-                                        key: 'Shipped',
-                                        status: 'Shipped',
-                                        date: item.tracking.shippedDate,
-                                        time: item.tracking.shippedTime,
-                                        description: 'Your order has been picked up by our delivery partner and is on its way!',
-                                        icon: '📦',
-                                        location: item.tracking.shippedLocation
-                                    },
-                                    {
-                                        key: 'OutForDelivery',
-                                        status: 'Out for Delivery',
-                                        date: item.tracking.outForDeliveryDate,
-                                        time: item.tracking.outForDeliveryTime,
-                                        description: 'Your order is out for delivery and will arrive at your doorstep soon.',
-                                        icon: '🚚',
-                                        location: item.tracking.outForDeliveryLocation
-                                    },
-                                    {
-                                        key: 'Delivered',
-                                        status: 'Delivered',
-                                        date: item.tracking.deliveredDate,
-                                        time: item.tracking.deliveredTime,
-                                        description: 'Your order has been successfully delivered to your doorstep.',
-                                        icon: '🏠',
-                                        location: null
-                                    }
-                                ];
-                                const currentPriority = statusPriority[item.status] || 0;
+
+                                const originalDiscountFixed =
+                                parseAmount(item.originalCouponDiscount) > 0
+                                ? parseAmount(item.originalCouponDiscount)
+                                : parseAmount(item.couponDiscount);
+
+                                const shouldShowDiscount =
+                                item.itemTotalDiscount > 0 &&
+                                !itemIsCancelled &&
+                                !itemIsReturnRequest &&
+                                !couponRevoked;
                                 %>
-                                <div class="tracking-timeline">
-                                    <% trackingDetails.forEach(detail => { 
-                                        const itemPriority = statusPriority[detail.key] || 0;
-                                        let itemClass = 'pending';
-                                        if (itemPriority < currentPriority && detail.date) {
-                                            itemClass = 'completed';
-                                        } else if (itemPriority === currentPriority && detail.date) {
-                                            itemClass = 'active';
-                                        }
-                                    %>
-                                        <div class="timeline-item <%= itemClass %>">
-                                            <div class="timeline-icon-container"><%= detail.icon %></div>
-                                            <div class="timeline-line"></div>
-                                            <div class="timeline-content">
-                                                <div class="timeline-status">
-                                                    <%= detail.status %>
-                                                    <% if (itemClass === 'completed') { %>
-                                                        <span class="status-badge-inline">COMPLETED</span>
-                                                    <% } else if (itemClass === 'active') { %>
-                                                        <span class="status-badge-inline">IN PROGRESS</span>
-                                                    <% } %>
-                                                </div>
-                                                <div class="timeline-date">
-                                                    <% if (!detail.date) { %>
-                                                        📅 Pending
-                                                    <% } else { %>
-                                                        📅 <%= detail.date %> • <%= detail.time || 'N/A' %>
-                                                    <% } %>
-                                                </div>
-                                                <div class="timeline-description"><%= detail.description %></div>
-                                                <% if (detail.location && (itemClass === 'completed' || itemClass === 'active')) { %>
-                                                    <div class="timeline-location">📍 <%= detail.location %></div>
-                                                <% } %>
-                                            </div>
-                                        </div>
-                                    <% }) %>
+
+                                <div class="price-row">
+                                    <span class="price-label">Price:</span>
+                                    <span class="price-value">₹<%=
+                                        item.itemOriginalPrice.toFixed(2)
+                                        %></span>
                                 </div>
-                                <div class="estimated-delivery">
-                                    <div class="estimated-delivery-label">
-                                        <%= item.status === 'Delivered' ? 'Delivered on' : 'Estimated Delivery' %>
-                                    </div>
-                                    <div class="estimated-delivery-date">
-                                        <% if (item.status === 'Delivered' && item.tracking.deliveredDate) { %>
-                                            <%= item.tracking.deliveredDate %> • <%= item.tracking.deliveredTime || 'N/A' %>
-                                        <% } else { %>
-                                            <%= item.tracking.estimatedDeliveryDate || 'Pending' %>
-                                        <% } %>
-                                    </div>
+
+                                <% if (shouldShowDiscount) { %>
+                                <div class="price-row discount-row">
+                                    <span class="price-label">Discount:</span>
+                                    <span
+                                        class="price-value discount-value">-₹<%=
+                                        item.itemTotalDiscount.toFixed(2)
+                                        %></span>
                                 </div>
+                                <% } %>
+
+                                <div class="price-row final-row">
+                                    <span class="price-label">Total:</span>
+                                    <span class="price-value final-value">₹<%=
+                                        item.itemFinalPrice.toFixed(2) %></span>
+                                </div>
+
+                                <% if (couponRevoked && originalDiscountFixed >
+                                0 && !itemIsCancelled) { %>
+                                <div
+                                    style="font-size: 12px; color: #dc2626; margin-top: 6px; font-style: italic;">
+                                    ⚠️ Discount revoked (was ₹<%=
+                                    originalDiscountFixed.toFixed(2) %>)
+                                </div>
+                                <% } %>
                             </div>
-                        <% } %>
-                    <% }) %>
-                <% } else { %>
-                    <div class="tracking-unavailable" style="padding: 60px 30px; text-align: center; color: #5f6368;">
-                        <p>Tracking information is currently unavailable for this order.</p>
+
+                            <div class="item-status">
+                                Status: <span class="item-status-badge"><%=
+                                    item.status %></span>
+                            </div>
+                        </div>
+
+                        <div class="item-actions"
+                            data-actions-id="<%= item.itemIndex %>-<%= item.variantSizeRaw %>">
+                            <%
+                            const isItemCancelled = item.status === 'Cancelled';
+                            const isItemReturned = item.status === 'Returned';
+                            const isItemReturnRequest = item.status ===
+                            'Return Request';
+                            const isItemDelivered = item.status === 'Delivered';
+                            const isItemShippedOrOut = item.status === 'Shipped'
+                            || item.status === 'OutForDelivery' || item.status
+                            === 'Out for Delivery';
+                            const isReturnRejected = item.returnRejected ===
+                            true;
+                            %>
+
+                            <% if (isItemCancelled) { %>
+                            <div class="cancelled-message">✕ Cancelled</div>
+                            <% } else if (isItemReturned) { %>
+                            <div class="returned-message">🔙 Returned</div>
+                            <% } else if (isReturnRejected) { %>
+                            <div class="return-rejected-message">Return rejected
+                                by admin</div>
+                            <% } else if (isItemReturnRequest) { %>
+                            <button class="btn btn-cancel-return"
+                                onclick="openCancelReturnModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>')">Cancel
+                                Return</button>
+                            <% } else if (isItemDelivered &&
+                            item.isReturnEligible) { %>
+                            <button class="btn btn-track"
+                                onclick="openTrackingModal('<%= item.productName %>')">🚚
+                                Track Order</button>
+                            <button class="btn btn-return-item"
+                                onclick="openReturnModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>')">🔙
+                                Return Item</button>
+                            <% } else { %>
+                            <button class="btn btn-track"
+                                onclick="openTrackingModal('<%= item.productName %>')">🚚
+                                Track Order</button>
+                            <% if (!isItemShippedOrOut && !isItemDelivered) { %>
+                            <button class="btn btn-cancel-item"
+                                onclick="openModal('<%= item.productName %>', <%= item.itemIndex %>, '<%= item.variantSizeRaw %>', '<%= item.subtotal %>')">Cancel
+                                Item</button>
+                            <% } %>
+                            <% } %>
+                        </div>
                     </div>
+                </div>
+                <% }) %>
                 <% } %>
             </div>
+
+            <div class="cancel-order-section" id="cancelOrderSection">
+                <%
+                const hasRejectedReturn = items && items.length > 0 &&
+                items.some(item => item.returnRejected === true);
+                const cancellableStatuses = ['Placed', 'Confirmed',
+                'Processing'];
+                const allItemsCancellable = items && items.length > 0 &&
+                items.every(item => cancellableStatuses.includes(item.status));
+                const anyItemCancellable = items && items.length > 0 &&
+                items.some(item => cancellableStatuses.includes(item.status));
+                const allItemsCancelled = items && items.length > 0 &&
+                items.every(item => item.status === 'Cancelled');
+                const allItemsReturned = items && items.length > 0 &&
+                items.every(item => item.status === 'Returned');
+                const allItemsReturnRequest = items && items.length > 0 &&
+                items.every(item => item.status === 'Return Request');
+                const allNonCancelledDelivered = items && items.length > 0 &&
+                items.every(item => item.status === 'Delivered' || item.status
+                === 'Cancelled');
+                const allNonCancelledReturnEligible = items && items.length > 0
+                && items.every(item => item.isReturnEligible || item.status ===
+                'Cancelled');
+                %>
+
+                <% if (allItemsCancelled || allItemsReturned) { %>
+                <button class="btn-continue-shopping"
+                    onclick="continueShopping()">Continue Shopping</button>
+                <% } else if (allItemsReturnRequest) { %>
+                <button class="btn-cancel-return-order"
+                    onclick="openCancelReturnModal('Entire Order', 'all', 'all')">Cancel
+                    Return</button>
+                <% } else if (hasRejectedReturn) { %>
+                <div class="return-rejected-message">
+                    <div
+                        style="color: #d32f2f; font-weight: 600; margin-bottom: 8px;">❌
+                        Return Request Rejected</div>
+                    <div style="color: #666; font-size: 14px;">
+                        Admin has rejected your return request. You cannot
+                        request return again for this order.
+                    </div>
+                </div>
+                <% } else if (allNonCancelledDelivered &&
+                allNonCancelledReturnEligible && isReturnEligible &&
+                !hasRejectedReturn) { %>
+                <button class="btn-return-order"
+                    onclick="openReturnModal('Entire Order', 'all', 'all')">Return
+                    Entire Order</button>
+                <% } else if (allItemsCancellable && anyItemCancellable) { %>
+                <button class="btn-cancel-order"
+                    onclick="openModal('Entire Order', 'all', 'all')">Cancel
+                    Entire Order</button>
+                <% } else if (anyItemCancellable && !allItemsCancellable) { %>
+                <div class="status-message"
+                    style="color: #f57c00; font-size: 14px; padding: 12px; background: #fff3e0; border-radius: 6px; border-left: 4px solid #f57c00;">
+                    ℹ️ You can only cancel the entire order if all items have
+                    the same status. Some items have different statuses.
+                </div>
+                <% } %>
+            </div>
+
+            <div class="modal" id="cancelModal">
+                <div class="modal-content">
+                    <div class="modal-icon">✕</div>
+                    <h3>Cancel <span id="cancelItemName">Order</span>?</h3>
+                    <p>Please select a reason for cancelling this order.</p>
+                    <div class="reason-options">
+                        <div class="reason-option">
+                            <input type="radio" id="reason1" name="cancelReason"
+                                value="Changed my mind" required>
+                            <label for="reason1">Changed my mind</label>
+                        </div>
+                        <div class="reason-option">
+                            <input type="radio" id="reason2" name="cancelReason"
+                                value="Found a better price elsewhere">
+                            <label for="reason2">Found a better price
+                                elsewhere</label>
+                        </div>
+                        <div class="reason-option">
+                            <input type="radio" id="reason3" name="cancelReason"
+                                value="Order placed by mistake">
+                            <label for="reason3">Order placed by mistake</label>
+                        </div>
+                        <div class="reason-option">
+                            <input type="radio" id="reason4" name="cancelReason"
+                                value="Other">
+                            <label for="reason4">Other</label>
+                        </div>
+                    </div>
+                    <textarea class="reason-textarea" id="additionalDetails"
+                        placeholder="Please provide additional details (optional)"></textarea>
+                    <div class="modal-buttons">
+                        <button class="btn-keep" onclick="closeModal()">Keep
+                            Order</button>
+                        <button class="btn-confirm-cancel"
+                            onclick="confirmCancel()">Submit</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal" id="returnModal">
+                <div class="modal-content">
+                    <div class="modal-icon modal-icon-return">🔙</div>
+                    <h3>Return <span id="returnItemName">Order</span>?</h3>
+                    <p>Please select a reason for returning this order.</p>
+                    <div class="reason-options">
+                        <div class="reason-option">
+                            <input type="radio" id="returnReason1"
+                                name="returnReason"
+                                value="Product not as described" required>
+                            <label for="returnReason1">Product not as
+                                described</label>
+                        </div>
+                        <div class="reason-option">
+                            <input type="radio" id="returnReason2"
+                                name="returnReason" value="Damaged product">
+                            <label for="returnReason2">Damaged product</label>
+                        </div>
+                        <div class="reason-option">
+                            <input type="radio" id="returnReason3"
+                                name="returnReason"
+                                value="Wrong product received">
+                            <label for="returnReason3">Wrong product
+                                received</label>
+                        </div>
+                        <div class="reason-option">
+                            <input type="radio" id="returnReason4"
+                                name="returnReason" value="Other">
+                            <label for="returnReason4">Other</label>
+                        </div>
+                    </div>
+                    <textarea class="reason-textarea"
+                        id="returnAdditionalDetails"
+                        placeholder="Please provide additional details (optional)"></textarea>
+                    <div class="modal-buttons">
+                        <button class="btn-keep"
+                            onclick="closeReturnModal()">Keep Order</button>
+                        <button class="btn-confirm-return"
+                            onclick="confirmReturn()">Submit</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal" id="cancelReturnModal">
+                <div class="modal-content">
+                    <div class="modal-icon modal-icon-cancel-return">✕</div>
+                    <h3>Cancel Return <span
+                            id="cancelReturnItemName">Order</span>?</h3>
+                    <p>Are you sure you want to cancel the return request?</p>
+                    <div class="modal-buttons">
+                        <button class="btn-keep"
+                            onclick="closeCancelReturnModal()">No, Keep
+                            Return</button>
+                        <button class="btn-confirm-cancel-return"
+                            onclick="confirmCancelReturn()">Yes, Cancel
+                            Return</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tracking-modal" id="trackingModal">
+                <div class="tracking-modal-content">
+                    <button class="tracking-close"
+                        onclick="closeTrackingModal()">✕</button>
+                    <div class="tracking-header">
+                        <div class="tracking-icon-box">📦</div>
+                        <h2>Track Your Order</h2>
+                        <p class="tracking-order-id">Order ID: <strong>#<%=
+                                orderId %></strong></p>
+                    </div>
+
+                    <% if (items && items.length > 0) { %>
+                    <% items.forEach(item => { %>
+                    <% if (!['Cancelled', 'Returned',
+                    'Return Request'].includes(item.status)) { %>
+                    <div class="tracking-item" style="display: none;"> <div
+                            class="tracking-item-header">
+                            <img src="<%= item.image %>"
+                                alt="<%= item.productName %>">
+                            <h3><%= item.productName %> (<%= item.variantSize
+                                %>)</h3>
+                        </div>
+                        <%
+                        const statusPriority = {
+                        'Placed': 1,
+                        'Confirmed': 2,
+                        'Processing': 3,
+                        'Shipped': 4,
+                        'OutForDelivery': 5,
+                        'Delivered': 6
+                        };
+                        const trackingDetails = [
+                        {
+                        key: 'Placed',
+                        status: 'Order Placed',
+                        date: item.tracking.placedDate,
+                        time: item.tracking.placedTime,
+                        description:
+                        'Your order has been successfully placed and payment confirmed.',
+                        icon: '✓',
+                        location: null
+                        },
+                        {
+                        key: 'Confirmed',
+                        status: 'Order Confirmed',
+                        date: item.tracking.confirmedDate,
+                        time: item.tracking.confirmedTime,
+                        description:
+                        'Your order has been confirmed and is being prepared for shipment.',
+                        icon: '✓',
+                        location: null
+                        },
+                        {
+                        key: 'Processing',
+                        status: 'Processing',
+                        date: item.tracking.processingDate,
+                        time: item.tracking.processingTime,
+                        description:
+                        'Your order is being processed and packaged with care.',
+                        icon: '⚙️',
+                        location: null
+                        },
+                        {
+                        key: 'Shipped',
+                        status: 'Shipped',
+                        date: item.tracking.shippedDate,
+                        time: item.tracking.shippedTime,
+                        description:
+                        'Your order has been picked up by our delivery partner and is on its way!',
+                        icon: '📦',
+                        location: item.tracking.shippedLocation
+                        },
+                        {
+                        key: 'OutForDelivery',
+                        status: 'Out for Delivery',
+                        date: item.tracking.outForDeliveryDate,
+                        time: item.tracking.outForDeliveryTime,
+                        description:
+                        'Your order is out for delivery and will arrive at your doorstep soon.',
+                        icon: '🚚',
+                        location: item.tracking.outForDeliveryLocation
+                        },
+                        {
+                        key: 'Delivered',
+                        status: 'Delivered',
+                        date: item.tracking.deliveredDate,
+                        time: item.tracking.deliveredTime,
+                        description:
+                        'Your order has been successfully delivered to your doorstep.',
+                        icon: '🏠',
+                        location: null
+                        }
+                        ];
+                        const currentPriority = statusPriority[item.status] ||
+                        0;
+                        %>
+                        <div class="tracking-timeline">
+                            <% trackingDetails.forEach(detail => {
+                            const itemPriority = statusPriority[detail.key] ||
+                            0;
+                            let itemClass = 'pending';
+                            if (itemPriority < currentPriority && detail.date) {
+                            itemClass = 'completed';
+                            } else if (itemPriority === currentPriority &&
+                            detail.date) {
+                            itemClass = 'active';
+                            }
+                            %>
+                            <div class="timeline-item <%= itemClass %>">
+                                <div class="timeline-icon-container"><%=
+                                    detail.icon %></div>
+                                <div class="timeline-line"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-status">
+                                        <%= detail.status %>
+                                        <% if (itemClass === 'completed') { %>
+                                        <span
+                                            class="status-badge-inline">COMPLETED</span>
+                                        <% } else if (itemClass === 'active') {
+                                        %>
+                                        <span class="status-badge-inline">IN
+                                            PROGRESS</span>
+                                        <% } %>
+                                    </div>
+                                    <div class="timeline-date">
+                                        <% if (!detail.date) { %>
+                                        📅 Pending
+                                        <% } else { %>
+                                        📅 <%= detail.date %> • <%= detail.time
+                                        || 'N/A' %>
+                                        <% } %>
+                                    </div>
+                                    <div class="timeline-description"><%=
+                                        detail.description %></div>
+                                    <% if (detail.location && (itemClass ===
+                                    'completed' || itemClass === 'active')) { %>
+                                    <div class="timeline-location">📍 <%=
+                                        detail.location %></div>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <% }) %>
+                        </div>
+                        <div class="estimated-delivery">
+                            <div class="estimated-delivery-label">
+                                <%= item.status === 'Delivered' ? 'Delivered on'
+                                : 'Estimated Delivery' %>
+                            </div>
+                            <div class="estimated-delivery-date">
+                                <% if (item.status === 'Delivered' &&
+                                item.tracking.deliveredDate) { %>
+                                <%= item.tracking.deliveredDate %> • <%=
+                                item.tracking.deliveredTime || 'N/A' %>
+                                <% } else { %>
+                                <%= item.tracking.estimatedDeliveryDate ||
+                                'Pending' %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                    <% }) %>
+                    <% } else { %>
+                    <div class="tracking-unavailable"
+                        style="padding: 60px 30px; text-align: center; color: #5f6368;">
+                        <p>Tracking information is currently unavailable for
+                            this order.</p>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
         </div>
 
-    </div>
+        <%- include('../../views/partials/user/footer') %>
 
-    <%- include('../../views/partials/user/footer') %>
-
-
-<script>
-
+        <script>
 
 let currentItem = '';
 let currentItemIndex = '';
@@ -1442,14 +1576,12 @@ function closeModal() {
   document.getElementById('cancelModal').classList.remove('active');
 }
 
-
 function formatCurrency(amount) {
   if (isNaN(amount) || amount === null || amount === undefined) {
     return '₹0.00';
   }
   return `₹${Math.abs(parseFloat(amount)).toFixed(2)}`;
 }
-
 
 function confirmCancel() {
   const reasonInput = document.querySelector('input[name="cancelReason"]:checked');
@@ -1470,21 +1602,17 @@ function confirmCancel() {
   const orderId = "<%= orderId %>";
   const isEntireOrder = currentItem === 'Entire Order';
 
+ 
   if (isEntireOrder) {
     showEntireOrderConfirmation(reason, details);
     return;
   }
 
+ 
   const checkUrl = `/orders/${orderId}/items/${currentItemIndex}/${currentVariantSize}/check-cancel`;
 
   const confirmBtn = document.querySelector('.btn-confirm-cancel');
   if (confirmBtn) confirmBtn.disabled = true;
-
-  console.log("🔍 Checking cancellation impact...");
-  console.log("URL:", checkUrl);
-  console.log("Item:", currentItem);
-  console.log("Item Index:", currentItemIndex);
-  console.log("Variant Size:", currentVariantSize);
 
   fetch(checkUrl, {
     method: 'POST',
@@ -1495,25 +1623,19 @@ function confirmCancel() {
     .then(data => {
       if (confirmBtn) confirmBtn.disabled = false;
 
-      console.log("✅ Cancellation check response:", data);
-
       if (!data.success) {
         throw new Error(data.error || 'Failed to check cancellation.');
       }
 
-      // ✅ IMPORTANT: Check couponRevoked from response
+      
       if (data.couponRevoked) {
-        console.log("🟥 Coupon will be revoked!");
         showCouponRevokedWarning(data, reason, details);
       } else {
-        console.log("🟩 Coupon will stay valid!");
         showNormalCancellationConfirmation(data, reason, details);
       }
     })
     .catch(error => {
       if (confirmBtn) confirmBtn.disabled = false;
-      console.error('❌ Error checking cancellation:', error);
-
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -1524,75 +1646,57 @@ function confirmCancel() {
     });
 }
 
-
 function showCouponRevokedWarning(data, reason, details) {
-  console.log("=== COUPON REVOKED WARNING DATA ===", data);
+  const safeParse = (val) => Number(Number(val || 0).toFixed(2));
+  
+  const totalDiscount = safeParse(data.totalDiscount);
+  const revokedDiscountOnOtherItems = safeParse(data.revokedDiscountOnOtherItems);
+  const remainingFullPrice = safeParse(data.remainingFullPrice);
+  const remainingCurrentlyPay = safeParse(data.remainingCurrentlyPay);
+  const balanceDue = safeParse(data.balanceDue);
+  const itemUserPaid = safeParse(data.itemUserPaid);
+  const refundAmount = safeParse(data.refundAmount);
+  const minPurchase = safeParse(data.minPurchase);
 
-  // ✅ Use new backend-sent values
-  const totalDiscount = parseFloat(data.totalDiscount) || 0;
-  const revokedDiscountOnOtherItems = parseFloat(data.revokedDiscountOnOtherItems) || 0;
-  const remainingFullPrice = parseFloat(data.remainingFullPrice) || 0;
-  const remainingCurrentlyPay = parseFloat(data.remainingCurrentlyPay) || 0;
-  const balanceDue = parseFloat(data.balanceDue) || 0;
-  const itemUserPaid = parseFloat(data.itemUserPaid) || 0;
-  const refundAmount = parseFloat(data.refundAmount) || 0;
-  const minPurchase = parseFloat(data.minPurchase) || 0;
+  const formatCurrency = (amt) => `₹${amt.toFixed(2)}`;
 
-  console.log("Parsed values → Paid:", itemUserPaid, "| BalanceDue:", balanceDue, "| Refund:", refundAmount);
-
-  const formatCurrency = (amt) => `₹${(amt || 0).toFixed(2)}`;
-
-  // ✅ Build the HTML content
-  let html = `
+  const html = `
     <div style="text-align: left; font-size: 15px; line-height: 1.8; color: #333;">
-      <p style="margin-bottom: 16px; padding: 12px; background: #fee2e2; border-left: 4px solid #dc2626; border-radius: 4px; color: #7f1d1d;">
-        <strong>⚠️ WARNING:</strong> Cancelling <strong style="color: #dc2626;">${currentItem}</strong> will drop your order total below the minimum purchase requirement of 
-        <strong>${formatCurrency(minPurchase)}</strong>. 
-        This will <strong>automatically revoke</strong> your coupon discount.
+
+      <p style="margin-bottom: 14px; background: #fee2e2; border-left: 4px solid #dc2626; padding: 12px; border-radius: 6px; color: #7f1d1d;">
+        ⚠️ <strong>WARNING:</strong> Cancelling <strong>"${currentItem}"</strong> will reduce your order total below 
+        <strong>${formatCurrency(minPurchase)}</strong>, which will revoke your coupon discount.
       </p>
 
-      <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 4px; margin: 12px 0;">
-        <p style="margin: 0; color: #991b1b; font-weight: 600; font-size: 14px;">🎟️ Coupon Discount Will Be Removed</p>
-        <p style="margin: 6px 0 0; color: #7f1d1d; font-size: 13px;">Total discount revoked on order: <strong>${formatCurrency(totalDiscount)}</strong></p>
-        <p style="margin: 2px 0 0; color: #7f1d1d; font-size: 13px;">Discount on other items being revoked: <strong>${formatCurrency(revokedDiscountOnOtherItems)}</strong></p>
+      <div style="background: #fff7ed; border-left: 4px solid #f97316; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+        <p style="margin: 0; color: #92400e; font-weight: 600;">🎟️ Coupon Discount Revocation</p>
+        <p style="margin: 4px 0 0; font-size: 13px; color: #78350f;">
+          Total discount applied: <strong>${formatCurrency(totalDiscount)}</strong><br>
+          Discount lost on remaining items: <strong>${formatCurrency(revokedDiscountOnOtherItems)}</strong>
+        </p>
       </div>
 
-      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px; margin: 12px 0;">
-        <p style="margin: 0; color: #92400e; font-weight: 600; font-size: 14px;">📌 Other Items Will Become Full Price</p>
-        <div style="margin-top: 8px; color: #78350f; font-size: 13px; line-height: 1.6;">
-          <div>Other items full price: <strong>${formatCurrency(remainingFullPrice)}</strong></div>
-          <div>They currently pay (with discount): <strong>${formatCurrency(remainingCurrentlyPay)}</strong></div>
-          <div>They need to pay (full price): <strong>${formatCurrency(remainingFullPrice)}</strong></div>
-          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #fcd34d;">
-            <strong style="color: #92400e;">Additional amount they need to pay: ${formatCurrency(balanceDue)}</strong>
-          </div>
-          <div style="font-size: 12px; color: #92400e;">(This will be deducted from your refund)</div>
+      <div style="background: #fefce8; border-left: 4px solid #facc15; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+        <p style="margin: 0; color: #854d0e; font-weight: 600;">📦 Updated Order Summary</p>
+        <div style="margin-top: 8px; font-size: 13px; color: #713f12;">
+          Remaining items full price: <strong>${formatCurrency(remainingFullPrice)}</strong><br>
+          Amount you paid (with discount): <strong>${formatCurrency(remainingCurrentlyPay)}</strong><br>
+          <strong>Extra amount due: ${formatCurrency(balanceDue)}</strong><br>
+          <small style="color: #92400e;">This will be deducted from your refund.</small>
         </div>
       </div>
 
-      <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; border-radius: 4px; margin: 12px 0;">
-        <p style="margin: 0; color: #15803d; font-weight: 600; font-size: 14px;">💰 Your Refund Calculation</p>
-        <div style="margin: 8px 0 0; color: #166534; font-size: 13px; line-height: 1.6;">
-          <div>Item you're cancelling: <strong>${currentItem}</strong></div>
-          <div>Amount you paid (after discount): <strong>${formatCurrency(itemUserPaid)}</strong></div>
-          ${balanceDue > 0
-            ? `<div>Less: Balance due for other items: <strong style="color: #b91c1c;">−${formatCurrency(balanceDue)}</strong></div>`
-            : ""
-          }
-          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #dcfce7;">
-            <strong style="font-size: 1.05em; color: #15803d;">Net refund you'll receive: ${formatCurrency(refundAmount)}</strong>
-          </div>
+      <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px;">
+        <p style="margin: 0; color: #065f46; font-weight: 600;">💰 Your Refund Breakdown</p>
+        <div style="margin-top: 8px; font-size: 13px; color: #064e3b;">
+          Item price (after discount): <strong>${formatCurrency(itemUserPaid)}</strong><br>
+          ${balanceDue > 0 ? `Less balance due: <strong style="color: #b91c1c;">-${formatCurrency(balanceDue)}</strong><br>` : ""}
+          <strong style="font-size: 1.05em; color: #10b981;">Net refund: ${formatCurrency(refundAmount)}</strong>
         </div>
       </div>
-
-      <hr style="margin: 16px 0; border: none; border-top: 2px solid #e5e7eb;">
-      <p style="margin: 12px 0; font-size: 14px; color: #555; text-align: center;">
-        <strong>Do you still want to cancel this item?</strong>
-      </p>
     </div>
   `;
 
-  // ✅ SweetAlert confirmation
   Swal.fire({
     icon: 'warning',
     title: '⚠️ Coupon Will Be Revoked',
@@ -1613,8 +1717,6 @@ function showCouponRevokedWarning(data, reason, details) {
     }
   });
 }
-
-
 
 function executeCancellation(reason, details) {
   const orderId = "<%= orderId %>";
@@ -1642,8 +1744,8 @@ function executeCancellation(reason, details) {
           : `${currentItem} Cancelled Successfully ✓`;
 
         const refundAmount = parseFloat(data.refundAmount) || 0;
-        const clawbackAmount = parseFloat(data.clawbackAmount) || 0;
         const balanceDue = parseFloat(data.balanceDue) || 0;
+        const revokedDiscount = parseFloat(data.revokedDiscountOnOtherItems) || 0;
 
         let successHtml = `
           <div style="text-align: left;">
@@ -1657,14 +1759,15 @@ function executeCancellation(reason, details) {
             </div>
         `;
 
-        if (data.couponRevoked && clawbackAmount > 0) {
+        if (data.couponRevoked && data.revokedDiscountOnOtherItems > 0) {
+          const revokedDiscount = parseFloat(data.revokedDiscountOnOtherItems) || 0;
           successHtml += `
             <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
               <p style="margin: 0; color: #991b1b; font-weight: 600;">
                 ⚠️ Coupon Revoked
               </p>
               <p style="margin: 8px 0 0 0; color: #7f1d1d; font-size: 14px;">
-                Discount of <strong>₹${clawbackAmount.toFixed(2)}</strong> has been removed
+                Discount removed: <strong>₹${revokedDiscount.toFixed(2)}</strong>
               </p>
               ${balanceDue > 0 ? `
               <p style="margin: 6px 0 0 0; color: #7f1d1d; font-size: 13px;">
@@ -1716,28 +1819,32 @@ function executeCancellation(reason, details) {
     });
 }
 
-
-
 function showNormalCancellationConfirmation(data, reason, details) {
   const refundAmount = parseFloat(data.refundAmount) || 0;
   const itemPrice = parseFloat(data.itemPrice) || 0;
   const discount = itemPrice - refundAmount;
 
+  let html = `
+    <div style="text-align: left; font-size: 14px; line-height: 1.8;">
+      <p style="margin-bottom: 12px;">
+        You will receive <strong style="color: #22c55e; font-size: 1.05em;">₹${refundAmount.toFixed(2)}</strong> as a refund to your wallet.
+      </p>
+  `;
+
+  if (discount > 0) {
+    html += `
+      <p style="color: #666; margin-bottom: 0;">
+        This includes the discount of <strong>₹${discount.toFixed(2)}</strong> applied to this item.
+      </p>
+    `;
+  }
+
+  html += `</div>`;
+
   Swal.fire({
     icon: 'question',
     title: `Cancel ${currentItem}?`,
-    html: `
-      <div style="text-align: left; font-size: 14px; line-height: 1.8;">
-        <p style="margin-bottom: 12px;">
-          You will receive <strong style="color: #22c55e; font-size: 1.05em;">₹${refundAmount.toFixed(2)}</strong> as a refund to your wallet.
-        </p>
-        ${discount > 0 ? `
-        <p style="color: #555; margin-bottom: 0;">
-          This includes the discount of <strong>₹${discount.toFixed(2)}</strong> applied to this item.
-        </p>
-        ` : ''}
-      </div>
-    `,
+    html,
     showCancelButton: true,
     confirmButtonText: 'Yes, Cancel',
     cancelButtonText: 'No, Keep Item',
@@ -1752,7 +1859,6 @@ function showNormalCancellationConfirmation(data, reason, details) {
     }
   });
 }
-
 
 function showEntireOrderConfirmation(reason, details) {
   Swal.fire({
@@ -1777,7 +1883,6 @@ function showEntireOrderConfirmation(reason, details) {
     }
   });
 }
-
 
 function openReturnModal(itemName, itemIndex, variantSize) {
   currentItem = itemName;
@@ -1994,8 +2099,6 @@ document.addEventListener('keydown', function(event) {
     closeTrackingModal();
   }
 });
-
-
 
 </script>
 
