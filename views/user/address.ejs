@@ -1,20 +1,64 @@
 <%- include("../partials/user/header.ejs") %>
 
 <head>
+    <title>Address Book - Sentique</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-label: #6b7280;
+            
+            --border-color: #e5e7eb;
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            
+            --btn-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --btn-text: #ffffff;
+            --accent-color: #667eea;
+            
+            --field-bg: #f9fafb;
+            --field-label: #667eea;
+            --card-border: 1px solid #e5e7eb;
         }
+
+        body.dark-mode {
+            --gold-gradient: linear-gradient(135deg, #e5c14a 0%, #f0d978 100%);
+            --gold-solid: #e5c14a;
+
+            --bg-body: #0a0a0a;
+            --bg-card: #121212;
+            --bg-input: #171717;
+            
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-label: #9ca3af;
+
+            --border-color: #262626;
+            --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.8);
+
+            --btn-primary: var(--gold-gradient);
+            --btn-text: #000000;
+            --accent-color: #f0d978;
+
+            --field-bg: #171717;
+            --field-label: #e5c14a;
+            --card-border: 1px solid rgba(229, 193, 74, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #eeeeee 0%, #f5f5f5 50%, #cbcbcb 100%);
+            background: var(--bg-body);
             min-height: 100vh;
-            color: #2d3748;
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
         }
 
         .main-content {
@@ -26,549 +70,283 @@
             padding: 40px 20px;
         }
 
-        .address-content {
-            min-width: 0;
-            width: 100%;
-        }
+        .address-content { width: 100%; }
 
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
             gap: 20px;
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-color);
         }
 
-        .header-left {
-            background: white;
-            backdrop-filter: blur(10px);
-            padding: 20px 30px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        body.dark-mode .section-header {
+            border: var(--card-border);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         .header-left h1 {
-            font-size: 32px;
-            font-weight: 900;
-            color: #1a202c;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        
+        body.dark-mode .header-left h1 {
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .header-left p {
-            font-size: 15px;
-            color: #718096;
-        }
+        .header-left p { font-size: 14px; color: var(--text-secondary); }
 
         .add-address-btn {
-            padding: 18px 36px;
-            background: white;
-            color: #667eea;
+            padding: 14px 28px;
+            background: var(--btn-primary);
+            color: var(--btn-text);
             border: none;
-            border-radius: 16px;
-            font-size: 16px;
-            font-weight: 800;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
-        .add-address-btn:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+        .add-address-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
         .addresses-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
         }
 
         .address-card {
-            background: white;
-            border-radius: 24px;
-            padding: 35px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            transition: all 0.4s;
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow-card);
+            border: var(--card-border);
+            transition: all 0.3s ease;
             position: relative;
-            border: 3px solid transparent;
             overflow: hidden;
         }
 
-        .address-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            opacity: 0;
-            transition: opacity 0.4s;
-        }
-
         .address-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
-            border-color: #e9d5ff;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            border-color: var(--accent-color);
         }
-
-        .address-card:hover::before {
-            opacity: 1;
-        }
-
-        .address-card.default {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #f7faff 0%, #fef5ff 100%);
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.25);
-        }
-
-        .address-card.default::before {
-            opacity: 1;
-            height: 6px;
-            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        
+        body.dark-mode .address-card:hover {
+            box-shadow: 0 0 20px rgba(229, 193, 74, 0.15);
         }
 
         .address-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .address-type {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .address-type { display: flex; align-items: center; gap: 12px; }
 
         .type-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s;
+            width: 45px; height: 45px;
+            background: var(--btn-primary);
+            color: var(--btn-text);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
         }
 
-        .address-card:hover .type-icon {
-            transform: rotate(10deg) scale(1.1);
-        }
-
-        .type-info h4 {
-            font-size: 22px;
-            font-weight: 800;
-            color: #1a202c;
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .type-info p {
-            font-size: 14px;
-            color: #718096;
-            font-weight: 600;
-        }
+        .type-info h4 { font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0; }
+        .type-info p { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin: 0; }
 
         .default-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
             color: white;
-            padding: 8px 18px;
-            border-radius: 25px;
-            font-size: 13px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-
-        .address-details {
-            margin: 25px 0;
-            padding: 25px;
-            background: linear-gradient(135deg, #f9fafb 0%, #f0f4f8 100%);
-            border-radius: 16px;
-            border-left: 5px solid #667eea;
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .detail-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            margin-bottom: 18px;
-            transition: all 0.3s;
-            padding: 8px;
-            border-radius: 10px;
-        }
-
-        .detail-row:hover {
-            background: white;
-            transform: translateX(5px);
-        }
-
-        .detail-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .detail-icon {
-            font-size: 22px;
-            width: 28px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .detail-text {
-            flex: 1;
-        }
-
-        .detail-label {
+            padding: 4px 10px;
+            border-radius: 20px;
             font-size: 11px;
-            color: #667eea;
-            font-weight: 800;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
         }
 
-        .detail-value {
-            font-size: 16px;
-            color: #1a202c;
+        .address-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: var(--field-bg);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .info-box.full { grid-column: 1 / -1; }
+
+        .info-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--field-label);
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: var(--text-primary);
             font-weight: 600;
-            line-height: 1.6;
-            word-wrap: break-word;
+            line-height: 1.4;
+            word-break: break-word;
         }
 
         .address-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 3px solid #f0f0f0;
+            display: flex; gap: 10px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
         }
 
-        .edit-btn,
-        .delete-btn {
+        .edit-btn, .delete-btn {
             flex: 1;
-            padding: 14px 20px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 800;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
             border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-align: center;
             text-decoration: none;
+            display: inline-block;
         }
 
         .edit-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
-
         .edit-btn:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+            background: var(--btn-primary);
+            color: var(--btn-text);
+            border-color: transparent;
         }
 
         .delete-btn {
-            background: linear-gradient(135deg, #fee 0%, #fecaca 100%);
-            color: #dc2626;
-            border: 2px solid #fca5a5;
-            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.15);
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
-
-        .delete-btn:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
-        }
-
+        .delete-btn:hover { background: #ef4444; color: white; }
+        
         .empty-state {
-            text-align: center;
-            padding: 100px 40px;
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
         }
-
-        .empty-icon {
-            font-size: 100px;
-            margin-bottom: 25px;
-            opacity: 0.6;
-        }
-
-        .empty-state h3 {
-            font-size: 28px;
-            color: #1a202c;
-            font-weight: 800;
-            margin-bottom: 15px;
-        }
-
-        .empty-state p {
-            font-size: 17px;
-            color: #718096;
-            margin-bottom: 35px;
-        }
+        body.dark-mode .empty-state { border: var(--card-border); }
+        .empty-icon { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }
 
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(5px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
-
-        .modal.show {
-            display: flex;
-        }
+        .modal.show { display: flex; }
 
         .modal-content {
-            background: white;
-            border-radius: 30px;
-            padding: 45px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 35px;
             max-width: 650px;
-            width: 90%;
+            width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
         }
+        body.dark-mode .modal-content { border: var(--card-border); }
 
         .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 35px;
-            padding-bottom: 25px;
-            border-bottom: 4px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
         }
+        .modal-header h2 { font-size: 24px; font-weight: 800; color: var(--text-primary); }
+        body.dark-mode .modal-header h2 { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .modal-header h2 {
-            font-size: 30px;
-            font-weight: 900;
-            color: #1a202c;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .close-btn { background: transparent; border: none; font-size: 24px; color: var(--text-secondary); cursor: pointer; }
+        .close-btn:hover { color: #ef4444; }
 
-        .close-btn {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #fee 0%, #fecaca 100%);
-            color: #dc2626;
-            border: none;
-            cursor: pointer;
-            font-size: 26px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
+        .form-group { margin-bottom: 20px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-label { font-size: 13px; font-weight: 600; color: var(--text-label); margin-bottom: 8px; display: block; }
 
-        .close-btn:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            transform: rotate(90deg) scale(1.1);
-        }
-
-        .form-group {
-            margin-bottom: 28px;
-        }
-
-        .form-label {
-            font-size: 15px;
-            font-weight: 800;
-            color: #4a5568;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 18px 22px;
-            border: 3px solid #e2e8f0;
-            border-radius: 14px;
+        .form-input, .form-select, .form-textarea {
+            width: 100%; padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
             font-family: 'Inter', sans-serif;
-            font-size: 15px;
-            transition: all 0.3s;
-            background: #f9fafb;
-            font-weight: 600;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 110px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 22px;
-        }
-
-        .error-text, .success-text {
-            font-size: 12px;
-            margin-top: 8px;
-            display: none;
-        }
-
-        .error-text {
-            color: #dc2626;
-        }
-
-        .success-text {
-            color: #059669;
-        }
-
-        .small-text {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 6px;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f9fafb 0%, #f0f4f8 100%);
-            border-radius: 14px;
-            border: 3px solid #e2e8f0;
-            cursor: pointer;
+            font-size: 14px;
             transition: all 0.3s;
         }
+        .form-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        body.dark-mode .form-input:focus { box-shadow: 0 0 0 3px rgba(229, 193, 74, 0.15); }
 
-        .checkbox-group:hover {
-            border-color: #667eea;
-            background: linear-gradient(135deg, white 0%, #f7faff 100%);
-            transform: translateX(5px);
+        .modal-actions { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .modal-btn { flex: 1; padding: 14px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; }
+        .btn-submit { background: var(--btn-primary); color: var(--btn-text); }
+        .btn-cancel { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+
+        .error-text, .success-text { font-size: 12px; margin-top: 6px; display: none; }
+        .error-text { color: #ef4444; }
+        .success-text { color: #10b981; }
+
+        .checkbox-group { display: flex; align-items: center; gap: 10px; padding: 15px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; }
+        .checkbox-group label { cursor: pointer; color: var(--text-primary); font-weight: 600; font-size: 14px; }
+
+        @media (max-width: 968px) {
+            .main-content { display: flex; flex-direction: column; padding: 20px 15px; }
+            .addresses-grid { grid-template-columns: 1fr; }
+            .address-body { grid-template-columns: 1fr; }
         }
 
-        .checkbox-group input[type="checkbox"] {
-            width: 26px;
-            height: 26px;
-            cursor: pointer;
-            accent-color: #667eea;
-        }
-
-        .checkbox-group label {
-            font-size: 16px;
-            font-weight: 700;
-            color: #2d3748;
-            cursor: pointer;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 18px;
-            margin-top: 35px;
-            padding-top: 35px;
-            border-top: 3px solid #f0f0f0;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 18px 36px;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-cancel {
-            background: white;
-            color: #667eea;
-            border: 3px solid #667eea;
-        }
-
-        .btn-cancel:hover {
-            background: #f7fafc;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 868px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .addresses-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 600px) {
+            .section-header { flex-direction: column; align-items: flex-start; }
+            .add-address-btn { width: 100%; justify-content: center; }
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+            .modal-actions { flex-direction: column-reverse; }
         }
     </style>
 </head>
 
 <body>
+
 <div class="main-content">
     <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'address' }) %>
 
@@ -576,11 +354,10 @@
         <div class="section-header">
             <div class="header-left">
                 <h1>📍 Address Book</h1>
-                <p>Manage your shipping and billing addresses</p>
+                <p>Manage your shipping locations</p>
             </div>
             <button class="add-address-btn" onclick="openModal()">
-                <span>➕</span>
-                Add New Address
+                <span>➕</span> Add New Address
             </button>
         </div>
 
@@ -588,19 +365,18 @@
     </div>
 </div>
 
-<!-- Modal -->
 <div class="modal" id="addressModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2><span>➕</span> Add New Address</h2>
-            <button class="close-btn" onclick="closeModal()">×</button>
+            <h2>Add New Address</h2>
+            <button class="close-btn" onclick="closeModal()">✕</button>
         </div>
 
         <form id="addressForm" onsubmit="saveAddress(event)">
             <div class="form-group">
-                <label class="form-label">🏷️ Address Type *</label>
+                <label class="form-label">Label As *</label>
                 <select class="form-select" name="addressType" id="type" required>
-                    <option value="" disabled selected>Select address type</option>
+                    <option value="" disabled selected>Select Type</option>
                     <option value="Home">🏠 Home</option>
                     <option value="Work">🏢 Work</option>
                     <option value="Other">📦 Other</option>
@@ -610,112 +386,103 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">👤 Full Name *</label>
-                    <input type="text" class="form-input" name="name" id="name" placeholder="Enter full name" required>
-                    <div class="small-text">Letters and spaces only, 3-50 characters</div>
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" class="form-input" name="name" id="name" placeholder="Receiver's Name" required>
                     <div class="error-text" id="nameError"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">📱 Phone Number *</label>
-                    <input type="tel" class="form-input" name="phone" id="phone" placeholder="10 digit number" required maxlength="10">
+                    <label class="form-label">Phone Number *</label>
+                    <input type="tel" class="form-input" name="phone" id="phone" placeholder="10-digit Mobile" required maxlength="10">
                     <div class="error-text" id="phoneError"></div>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">🏠 House/Building Name *</label>
-                    <input type="text" class="form-input" name="houseName" id="houseName" placeholder="Enter house/building name" required>
+                    <label class="form-label">House / Building *</label>
+                    <input type="text" class="form-input" name="houseName" id="houseName" required>
                     <div class="error-text" id="houseError"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">🔢 Building Number</label>
+                    <label class="form-label">Building Number</label>
                     <input type="text" class="form-input" name="buildingNumber" id="buildingNumber" placeholder="Optional">
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">🏘️ Landmark *</label>
-                <textarea class="form-textarea" name="landmark" id="landmark" placeholder="Nearby landmark or reference" required></textarea>
+                <label class="form-label">Landmark *</label>
+                <input type="text" class="form-input" name="landmark" id="landmark" required>
                 <div class="error-text" id="landmarkError"></div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">☎️ Alternative Number</label>
-                    <input type="tel" class="form-input" name="altPhone" id="altPhone" placeholder="10 digit number (optional)" maxlength="10">
-                    <div class="error-text" id="altPhoneError"></div>
+                    <label class="form-label">PIN Code *</label>
+                    <input type="text" class="form-input" name="pincode" id="zip" placeholder="6 Digits" required maxlength="6">
+                    <div id="zipLoader" style="display:none; font-size:11px; color:var(--accent-color);">Fetching location...</div>
+                    <div class="error-text" id="zipError"></div>
+                    <div class="success-text" id="zipSuccess"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">🌍 Nationality *</label>
-                    <input type="text" class="form-input" name="nationality" id="nationality" value="Indian" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                    <label class="form-label">Alt Phone</label>
+                    <input type="tel" class="form-input" name="altPhone" id="altPhone" maxlength="10">
+                    <div class="error-text" id="altPhoneError"></div>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">🏙️ City *</label>
-                    <input type="text" class="form-input" name="city" id="city" placeholder="Auto-filled from PIN" readonly style="background-color: #f3f4f6;">
+                    <label class="form-label">City</label>
+                    <input type="text" class="form-input" name="city" id="city" readonly>
                     <div class="error-text" id="cityError"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">🗺️ State *</label>
+                    <label class="form-label">State</label>
                     <select class="form-select" name="state" id="state" required>
-                        <option value="" disabled selected>Auto-filled from PIN</option>
-                        <option value="Andhra Pradesh">Andhra Pradesh</option>
-                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                        <option value="Assam">Assam</option>
-                        <option value="Bihar">Bihar</option>
-                        <option value="Chhattisgarh">Chhattisgarh</option>
-                        <option value="Goa">Goa</option>
-                        <option value="Gujarat">Gujarat</option>
-                        <option value="Haryana">Haryana</option>
-                        <option value="Himachal Pradesh">Himachal Pradesh</option>
-                        <option value="Jharkhand">Jharkhand</option>
-                        <option value="Karnataka">Karnataka</option>
-                        <option value="Kerala">Kerala</option>
-                        <option value="Madhya Pradesh">Madhya Pradesh</option>
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Manipur">Manipur</option>
-                        <option value="Meghalaya">Meghalaya</option>
-                        <option value="Mizoram">Mizoram</option>
-                        <option value="Nagaland">Nagaland</option>
-                        <option value="Odisha">Odisha</option>
-                        <option value="Punjab">Punjab</option>
-                        <option value="Rajasthan">Rajasthan</option>
-                        <option value="Sikkim">Sikkim</option>
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        <option value="Telangana">Telangana</option>
-                        <option value="Tripura">Tripura</option>
-                        <option value="Uttar Pradesh">Uttar Pradesh</option>
-                        <option value="Uttarakhand">Uttarakhand</option>
-                        <option value="West Bengal">West Bengal</option>
+                         <option value="" disabled selected>Auto-filled</option>
+                         <option value="Andhra Pradesh">Andhra Pradesh</option>
+                         <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                         <option value="Assam">Assam</option>
+                         <option value="Bihar">Bihar</option>
+                         <option value="Chhattisgarh">Chhattisgarh</option>
+                         <option value="Goa">Goa</option>
+                         <option value="Gujarat">Gujarat</option>
+                         <option value="Haryana">Haryana</option>
+                         <option value="Himachal Pradesh">Himachal Pradesh</option>
+                         <option value="Jharkhand">Jharkhand</option>
+                         <option value="Karnataka">Karnataka</option>
+                         <option value="Kerala">Kerala</option>
+                         <option value="Madhya Pradesh">Madhya Pradesh</option>
+                         <option value="Maharashtra">Maharashtra</option>
+                         <option value="Manipur">Manipur</option>
+                         <option value="Meghalaya">Meghalaya</option>
+                         <option value="Mizoram">Mizoram</option>
+                         <option value="Nagaland">Nagaland</option>
+                         <option value="Odisha">Odisha</option>
+                         <option value="Punjab">Punjab</option>
+                         <option value="Rajasthan">Rajasthan</option>
+                         <option value="Sikkim">Sikkim</option>
+                         <option value="Tamil Nadu">Tamil Nadu</option>
+                         <option value="Telangana">Telangana</option>
+                         <option value="Tripura">Tripura</option>
+                         <option value="Uttar Pradesh">Uttar Pradesh</option>
+                         <option value="Uttarakhand">Uttarakhand</option>
+                         <option value="West Bengal">West Bengal</option>
                     </select>
                     <div class="error-text" id="stateError"></div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">📮 PIN Code *</label>
-                <input type="text" class="form-input" name="pincode" id="zip" placeholder="Enter 6-digit PIN code" required maxlength="6">
-                <div class="small-text">6 digits (fetches city & state automatically)</div>
-                <div id="zipLoader" style="display: none; margin-top: 8px; color: #667eea; font-size: 12px;">
-                    <span>⏳ Fetching location...</span>
-                </div>
-                <div class="success-text" id="zipSuccess"></div>
-                <div class="error-text" id="zipError"></div>
-            </div>
-
-            <div class="form-group">
                 <div class="checkbox-group">
                     <input type="checkbox" id="setDefault" name="isDefault">
-                    <label for="setDefault">⭐ Set as default address</label>
+                    <label for="setDefault">Set as default address</label>
                 </div>
             </div>
 
             <div class="modal-actions">
                 <button type="button" class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="modal-btn btn-submit" id="submitBtn">💾 Save Address</button>
+                <button type="submit" class="modal-btn btn-submit" id="submitBtn">Save Address</button>
             </div>
         </form>
     </div>
@@ -735,8 +502,6 @@
 
     async function saveAddress(e) {
         e.preventDefault();
-        console.log('Save button clicked');
-
         Object.values(errors).forEach(el => el.style.display = 'none');
 
         const addressType = document.getElementById('type').value.trim();
@@ -751,139 +516,55 @@
 
         let hasErrors = false;
 
-        if (!addressType) {
-            document.getElementById('typeError').textContent = 'Please select address type';
-            document.getElementById('typeError').style.display = 'block';
-            hasErrors = true;
-        }
-
-        if (!name || name.length < 3 || name.length > 50 || !/^[a-zA-Z\s]+$/.test(name)) {
-            errors.name.textContent = 'Name: 3-50 letters/spaces only';
-            errors.name.style.display = 'block';
-            hasErrors = true;
-        }
-
-        if (!phone || phone.length !== 10) {
-            errors.phone.textContent = 'Phone must be exactly 10 digits';
-            errors.phone.style.display = 'block';
-            hasErrors = true;
-        }
-
-        if (!houseName || houseName.length < 2) {
-            errors.house.textContent = 'House name: min 2 characters';
-            errors.house.style.display = 'block';
-            hasErrors = true;
-        }
-
-        if (!landmark || landmark.length < 3) {
-            errors.landmark.textContent = 'Landmark: min 3 characters';
-            errors.landmark.style.display = 'block';
-            hasErrors = true;
-        }
-
-        if (!city) {
-            errors.city.textContent = 'Please enter PIN code to fetch city';
-            errors.city.style.display = 'block';
-            hasErrors = true;
-        }
-
-        if (!state) {
-            errors.state.textContent = 'Please enter PIN code to fetch state';
-            errors.state.style.display = 'block';
-            hasErrors = true;
-        }
-
-        if (!pincode || pincode.length !== 6) {
-            errors.zip.textContent = 'Valid 6-digit PIN code required';
-            errors.zip.style.display = 'block';
-            hasErrors = true;
-        }
-
-        if (altPhone && (altPhone.length !== 10 || !/^\d{10}$/.test(altPhone))) {
-            errors.altPhone.textContent = 'Alt phone must be 10 digits';
-            errors.altPhone.style.display = 'block';
-            hasErrors = true;
-        }
+        if (!addressType) { document.getElementById('typeError').textContent = 'Required'; document.getElementById('typeError').style.display = 'block'; hasErrors = true; }
+        if (name.length < 3 || !/^[a-zA-Z\s]+$/.test(name)) { errors.name.textContent = 'Invalid Name'; errors.name.style.display = 'block'; hasErrors = true; }
+        if (!/^\d{10}$/.test(phone)) { errors.phone.textContent = '10 digits required'; errors.phone.style.display = 'block'; hasErrors = true; }
+        if (houseName.length < 2) { errors.house.textContent = 'Required'; errors.house.style.display = 'block'; hasErrors = true; }
+        if (!pincode || pincode.length !== 6) { errors.zip.textContent = 'Invalid PIN'; errors.zip.style.display = 'block'; hasErrors = true; }
+        if (!city || !state) { errors.city.textContent = 'Fetch location first'; errors.city.style.display = 'block'; hasErrors = true; }
 
         if (hasErrors) return;
 
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
-        submitBtn.textContent = '💾 Saving...';
+        submitBtn.textContent = 'Saving...';
 
         const payload = {
-            addressType,
-            name,
-            phone,
-            houseName,
+            addressType, name, phone, houseName, 
             buildingNumber: document.getElementById('buildingNumber').value.trim(),
-            landmark,
-            altPhone,
-            nationality: 'Indian',
-            city,
-            state,
-            pincode,
+            landmark, altPhone, nationality: 'Indian', city, state, pincode,
             isDefault: document.getElementById('setDefault').checked
         };
 
         try {
             const res = await fetch('/addresses/add', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
             const data = await res.json();
-            console.log('Response:', data);
 
             if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: data.message || 'Address added successfully',
-                    confirmButtonColor: '#667eea',
-                    confirmButtonText: 'OK'
-                });
-                document.getElementById('addressForm').reset();
+                Swal.fire({ icon: 'success', title: 'Saved', text: 'Address added successfully', timer: 1500, showConfirmButton: false });
                 closeModal();
-                await fetchAddresses();
+                fetchAddresses();
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message || 'Failed to add address',
-                    confirmButtonColor: '#667eea',
-                    confirmButtonText: 'OK'
-                });
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message });
             }
         } catch (err) {
-            console.error('Save error:', err);
-            Swal.fire({
-                icon: 'error',
-                title: 'Network Error',
-                text: 'Failed to save address',
-                confirmButtonColor: '#667eea'
-            });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Network error' });
         } finally {
             submitBtn.disabled = false;
-            submitBtn.textContent = '💾 Save Address';
+            submitBtn.textContent = 'Save Address';
         }
     }
 
     async function fetchAddresses() {
         try {
-            const res = await fetch('/addresses/list', {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
+            const res = await fetch('/addresses/list', { method: 'GET' });
             const data = await res.json();
             if (data.success) renderAddresses(data.addresses);
-        } catch (err) {
-            console.error('Fetch error:', err);
-        }
+        } catch (err) { console.error(err); }
     }
 
     function renderAddresses(addresses) {
@@ -895,7 +576,7 @@
                 <div class="empty-state">
                     <div class="empty-icon">📭</div>
                     <h3>No addresses found</h3>
-                    <p>Click "Add New Address" to add your first address</p>
+                    <p>Click "Add New Address" to get started.</p>
                 </div>`;
             return;
         }
@@ -903,9 +584,8 @@
         addresses.forEach(addr => {
             const card = document.createElement('div');
             card.classList.add('address-card');
-            if (addr.isDefault) card.classList.add('default');
             const icon = addr.addressType === 'Home' ? '🏠' : addr.addressType === 'Work' ? '🏢' : '📦';
-
+            
             card.innerHTML = `
                 <div class="address-header">
                     <div class="address-type">
@@ -915,236 +595,110 @@
                             <p>${addr.addressType}</p>
                         </div>
                     </div>
-                    ${addr.isDefault ? '<div class="default-badge">⭐ Default</div>' : ''}
+                    ${addr.isDefault ? '<div class="default-badge">Default</div>' : ''}
                 </div>
-                <div class="address-details">
-                    <div class="detail-row">
-                        <div class="detail-icon">📱</div>
-                        <div class="detail-text">
-                            <div class="detail-label">Phone Number</div>
-                            <div class="detail-value">${addr.phone}</div>
-                        </div>
+
+                <div class="address-body">
+                    <div class="info-box">
+                        <div class="info-label">Phone</div>
+                        <div class="info-value">${addr.phone}</div>
                     </div>
-                    <div class="detail-row">
-                        <div class="detail-icon">🏠</div>
-                        <div class="detail-text">
-                            <div class="detail-label">House/Building</div>
-                            <div class="detail-value">${addr.houseName}${addr.buildingNumber ? ', ' + addr.buildingNumber : ''}</div>
-                        </div>
+                    <div class="info-box">
+                        <div class="info-label">Pincode</div>
+                        <div class="info-value">${addr.pincode}</div>
                     </div>
-                    <div class="detail-row">
-                        <div class="detail-icon">🏘️</div>
-                        <div class="detail-text">
-                            <div class="detail-label">Landmark</div>
-                            <div class="detail-value">${addr.landmark}</div>
-                        </div>
+                    <div class="info-box full">
+                        <div class="info-label">House / Building</div>
+                        <div class="info-value">${addr.houseName}${addr.buildingNumber ? ', ' + addr.buildingNumber : ''}</div>
+                    </div>
+                    <div class="info-box full">
+                        <div class="info-label">Landmark</div>
+                        <div class="info-value">${addr.landmark}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">City</div>
+                        <div class="info-value">${addr.city}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">State</div>
+                        <div class="info-value">${addr.state}</div>
                     </div>
                     ${addr.altPhone ? `
-                    <div class="detail-row">
-                        <div class="detail-icon">☎️</div>
-                        <div class="detail-text">
-                            <div class="detail-label">Alternative Number</div>
-                            <div class="detail-value">${addr.altPhone}</div>
-                        </div>
+                    <div class="info-box full">
+                        <div class="info-label">Alt Phone</div>
+                        <div class="info-value">${addr.altPhone}</div>
                     </div>` : ''}
-                    <div class="detail-row">
-                        <div class="detail-icon">📍</div>
-                        <div class="detail-text">
-                            <div class="detail-label">Location</div>
-                            <div class="detail-value">${addr.city}, ${addr.state} - ${addr.pincode}</div>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-icon">🌍</div>
-                        <div class="detail-text">
-                            <div class="detail-label">Nationality</div>
-                            <div class="detail-value">${addr.nationality}</div>
-                        </div>
-                    </div>
                 </div>
-                <div class="address-actions">
-                    <a href="/addresses/edit-address/${addr._id}" class="edit-btn">✏️ Edit</a>
-                    <button type="button" class="delete-btn" data-id="${addr._id}">🗑️ Delete</button>
-                </div>`;
-            grid.appendChild(card);
-        });
 
-        // Attach delete listeners
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                deleteAddress(this.getAttribute('data-id'));
-            });
+                <div class="address-actions">
+                    <a href="/addresses/edit-address/${addr._id}" class="edit-btn">Edit</a>
+                    <button onclick="deleteAddress('${addr._id}')" class="delete-btn">Delete</button>
+                </div>
+            `;
+            grid.appendChild(card);
         });
     }
 
     async function deleteAddress(id) {
-        console.log('Delete triggered for ID:', id);
-        
         const confirm = await Swal.fire({
-            title: 'Delete Address?',
-            text: 'Are you sure you want to delete this address?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#667eea',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
+            title: 'Delete Address?', text: "You won't be able to revert this!",
+            icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes, delete it!'
         });
 
-        if (!confirm.isConfirmed) return;
-
-        try {
-            const res = await fetch(`/addresses/delete/${id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            const data = await res.json();
-            console.log('Delete response:', data);
-
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Deleted!',
-                    text: data.message || 'Address deleted successfully',
-                    confirmButtonColor: '#667eea',
-                    confirmButtonText: 'OK'
-                });
-                await fetchAddresses();
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message || 'Failed to delete address',
-                    confirmButtonColor: '#667eea',
-                    confirmButtonText: 'OK'
-                });
-            }
-        } catch (err) {
-            console.error('Delete error:', err);
-            Swal.fire({
-                icon: 'error',
-                title: 'Server Error',
-                text: 'Failed to delete address',
-                confirmButtonColor: '#667eea'
-            });
+        if (confirm.isConfirmed) {
+            try {
+                const res = await fetch(`/addresses/delete/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire('Deleted!', 'Address has been deleted.', 'success');
+                    fetchAddresses();
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            } catch (err) { Swal.fire('Error', 'Failed to delete', 'error'); }
         }
     }
 
-    function openModal() {
-        const modal = document.getElementById('addressModal');
-        const form = document.getElementById('addressForm');
-        form.reset();
-        Object.values(errors).forEach(el => el.style.display = 'none');
-        document.getElementById('zipLoader').style.display = 'none';
-        modal.classList.add('show');
-    }
-
-    function closeModal() {
-        document.getElementById('addressModal').classList.remove('show');
-    }
-
-    // PIN code validation
     document.getElementById('zip').addEventListener('blur', async (e) => {
         const pincode = e.target.value.trim();
-        errors.zip.style.display = 'none';
-        document.getElementById('zipLoader').style.display = 'none';
-        document.getElementById('city').value = '';
-        document.getElementById('state').selectedIndex = 0;
-
-        if (!pincode) return;
-
-        if (!/^\d{6}$/.test(pincode)) {
-            errors.zip.textContent = 'PIN code must be exactly 6 digits';
-            errors.zip.style.display = 'block';
-            return;
-        }
-
-        if (/^(\d)\1{5}$/.test(pincode)) {
-            errors.zip.textContent = 'PIN code cannot have all same digits';
-            errors.zip.style.display = 'block';
-            return;
-        }
-
-        let isSequential = true;
-        for (let i = 1; i < 6; i++) {
-            if (parseInt(pincode[i]) - parseInt(pincode[i - 1]) !== 1) {
-                isSequential = false;
-                break;
-            }
-        }
-        if (isSequential) {
-            errors.zip.textContent = 'PIN code cannot be sequential';
-            errors.zip.style.display = 'block';
-            return;
-        }
-
-        let isReverseSequential = true;
-        for (let i = 1; i < 6; i++) {
-            if (parseInt(pincode[i - 1]) - parseInt(pincode[i]) !== 1) {
-                isReverseSequential = false;
-                break;
-            }
-        }
-        if (isReverseSequential) {
-            errors.zip.textContent = 'PIN code cannot be reverse sequential';
-            errors.zip.style.display = 'block';
-            return;
-        }
-
-        document.getElementById('zipLoader').style.display = 'block';
+        const loader = document.getElementById('zipLoader');
+        const successMsg = document.getElementById('zipSuccess');
+        
+        if (pincode.length !== 6) return;
+        loader.style.display = 'block';
+        successMsg.textContent = '';
 
         try {
             const res = await fetch(`/addresses/get-location/${pincode}`);
             const data = await res.json();
-            document.getElementById('zipLoader').style.display = 'none';
+            loader.style.display = 'none';
 
             if (data.success) {
-                document.getElementById('city').value = data.city || '';
-                
-                let found = false;
+                document.getElementById('city').value = data.city;
                 const stateSelect = document.getElementById('state');
-                for (let option of stateSelect.options) {
-                    if (option.value.toLowerCase() === (data.state || '').toLowerCase()) {
-                        option.selected = true;
-                        found = true;
-                        break;
+                for (let opt of stateSelect.options) {
+                    if (opt.value.toLowerCase() === data.state.toLowerCase()) {
+                        opt.selected = true; break;
                     }
                 }
-                if (!found) stateSelect.selectedIndex = 0;
-
-                document.getElementById('zipSuccess').textContent = `✓ Location found: ${data.city}, ${data.state}`;
-                document.getElementById('zipSuccess').style.display = 'block';
-            } else {
-                errors.zip.textContent = data.message || 'Invalid PIN code';
-                errors.zip.style.display = 'block';
+                successMsg.textContent = `✓ Found: ${data.city}, ${data.state}`;
+                successMsg.style.display = 'block';
             }
-        } catch (err) {
-            document.getElementById('zipLoader').style.display = 'none';
-            errors.zip.textContent = 'Error fetching location';
-            errors.zip.style.display = 'block';
-        }
+        } catch (err) { loader.style.display = 'none'; }
     });
 
-    // Phone input filtering
-    document.getElementById('phone').addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
-    });
+    function openModal() {
+        document.getElementById('addressForm').reset();
+        document.getElementById('zipSuccess').textContent = '';
+        document.getElementById('addressModal').classList.add('show');
+    }
+    function closeModal() {
+        document.getElementById('addressModal').classList.remove('show');
+    }
+    window.onclick = function(e) {
+        if (e.target === document.getElementById('addressModal')) closeModal();
+    }
 
-    document.getElementById('altPhone').addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
-    });
-
-    document.getElementById('zip').addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
-    });
-
-    // Modal click outside to close
-    document.getElementById('addressModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
-
-    // Initialize on page load
     document.addEventListener('DOMContentLoaded', fetchAddresses);
 </script>
 

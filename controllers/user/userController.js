@@ -8,7 +8,7 @@ const bcrypt = require("bcrypt");
 const Brand = require("../../models/brandSchema");
 const Wallet = require("../../models/walletSchema");
 const mongoose = require("mongoose");
-
+const Review=require("../../models/reviewSchema")
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -601,7 +601,7 @@ const loadShopingPage = async (req, res) => {
     const sort = req.query.sort || "newest";
     const priceRange = req.query.priceRange || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+    const limit = 12;
     const skip = (page - 1) * limit;
 
     const filterQuery = {
@@ -746,57 +746,478 @@ const loadShopingPage = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+const searchProductsApi = async (req, res) => {
+  try {
+    const query = req.query.query || "";
+    
+    if (!query) {
+      return res.json({ success: true, results: [] });
+    }
 
+    // Find top 5 matching products
+    const products = await Product.find({
+      productName: { $regex: query, $options: "i" },
+      isBlocked: false,
+      "variants.stock": { $gt: 0 } // Optional: ensure stock exists
+    })
+    .select("productName images variants")
+    .limit(5);
+
+    // Format results for frontend
+    const results = products.map(p => {
+      // Logic to find lowest price from variants (same as your shop logic)
+      let price = 0;
+      if (p.variants && p.variants.length > 0) {
+        const cheapest = p.variants.reduce((min, curr) => {
+           const currPrice = curr.salePrice || curr.regularPrice;
+           const minPrice = min.salePrice || min.regularPrice || Infinity;
+           return currPrice < minPrice ? curr : min;
+        }, { salePrice: Infinity });
+        price = cheapest.salePrice || cheapest.regularPrice;
+      }
+
+      return {
+        id: p._id,
+        name: p.productName,
+        image: (p.images && p.images.length > 0) ? p.images[0] : '/images/placeholder.jpg',
+        price: price
+      };
+    });
+
+    res.json({ success: true, results });
+
+  } catch (error) {
+    console.error("Search API Error:", error);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+// const loadProductDetails = async (req, res) => {
+  
+//   try {
+//     const productId = req.params.id || req.query.id;
+
+//     if (!productId) {
+//       return res.redirect("/shopPage");
+//     }
+  
+//     const product = await Product.findOne({
+//       _id: productId,
+//       isBlocked: false,
+//     })
+//       .populate("brand", "brandName brandImage")
+//       .populate("category", "categoryName categoryImage")
+//       .lean();
+
+//     if (!product) {
+//       return res.redirect("/shopPage");
+//     }
+
+   
+// const relatedProducts = await Product.find({
+//   category: product.category,
+//   _id: { $ne: product._id },
+//   isBlocked: false
+// })
+// .populate("brand", "brandName")
+// .populate("category", "name")
+
+// .limit(3)
+// .lean();
+
+
+//     res.render("productDetails", {
+//       product,
+//       relatedProducts,
+//     });
+
+//      console.log("Related Products:", relatedProducts.map(p => ({
+//   name: p.productName,
+//   category: p.category,
+//   brand: p.brand
+// })));
+//   } catch (error) {
+//     console.error("Error loading product details:", error);
+//     res.redirect("/shopPage");
+//   }
+// };
+
+
+
+const addReview = async (req, res) => {
+  try {
+    const userId = req.session.user?.id || req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login to write a review"
+      });
+    }
+
+    const { productId, rating, comment } = req.body;
+
+    // Validate inputs
+    if (!productId || !rating || !comment?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
+
+    // Validate rating
+    const ratingNum = parseInt(rating);
+    if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 1 and 5"
+      });
+    }
+
+    // Validate comment length
+    if (comment.trim().length < 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Review must be at least 5 characters long"
+      });
+    }
+
+    if (comment.trim().length > 500) {
+      return res.status(400).json({
+        success: false,
+        message: "Review cannot exceed 500 characters"
+      });
+    }
+
+    // Check if product exists
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
+      });
+    }
+
+    // Check if user already reviewed this product (unique index will also prevent this)
+    const existingReview = await Review.findOne({ userId, productId });
+    if (existingReview) {
+      return res.status(400).json({
+        success: false,
+        message: "You already reviewed this product"
+      });
+    }
+
+    // Create new review
+    const review = await Review.create({
+      userId,
+      productId,
+      rating: ratingNum,
+      comment: comment.trim()
+    });
+
+    // Fetch all reviews for this product to calculate average
+    const allReviews = await Review.find({ productId });
+
+    // Calculate average rating
+    const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0);
+    const averageRating = (totalRating / allReviews.length).toFixed(1);
+
+    return res.status(201).json({
+      success: true,
+      message: "Review added successfully",
+      review: {
+        _id: review._id,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt
+      },
+      productStats: {
+        averageRating: parseFloat(averageRating),
+        totalReviews: allReviews.length
+      }
+    });
+
+  } catch (error) {
+    console.error("Review Error:", error);
+    
+    // Handle duplicate review error from unique index
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "You already reviewed this product"
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
+};
+
+// Load Product Details with reviews
 const loadProductDetails = async (req, res) => {
   try {
-    const productId = req.params.id || req.query.id;
+    const productId = req.query.id || req.params.id;
 
     if (!productId) {
       return res.redirect("/shopPage");
     }
-  
+
+    // Fetch product with brand and category
     const product = await Product.findOne({
       _id: productId,
-      isBlocked: false,
+      isBlocked: false
     })
-      .populate("brand", "brandName brandImage")
-      .populate("category", "categoryName categoryImage")
+      .populate({
+        path: "brand",
+        select: "brandName brandImage"
+      })
+      .populate({
+        path: "category",
+        select: "name categoryImage"
+      })
       .lean();
 
     if (!product) {
       return res.redirect("/shopPage");
     }
 
-   
-const relatedProducts = await Product.find({
-  category: product.category,
-  _id: { $ne: product._id },
-  isBlocked: false
-})
-.populate("brand", "brandName")
-.populate("category", "name")
+    // Fetch related products (same category, max 4)
+    const relatedProducts = await Product.find({
+      category: product.category._id,
+      _id: { $ne: product._id },
+      isBlocked: false,
+      status: "Available"
+    })
+      .populate({
+        path: "brand",
+        select: "brandName"
+      })
+      .limit(4)
+      .lean();
 
-.limit(3)
-.lean();
+    // Fetch reviews with user information
+    const reviews = await Review.find({ productId: product._id })
+      .populate({
+        path: "userId",
+        select: "name email"
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
+    // Calculate rating statistics
+    let averageRating = 0;
+    const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
+    if (reviews.length > 0) {
+      const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+      averageRating = (totalRating / reviews.length).toFixed(1);
+
+      // Count reviews for each rating
+      reviews.forEach(review => {
+        ratingDistribution[review.rating]++;
+      });
+    }
+
+    // Check if current user has already reviewed this product
+    let userHasReviewed = false;
+    let userReview = null;
+
+    if (req.user?._id || req.session?.user?.id) {
+      const userId = req.user?._id || req.session.user?.id;
+      userReview = reviews.find(r => r.userId._id.toString() === userId.toString());
+      userHasReviewed = !!userReview;
+    }
+
+    // Calculate percentage for each rating
+    const ratingPercentage = {};
+    Object.keys(ratingDistribution).forEach(star => {
+      ratingPercentage[star] = reviews.length > 0
+        ? Math.round((ratingDistribution[star] / reviews.length) * 100)
+        : 0;
+    });
+
+    // Render product details page
     res.render("productDetails", {
       product,
       relatedProducts,
+      reviews,
+      averageRating: parseFloat(averageRating),
+      totalReviews: reviews.length,
+      ratingDistribution,
+      ratingPercentage,
+      userHasReviewed,
+      userReview,
+      user: req.user || req.session.user || null
     });
 
-     console.log("Related Products:", relatedProducts.map(p => ({
-  name: p.productName,
-  category: p.category,
-  brand: p.brand
-})));
   } catch (error) {
     console.error("Error loading product details:", error);
     res.redirect("/shopPage");
   }
 };
 
+// Get product rating via AJAX (for real-time updates)
+const getProductRating = async (req, res) => {
+  try {
+    const { productId } = req.params;
 
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID is required"
+      });
+    }
+
+    // Fetch all reviews for the product
+    const reviews = await Review.find({ productId }).lean();
+
+    // Calculate statistics
+    let averageRating = 0;
+    const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+    if (reviews.length > 0) {
+      const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+      averageRating = (totalRating / reviews.length).toFixed(1);
+
+      reviews.forEach(review => {
+        ratingDistribution[review.rating]++;
+      });
+    }
+
+    // Calculate percentage for each rating
+    const ratingPercentage = {};
+    Object.keys(ratingDistribution).forEach(star => {
+      ratingPercentage[star] = reviews.length > 0
+        ? Math.round((ratingDistribution[star] / reviews.length) * 100)
+        : 0;
+    });
+
+    return res.status(200).json({
+      success: true,
+      averageRating: parseFloat(averageRating),
+      totalReviews: reviews.length,
+      ratingDistribution,
+      ratingPercentage
+    });
+
+  } catch (error) {
+    console.error("Error fetching product rating:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
+};
+
+
+
+
+
+
+
+// const addReview = async (req, res) => {
+//   try {
+//     const userId = req.session.user?.id || req.user?._id;
+
+//     if (!userId) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "Please login to write a review"
+//       });
+//     }
+
+//     const { productId, rating, comment } = req.body;
+
+//     if (!productId || !rating || !comment.trim()) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "All fields are required"
+//       });
+//     }
+
+//     const existing = await Review.findOne({ userId, productId });
+
+//     if (existing) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "You already reviewed this product"
+//       });
+//     }
+
+//     await Review.create({
+//       userId,
+//       productId,
+//       rating,
+//       comment
+//     });
+
+//     return res.json({
+//       success: true,
+//       message: "Review added successfully"
+//     });
+
+//   } catch (error) {
+//     console.error("Review Error:", error);
+//     return res.status(500).json({ success: false, message: "Internal Server Error" });
+//   }
+// };
+
+
+// const loadProductDetails = async (req, res) => {
+//   try {
+//     const productId = req.params.id || req.query.id;
+
+//     if (!productId) {
+//       return res.redirect("/shopPage");
+//     }
+  
+//     // Fetch Product
+//     // We populate category to get its name/image
+//     const product = await Product.findOne({
+//       _id: productId,
+//       isBlocked: false,
+//     })
+//       .populate("brand", "brandName brandImage")
+//       .populate("category", "name categoryImage") // Adjust 'name' if your schema uses 'categoryName'
+//       .lean();
+
+//     if (!product) {
+//       return res.redirect("/shopPage");
+//     }
+
+//     // Fetch Related Products
+//     // CRITICAL FIX: Since product.category is an object (populated), we access product.category._id
+//     const relatedProducts = await Product.find({
+//       category: product.category._id, 
+//       _id: { $ne: product._id }, // Exclude current product
+//       isBlocked: false
+//     })
+//     .populate("brand", "brandName")
+//     .limit(4)
+//     .lean();
+
+//     // Fetch Reviews
+//     const reviews = await Review.find({ productId: product._id })
+//       .populate("userId", "name") // Get reviewer name
+//       .sort({ createdAt: -1 })    // Show newest first
+//       .lean();
+
+//     // Render Page
+//     res.render("productDetails", {
+//       product,
+//       relatedProducts,
+//       reviews, // <--- Passed to EJS to fix the error
+//       user: req.user || req.session.user || null
+//     });
+
+//   } catch (error) {
+//     console.error("Error loading product details:", error);
+//     res.redirect("/shopPage");
+//   }
+// };
 
 module.exports = {
     loadLandingPage,
@@ -811,11 +1232,14 @@ module.exports = {
     login,
     logout,    
     loadShopingPage, 
+    searchProductsApi,
     loadProductDetails,
     generateOtp,
     sendOtp,
     ensureUserHasReferralCode,
-    generateUniqueReferralCode
+    generateUniqueReferralCode,
+    addReview,
+    getProductRating,
    
 };
 

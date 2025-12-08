@@ -1,182 +1,220 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-/* Top Bar */
-.top-bar {
-    background-color: #000;
-    color: #fff;
-    font-size: 14px;
-    text-align: center;
-    padding: 10px 5px;
-}
-.top-bar a {
-    color: #fff;
-    text-decoration: underline;
+/* =========================================
+   1. THEME ENGINE (CSS Variables)
+   ========================================= */
+:root {
+    /* --- Light Mode (Default) --- */
+    --bg-body: #ffffff;
+    --bg-nav: #ffffff;
+    --bg-dropdown: #ffffff;
+    --bg-topbar: #000000;
+    
+    --text-main: #000000;
+    --text-topbar: #ffffff;
+    --text-muted: #555555;
+    
+    --border-color: #e5e5e5;
+    --icon-color: #000000;
+    --hover-color: #f3f4f6;
+    
+    /* Logo: Default (Black) */
+    --logo-filter: none;
+    
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* Navbar */
+body.dark-mode {
+    /* --- Dark Mode (Overrides) --- */
+    --bg-body: #121212;        
+    --bg-nav: #1a1a1a;        
+    --bg-dropdown: #252525;
+    --bg-topbar: #252525;
+    
+    --text-main: #ffffff;
+    --text-topbar: #e0e0e0;
+    --text-muted: #a0a0a0;
+    
+    --border-color: #333333;
+    --icon-color: #ffffff;
+    --hover-color: #333333;
+    
+    --logo-filter: brightness(0) invert(1);
+    
+    --shadow: 0 4px 15px rgba(0,0,0,0.6);
+}
+
+/* =========================================
+   2. GLOBAL STYLES
+   ========================================= */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-body) !important;
+    color: var(--text-main) !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+}
+
+a { text-decoration: none; color: var(--text-main); transition: 0.3s; }
+
+/* --- Top Bar --- */
+.top-bar {
+    background-color: var(--bg-topbar);
+    color: var(--text-topbar);
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 0;
+    letter-spacing: 0.5px;
+}
+.top-bar a { color: inherit; text-decoration: underline; }
+
+/* --- Navbar --- */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    position: relative;
-    z-index: 500;
-}
-.nav-logo img {
-    width: 120px;
-    height: auto;
-}
-nav.nav-links {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-nav.nav-links a {
-    color: black;
-    text-decoration: none;
-    font-size: 14px;
-}
-nav.nav-links a.active {
-    font-weight: bold;
-    text-decoration: underline;
+    padding: 15px 40px;
+    background-color: var(--bg-nav);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: background-color 0.3s ease;
 }
 
-/* Nav Icons */
-.nav-icons {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+.nav-logo img { 
+    width: 120px; 
+    height: auto;
+    filter: var(--logo-filter);
+    transition: filter 0.3s ease;
 }
-.nav-icons a {
+
+/* Nav Links */
+nav.nav-links { display: flex; gap: 25px; align-items: center; }
+nav.nav-links a {
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 500;
+}
+nav.nav-links a:hover, nav.nav-links a.active { 
+    font-weight: bold; 
+    text-decoration: underline; 
+}
+
+/* Icons Area */
+.nav-icons { display: flex; align-items: center; gap: 20px; }
+
+.nav-icons a, .theme-toggle-btn, .user-icon-btn {
+    color: var(--icon-color);
+    font-size: 20px;
     position: relative;
-    color: black;
-    font-size: 18px;
-    text-decoration: none;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-.nav-icons a:hover {
-    transform: scale(1.2);
     transition: transform 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
+.nav-icons a:hover, .theme-toggle-btn:hover, .user-icon-btn:hover { transform: scale(1.1); }
 
 /* Notification Badge */
 .notification-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #ef4444;
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    border: 2px solid white;
-    animation: badgePulse 2s infinite;
+    position: absolute; top: -6px; right: -8px;
+    background: #ef4444; color: white;
+    border-radius: 50%; width: 16px; height: 16px;
+    font-size: 10px; display: flex;
+    align-items: center; justify-content: center;
+    border: 2px solid var(--bg-nav);
+    font-weight: bold;
 }
+.hide { display: none; }
+.show { display: flex; }
 
-@keyframes badgePulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.15);
-    }
-}
+/* =========================================
+   3. DROPDOWN FIX (CLICK BASED)
+   ========================================= */
+.dropdown { position: relative; }
 
-.notification-badge.show {
-    display: flex !important;
-}
-
-.notification-badge.hide {
-    display: none !important;
-}
-
-/* Dropdown for user */
-.dropdown {
-    position: relative;
-}
-.dropdown .user-icon {
-    font-size: 24px;
-    cursor: pointer;
-}
 .dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: white;
-    min-width: 160px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    z-index: 1000;
-    border-radius: 6px;
+    display: none; /* Hidden by default */
+    position: absolute; 
+    right: 0; 
+    top: 130%; /* Pushes it slightly down */
+    background-color: var(--bg-dropdown);
+    min-width: 180px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     overflow: hidden;
-}
-.dropdown-content a, .dropdown-content div {
-    display: block;
-    padding: 10px 16px;
-    color: black;
-    text-decoration: none;
-}
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
-}
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-/* Hamburger and Mobile Nav */
-.hamburger {
-    display: none;
-    font-size: 22px;
-    cursor: pointer;
-}
-.mobile-nav {
-    display: none;
+    z-index: 2000;
     flex-direction: column;
-    gap: 10px;
-    background: #fff;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    padding: 10px 20px;
-    border-top: 1px solid #ccc;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-.mobile-nav a {
-    font-size: 14px;
-    color: black;
 }
 
-/* Responsive */
+/* Use JS class 'active' to show, not :hover */
+.dropdown-content.active {
+    display: flex;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dropdown Links */
+.dropdown-content a {
+    display: block; 
+    padding: 12px 16px;
+    color: var(--text-main) !important; /* Forces correct color in Dark Mode */
+    font-size: 14px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.dropdown-content a:last-child { border-bottom: none; }
+.dropdown-content a:hover { background-color: var(--hover-color); }
+
+.user-name-box {
+    padding: 12px 16px; 
+    font-weight: bold; 
+    color: var(--text-main); 
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--hover-color);
+    font-size: 14px;
+}
+
+/* --- Mobile Menu --- */
+.hamburger { display: none; font-size: 22px; color: var(--icon-color); cursor: pointer; }
+
+.mobile-nav {
+    display: none; flex-direction: column;
+    background-color: var(--bg-nav);
+    position: absolute; top: 100%; left: 0; width: 100%;
+    border-top: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    padding: 15px 20px; gap: 15px;
+}
+.mobile-nav a { color: var(--text-main); font-size: 14px; }
+
 @media screen and (max-width: 768px) {
+    .navbar { padding: 15px 20px; }
     nav.nav-links { display: none; }
     .hamburger { display: block; }
-    .nav-icons { margin-top: 10px; width: 100%; justify-content: flex-end; gap: 15px; }
-    
-    .notification-badge {
-        width: 20px;
-        height: 20px;
-        font-size: 10px;
-    }
 }
 </style>
 
-<!-- Top Bar -->
 <div class="top-bar">
     Summer Sale on All Branded Perfumes – Up to 20% Off + Free Express Delivery 
     <a href="/shopPage">Shop Now</a>
 </div>
 
-<!-- Navbar -->
 <header class="navbar">
+
     <div class="nav-logo">
         <a href="/home"><img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo"></a>
     </div>
@@ -186,18 +224,21 @@ nav.nav-links a.active {
     <nav class="nav-links" id="navLinks">
         <a href="/home">Home</a>
         <a href="/shopPage">Shop</a>
-        <a href="#">Contact</a>
+        <a href="/contact">Contact</a>
         <a href="/">About</a>
     </nav>
 
     <div class="nav-icons">
-        <!-- Wishlist with Badge -->
+        
+        <button id="themeToggle" class="theme-toggle-btn">
+            <i id="themeIcon" class="fas fa-moon"></i>
+        </button>
+
         <a href="/wishlist" title="Wishlist" id="wishlistLink">
             <i class="fa fa-heart"></i>
             <span class="notification-badge hide" id="wishlistBadge">0</span>
         </a>
 
-        <!-- Cart with Badge -->
         <a href="/cart" title="Cart" id="cartLink">
             <i class="fa fa-shopping-cart"></i>
             <span class="notification-badge hide" id="cartBadge">0</span>
@@ -205,118 +246,124 @@ nav.nav-links a.active {
 
         <% if (user) { %>
         <div class="dropdown">
-            <a href="#" class="user-icon"><i class="fa fa-user-circle"></i></a>
-            <div class="dropdown-content">
-                <div><strong><%= user.name %></strong></div>
-                <a href="/profile">Profile</a>
-                <a href="/logout">Logout</a>
+            <button class="user-icon-btn" id="userIconBtn">
+                <i class="fa fa-user-circle"></i>
+            </button>
+            
+            <div class="dropdown-content" id="userDropdown">
+                <div class="user-name-box">
+                    Hello, <%= user.name %>
+                </div>
+                <a href="/profile">My Profile</a>
+                <a href="/profile/order-list">My Orders</a>
+                <a href="/logout" style="color: #ef4444 !important;">Logout</a>
             </div>
         </div>
         <% } else { %>
-        <a href="/login">Login</a>
-        <a href="/signup">Sign Up</a>
+            <a href="/login" style="font-size: 14px; font-weight: 600;">Login</a>
+            <a href="/signup" style="font-size: 14px; font-weight: 600;">Sign Up</a>
         <% } %>
+
     </div>
 
-    <!-- Mobile Nav -->
     <nav class="mobile-nav" id="mobileNav">
         <a href="/home">Home</a>
         <a href="/shopPage">Shop</a>
-        <a href="#">Contact</a>
-        <a href="#">About</a>
+        <a href="/contact">Contact</a>
+        <a href="/about">About</a>
+        
+        <hr style="border: 0; border-top: 1px solid var(--border-color);">
+
         <% if (!user) { %>
-        <a href="/login">Login</a>
-        <a href="/signup">Sign Up</a>
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        <% } else { %>
+            <a href="/profile">My Profile</a>
+            <a href="/profile/order-list">My Orders</a>
+            <a href="/logout" style="color: #ef4444;">Logout</a>
         <% } %>
     </nav>
+
 </header>
 
-
-
 <script>
-// Hamburger Menu
+// Hamburger Menu Toggle
 const hamburger = document.getElementById("hamburger");
 const mobileNav = document.getElementById("mobileNav");
-
-hamburger && hamburger.addEventListener("click", () => {
-    mobileNav.style.display = mobileNav.style.display === "flex" ? "none" : "flex";
-});
-
-// ========== DEBUGGING FUNCTIONS ==========
-function debugLog(message, data = null) {
-    console.log(`[BADGE DEBUG] ${message}`, data || '');
+if(hamburger){
+    hamburger.addEventListener("click", () => {
+        mobileNav.style.display = mobileNav.style.display === "flex" ? "none" : "flex";
+    });
 }
 
-// ========== BADGE UPDATE FUNCTIONS ==========
+// ================= DROPDOWN FIX (CLICK) =================
+const userIconBtn = document.getElementById('userIconBtn');
+const userDropdown = document.getElementById('userDropdown');
+
+if (userIconBtn && userDropdown) {
+    // Toggle on click
+    userIconBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent immediate closing
+        userDropdown.classList.toggle('active');
+    });
+
+    // Close when clicking anywhere else
+    document.addEventListener('click', (e) => {
+        if (!userDropdown.contains(e.target) && !userIconBtn.contains(e.target)) {
+            userDropdown.classList.remove('active');
+        }
+    });
+}
+
+/* ================= DARK MODE LOGIC ================= */
+const toggleBtn = document.getElementById("themeToggle");
+const themeIcon = document.getElementById("themeIcon");
+const body = document.body;
+
+// 1. Load Theme from LocalStorage
+const savedTheme = localStorage.getItem("sentique-theme");
+if (savedTheme === "dark") {
+    body.classList.add("dark-mode");
+    themeIcon.className = "fa fa-sun";
+}
+
+// 2. Toggle Theme
+if(toggleBtn){
+    toggleBtn.addEventListener("click", () => {
+        const dark = body.classList.toggle("dark-mode");
+
+        if (dark) {
+            themeIcon.className = "fa fa-sun";
+            localStorage.setItem("sentique-theme", "dark");
+        } else {
+            themeIcon.className = "fa fa-moon";
+            localStorage.setItem("sentique-theme", "light");
+        }
+    });
+}
+
+/* ================= BADGES LOGIC ================= */
 function updateBadges() {
-    updateCartBadge();
-    updateWishlistBadge();
-}
-
-function updateCartBadge() {
-    fetch('/cart/count')
-        .then(res => res.ok ? res.json() : Promise.reject(res.status))
-        .then(data => {
-            const count = data.count || 0;
-            const badge = document.getElementById('cartBadge');
-            
-            if (badge) {
-                if (count > 0) {
-                    badge.textContent = count > 9 ? '9+' : count;
-                    badge.classList.remove('hide');
-                    badge.classList.add('show');
-                } else {
-                    badge.classList.remove('show');
-                    badge.classList.add('hide');
+    const fetchAndUpdate = (url, elementId) => {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const el = document.getElementById(elementId);
+                if (el && data.count > 0) {
+                    el.textContent = data.count > 9 ? '9+' : data.count;
+                    el.classList.remove('hide');
+                    el.classList.add('show');
+                } else if (el) {
+                    el.classList.remove('show');
+                    el.classList.add('hide');
                 }
-            }
-        })
-        .catch(err => console.error('[Cart Badge ERROR]:', err));
+            })
+            .catch(err => console.log('Badge fetch error:', err));
+    };
+
+    fetchAndUpdate('/cart/count', 'cartBadge');
+    fetchAndUpdate('/wishlist/count', 'wishlistBadge');
 }
 
-function updateWishlistBadge() {
-    fetch('/wishlist/count')
-        .then(res => res.ok ? res.json() : Promise.reject(res.status))
-        .then(data => {
-            const count = data.count || 0;
-            const badge = document.getElementById('wishlistBadge');
-            
-            if (badge) {
-                if (count > 0) {
-                    badge.textContent = count > 9 ? '9+' : count;
-                    badge.classList.remove('hide');
-                    badge.classList.add('show');
-                } else {
-                    badge.classList.remove('show');
-                    badge.classList.add('hide');
-                }
-            }
-        })
-        .catch(err => console.error('[Wishlist Badge ERROR]:', err));
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', updateBadges);
-
-// Call these functions after cart/wishlist modifications
-function addToCart(productId) {
-    // Your add to cart logic...
-    // Then update badge:
-    updateCartBadge();
-}
-
-function removeFromCart(itemId) {
-    // Your remove logic...
-    updateCartBadge();
-}
-
-function addToWishlist(productId) {
-    // Your add logic...
-    updateWishlistBadge();
-}
-
-function removeFromWishlist(productId) {
-    // Your remove logic...
-    updateWishlistBadge();
-}
+document.addEventListener("DOMContentLoaded", updateBadges);
 </script>

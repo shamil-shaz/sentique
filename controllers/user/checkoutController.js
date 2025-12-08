@@ -165,8 +165,9 @@ const getCheckoutPage = async (req, res) => {
       addresses = [];
     }
 
-    const discount = 0;
-    const total = subtotal - discount;
+    const SHIPPING_CHARGE = 49; 
+const discount = 0;
+const total = subtotal - discount + SHIPPING_CHARGE; 
 
     req.session.checkoutData = {
       userId,
@@ -180,6 +181,7 @@ const getCheckoutPage = async (req, res) => {
       })),
       subtotal,
       discount,
+      shippingCharge: SHIPPING_CHARGE,
       total,
       addressCount: addresses.length,
       validItems: validCartItems.length,
@@ -194,6 +196,7 @@ const getCheckoutPage = async (req, res) => {
       addresses,
       subtotal: Math.round(subtotal * 100) / 100,
       discount: Math.round(discount * 100) / 100,
+      shippingCharge: SHIPPING_CHARGE,
       total: Math.round(total * 100) / 100,
       blockedProducts: [],
       success_msg: req.flash('success_msg') || [],

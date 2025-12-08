@@ -9,9 +9,29 @@ body, p, div, h1, h2, a, span, strong {
   color: #333;
   margin: 0;
   padding: 0;
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 
 @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;600&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ============================================
+   LIGHT MODE - DEFAULT
+   ============================================ */
+
+body {
+  background-color: #fff;
+  color: #333;
+  font-size: 16px;
+}
 
 .banner {
   width: 100%;
@@ -24,7 +44,7 @@ body, p, div, h1, h2, a, span, strong {
 .zodiac-banner {
   position: relative;
   width: 100%;
-  height: 450px;
+  height: 100%;
   transform: perspective(1200px) rotateX(-5deg);
   transform-style: preserve-3d;
 }
@@ -61,6 +81,7 @@ input[type="radio"][name="zodiac"] {
 .zodiac-content {
   text-align: center;
   color: white;
+  padding: 20px;
 }
 
 .zodiac-symbol {
@@ -104,6 +125,7 @@ input[type="radio"][name="zodiac"] {
   opacity: 0.9;
   max-width: 500px;
   margin: 0 auto 15px;
+  color: white;
 }
 
 .zodiac-dates {
@@ -266,6 +288,8 @@ input[type="radio"]:checked + .zodiac-slide {
   text-transform: uppercase;
   z-index: 100;
   font-weight: 300;
+  text-align: center;
+  width: 90%;
 }
 
 .banner-logo span {
@@ -279,6 +303,7 @@ input[type="radio"]:checked + .zodiac-slide {
 .section {
   padding: 40px 20px;
   text-align: center;
+  background-color: #fff;
 }
 
 .section h2 {
@@ -293,6 +318,8 @@ input[type="radio"]:checked + .zodiac-slide {
   justify-content: center;
   gap: 30px;
   flex-wrap: wrap;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .discover-btn {
@@ -328,10 +355,11 @@ input[type="radio"]:checked + .zodiac-slide {
 }
 
 .product {
-  width: 220px;
+  width: 100%;
+  max-width: 220px;
   text-align: center;
   border: 1px solid #eee;
-  padding: 10px;
+  padding: 15px;
   border-radius: 12px;
   background: #fff;
   position: relative;
@@ -345,13 +373,13 @@ input[type="radio"]:checked + .zodiac-slide {
 
 .product img {
   width: 100%;
-  height: 300px;
+  height: 250px;
   object-fit: cover;
   border-radius: 8px;
 }
 
 .product-details {
-  margin-top: 20px;
+  margin-top: 15px;
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -359,15 +387,22 @@ input[type="radio"]:checked + .zodiac-slide {
 }
 
 .product-details p {
-  font-size: 14px;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.product-details strong {
+  color: #333;
 }
 
 .product-details div {
-  font-size: 12px;
+  font-size: 11px;
   color: #555;
   display: flex;
   justify-content: left;
-  gap: 10px;
+  gap: 5px;
+  line-height: 1.4;
 }
 
 .sale-price {
@@ -375,12 +410,14 @@ input[type="radio"]:checked + .zodiac-slide {
   font-weight: bold;
   display: inline-block;
   margin-right: 8px;
+  font-size: 14px;
 }
 
 .regular-price {
   color: #767676;
   text-decoration: line-through;
   display: inline-block;
+  font-size: 12px;
 }
 
 .product-image-container {
@@ -396,9 +433,8 @@ input[type="radio"]:checked + .zodiac-slide {
   gap: 8px;
 }
 
-.icon-btn.cart {
+.icon-btn {
   background: rgba(255,255,255,0.9);
-  color: #007bff;
   border: none;
   border-radius: 50%;
   width: 35px;
@@ -409,11 +445,6 @@ input[type="radio"]:checked + .zodiac-slide {
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
-}
-
-.icon-btn.cart:hover {
-  background: #007bff;
-  color: #fff;
 }
 
 .icon-btn i {
@@ -421,18 +452,7 @@ input[type="radio"]:checked + .zodiac-slide {
 }
 
 .icon-btn.wishlist {
-  background: rgba(255,255,255,0.9);
   color: #ff0000;
-  border: none;
-  border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  transition: all 0.3s ease;
 }
 
 .icon-btn.wishlist:hover {
@@ -440,11 +460,20 @@ input[type="radio"]:checked + .zodiac-slide {
   color: #fff;
 }
 
+.icon-btn.cart {
+  color: #007bff;
+}
+
+.icon-btn.cart:hover {
+  background: #007bff;
+  color: #fff;
+}
+
 .slider-container {
   position: relative;
-  max-width: 950px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 60px;
+  padding: 0 50px;
 }
 
 .slider-wrapper {
@@ -459,24 +488,25 @@ input[type="radio"]:checked + .zodiac-slide {
   padding: 20px 0;
 }
 
-.brand {
-  min-width: 180px;
+.brand, .category {
+  min-width: 160px;
   text-align: center;
   background: #fff;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex-shrink: 0;
 }
 
-.brand:hover {
+.brand:hover, .category:hover {
   transform: translateY(-8px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 .brand img {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   border-radius: 50%;
   margin-bottom: 15px;
@@ -485,29 +515,15 @@ input[type="radio"]:checked + .zodiac-slide {
 
 .brand p {
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #333;
   margin: 0;
-}
-
-.category {
-  min-width: 180px;
-  text-align: center;
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.category:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  line-height: 1.3;
 }
 
 .category img {
   width: 100%;
-  height: 180px;
+  height: 150px;
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 15px;
@@ -516,9 +532,10 @@ input[type="radio"]:checked + .zodiac-slide {
 
 .category p {
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #333;
   margin: 0;
+  line-height: 1.3;
 }
 
 .slider-btn {
@@ -554,11 +571,11 @@ input[type="radio"]:checked + .zodiac-slide {
 }
 
 .slider-btn.left {
-  left: 10px;
+  left: 0;
 }
 
 .slider-btn.right {
-  right: 10px;
+  right: 0;
 }
 
 .view-all {
@@ -583,33 +600,122 @@ input[type="radio"]:checked + .zodiac-slide {
   background-color: rgba(212, 95, 55, 0.1);
 }
 
-.wishlist-toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #27ae60;
-  color: white;
-  padding: 16px 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  animation: slideIn 0.3s ease-out;
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 500;
+/* --- ADD THIS TO YOUR CSS --- */
+
+/* 1. Wishlist Active State (When added) */
+.icon-btn.wishlist.active {
+    background-color: #fff0f0;
+    border-color: #ff0000;
+}
+.icon-btn.wishlist.active i {
+    color: #ff0000;
+    font-weight: 900; /* Forces Solid Icon */
 }
 
-.wishlist-toast.error {
-  background: #e74c3c;
+/* 2. Dark Mode Wishlist Active State */
+body.dark-mode .icon-btn.wishlist.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(240, 217, 120, 0.2));
+  border: 2px solid #d4af37;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
 }
 
-.wishlist-toast.info {
-  background: #3498db;
+
+/* 3. Dark Mode Toast Message (Golden Design) */
+body.dark-mode .wishlist-toast {
+    background-color: #1a1a1a !important; /* Dark BG */
+    color: #d4af37 !important; /* Golden Text */
+    border: 1px solid #d4af37; /* Golden Border */
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2) !important; /* Golden Glow */
+}
+/* Ensure Icons inside toast are also Gold in dark mode */
+body.dark-mode .icon-btn.wishlist.active i {
+  color: #d4af37;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-.wishlist-toast i {
-  font-size: 18px;
+/* 3. Dark Mode Toast Messages (Golden Design) */
+body.dark-mode .wishlist-toast {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%) !important;
+  color: #d4af37 !important;
+  border: 2px solid #d4af37 !important;
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3), 
+              0 0 20px rgba(212, 175, 55, 0.2) !important;
+}
+
+body.dark-mode .wishlist-toast i {
+  color: #d4af37 !important;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+body.dark-mode .wishlist-toast span {
+  color: #f0d978 !important;
+  font-weight: 600;
+}
+
+/* 4. Dark Mode Toast Variants */
+body.dark-mode .wishlist-toast.success {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%) !important;
+  border-color: #d4af37 !important;
+}
+
+body.dark-mode .wishlist-toast.success i {
+  color: #d4af37 !important;
+}
+
+body.dark-mode .wishlist-toast.error {
+  background: linear-gradient(135deg, #2a1a1a 0%, #3a1a1a 100%) !important;
+  border-color: #ff6b6b !important;
+  box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3), 
+              0 0 20px rgba(255, 107, 107, 0.2) !important;
+}
+
+body.dark-mode .wishlist-toast.error i {
+  color: #ff6b6b !important;
+}
+
+body.dark-mode .wishlist-toast.error span {
+  color: #ffaaaa !important;
+}
+
+body.dark-mode .wishlist-toast.info {
+  background: linear-gradient(135deg, #1a1a2a 0%, #1a2a3a 100%) !important;
+  border-color: #66aaff !important;
+  box-shadow: 0 8px 32px rgba(102, 170, 255, 0.3), 
+              0 0 20px rgba(102, 170, 255, 0.2) !important;
+}
+
+body.dark-mode .wishlist-toast.info i {
+  color: #66aaff !important;
+}
+
+body.dark-mode .wishlist-toast.info span {
+  color: #99ccff !important;
+}
+
+/* 5. Dark Mode Cart Icon (Optional Enhancement) */
+body.dark-mode .icon-btn.cart {
+  background: rgba(102, 170, 255, 0.1);
+  border: 1px solid rgba(102, 170, 255, 0.3);
+  color: #66aaff;
+}
+
+body.dark-mode .icon-btn.cart:hover {
+  background: rgba(102, 170, 255, 0.2);
+  border-color: #66aaff;
+  color: #99ccff;
+  box-shadow: 0 0 15px rgba(102, 170, 255, 0.3);
+}
+
+/* 6. Pulse Animation for Active Wishlist in Dark Mode */
+@keyframes goldenPulse {
+  0% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.5); }
+  100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+}
+
+body.dark-mode .icon-btn.wishlist.active {
+  animation: goldenPulse 2s ease-in-out infinite;
 }
 
 @keyframes slideIn {
@@ -634,7 +740,6 @@ input[type="radio"]:checked + .zodiac-slide {
   }
 }
 
-/* Offer Badge */
 .offer-badge {
   position: absolute;
   top: 10px;
@@ -651,24 +756,439 @@ input[type="radio"]:checked + .zodiac-slide {
   animation: pulse 2s infinite;
 }
 
+/* ============================================
+   BASE TOAST MESSAGE STYLING (LIGHT MODE)
+   ============================================ */
+
+.wishlist-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #27ae60;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  transform: translateX(400px);
+  opacity: 0;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.wishlist-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.wishlist-toast.error {
+  background: #e74c3c;
+}
+
+.wishlist-toast.info {
+  background: #3498db;
+}
+
+.wishlist-toast i {
+  font-size: 18px;
+}
+
 @keyframes pulse {
   0% { transform: rotate(-5deg) scale(1); }
   50% { transform: rotate(-5deg) scale(1.05); }
   100% { transform: rotate(-5deg) scale(1); }
 }
 
-@media (max-width:768px) {
-  .slider-container { padding: 0 40px; }
-  .brand, .category { min-width: 140px; }
-  .slider-btn { width: 40px; height: 40px; font-size: 14px; }
-  .category img { height: 150px; }
-  .zodiac-symbol { font-size: 80px; }
-  .zodiac-name { font-size: 32px; letter-spacing: 6px; }
-  .zodiac-description { font-size: 14px; }
-  .zodiac-menu { left: 20px; font-size: 9px; }
-  .banner { height: 350px; }
-  .zodiac-banner { height: 350px; }
-  .discover-btn { padding: 12px 30px; font-size: 12px; }
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE FIRST
+   ============================================ */
+
+/* Mobile - Extra Small (320px - 480px) */
+@media (max-width: 480px) {
+  .banner {
+    height: 300px;
+  }
+
+  .zodiac-banner {
+    height: 300px;
+  }
+
+  .zodiac-symbol {
+    font-size: 50px;
+  }
+
+  .zodiac-name {
+    font-size: 28px;
+    letter-spacing: 4px;
+  }
+
+  .zodiac-element {
+    font-size: 11px;
+  }
+
+  .zodiac-description {
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .zodiac-dates {
+    font-size: 10px;
+  }
+
+  .zodiac-menu {
+    left: 15px;
+    font-size: 8px;
+  }
+
+  .zodiac-menu label {
+    margin-bottom: 12px;
+  }
+
+  .banner-logo {
+    font-size: 12px;
+    top: 15px;
+  }
+
+  .banner-logo span {
+    font-size: 10px;
+  }
+
+  .discover-btn {
+    padding: 10px 25px;
+    font-size: 11px;
+    bottom: 15px;
+  }
+
+  .section {
+    padding: 25px 15px;
+  }
+
+  .section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .product-grid {
+    gap: 15px;
+  }
+
+  .product {
+    max-width: 160px;
+  }
+
+  .product img {
+    height: 180px;
+  }
+
+  .slider-container {
+    padding: 0 30px;
+  }
+
+  .brand, .category {
+    min-width: 130px;
+    padding: 15px;
+  }
+
+  .brand img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .category img {
+    height: 120px;
+  }
+
+  .slider-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+/* Mobile - Small (481px - 768px) */
+@media (max-width: 768px) {
+  .banner {
+    height: 350px;
+  }
+
+  .zodiac-banner {
+    height: 350px;
+  }
+
+  .zodiac-symbol {
+    font-size: 60px;
+  }
+
+  .zodiac-name {
+    font-size: 32px;
+    letter-spacing: 6px;
+  }
+
+  .zodiac-element {
+    font-size: 12px;
+  }
+
+  .zodiac-description {
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .zodiac-dates {
+    font-size: 11px;
+  }
+
+  .zodiac-menu {
+    left: 20px;
+    font-size: 9px;
+  }
+
+  .zodiac-menu label {
+    margin-bottom: 15px;
+  }
+
+  .banner-logo {
+    font-size: 13px;
+    top: 20px;
+  }
+
+  .banner-logo span {
+    font-size: 11px;
+  }
+
+  .discover-btn {
+    padding: 12px 30px;
+    font-size: 12px;
+    bottom: 20px;
+  }
+
+  .section {
+    padding: 30px 20px;
+  }
+
+  .section h2 {
+    font-size: 1.75rem;
+    margin-bottom: 25px;
+  }
+
+  .product-grid {
+    gap: 20px;
+  }
+
+  .product {
+    max-width: 180px;
+  }
+
+  .product img {
+    height: 220px;
+  }
+
+  .slider-container {
+    padding: 0 40px;
+  }
+
+  .brand, .category {
+    min-width: 150px;
+  }
+
+  .slider-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 17px;
+  }
+}
+
+/* Tablet (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .banner {
+    height: 400px;
+  }
+
+  .zodiac-banner {
+    height: 400px;
+  }
+
+  .slider-container {
+    padding: 0 45px;
+  }
+
+  .product-grid {
+    gap: 25px;
+  }
+
+  .product {
+    max-width: 200px;
+  }
+
+  .product img {
+    height: 270px;
+  }
+}
+
+/* Desktop (1025px+) */
+@media (min-width: 1025px) {
+  .slider-container {
+    padding: 0 60px;
+  }
+
+  .product-grid {
+    gap: 30px;
+  }
+
+  .product {
+    max-width: 230px;
+  }
+
+  .product img {
+    height: 300px;
+  }
+}
+
+/* ============================================
+   DARK MODE — COMPLETE
+   ============================================ */
+
+body.dark-mode {
+  background-color: #0e0e0e;
+  color: #e0e0e0;
+}
+
+body.dark-mode .section {
+  background-color: #0e0e0e;
+}
+
+body.dark-mode .section h2 {
+  color: #ffd700;
+}
+
+body.dark-mode .product {
+  background: #1a1a1a;
+  border-color: #333;
+  box-shadow: 0 2px 10px rgba(255,255,255,0.05);
+}
+
+body.dark-mode .product:hover {
+  box-shadow: 0 4px 18px rgba(255,255,255,0.1);
+}
+
+body.dark-mode .product-details p,
+body.dark-mode .product-details strong {
+  color: #fff;
+}
+
+body.dark-mode .product-details div {
+  color: #bbb;
+}
+
+body.dark-mode .sale-price {
+  color: #ff9c6a;
+}
+
+body.dark-mode .regular-price {
+  color: #888;
+}
+
+body.dark-mode .icon-btn.wishlist {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #d4af37;
+}
+
+body.dark-mode .icon-btn.wishlist:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: #d4af37;
+  color: #f0d978;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+body.dark-mode .icon-btn.cart {
+  background: #222;
+  color: #66aaff;
+}
+
+body.dark-mode .icon-btn.cart:hover {
+  background: #66aaff;
+  color: #fff;
+}
+
+body.dark-mode .brand {
+  background: #1a1a1a;
+  border-color: #333;
+  box-shadow: 0 4px 12px rgba(255,255,255,0.08);
+}
+
+body.dark-mode .brand:hover {
+  box-shadow: 0 8px 20px rgba(255,255,255,0.1);
+}
+
+body.dark-mode .brand p {
+  color: #fff;
+}
+
+body.dark-mode .brand img {
+  border-color: #555;
+}
+
+body.dark-mode .category {
+  background: #1a1a1a;
+  border-color: #333;
+  box-shadow: 0 4px 12px rgba(255,255,255,0.08);
+}
+
+body.dark-mode .category:hover {
+  box-shadow: 0 8px 20px rgba(255,255,255,0.1);
+}
+
+body.dark-mode .category p {
+  color: #fff;
+}
+
+body.dark-mode .category img {
+  border-color: #555;
+}
+
+body.dark-mode .slider-btn {
+  background: linear-gradient(135deg, #333, #555);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+}
+
+body.dark-mode .slider-btn:hover {
+  background: linear-gradient(135deg, #555, #777);
+}
+
+body.dark-mode .slider-btn:disabled {
+  background: #333;
+  box-shadow: 0 2px 6px rgba(255,255,255,0.05);
+}
+
+body.dark-mode .view-all {
+  border-color: #fff;
+  color: #fff;
+}
+
+body.dark-mode .view-all:hover {
+  background: #fff;
+  color: #000;
+}
+
+body.dark-mode .wishlist-toast {
+  background: #222;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .offer-badge {
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.5);
+}
+
+body.dark-mode .nav-logo img {
+  filter: invert(1) !important;
+}
+
+body.dark-mode .brand img {
+  filter: invert(1) !important;
 }
 </style>
 
@@ -757,7 +1277,7 @@ input[type="radio"]:checked + .zodiac-slide {
             </a>
             <div class="product-icons">
               <button class="icon-btn wishlist" onclick="addToWishlist('<%= product._id %>')">
-                <i class="fas fa-heart"></i>
+                <i class="far fa-heart"></i>
               </button>
             </div>
             <% if (discount > 0) { %>
@@ -934,132 +1454,223 @@ input[type="radio"]:checked + .zodiac-slide {
 </div>
 
 <script>
-const starBg = document.getElementById('starBg');
-if (starBg) {
-  for (let i = 0; i < 80; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.animationDelay = Math.random() * 3 + 's';
-    starBg.appendChild(star);
-  }
-}
-
-const zodiacs = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
-let currentIndex = 0;
-let isTransitioning = false;
-
-function advanceZodiac() {
-  if (isTransitioning) return;
-  isTransitioning = true;
-  currentIndex = (currentIndex + 1) % zodiacs.length;
-  const zodiacElement = document.getElementById(zodiacs[currentIndex]);
-  if (zodiacElement) {
-    zodiacElement.checked = true;
-  }
-  setTimeout(() => {
-    isTransitioning = false;
-  }, 500);
-}
-
-setInterval(advanceZodiac, 4500);
-
-class Slider {
-  constructor(gridId) {
-    this.grid = document.getElementById(gridId);
-    this.leftBtn = document.getElementById(gridId.replace('Grid','LeftBtn'));
-    this.rightBtn = document.getElementById(gridId.replace('Grid','RightBtn'));
-    this.currentPosition = 0;
-    this.itemWidth = 200;
-    this.visibleItems = this.calculateVisibleItems();
-    this.maxItems = this.grid.children.length;
-    this.updateButtons();
-    window.addEventListener('resize', ()=> { this.visibleItems=this.calculateVisibleItems(); this.updateButtons(); });
-  }
-  calculateVisibleItems() { return Math.floor(this.grid.parentElement.offsetWidth / this.itemWidth); }
-  updateButtons() { if(this.leftBtn && this.rightBtn){ this.leftBtn.disabled=this.currentPosition<=0; this.rightBtn.disabled=this.currentPosition>=this.maxItems-this.visibleItems; } }
-  slideLeft(){ if(this.currentPosition>0){ this.currentPosition--; this.updateTransform(); } }
-  slideRight(){ if(this.currentPosition<this.maxItems-this.visibleItems){ this.currentPosition++; this.updateTransform(); } }
-  updateTransform(){ this.grid.style.transform=`translateX(-${this.currentPosition*this.itemWidth}px)`; this.updateButtons(); }
-}
-
-const brandSlider = new Slider('brandGrid');
-const categorySlider = new Slider('categoryGrid');
-
-function slideLeft(gridId){ if(gridId==='brandGrid') brandSlider.slideLeft(); else if(gridId==='categoryGrid') categorySlider.slideLeft(); }
-function slideRight(gridId){ if(gridId==='brandGrid') brandSlider.slideRight(); else if(gridId==='categoryGrid') categorySlider.slideRight(); }
-
-function addSwipeSupport(slider){
-  let startX=0,endX=0;
-  slider.grid.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; });
-  slider.grid.addEventListener('touchmove', e=>{ endX=e.touches[0].clientX; });
-  slider.grid.addEventListener('touchend', ()=> { const diff=startX-endX; if(Math.abs(diff)>50){ if(diff>0) slider.slideRight(); else slider.slideLeft(); } });
-}
-
-addSwipeSupport(brandSlider);
-addSwipeSupport(categorySlider);
-
-function showToast(message, type = 'success') {
-  const toast = document.createElement('div');
-  toast.className = `wishlist-toast ${type}`;
-  let icon = 'fa-check-circle';
-  if (type === 'error') icon = 'fa-exclamation-circle';
-  if (type === 'info') icon = 'fa-info-circle';
-  toast.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
-  document.body.appendChild(toast);
-  setTimeout(() => {
-    toast.style.animation = 'slideOut 0.3s ease-out';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
-
-function addToWishlist(productId) {
-  const clickedButton = event.currentTarget;
-  if (clickedButton.dataset.loading === 'true') {
-    return;
-  }
-  clickedButton.dataset.loading = 'true';
-  fetch('/wishlist/add', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId })
-  })
-  .then(res => res.json())
-  .then(data => {
-    clickedButton.dataset.loading = 'false';
-    if (data.success) {
-      clickedButton.classList.add('active');
-      showToast('Added to Wishlist!', 'success');
-    } else {
-      clickedButton.classList.add('active');
-      showToast(data.message || 'Already in your wishlist', 'info');
+  // --- 1. BACKGROUND STARS (Your Original Effect) ---
+  const starBg = document.getElementById('starBg');
+  if (starBg) {
+    for (let i = 0; i < 80; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
+      starBg.appendChild(star);
     }
-  })
-  .catch(err => {
-    clickedButton.dataset.loading = 'false';
-    console.error('Wishlist error:', err);
-    showToast('Failed to add to wishlist', 'error');
-  });
-}
+  }
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetch('/wishlist', {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success && data.products && data.products.length > 0) {
-      data.products.forEach(product => {
-        const productId = product._id || product;
-        const buttons = document.querySelectorAll(`button.wishlist[onclick*="${productId}"]`);
-        buttons.forEach(btn => btn.classList.add('active'));
+  // --- 2. ZODIAC AUTO-ROTATION (Your Original Logic) ---
+  const zodiacs = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
+  let currentIndex = 0;
+  let isTransitioning = false;
+
+  function advanceZodiac() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    currentIndex = (currentIndex + 1) % zodiacs.length;
+    const zodiacElement = document.getElementById(zodiacs[currentIndex]);
+    if (zodiacElement) {
+      zodiacElement.checked = true;
+    }
+    setTimeout(() => {
+      isTransitioning = false;
+    }, 500);
+  }
+
+  setInterval(advanceZodiac, 4500);
+
+  // --- 3. SLIDER LOGIC (Your Original Logic) ---
+  class Slider {
+    constructor(gridId) {
+      this.grid = document.getElementById(gridId);
+      this.leftBtn = document.getElementById(gridId.replace('Grid', 'LeftBtn'));
+      this.rightBtn = document.getElementById(gridId.replace('Grid', 'RightBtn'));
+      this.currentPosition = 0;
+      this.itemWidth = 200;
+      this.visibleItems = this.calculateVisibleItems();
+      this.maxItems = this.grid.children.length;
+      this.updateButtons();
+      window.addEventListener('resize', () => {
+        this.visibleItems = this.calculateVisibleItems();
+        this.updateButtons();
       });
     }
-  })
-  .catch(err => console.error('Error loading wishlist:', err));
-});
+    calculateVisibleItems() {
+      return Math.floor(this.grid.parentElement.offsetWidth / this.itemWidth);
+    }
+    updateButtons() {
+      if (this.leftBtn && this.rightBtn) {
+        this.leftBtn.disabled = this.currentPosition <= 0;
+        this.rightBtn.disabled = this.currentPosition >= this.maxItems - this.visibleItems;
+      }
+    }
+    slideLeft() {
+      if (this.currentPosition > 0) {
+        this.currentPosition--;
+        this.updateTransform();
+      }
+    }
+    slideRight() {
+      if (this.currentPosition < this.maxItems - this.visibleItems) {
+        this.currentPosition++;
+        this.updateTransform();
+      }
+    }
+    updateTransform() {
+      this.grid.style.transform = `translateX(-${this.currentPosition * this.itemWidth}px)`;
+      this.updateButtons();
+    }
+  }
+
+  const brandSlider = new Slider('brandGrid');
+  const categorySlider = new Slider('categoryGrid');
+
+  function slideLeft(gridId) {
+    if (gridId === 'brandGrid') brandSlider.slideLeft();
+    else if (gridId === 'categoryGrid') categorySlider.slideLeft();
+  }
+
+  function slideRight(gridId) {
+    if (gridId === 'brandGrid') brandSlider.slideRight();
+    else if (gridId === 'categoryGrid') categorySlider.slideRight();
+  }
+
+  function addSwipeSupport(slider) {
+    let startX = 0,
+      endX = 0;
+    slider.grid.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+    });
+    slider.grid.addEventListener('touchmove', e => {
+      endX = e.touches[0].clientX;
+    });
+    slider.grid.addEventListener('touchend', () => {
+      const diff = startX - endX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) slider.slideRight();
+        else slider.slideLeft();
+      }
+    });
+  }
+
+  addSwipeSupport(brandSlider);
+  addSwipeSupport(categorySlider);
+
+
+  // --- 4. NEW MODERN TOAST FUNCTION ---
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `wishlist-toast ${type}`;
+
+    let icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+    if (type === 'info') icon = 'fa-info-circle';
+
+    toast.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+    document.body.appendChild(toast);
+
+    // Trigger Slide Animation
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+    });
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 3000);
+  }
+
+  // --- 5. UPDATED WISHLIST FUNCTION (With Icon Toggle) ---
+  function addToWishlist(productId) {
+    const clickedButton = event.currentTarget;
+    // Find the icon inside the button
+    const icon = clickedButton.querySelector('i');
+
+    if (clickedButton.dataset.loading === 'true') return;
+    clickedButton.dataset.loading = 'true';
+
+    fetch('/wishlist/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        clickedButton.dataset.loading = 'false';
+
+        if (data.success) {
+          // 1. Add Active Class (Red Color)
+          clickedButton.classList.add('active');
+
+          // 2. Switch to Solid Heart Icon
+          if (icon) {
+            icon.classList.remove('far'); // Remove outline
+            icon.classList.add('fas'); // Add solid
+          }
+
+          // 3. Show Success Toast
+          showToast('Added to Wishlist!', 'success');
+
+        } else {
+          // Even if it exists, ensure it looks active
+          clickedButton.classList.add('active');
+          if (icon) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+          }
+          showToast(data.message || 'Already in your wishlist', 'info');
+        }
+      })
+      .catch(err => {
+        clickedButton.dataset.loading = 'false';
+        console.error('Wishlist error:', err);
+        showToast('Failed to add to wishlist', 'error');
+      });
+  }
+
+  // --- 6. INITIAL LOAD (Check Wishlist Status) ---
+  document.addEventListener('DOMContentLoaded', () => {
+    fetch('/wishlist', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.products && data.products.length > 0) {
+          data.products.forEach(product => {
+            const productId = product._id || product;
+            // Find buttons for this product
+            const buttons = document.querySelectorAll(`button.wishlist[onclick*="${productId}"]`);
+
+            buttons.forEach(btn => {
+              btn.classList.add('active');
+              // Ensure icon is solid on load
+              const icon = btn.querySelector('i');
+              if (icon) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+              }
+            });
+          });
+        }
+      })
+      .catch(err => console.error('Error loading wishlist:', err));
+  });
 </script>
 
 <%- include("../partials/user/footer.ejs") %>

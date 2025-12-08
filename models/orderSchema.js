@@ -119,6 +119,11 @@ const orderSchema = new Schema({
     enum: ["flat", "percentage", null],
     default: null,
   },
+  shippingCharge: { 
+  type: Number, 
+  default: 0,
+  description: 'Shipping charge applied to order' 
+},
   discountDistributionMethod: {
     type: String,
     default: "fixed",

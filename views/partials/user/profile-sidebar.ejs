@@ -1,174 +1,202 @@
 <style>
-/* SIDEBAR STYLES */
+    /* =========================
+       1. CSS VARIABLES & THEME
+       ========================= */
+    :root {
+        /* Light Mode */
+        --bg-sidebar: #FFFFFF;
+        --sidebar-text: #4A5568;
+        --sidebar-border: 1px solid #E2E8F0;
+        --sidebar-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        
+        --active-bg: linear-gradient(135deg, #183043 0%, #10262c 100%);
+        --active-text: #FFFFFF;
+        
+        --hover-bg: #F7FAFC;
+        --accent: #667eea;
+    }
 
-.main-content {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 30px;
-}
+    /* Dark Mode (Luxury Gold) */
+    body.dark-mode {
+        --bg-sidebar: #121212;
+        --sidebar-text: #D1D5DB;
+        --sidebar-border: 1px solid rgba(229, 193, 74, 0.2); /* Gold Border */
+        --sidebar-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        
+        /* Your Gold Gradient */
+        --active-bg: linear-gradient(135deg, #e5c14a 0%, #f0d978 100%);
+        --active-text: #000000; /* Black text on Gold */
+        
+        --hover-bg: #1F1F1F;
+        --accent: #f0d978;
+    }
 
-.sidebar {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    height: fit-content;
-    transition: all 0.3s;
-}
-
-.sidebar-left {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.profile-avatar-container {
-    margin-bottom: 20px;
-}
-
-.profile-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #141a31 0%, #18342f 100%);
-    margin: 0 auto 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 40px;
-    font-weight: 600;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.profile-name {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 30px;
-}
-
-.sidebar-menu .menu-section {
-    margin-bottom: 25px;
-}
-
-.menu-title {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #a0aec0;
-    font-weight: 600;
-    margin-bottom: 12px;
-    letter-spacing: 1px;
-}
-
-.menu-item {
-    padding: 12px 15px;
-    margin-bottom: 5px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s;
-    color: #4a5568;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    text-decoration: none;
-}
-
-.menu-item:hover {
-    background: #f7fafc;
-    color: #667eea;
-    transform: translateX(5px);
-}
-
-.menu-item.active {
-     background: linear-gradient(135deg, #183043 0%, #10262c 100%);
-    color: white;
-}
-
-/* RESPONSIVE STYLES */
-
-/* Tablets */
-@media (max-width: 1024px) {
+    /* =========================
+       2. MAIN LAYOUT GRID (The Fix)
+       ========================= */
     .main-content {
-        grid-template-columns: 250px 1fr;
-        gap: 25px;
-    }
-}
-
-/* Smaller tablets / landscape phones */
-@media (max-width: 868px) {
-    .main-content {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-
-    .sidebar {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 25px;
-    }
-
-    .sidebar-left {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .menu-item {
-        justify-content: center;
+        display: grid;
+        grid-template-columns: 280px 1fr; /* Desktop: 280px Sidebar + Rest Content */
+        gap: 30px;
+        align-items: start;
         width: 100%;
     }
-}
 
-/* Mobile */
-@media (max-width: 640px) {
+    /* =========================
+       3. SIDEBAR STYLING
+       ========================= */
     .sidebar {
-        padding: 20px;
-        text-align: center;
+        background: var(--bg-sidebar);
+        border: var(--sidebar-border);
+        box-shadow: var(--sidebar-shadow);
+        border-radius: 15px;
+        padding: 30px;
+        height: fit-content;
+        position: sticky;
+        top: 20px; /* Stays visible when scrolling on desktop */
+        z-index: 10;
+        transition: all 0.3s ease;
     }
 
+    /* Avatar Area */
+    .sidebar-left { text-align: center; margin-bottom: 25px; }
+    
     .profile-avatar {
-        width: 80px;
-        height: 80px;
-        font-size: 32px;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: #1f2937;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 3px solid var(--bg-sidebar);
+        box-shadow: 0 0 0 2px var(--accent);
     }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-name { font-weight: 700; font-size: 18px; color: var(--sidebar-text); }
 
-    .profile-name {
-        font-size: 16px;
-        margin-bottom: 20px;
-    }
-
+    /* Menu Items */
+    .menu-section { margin-bottom: 20px; }
+    
     .menu-title {
-        font-size: 10px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #9CA3AF;
+        font-weight: 700;
+        margin-bottom: 10px;
     }
 
     .menu-item {
-        font-size: 13px;
-        padding: 10px 12px;
-        gap: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        border-radius: 10px;
+        color: var(--sidebar-text);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        margin-bottom: 5px;
     }
-}
+
+    .menu-item:hover {
+        background: var(--hover-bg);
+        color: var(--accent);
+        padding-left: 20px; /* Slide effect */
+    }
+
+    .menu-item.active {
+        background: var(--active-bg);
+        color: var(--active-text);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        font-weight: 700;
+    }
+
+    /* =========================
+       4. MOBILE TOGGLE BUTTON
+       ========================= */
+    .sidebar-toggle-btn {
+        display: none; /* Hidden on Desktop */
+        width: 100%;
+        padding: 15px 20px;
+        background: var(--bg-sidebar);
+        border: var(--sidebar-border);
+        color: var(--sidebar-text);
+        font-weight: 700;
+        border-radius: 12px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--sidebar-shadow);
+        transition: all 0.3s;
+    }
+    
+    /* Gold Border for Toggle in Dark Mode */
+    body.dark-mode .sidebar-toggle-btn {
+        border: 1px solid var(--accent);
+    }
+
+    /* =========================
+       5. RESPONSIVE (Mobile Layout)
+       ========================= */
+    @media (max-width: 968px) {
+        /* Switch grid to single column */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* Show the Toggle Button */
+        .sidebar-toggle-btn {
+            display: flex;
+        }
+
+        /* Hide Sidebar by default */
+        .sidebar {
+            display: none; /* Hidden initially */
+            width: 100%;
+            position: static; /* Remove sticky */
+            margin-bottom: 30px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* Class to show sidebar when clicked */
+        .sidebar.show {
+            display: block;
+        }
+        
+        /* Adjust padding inside sidebar for mobile */
+        .menu-item {
+            padding: 15px; /* Larger touch targets */
+        }
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
-<!-- Updated Sidebar - Replace the Security Section -->
-<aside class="sidebar">
+
+<button class="sidebar-toggle-btn" onclick="toggleSidebar()">
+    <span style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:20px;">☰</span> Menu
+    </span>
+    <span id="toggle-icon" style="font-size:12px;">▼</span>
+</button>
+
+<aside class="sidebar" id="profileSidebar">
   <div class="sidebar-left">
     <div class="profile-avatar-container">
       <div class="profile-avatar">
         <% if (user && user.image) { %>
           <img src="<%= user.image %>" alt="Profile Picture" />
         <% } else { %>
-          <img src="/images/default-profile.png" alt="Default Picture" />
+          <span style="font-size: 35px; color: #9CA3AF;">👤</span>
         <% } %>
       </div>
     </div>
@@ -178,39 +206,57 @@
   <div class="sidebar-menu">
     <div class="menu-section">
       <div class="menu-title">Account</div>
-      <a href="/profile" class="menu-item <%= activePage === 'profile' ? 'active' : '' %>">
+      <a href="/profile" class="menu-item <%= typeof activePage !== 'undefined' && activePage === 'profile' ? 'active' : '' %>">
         <span>👤</span> My Profile
       </a>
-      <a href="/profile/address" class="menu-item <%= activePage === 'address' ? 'active' : '' %>">
+      <a href="/profile/address" class="menu-item <%= typeof activePage !== 'undefined' && activePage === 'address' ? 'active' : '' %>">
         <span>📍</span> Address Book
       </a>
     </div>
+    
     <div class="menu-section">
       <div class="menu-title">Shopping</div>
-      <a href="/profile/order-list" class="menu-item <%= activePage === 'orders' ? 'active' : '' %>">
+      <a href="/profile/order-list" class="menu-item <%= typeof activePage !== 'undefined' && activePage === 'orders' ? 'active' : '' %>">
         <span>📦</span> My Orders
       </a>
-      <a href="/wishlist" class="menu-item <%= activePage === 'wishlist' ? 'active' : '' %>">
+      <a href="/wishlist" class="menu-item <%= typeof activePage !== 'undefined' && activePage === 'wishlist' ? 'active' : '' %>">
         <span>❤️</span> My Wishlist
       </a>
-      <a href="/cart" class="menu-item <%= activePage === 'cart' ? 'active' : '' %>">
+      <a href="/cart" class="menu-item <%= typeof activePage !== 'undefined' && activePage === 'cart' ? 'active' : '' %>">
         <span>🛒</span> Shopping Cart
       </a>
     </div>
+    
     <div class="menu-section">
       <div class="menu-title">Payments</div>
-      <a href="/profile/wallet" class="menu-item <%= activePage === 'wallet' ? 'active' : '' %>">
+      <a href="/profile/wallet" class="menu-item <%= typeof activePage !== 'undefined' && activePage === 'wallet' ? 'active' : '' %>">
         <span>💳</span> Wallet
       </a>
-      <a href="/coupons" class="menu-item <%= activePage === 'coupons' ? 'active' : '' %>">
+      <a href="/coupons" class="menu-item <%= typeof activePage !== 'undefined' && activePage === 'coupons' ? 'active' : '' %>">
         <span>🎟️</span> Coupons
       </a>
     </div>
+    
     <div class="menu-section">
       <div class="menu-title">Security</div>
-      <a href="/profile/privacy-security" class="menu-item <%= activePage === 'security' ? 'active' : '' %>">
+      <a href="/profile/privacy-security" class="menu-item <%= typeof activePage !== 'undefined' && activePage === 'security' ? 'active' : '' %>">
         <span>🔒</span> Privacy & Security
       </a>
     </div>
   </div>
 </aside>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('profileSidebar');
+        const icon = document.getElementById('toggle-icon');
+        
+        sidebar.classList.toggle('show');
+        
+        if (sidebar.classList.contains('show')) {
+            icon.innerHTML = '&#9650;'; // Up Arrow
+        } else {
+            icon.innerHTML = '&#9660;'; // Down Arrow
+        }
+    }
+</script>

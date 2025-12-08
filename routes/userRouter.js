@@ -103,10 +103,12 @@ router.get('/logout', checkBlockedUser, userAuth, userController.logout);
 router.get('/', userController.loadLandingPage);
 router.get("/home", checkBlockedUser, userController.loadHomepage);
 router.get("/shopPage", checkBlockedUser,  userController.loadShopingPage);
+router.get("/api/search", userController.searchProductsApi);
 router.get("/productDetails", checkBlockedUser, userController.loadProductDetails);
 router.get('/zodiac', checkBlockedUser,  userProductController.loadZodiacPage);
 router.get('/api/zodiac-products', checkBlockedUser,  userProductController.getZodiacProducts);
-
+router.post("/product/review", userAuth, userController.addReview);
+router.get("/product/:productId/rating", userController.getProductRating);
 
 
 // -----Profile Routes----------
@@ -174,7 +176,6 @@ router.post('/orders/:orderId/items/:productName/status', orderController.update
 router.get('/orders/:orderId/invoice', userAuth,invoiceController.generateInvoice);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/check-cancel', userAuth, orderController.checkCancellationImpact);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel',userAuth,orderController.cancelSingleOrderWithCouponCheck);
-
 
 ////-------wallet-------
 

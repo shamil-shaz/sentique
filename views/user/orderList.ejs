@@ -2,507 +2,339 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Orders - <%= customerName %></title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%); color: #1a1a1a; line-height: 1.6; min-height: 100vh; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .page-header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); border-radius: 16px; padding: 32px 40px; margin-bottom: 28px; box-shadow: 0 8px 24px rgba(44, 62, 80, 0.15); position: relative; overflow: hidden; }
-        .page-header::before { content: ''; position: absolute; top: 0; right: 0; width: 300px; height: 300px; background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%); }
-        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-bottom: 20px; flex-wrap: wrap; position: relative; z-index: 1; }
-        .breadcrumb a { color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.3s; }
-        .breadcrumb a:hover { color: #d4af37; }
-        .breadcrumb span { color: white; font-weight: 600; }
-        .page-title-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; position: relative; z-index: 1; }
-        .page-title { font-size: 32px; font-weight: 800; color: white; letter-spacing: -0.5px; }
-        .welcome-box { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 12px 24px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .welcome-text { color: rgba(255, 255, 255, 0.9); font-size: 14px; }
-        .welcome-text span { color: #d4af37; font-weight: 700; margin-left: 4px; }
-        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
-        .stat-card { background: white; padding: 20px 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); display: flex; align-items: center; gap: 16px; transition: all 0.3s; }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); }
-        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .stat-icon.total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-icon.processing { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-icon.delivered { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .stat-icon.amount { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .stat-icon.payment-failed { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); }
-        .stat-content h3 { font-size: 13px; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-content p { font-size: 24px; font-weight: 700; color: #2c3e50; margin-top: 4px; }
-        .controls-bar { background: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-        .search-box { max-width: 300px; position: relative; }
-        .search-box input { width: 100%; padding: 12px 16px 12px 44px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: all 0.3s; }
-        .search-box input:focus { outline: none; border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1); }
-        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: 18px; }
-        .sort-dropdown, .filter-dropdown { padding: 12px 16px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; color: #495057; background: white; cursor: pointer; transition: all 0.3s; min-width: 180px; }
-        .sort-dropdown:focus, .filter-dropdown:focus { outline: none; border-color: #d4af37; }
-        .clear-filters { background: none; border: none; color: #d4af37; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; padding: 6px 12px; border-radius: 6px; }
-        .clear-filters:hover { background: rgba(212, 175, 55, 0.1); }
-        .mobile-profile-toggle { display: none; background: white; border: 2px solid #e9ecef; border-radius: 8px; padding: 12px 20px; margin-bottom: 16px; cursor: pointer; width: 100%; font-size: 15px; font-weight: 600; color: #2c3e50; align-items: center; justify-content: space-between; transition: all 0.3s; }
-        .mobile-profile-toggle:hover { border-color: #d4af37; }
-        .orders-layout { display: grid; grid-template-columns: 250px 1fr; gap: 24px; align-items: start; }
-        .profile-sidebar { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: sticky; top: 20px; }
+        /* ================= VARIABLES ================= */
+        :root {
+            --bg-body: #FAF9F6;
+            --bg-card: #FFFFFF;
+            --bg-header: linear-gradient(135deg, #FFFFFF 0%, #FFFDF5 100%);
+            --gold-primary: #fbd763;
+            --gold-soft: rgba(212, 175, 55, 0.12);
+            --text-main: #111827;
+            --text-secondary: #4B5563;
+            --text-muted: #9CA3AF;
+            --border-color: rgba(0,0,0,0.05);
+            --shadow-sm: 0 2px 4px rgba(212, 175, 55, 0.05);
+            --shadow-md: 0 8px 24px rgba(212, 175, 55, 0.12);
+            --radius-pill: 50px;
+            
+            /* Alert Colors (Light) */
+            --alert-bg: #FEF2F2;
+            --alert-border: #DC2626;
+            --alert-text: #991B1B;
+        }
+
+        body.dark-mode {
+            --bg-body: #050505;
+            --bg-card: #121212;
+            --bg-header: #121212;
+            --text-main: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #6B7280;
+            --border-color: rgba(255,255,255,0.1);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.5);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.8);
+            --alert-bg: #450a0a; 
+            --alert-border: #7f1d1d;
+            --alert-text: #fca5a5;
+        }
+
+        /* ================= BASE ================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; min-height: 100vh; overflow-x: hidden; transition: 0.3s; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 20px; }
+
+        /* ================= HEADER ================= */
+        .page-header { text-align: center; margin-bottom: 30px; }
+        .breadcrumb { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; text-transform: uppercase; }
+        .page-title { font-size: clamp(24px, 4vw, 32px); font-weight: 800; margin-bottom: 4px; color: var(--text-main); }
+        .welcome-text { font-size: 14px; color: var(--text-secondary); }
+        .welcome-text span { color: var(--gold-primary); font-weight: 700; }
+
+        /* ================= CONTROLS ================= */
+        .controls-wrapper { display: flex; justify-content: center; margin-bottom: 20px; position: sticky; top: 10px; z-index: 90; }
+        .controls-bar { background: var(--bg-card); padding: 6px 8px; border-radius: var(--radius-pill); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        
+        .search-box { position: relative; }
+        .search-box input { padding: 10px 16px 10px 36px; border-radius: var(--radius-pill); border: 1px solid transparent; background: var(--bg-body); color: var(--text-main); width: 220px; transition: 0.3s; font-size: 13px; }
+        .search-box input:focus { width: 260px; background: var(--bg-card); border-color: var(--gold-primary); outline: none; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; pointer-events: none; }
+        
+        .filter-dropdown { padding: 10px 16px; border-radius: var(--radius-pill); border: 1px solid transparent; background: var(--bg-body); color: var(--text-main); cursor: pointer; font-size: 13px; }
+        .clear-filters { padding: 8px 16px; border-radius: var(--radius-pill); background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); cursor: pointer; font-weight: 600; font-size: 12px; text-decoration: none; white-space: nowrap; }
+
+        /* Filter Results Message */
+        .filter-msg { display: none; width: 100%; text-align: center; margin-top: 10px; font-size: 13px; color: var(--text-secondary); }
+
+        /* ================= LAYOUT ================= */
+        .orders-layout { display: grid; grid-template-columns: 260px 1fr; gap: 24px; align-items: start; }
+        .profile-sidebar { position: sticky; top: 20px; background: var(--bg-card); padding: 20px; border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
+        .mobile-profile-toggle { display: none; width: 100%; padding: 12px 20px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 20px; font-weight: 600; justify-content: space-between; align-items: center; color: var(--text-main); cursor: pointer; }
+
+        /* ================= CARDS ================= */
         .orders-list { display: flex; flex-direction: column; gap: 20px; }
-        .order-card { background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); overflow: hidden; transition: all 0.4s ease; border: 2px solid transparent; }
-        .order-card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); border-color: #d4af37; transform: translateY(-2px); }
-        .order-header { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px 28px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; border-bottom: 2px solid #dee2e6; }
-        .order-info-item { display: flex; flex-direction: column; gap: 6px; }
-        .order-info-label { font-size: 11px; color: #6c757d; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
-        .order-info-value { font-size: 14px; color: #2c3e50; font-weight: 700; }
-        .order-id { color: #d4af37; font-family: 'Courier New', monospace; font-size: 13px; }
-        .view-details-btn { background: none; border: none; color: #d4af37; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 6px; }
-        .view-details-btn:hover { color: #2c3e50; }
-        .view-details-btn::after { content: '→'; transition: transform 0.3s; }
-        .view-details-btn:hover::after { transform: translateX(4px); }
-        .order-products { padding: 20px 28px; }
-        .product-item { display: flex; gap: 20px; align-items: center; padding: 16px; border-bottom: 1px solid #f0f0f0; transition: background 0.3s; }
+        .order-card { background: var(--bg-card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); transition: 0.3s; }
+        .order-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--gold-soft); }
+
+        .order-header { padding: 16px 24px; background: linear-gradient(to right, var(--bg-body), var(--bg-card)); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .order-info-label { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+        .order-info-value { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .order-id { font-family: monospace; color: var(--gold-primary); }
+        .view-details-btn { font-size: 13px; font-weight: 600; color: var(--gold-primary); display: flex; align-items: center; gap: 4px; text-decoration: none; }
+
+        /* Payment Alert */
+        .payment-failed-alert { background: var(--alert-bg); border-left: 4px solid var(--alert-border); padding: 12px 20px; color: var(--alert-text); font-size: 13px; font-weight: 500; margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+
+        /* Product List */
+        .product-item { display: flex; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border-color); align-items: center; }
         .product-item:last-child { border-bottom: none; }
-        .product-item:hover { background: #f8f9fa; border-radius: 8px; }
-        .product-image-wrapper { position: relative; flex-shrink: 0; }
-        .product-image { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #f8f9fa; border: 2px solid #e9ecef; }
-        .product-badge { position: absolute; top: -6px; right: -6px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 9px; padding: 3px 6px; border-radius: 10px; font-weight: 700; text-transform: uppercase; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
-        .product-details { flex: 1; min-width: 0; }
-        .product-name { font-size: 15px; font-weight: 600; color: #2c3e50; margin-bottom: 4px; letter-spacing: -0.2px; }
-        .product-variant { font-size: 12px; color: #6c757d; margin-bottom: 8px; font-weight: 500; }
-        .product-meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .quantity-badge { font-size: 11px; color: #495057; background: #e9ecef; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
-        .product-price { font-size: 16px; font-weight: 700; color: #2c3e50; }
-        .product-status { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-        .status-badge { padding: 6px 16px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-        .status-processing { background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white; }
-        .status-delivered { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #155724; }
-        .status-cancelled { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
-        .status-shipped { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
-        .status-payment-failed { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #dc2626; }
-        .return-eligible { font-size: 10px; color: #28a745; display: inline-flex; align-items: center; gap: 4px; background: rgba(40, 167, 69, 0.1); padding: 3px 8px; border-radius: 10px; font-weight: 600; }
-        .return-eligible::before { content: "✓"; font-weight: bold; }
-        .order-footer { background: #f8f9fa; padding: 16px 28px; border-top: 2px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-        .order-total { display: flex; align-items: center; gap: 12px; }
-        .total-label { font-size: 12px; color: #6c757d; font-weight: 600; text-transform: uppercase; }
-        .total-amount { font-size: 20px; font-weight: 800; color: #2c3e50; }
-        .retry-payment-btn { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-        .retry-payment-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-        .payment-failed-alert { background: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 16px; margin: 16px 0; border-radius: 6px; }
-        .payment-failed-alert-title { color: #991b1b; font-weight: 600; margin-bottom: 4px; font-size: 0.9rem; }
-        .payment-failed-alert-text { color: #7f1d1d; font-size: 0.85rem; }
-        .empty-state { background: white; border-radius: 16px; padding: 80px 24px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
-        .empty-state-icon { font-size: 80px; margin-bottom: 24px; opacity: 0.4; }
-        .empty-state-title { font-size: 24px; font-weight: 700; color: #2c3e50; margin-bottom: 12px; }
-        .empty-state-text { color: #6c757d; margin-bottom: 32px; font-size: 15px; }
-        .btn { padding: 8px 20px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-        .btn-primary { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; box-shadow: 0 2px 8px rgba(44, 62, 80, 0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(44, 62, 80, 0.4); }
-        .pagination-container { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 32px; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
-        .pagination { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
-        .pagination-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 8px; border: 1px solid #dee2e6; background-color: #fff; color: #495057; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
-        .pagination-btn:hover:not(.disabled):not(.active) { background-color: #e9ecef; border-color: #adb5bd; }
-        .pagination-btn.active { background-color: #d4af37; border-color: #d4af37; color: white; cursor: default; }
-        .pagination-btn.disabled { opacity: 0.5; cursor: not-allowed; background-color: #f8f9fa; }
-        .pagination-info { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #6c757d; }
+        .product-image { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-color); background: var(--bg-body); flex-shrink: 0; }
+        .product-details { flex: 1; }
+        .product-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .product-meta { font-size: 13px; color: var(--text-muted); display: flex; gap: 10px; }
+        .product-price { font-weight: 700; font-size: 15px; }
+
+        /* ================= STATUS BADGES ================= */
+        .status-badge { 
+            padding: 4px 12px; 
+            border-radius: var(--radius-pill); 
+            font-size: 10px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            display: inline-block;
+            background: #F3F4F6; color: #374151; 
+        }
+
+        .status-placed { background: #DBEAFE; color: #1E40AF; }         /* Blue */
+        .status-processing { background: #FFEDD5; color: #C2410C; }    /* Orange */
+        .status-delivered { background: #D1FAE5; color: #047857; }     /* Green */
+        .status-cancelled { background: #FEE2E2; color: #B91C1C; }     /* Red */
+        .status-payment-failed { background: var(--alert-bg); color: var(--alert-text); border: 1px solid var(--alert-border); }
+
+        /* Footer */
+        .order-footer { padding: 16px 24px; background: var(--bg-body); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); }
+        .total-amount { font-size: 18px; font-weight: 800; color: var(--text-main); }
+
+        /* Buttons */
+        .retry-payment-btn { background: #DC2626; color: white; padding: 10px 20px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; cursor: pointer; border: none; }
+        
+        /* Pagination */
+        .pagination-container { display: flex; justify-content: center; margin-top: 40px; margin-bottom: 20px; }
+        .pagination { background: var(--bg-card); padding: 6px; border-radius: var(--radius-pill); box-shadow: var(--shadow-sm); display: flex; gap: 4px; border: 1px solid var(--border-color); }
+        .pagination-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 13px; font-weight: 600; color: var(--text-secondary); border: none; background: transparent; text-decoration: none; }
+        .pagination-btn.active { background: var(--gold-primary); color: white; }
+
+        /* Empty State */
+        .empty-state { text-align: center; padding: 60px 20px; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); }
+
+        /* ================= RESPONSIVE ================= */
         @media (max-width: 992px) {
             .orders-layout { grid-template-columns: 1fr; }
-            .profile-sidebar { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; max-width: 100%; height: 100vh; overflow-y: auto; border-radius: 0; padding: 20px; }
+            .profile-sidebar { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; height: 100vh; overflow-y: auto; margin: 0; border-radius: 0; }
             .profile-sidebar.active { display: block; }
             .mobile-profile-toggle { display: flex; }
         }
+
         @media (max-width: 768px) {
-            .container { padding: 12px; }
-            .page-title { font-size: 24px; }
-            .stats-bar { grid-template-columns: repeat(2, 1fr); }
-            .controls-bar { flex-direction: column; align-items: stretch; }
-            .search-box { max-width: 100%; }
-            .sort-dropdown, .filter-dropdown { width: 100%; }
-            .order-header { grid-template-columns: 1fr; padding: 16px 20px; gap: 16px; }
-            .product-item { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .product-image { width: 100%; height: 200px; }
-            .product-status { width: 100%; flex-direction: row; justify-content: space-between; }
-            .btn { justify-content: center; width: 100%; }
+            .container { padding: 15px; }
+            .controls-bar { flex-direction: column; width: 100%; border-radius: 16px; padding: 16px; align-items: stretch; }
+            .search-box input { width: 100%; }
+            .search-box input:focus { width: 100%; }
+            .filter-dropdown, .clear-filters { width: 100%; text-align: center; }
         }
+
+        /* ✅ MOBILE IMAGE FIX */
         @media (max-width: 480px) {
-            .stats-bar { grid-template-columns: 1fr; }
+            .order-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            
+            .product-item { 
+                display: grid; 
+                grid-template-columns: 60px 1fr; /* Image takes 60px, text takes rest */
+                gap: 12px; 
+                padding: 12px; 
+                align-items: start;
+            }
+            .product-image { 
+                width: 60px; 
+                height: 60px; 
+                border-radius: 8px; 
+                margin: 0; 
+                object-fit: cover;
+            }
+            .product-details { grid-column: 2; }
+            
+            .product-status-block { 
+                grid-column: 1 / -1; 
+                margin-top: 5px; 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                width: 100%; 
+                border-top: 1px dashed var(--border-color); 
+                padding-top: 8px; 
+            }
+            .order-footer { flex-direction: column; gap: 12px; align-items: stretch; }
+            .retry-payment-btn { width: 100%; }
         }
-
-        .status-payment-failed { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #dc2626; }
-        .retry-payment-btn { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-        .retry-payment-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-        .payment-failed-alert { background: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 16px; margin: 16px 0; border-radius: 6px; }
-        .payment-failed-alert-title { color: #991b1b; font-weight: 600; margin-bottom: 4px; font-size: 0.9rem; }
-        .payment-failed-alert-text { color: #7f1d1d; font-size: 0.85rem; }
-
-        .status-payment-failed {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    color: #dc2626;
-    border: 1px solid #fca5a5;
-  }
-
-  /* Payment Failed Alert Box */
-  .payment-failed-alert {
-    background: #fef2f2;
-    border-left: 4px solid #dc2626;
-    border-radius: 8px;
-    padding: 16px 20px;
-    margin: 16px 28px 0 28px;
-    animation: slideIn 0.3s ease-out;
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .payment-failed-alert-title {
-    color: #991b1b;
-    font-weight: 700;
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-    letter-spacing: 0.3px;
-  }
-
-  .payment-failed-alert-text {
-    color: #7f1d1d;
-    font-size: 0.9rem;
-    line-height: 1.6;
-  }
-
-  .payment-failed-alert-text div {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* Retry Payment Button */
-  .retry-payment-btn {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    letter-spacing: 0.3px;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
-    text-decoration: none;
-  }
-
-  .retry-payment-btn:hover {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
-  }
-
-  .retry-payment-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
-  }
-
-  .retry-payment-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-
-  /* Action Required Indicator */
-  .order-card[data-status="Payment Failed"] {
-    border-left: 4px solid #dc2626;
-  }
-
-  .order-card[data-status="Payment Failed"]:hover {
-    border-left-color: #991b1b;
-  }
-
-  /* Mobile Responsive */
-  @media (max-width: 768px) {
-    .retry-payment-btn {
-      padding: 8px 14px;
-      font-size: 12px;
-      width: 100%;
-      justify-content: center;
-    }
-
-    .payment-failed-alert {
-      margin: 12px 16px 0 16px;
-      padding: 12px 14px;
-    }
-
-    .payment-failed-alert-title {
-      font-size: 0.9rem;
-    }
-
-    .payment-failed-alert-text {
-      font-size: 0.85rem;
-    }
-  }
-
-  /* Animation for new failed orders */
-  @keyframes pulse-alert {
-    0%, 100% {
-      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2);
-    }
-    50% {
-      box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
-    }
-  }
-
-  .payment-failed-alert {
-    animation: slideIn 0.3s ease-out, pulse-alert 3s ease-in-out 0.5s 1;
-  }
     </style>
 </head>
 
 <body>
     <%- include('../../views/partials/user/header') %>
-   <div class="container">
-    <div class="page-header">
-      <div class="breadcrumb">
-        <a href="/">Home</a> <span>/</span> <a href="/account">Account</a> <span>/</span> <span>My Orders</span>
-      </div>
-      <div class="page-title-row">
-        <h1 class="page-title">My Orders</h1>
-        <div class="welcome-box">
-          <div class="welcome-text">Welcome!<span><%= customerName %></span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ✅ Stats Section -->
-    <div class="stats-bar">
-      <div class="stat-card">
-        <div class="stat-icon total">📦</div>
-        <div class="stat-content"><h3>Total Items</h3><p><%= itemStats.totalItems || 0 %></p></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon processing">⏳</div>
-        <div class="stat-content"><h3>Processing</h3><p><%= itemStats.processing || 0 %></p></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon delivered">✓</div>
-        <div class="stat-content"><h3>Delivered</h3><p><%= itemStats.delivered || 0 %></p></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon amount">💰</div>
-        <div class="stat-content">
-          <h3>Total Spent</h3>
-          <p>₹<%= (itemStats.totalSpent || 0).toLocaleString() %></p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon payment-failed">❌</div>
-        <div class="stat-content"><h3>Payment Failed</h3><p><%= itemStats.paymentFailed || 0 %></p></div>
-      </div>
-    </div>
-
-    <!-- ✅ Filters -->
-    <div class="controls-bar">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Search by product, order ID..." onkeyup="searchOrders()">
-      </div>
-      <select class="sort-dropdown" id="sortSelect" onchange="sortOrders()">
-        <option value="date-desc">Newest First</option>
-        <option value="date-asc">Oldest First</option>
-        <option value="price-desc">Highest Price</option>
-        <option value="price-asc">Lowest Price</option>
-      </select>
-     <select class="filter-dropdown" id="statusFilter" onchange="applyFilters()">
-  <option value="">All Statuses</option>
-  <option value="Processing">Processing</option>
-  <option value="Delivered">Delivered</option>
-  <option value="Cancelled">Cancelled</option>
-  <option value="Payment Failed">Payment Failed</option> <!-- ✅ Added manually -->
-</select>
-
-      <select class="filter-dropdown" id="timeFilter" onchange="applyFilters()">
-        <option value="">All Time</option>
-        <option value="last30days">Last 30 Days</option>
-        <option value="last6months">Last 6 Months</option>
-        <% const years = [...new Set(orders.map(o => new Date(o.date).getFullYear()))].sort((a, b) => b - a);
-          years.forEach(year => { %>
-            <option value="<%= year %>"><%= year %></option>
-        <% }); %>
-      </select>
-      <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
-    </div>
-
-    <button class="mobile-profile-toggle" onclick="toggleProfileSidebar()"><span>Menu</span><span>☰</span></button>
-
-    <!-- ✅ Orders Layout -->
-    <div class="orders-layout">
-      <%- include('../partials/user/profile-sidebar.ejs', { user: user, activePage: 'orders' }) %>
-
-      <div class="orders-list" id="ordersList">
-        <% if (orders && orders.length > 0) { %>
-          <% orders.forEach(order => { %>
-            <div class="order-card"
-                 data-status="<%= order.status %>"
-                 data-date="<%= order.date %>"
-                 data-price="<%= order.dynamicTotal || 0 %>">
-
-              <!-- ✅ ORDER HEADER -->
-              <div class="order-header">
-                <div class="order-info-item">
-                  <span class="order-info-label">Order Placed</span>
-                  <span class="order-info-value">
-                    <%= new Date(order.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %>
-                  </span>
-                </div>
-                <div class="order-info-item">
-                  <span class="order-info-label">Total</span>
-                  <span class="order-info-value">₹<%= (order.dynamicTotal || 0).toLocaleString() %></span>
-                </div>
-                <div class="order-info-item">
-                  <span class="order-info-label">Ship To</span>
-                  <span class="order-info-value"><%= order.shipTo || 'N/A' %></span>
-                </div>
-                <div class="order-info-item">
-                  <span class="order-info-label">Order ID</span>
-                  <span class="order-info-value order-id">#<%= order.orderId %></span>
-                </div>
-                <div class="order-info-item">
-                  <% if (order.status === 'Payment Failed') { %>
-                  <button onclick="retryFailedPayment('<%= order.orderId %>')"
-        class="retry-payment-btn">
-  🔄 Retry Payment
-</button>
-                  <% } else { %>
-                    <a href="/orderDetails/<%= order.orderId %>" class="view-details-btn">View Details</a>
-                  <% } %>
-                </div>
-              </div>
-
-              <!-- ✅ PAYMENT FAILED ALERT -->
-              <% if (order.status === 'Payment Failed') { %>
-                <div class="payment-failed-alert">
-                  <div class="payment-failed-alert-title">⚠️ Payment Failed</div>
-                  <div class="payment-failed-alert-text">
-                    <div><strong>Reason:</strong> <%= order.paymentFailureReason || 'Your payment could not be processed' %></div>
-                    <% if (order.paymentFailedAt) { %>
-                      <div style="margin-top: 6px; font-size: 0.85rem; color: #5f2120;">
-                        <strong>Failed on:</strong>
-                        <%= new Date(order.paymentFailedAt).toLocaleString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
-                      </div>
-                    <% } %>
-                    <% if (order.paymentRetryCount > 0) { %>
-                      <div style="margin-top: 6px; font-size: 0.85rem; color: #5f2120;">
-                        <strong>Retry attempts:</strong> <%= order.paymentRetryCount %>
-                      </div>
-                    <% } %>
-                  </div>
-                </div>
-              <% } %>
-
-              <!-- ✅ ORDER PRODUCTS -->
-              <div class="order-products">
-                <% order.orderItems.forEach(item => { %>
-                  <div class="product-item">
-                    <div class="product-image-wrapper">
-                      <img src="<%= item.product && item.product.images && item.product.images[0] 
-                                 ? (item.product.images[0].startsWith('http') 
-                                    ? item.product.images[0] 
-                                    : `/uploads/product-images/${item.product.images[0]}`) 
-                                 : 'https://via.placeholder.com/80x80?text=No+Image' %>"
-                           alt="<%= item.productName || 'Product' %>"
-                           class="product-image"
-                           loading="lazy" />
-                    </div>
-
-                    <div class="product-details">
-                      <h3 class="product-name"><%= item.productName || 'Unknown Product' %></h3>
-                      <% if (item.variantSize) { %>
-                        <p class="product-variant">Size: <%= item.variantSize %></p>
-                      <% } %>
-                      <div class="product-meta">
-                        <span class="quantity-badge">Qty: <%= item.quantity || 1 %></span>
-                        <span class="product-price">₹<%= (item.price || 0).toLocaleString() %></span>
-                        <% if (item.isReturnEligible) { %>
-                          <span class="return-eligible">Return eligible</span>
-                        <% } %>
-                      </div>
-                    </div>
-
-                    <div class="product-status">
-                      <span class="status-badge status-<%= (item.status || order.status).toLowerCase().replace(/\s+/g, '-') %>">
-  <%= (item.status || order.status) === 'Payment Failed' ? 'Payment Failed 💳❌' : (item.status || order.status).toUpperCase() %>
-</span>
-
-                    </div>
-                  </div>
-                <% }); %>
-              </div>
-
-              <!-- ✅ ORDER FOOTER -->
-              <div class="order-footer">
-                <div class="order-total">
-                  <span class="total-label">Order Total:</span>
-                  <span class="total-amount">₹<%= (order.dynamicTotal || 0).toLocaleString() %></span>
-                </div>
-                <% if (order.status === 'Payment Failed') { %>
-                  <div style="font-size: 0.85rem; color: #dc2626; font-weight: 600;">
-                    ⚠️ Action Required
-                  </div>
-                <% } %>
-              </div>
+   
+    <div class="container">
+        <div class="page-header">
+            <div class="breadcrumb">
+                <a href="/">Home</a> <span>/</span> <a href="/account">Account</a> <span>/</span> <span>Orders</span>
             </div>
-          <% }); %>
-        <% } else { %>
-          <div class="empty-state">
-            <div class="empty-state-icon">📦</div>
-            <h3 class="empty-state-title">No Orders Yet</h3>
-            <p class="empty-state-text">Looks like you haven't placed any orders. Start shopping now!</p>
-            <a href="/shopPage" class="btn btn-primary">Start Shopping</a>
-          </div>
+            <h1 class="page-title">My Orders</h1>
+            <div class="welcome-text">Welcome back, <span><%= customerName %></span></div>
+        </div>
+
+        <div class="controls-wrapper">
+            <form action="" method="GET" class="controls-bar" id="filterForm">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" name="search" id="searchInput" placeholder="Search orders..." value="<%= currentSearch || '' %>" onkeyup="clientSideSearch()">
+                </div>
+                
+                <select name="status" class="filter-dropdown" onchange="this.form.submit()">
+                    <option value="" <%= currentStatus === '' ? 'selected' : '' %>>All Statuses</option>
+                    <option value="Placed" <%= currentStatus === 'Placed' ? 'selected' : '' %>>Placed</option>
+                    <option value="Processing" <%= currentStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
+                    <option value="Delivered" <%= currentStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                    <option value="Cancelled" <%= currentStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    <option value="Payment Failed" <%= currentStatus === 'Payment Failed' ? 'selected' : '' %>>Payment Failed</option>
+                </select>
+
+                <select name="time" class="filter-dropdown" onchange="this.form.submit()">
+                    <option value="" <%= currentTime === '' ? 'selected' : '' %>>All Time</option>
+                    <option value="last30days" <%= currentTime === 'last30days' ? 'selected' : '' %>>Last 30 Days</option>
+                    <option value="last6months" <%= currentTime === 'last6months' ? 'selected' : '' %>>Last 6 Months</option>
+                </select>
+
+                <button type="button" class="clear-filters" onclick="window.location.href=window.location.pathname">Clear</button>
+            </form>
+        </div>
+        
+        <div id="filterCountMsg" class="filter-msg"></div>
+
+     
+
+        <div class="orders-layout">
+            <%- include('../partials/user/profile-sidebar.ejs', { user: user, activePage: 'orders' }) %>
+
+            <div class="orders-list">
+                <% if (orders && orders.length > 0) { %>
+                    <% orders.forEach(order => { %>
+                        <div class="order-card" 
+                             data-order-id="<%= order.orderId.toLowerCase() %>" 
+                             data-product-names="<%= order.orderItems.map(i => i.productName.toLowerCase()).join(' ') %>">
+                            
+                            <div class="order-header">
+                                <div>
+                                    <span class="order-info-label">Placed On</span>
+                                    <div class="order-info-value">
+                                        <%= new Date(order.createdOn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="order-info-label">Order ID</span>
+                                    <div class="order-info-value order-id">#<%= order.orderId %></div>
+                                </div>
+                                <div>
+                                    <% if (order.status === 'Payment Failed') { %>
+                                        <button onclick="retryFailedPayment('<%= order.orderId %>')" class="retry-payment-btn">Retry</button>
+                                    <% } else { %>
+                                        <a href="/orderDetails/<%= order.orderId %>" class="view-details-btn">View Details →</a>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <% if (order.status === 'Payment Failed') { %>
+                                <div class="payment-failed-alert">
+                                    ⚠️ Payment Failed: <%= order.paymentFailureReason || 'Transaction incomplete.' %>
+                                </div>
+                            <% } %>
+
+                            <div class="order-products">
+                                <% order.orderItems.forEach(item => { %>
+                                    <div class="product-item">
+                                        <img src="<%= item.productImage %>" alt="Product" class="product-image">
+                                        
+                                        <div class="product-details">
+                                            <div class="product-name"><%= item.productName %></div>
+                                            <div class="product-meta">
+                                                <% if (item.variantSize) { %>Size: <%= item.variantSize %> | <% } %>
+                                                Qty: <%= item.quantity %>
+                                            </div>
+                                        </div>
+
+                                        <div class="product-status-block" style="text-align:right">
+                                            <div class="product-price">₹<%= item.price.toLocaleString() %></div>
+                                            <span class="status-badge status-<%= item.displayStatus.toLowerCase().replace(/\s+/g, '-') %>">
+                                                <%= item.displayStatus %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            </div>
+
+                            <div class="order-footer">
+                                <span class="order-info-label">Total Amount</span>
+                                <span class="total-amount">₹<%= (order.dynamicTotal || 0).toLocaleString() %></span>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <h3 style="font-size:20px; font-weight:700;">No Orders Found</h3>
+                        <p style="color:var(--text-secondary);">Try adjusting your filters.</p>
+                        <button onclick="window.location.href=window.location.pathname" class="retry-payment-btn" style="background:var(--text-main); display:inline-block; margin-top:10px;">Clear Filters</button>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <% if (totalPages > 1) { %>
+            <div class="pagination-container" id="paginationContainer">
+                <div class="pagination">
+                    <% if (currentPage > 1) { %>
+                        <a href="?page=<%= currentPage - 1 %>&status=<%= currentStatus %>&time=<%= currentTime %>" class="pagination-btn">‹</a>
+                    <% } else { %>
+                        <span class="pagination-btn disabled">‹</span>
+                    <% } %>
+
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <% if (i === currentPage) { %>
+                            <span class="pagination-btn active"><%= i %></span>
+                        <% } else { %>
+                            <a href="?page=<%= i %>&status=<%= currentStatus %>&time=<%= currentTime %>" class="pagination-btn"><%= i %></a>
+                        <% } %>
+                    <% } %>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %>&status=<%= currentStatus %>&time=<%= currentTime %>" class="pagination-btn">›</a>
+                    <% } else { %>
+                        <span class="pagination-btn disabled">›</span>
+                    <% } %>
+                </div>
+            </div>
         <% } %>
-      </div>
     </div>
 
-    <!-- ✅ Pagination (Safe defaults) -->
-    <% if (totalPages > 1) { %>
-      <div class="pagination-container">
-        <div class="pagination">
-          <% if (currentPage > 1) { %>
-            <a href="?page=1" class="pagination-btn">«</a>
-            <a href="?page=<%= currentPage - 1 %>" class="pagination-btn">‹</a>
-          <% } else { %>
-            <span class="pagination-btn disabled">«</span>
-            <span class="pagination-btn disabled">‹</span>
-          <% } %>
-          <% for (let i = 1; i <= totalPages; i++) { %>
-            <% if (i === currentPage) { %>
-              <span class="pagination-btn active"><%= i %></span>
-            <% } else { %>
-              <a href="?page=<%= i %>" class="pagination-btn"><%= i %></a>
-            <% } %>
-          <% } %>
-          <% if (currentPage < totalPages) { %>
-            <a href="?page=<%= currentPage + 1 %>" class="pagination-btn">›</a>
-            <a href="?page=<%= totalPages %>" class="pagination-btn">»</a>
-          <% } else { %>
-            <span class="pagination-btn disabled">›</span>
-            <span class="pagination-btn disabled">»</span>
-          <% } %>
-        </div>
-      </div>
-    <% } %>
-  </div>
-
-  <%- include('../../views/partials/user/footer') %>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <%- include('../../views/partials/user/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
-        updateFilterDropdowns();
-
         function toggleProfileSidebar() {
             const profileSidebar = document.querySelector('.profile-sidebar');
             profileSidebar.classList.toggle('active');
@@ -513,86 +345,20 @@
             }
         }
 
-        function clearFilters() {
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('timeFilter').value = '';
-            document.getElementById('searchInput').value = '';
-            applyFilters();
-            updateFilterDropdowns();
-        }
-
-        function updateFilterDropdowns() {
-            const filters = [
-                document.getElementById('statusFilter').value,
-                document.getElementById('timeFilter').value
-            ].filter(val => val !== '');
-        }
-
-        function applyFilters() {
-            const orderCards = document.querySelectorAll('.order-card');
-            const statusFilter = document.getElementById('statusFilter').value;
-            const timeFilter = document.getElementById('timeFilter').value;
+        // ================= INSTANT LIVE SEARCH (CLIENT SIDE) =================
+        function clientSideSearch() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.order-card');
+            const pagination = document.getElementById('paginationContainer');
+            const msg = document.getElementById('filterCountMsg');
             let visibleCount = 0;
 
-            orderCards.forEach(card => {
-                let showCard = true;
-
-                if (statusFilter && card.dataset.status !== statusFilter) {
-  // ✅ Allow both "Failed" and "Payment Failed" to match
-  if (!(statusFilter === 'Payment Failed' && 
-       (card.dataset.status === 'Failed' || card.dataset.status === 'Payment Failed'))) {
-    showCard = false;
-  }
-}
-
-
-                if (timeFilter && showCard) {
-                    const orderDate = new Date(card.dataset.date);
-                    const today = new Date();
-                    const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-                    const sixMonthsAgo = new Date(today.getTime() - (180 * 24 * 60 * 60 * 1000));
-                    
-                    let matchTime = false;
-                    
-                    if (timeFilter === 'last30days' && orderDate >= thirtyDaysAgo) {
-                        matchTime = true;
-                    } else if (timeFilter === 'last6months' && orderDate >= sixMonthsAgo) {
-                        matchTime = true;
-                    } else if (!isNaN(timeFilter) && orderDate.getFullYear() === parseInt(timeFilter)) {
-                        matchTime = true;
-                    }
-                    
-                    if (!matchTime) {
-                        showCard = false;
-                    }
-                }
-
-                if (showCard) {
-                    card.style.display = 'block';
-                    setTimeout(() => card.style.opacity = '1', 10);
-                    visibleCount++;
-                } else {
-                    card.style.opacity = '0';
-                    setTimeout(() => card.style.display = 'none', 300);
-                }
-            });
-
-            showEmptyState(visibleCount === 0, 'filter');
-            updateFilterDropdowns();
-        }
-
-        function searchOrders() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const orderCards = document.querySelectorAll('.order-card');
-            let visibleCount = 0;
-
-            orderCards.forEach(card => {
-                const orderId = card.querySelector('.order-id').textContent.toLowerCase();
-                const productNames = Array.from(card.querySelectorAll('.product-name'))
-                    .map(el => el.textContent.toLowerCase())
-                    .join(' ');
+            cards.forEach(card => {
+                const orderId = card.getAttribute('data-order-id');
+                const products = card.getAttribute('data-product-names');
                 
-                if (productNames.includes(searchTerm) || orderId.includes(searchTerm)) {
+                // Check if search matches order ID or product names
+                if (orderId.includes(input) || products.includes(input)) {
                     card.style.display = 'block';
                     visibleCount++;
                 } else {
@@ -600,437 +366,78 @@
                 }
             });
 
-            showEmptyState(visibleCount === 0, 'search');
-        }
-
-        function sortOrders() {
-            const sortValue = document.getElementById('sortSelect').value;
-            const ordersList = document.getElementById('ordersList');
-            const orderCards = Array.from(document.querySelectorAll('.order-card'));
-
-            orderCards.sort((a, b) => {
-                switch(sortValue) {
-                    case 'date-desc':
-                        return new Date(b.dataset.date) - new Date(a.dataset.date);
-                    case 'date-asc':
-                        return new Date(a.dataset.date) - new Date(b.dataset.date);
-                    case 'price-desc':
-                        return parseInt(b.dataset.price) - parseInt(a.dataset.price);
-                    case 'price-asc':
-                        return parseInt(a.dataset.price) - parseInt(b.dataset.price);
-                    default:
-                        return 0;
-                }
-            });
-
-            orderCards.forEach(card => ordersList.appendChild(card));
-        }
-
-        function showEmptyState(show, type) {
-            const ordersList = document.getElementById('ordersList');
-            let emptyState = document.querySelector('.empty-state.dynamic');
-            
-            if (show) {
-                if (!emptyState) {
-                    emptyState = document.createElement('div');
-                    emptyState.className = 'empty-state dynamic';
-                    
-                    if (type === 'filter') {
-                        emptyState.innerHTML = `
-                            <div class="empty-state-icon">🔍</div>
-                            <h3 class="empty-state-title">No Orders Found</h3>
-                            <p class="empty-state-text">Try adjusting your filters to see more results</p>
-                            <button class="btn btn-primary" onclick="clearFilters()">Clear Filters</button>
-                        `;
-                    } else if (type === 'search') {
-                        emptyState.innerHTML = `
-                            <div class="empty-state-icon">🔍</div>
-                            <h3 class="empty-state-title">No Results Found</h3>
-                            <p class="empty-state-text">We couldn't find any orders matching your search</p>
-                            <button class="btn btn-primary" onclick="document.getElementById('searchInput').value=''; searchOrders();">Clear Search</button>
-                        `;
-                    }
-                    
-                    ordersList.appendChild(emptyState);
-                }
+            // Toggle Pagination & Counter
+            if (input.length > 0) {
+                if (pagination) pagination.style.display = 'none';
+                msg.style.display = 'block';
+                msg.innerText = `Found ${visibleCount} order${visibleCount !== 1 ? 's' : ''}`;
             } else {
-                if (emptyState) {
-                    emptyState.remove();
+                if (pagination) pagination.style.display = 'flex';
+                msg.style.display = 'none';
+            }
+        }
+
+        // Payment Retry Logic
+        async function retryFailedPayment(orderId) {
+            try {
+                const response = await fetch(`/order/get-payment-failure-details/${orderId}`);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.message);
+
+                const result = await Swal.fire({
+                    title: 'Retry Payment?',
+                    text: `Total: ₹${data.order.finalAmount}`,
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Pay Now',
+                    confirmButtonColor: '#D4AF37'
+                });
+
+                if (result.isConfirmed) {
+                    await handleRazorpayPaymentRetry(orderId, data.order.finalAmount);
                 }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: err.message });
             }
         }
 
-        document.addEventListener('click', function(e) {
-            const profileSidebar = document.querySelector('.profile-sidebar');
-            const profileToggle = document.querySelector('.mobile-profile-toggle');
-            
-            if (window.innerWidth <= 992 && 
-                profileSidebar.classList.contains('active') && 
-                !profileSidebar.contains(e.target) && 
-                !profileToggle.contains(e.target)) {
-                profileSidebar.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
+        async function handleRazorpayPaymentRetry(orderId, amount) {
+            try {
+                const orderRes = await fetch('/payment/create-razorpayOrder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, currency: 'INR', orderId })
+                });
+                const orderData = await orderRes.json();
+                if(!orderData.success) throw new Error(orderData.message);
 
-        window.addEventListener('resize', function() {
-            const profileSidebar = document.querySelector('.profile-sidebar');
-            if (window.innerWidth > 992) {
-                profileSidebar.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const status = urlParams.get('status');
-            
-            if (status) {
-                const statusDropdown = document.getElementById('statusFilter');
-                if (statusDropdown) {
-                    statusDropdown.value = status;
-                    applyFilters();
-                }
-            }
-        });
-
-        
-// ✅ FIXED: Retry Failed Payment (Order List Page)
-async function retryFailedPayment(orderId, amount) {
-  console.log('🔄 Retrying payment for order:', orderId);
-  console.log('   Amount (raw):', amount);
-  console.log('   Amount type:', typeof amount);
-
-  try {
-    // ✅ FIX: Get fresh order details from server (don't trust frontend amount)
-    console.log('🔍 Fetching order details from server...');
-    
-    const response = await fetch(`/order/get-payment-failure-details/${orderId}`, {
-      method: 'GET',
-      credentials: 'include'
-    });
-
-    console.log('📥 Response status:', response.status);
-    console.log('📥 Response OK:', response.ok);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Response not OK:', response.status, errorText);
-      throw new Error(`Server error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('✅ Order details received:', data);
-
-    if (!data.success) {
-      throw new Error(data.message || 'Failed to fetch order details');
-    }
-
-    // ✅ Use SERVER amount (this is the source of truth)
-    const finalAmount = data.order.finalAmount;
-    console.log('💰 Final amount from server:', finalAmount);
-    console.log('   Type:', typeof finalAmount);
-
-    if (!finalAmount || finalAmount <= 0) {
-      throw new Error('Invalid order amount');
-    }
-
-    // Show confirmation dialog
-    const confirmResult = await Swal.fire({
-      title: 'Retry Payment?',
-      html: `
-        <div style="text-align: left; font-size: 0.95rem; color: #333;">
-          <p style="margin-bottom: 12px;">
-            <strong>Order ID:</strong> <span style="font-family: monospace; color: #666;">#${data.order.orderId}</span>
-          </p>
-          <p style="margin-bottom: 16px;">
-            <strong>Amount:</strong> <span style="color: #dc2626; font-weight: 600; font-size: 1.1rem;">₹${parseFloat(finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-          </p>
-          <p style="color: #6b7280; font-size: 0.9rem;">
-            💡 Your order details will remain the same. We'll process the payment again.
-          </p>
-        </div>
-      `,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: '💳 Retry Now',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#22c55e',
-      cancelButtonColor: '#6b7280'
-    });
-
-    if (confirmResult.isConfirmed) {
-      // ✅ Pass server-verified amount
-      await handleRazorpayPaymentRetry(orderId, finalAmount);
-    }
-
-  } catch (err) {
-    console.error('❌ Error:', err.message);
-    console.error('   Stack:', err.stack);
-    
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: err.message || 'Could not load order details',
-      confirmButtonColor: '#ef4444'
-    });
-  }
-}
-
-// ✅ FIXED: Handle Razorpay Payment Retry
-async function handleRazorpayPaymentRetry(orderId, amount) {
-  try {
-    console.log('💳 handleRazorpayPaymentRetry');
-    console.log('   orderId:', orderId);
-    console.log('   amount:', amount);
-    console.log('   amount type:', typeof amount);
-
-    // ✅ Validate amount
-    if (!amount || amount <= 0 || typeof amount !== 'number') {
-      throw new Error(`Invalid amount: ${amount}`);
-    }
-
-    // ✅ Check authentication
-    console.log('🔐 Checking authentication...');
-    
-    const authCheck = await fetch('/payment/check-auth', {
-      method: 'GET',
-      credentials: 'include'
-    });
-    const authData = await authCheck.json();
-    
-    if (!authData.isAuthenticated) {
-      console.log('❌ User not authenticated');
-      window.location.href = '/login';
-      return;
-    }
-
-    console.log('✅ User authenticated');
-
-    Swal.fire({
-      title: 'Processing...',
-      html: 'Setting up payment gateway',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
-
-    console.log('📝 Creating Razorpay order');
-    console.log('   Amount (rupees):', amount);
-
-    // ✅ KEY FIX: Pass amount as RUPEES, not paise
-    const orderResponse = await fetch('/payment/create-razorpayOrder', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        amount: amount,  // ✅ RUPEES only
-        currency: 'INR',
-        orderId: orderId  // ✅ Pass orderId to indicate RETRY mode
-      })
-    });
-
-    console.log('📥 Order response status:', orderResponse.status);
-
-    if (!orderResponse.ok) {
-      const errorText = await orderResponse.text();
-      console.error('❌ Response not OK:', errorText);
-      throw new Error(`Failed to create order (${orderResponse.status})`);
-    }
-
-    const orderData = await orderResponse.json();
-
-    console.log('✅ Razorpay order created');
-    console.log('   Order ID:', orderData.orderId);
-    console.log('   Amount (paise):', orderData.amount);
-    console.log('   Amount (rupees):', orderData.amount / 100);
-
-    if (!orderData.success) {
-      throw new Error(orderData.message || 'Failed to create payment order');
-    }
-
-    if (!orderData.keyId || !orderData.orderId) {
-      throw new Error('Invalid Razorpay configuration');
-    }
-
-    if (typeof Razorpay === 'undefined') {
-      throw new Error('Razorpay script not loaded');
-    }
-
-    console.log('✅ Opening Razorpay modal');
-
-    const options = {
-      key: orderData.keyId,
-      amount: orderData.amount,  // ✅ In paise (from server)
-      currency: orderData.currency || 'INR',
-      name: 'Sentique',
-      description: 'Payment Retry',
-      order_id: orderData.orderId,
-      
-      handler: async (response) => {
-        console.log('✅ Payment success, verifying...');
-        console.log('   Order ID:', response.razorpay_order_id);
-        console.log('   Payment ID:', response.razorpay_payment_id);
-        
-        await verifyRetryPayment(
-          response.razorpay_order_id,
-          response.razorpay_payment_id,
-          response.razorpay_signature,
-          orderId  // ✅ Pass original order ID for retry
-        );
-      },
-      
-      theme: { color: '#22c55e' },
-      
-      modal: {
-        ondismiss: () => {
-          console.log('⚠️ User closed Razorpay modal');
-          Swal.close();
-          Swal.fire({
-            icon: 'info',
-            title: 'Payment Cancelled',
-            text: 'Your order is still saved. You can retry payment anytime.',
-            confirmButtonColor: '#22c55e'
-          });
+                const options = {
+                    key: orderData.keyId,
+                    amount: orderData.amount,
+                    currency: "INR",
+                    name: "Sentique",
+                    order_id: orderData.orderId,
+                    handler: async (res) => {
+                        await verifyRetryPayment(res.razorpay_order_id, res.razorpay_payment_id, res.razorpay_signature, orderId);
+                    },
+                    theme: { color: "#D4AF37" }
+                };
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', (res) => Swal.fire("Failed", res.error.description, "error"));
+                rzp.open();
+            } catch(e) { Swal.fire("Error", e.message, "error"); }
         }
-      }
-    };
 
-    Swal.close();
-    const rzp = new Razorpay(options);
-
-    rzp.on('payment.failed', async (response) => {
-      console.log('❌ Payment failed:', response.error);
-      
-      try {
-        await fetch('/payment/payment-failure', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            razorpay_order_id: response.error.metadata.order_id,
-            error_description: response.error.description,
-            error_code: response.error.code
-          })
-        });
-      } catch (err) {
-        console.error('Warning: Could not mark payment failed:', err);
-      }
-
-      Swal.close();
-      Swal.fire({
-        icon: 'error',
-        title: 'Payment Failed Again',
-        text: response.error.description || 'Payment could not be processed',
-        confirmButtonColor: '#ef4444',
-        didOpen: () => {
-          setTimeout(() => window.location.reload(), 2000);
+        async function verifyRetryPayment(rzpOrderId, rzpPaymentId, rzpSignature, orderId) {
+             const res = await fetch('/payment/verify-razorpay-payment', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ razorpay_order_id: rzpOrderId, razorpay_payment_id: rzpPaymentId, razorpay_signature: rzpSignature, orderId })
+            });
+            const data = await res.json();
+            if(data.success) window.location.href = `/orderSuccess?orderId=${data.orderId}`;
+            else Swal.fire("Verification Failed", data.message, "error");
         }
-      });
-    });
-
-    rzp.open();
-
-  } catch (err) {
-    console.error('❌ Error in retry:', err.message);
-    console.error('   Stack:', err.stack);
-    
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: err.message || 'Failed to initiate payment retry',
-      confirmButtonColor: '#ef4444'
-    });
-  }
-}
-
-// ✅ FIXED: Verify Retry Payment
-async function verifyRetryPayment(razorpayOrderId, razorpayPaymentId, razorpaySignature, retryOrderId) {
-  console.log('✅ Verifying retry payment');
-  console.log('   Razorpay Order ID:', razorpayOrderId);
-  console.log('   Retry Order ID:', retryOrderId);
-
-  Swal.fire({
-    title: 'Verifying Payment...',
-    html: 'Please wait while we verify your payment',
-    allowOutsideClick: false,
-    didOpen: () => Swal.showLoading()
-  });
-
-  try {
-    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
-      throw new Error('Missing payment verification data');
-    }
-
-    const payload = {
-      razorpay_order_id: razorpayOrderId,
-      razorpay_payment_id: razorpayPaymentId,
-      razorpay_signature: razorpaySignature,
-      orderId: retryOrderId  // ✅ Pass original order ID for retry
-    };
-
-    console.log('📤 Sending verification payload');
-
-    const response = await fetch('/payment/verify-razorpay-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    });
-
-    console.log('📥 Verification response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Verification failed:', errorText);
-      throw new Error('Verification failed');
-    }
-
-    const data = await response.json();
-    console.log('✅ Verification successful');
-    console.log('   Response:', data);
-
-    if (data.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Payment Successful! 🎉',
-        html: `
-          <div style="text-align: center;">
-            <p style="margin-bottom: 16px;"><strong>Thank you for completing your payment!</strong></p>
-            <p style="color: #666; font-size: 0.95rem;">
-              Order ID: <strong style="font-family: monospace;">${data.orderId || data.orderNumber}</strong>
-            </p>
-          </div>
-        `,
-        confirmButtonText: 'View Order',
-        confirmButtonColor: '#22c55e',
-        allowOutsideClick: false
-      }).then(() => {
-        // ✅ FIXED: Redirect to orderSuccess
-        window.location.href = `/orderSuccess?orderId=${data.orderId || data.orderNumber}`;
-      });
-    } else {
-      throw new Error(data.message || 'Payment verification failed');
-    }
-  } catch (err) {
-    console.error('❌ Verification error:', err.message);
-    Swal.close();
-    
-    Swal.fire({
-      icon: 'error',
-      title: 'Verification Failed',
-      text: err.message || 'Could not verify payment',
-      confirmButtonColor: '#ef4444',
-      didOpen: () => {
-        setTimeout(() => window.location.reload(), 2000);
-      }
-    });
-  }
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('✅ Order list payment retry handlers initialized');
-});
     </script>
 </body>
 </html>

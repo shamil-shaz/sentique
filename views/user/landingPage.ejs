@@ -1,319 +1,575 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sentique – Luxury Zodiac Perfumes</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
+    /* =========================================
+       1. THEME ENGINE & VARIABLES
+       ========================================= */
+    :root {
+        /* --- Light Mode (Porcelain & Gold) --- */
+        --bg-body: #fdfbf7;
+        --bg-glass: rgba(255, 255, 255, 0.85);
+        --bg-card: rgba(255, 255, 255, 0.8);
+        --text-main: #1a1a1a;
+        --text-muted: #666666;
+        --border-color: rgba(212, 175, 55, 0.2);
+        --gold: #d4af37;
+        --gold-gradient: linear-gradient(135deg, #b8860b 0%, #e2c055 50%, #d4af37 100%);
+        --shadow-card: 0 10px 30px rgba(212, 175, 55, 0.15);
+        /* Subtle Aurora Background for Light Mode */
+        --aurora-bg: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1), transparent 60%);
+    }
+
+    body.dark-mode {
+        /* --- Dark Mode (Midnight & Stardust) --- */
+        --bg-body: #050505;
+        --bg-glass: rgba(10, 10, 10, 0.8);
+        --bg-card: rgba(20, 20, 20, 0.6);
+        --text-main: #ffffff;
+        --text-muted: #a0a0a0;
+        --border-color: rgba(212, 175, 55, 0.2);
+        --gold: #e2c055;
+        --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f3e5ab 50%, #b8860b 100%);
+        --shadow-card: 0 10px 40px rgba(0,0,0,0.6);
+        /* Deep Void Gradient for Dark Mode */
+        --aurora-bg: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05), transparent 70%);
+    }
+
+    * { box-sizing: border-box; transition: color 0.4s ease, border-color 0.4s ease, background-color 0.4s ease; }
+
     body {
-      margin: 0;
-      padding: 0;
-      background: #0d0d0d;
-      color: #fff;
+      margin: 0; padding: 0;
+      background: var(--bg-body);
+      color: var(--text-main);
       font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
     }
 
-    h1, h2, h3 {
-      font-family: 'Playfair Display', serif;
-      margin: 0;
+    h1, h2, h3 { font-family: 'Playfair Display', serif; margin: 0; }
+    a { text-decoration: none; transition: 0.3s; }
+
+    /* --- CANVAS BACKGROUND --- */
+    #bgCanvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: -1;
+        background: var(--aurora-bg);
     }
 
-    
+    /* =========================================
+       2. HEADER & NAV
+       ========================================= */
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 50px;
-      background: rgba(10, 10, 10, 0.95);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    .logo img {
-      height: 110px; 
-    }
-    nav {
-      flex: 1;
-      text-align: center;
-    }
-    nav a {
-      margin: 0 15px;
-      text-decoration: none;
-      color: #ccc;
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-    nav a:hover {
-      color: gold;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 50px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      position: sticky; top: 0; z-index: 1000;
+      border-bottom: 1px solid var(--border-color);
     }
 
+    .logo img { 
+        height: 80px; 
+        filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3)); 
+        transition: 0.3s;
+    }
     
-    .btn-small {
-      background: gold;
-      color: #000;
-      padding: 8px 16px;
-      border-radius: 20px;
-      text-decoration: none;
-      font-weight: bold;
+    .nav-links { flex: 1; text-align: center; }
+    .nav-links a {
+      margin: 0 20px;
+      color: var(--text-muted);
       font-size: 0.9rem;
-      transition: background 0.3s;
-    }
-    .btn-small:hover {
-      background: #d4af37;
-    }
-
-    
-    .user-section {
-      display: flex;
-      align-items: center;
-      gap: 15px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
       position: relative;
     }
-    .user-icon {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      background: gold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 18px; 
-      color: #000;
+    .nav-links a:hover { color: var(--gold); }
+    .nav-links a::after {
+      content: ''; position: absolute; width: 0; height: 1px;
+      bottom: -5px; left: 0; background: var(--gold); transition: width 0.3s;
     }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* Icons Section */
+    .icons-section { display: flex; align-items: center; gap: 20px; }
+
+    /* Theme Toggle */
+    .theme-btn {
+        background: transparent; border: 1px solid var(--border-color);
+        color: var(--gold); width: 35px; height: 35px; border-radius: 50%;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: 0.3s;
+    }
+    .theme-btn:hover { background: var(--gold); color: #000; transform: rotate(15deg); }
+
+    /* User Profile */
+    .user-icon {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--gold-gradient);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: #000; font-size: 16px;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+      position: relative;
+    }
+    
     .dropdown {
-      position: absolute;
-      top: 50px;
-      right: 0;
-      background: #1a1a1a;
-      border-radius: 10px;
-      display: none;
-      flex-direction: column;
-      min-width: 150px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      position: absolute; top: 70px; right: 40px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: none; flex-direction: column;
+      min-width: 180px;
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      animation: slideDown 0.2s ease;
+      z-index: 1001;
+      backdrop-filter: blur(10px);
     }
     .dropdown a {
-      padding: 10px;
-      color: #ccc;
-      text-decoration: none;
-      transition: background 0.3s;
+      padding: 12px 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
     }
-    .dropdown a:hover {
-      background: #333;
-      color: gold;
-    }
-   
+    .dropdown a:hover { background: var(--gold); color: #000; }
 
-    
+    .hamburger { display: none; font-size: 24px; color: var(--gold); cursor: pointer; }
+
+    /* =========================================
+       3. HERO SECTION (Floating Animation)
+       ========================================= */
     .hero {
       text-align: center;
-      padding: 100px 20px;
-      background: #0a0a0a;
+      padding: 140px 20px 100px;
       position: relative;
+      /* Remove standard background to see canvas */
+      background: transparent; 
     }
+
     .hero h1 {
-      font-size: 5rem;
-      letter-spacing: 3px;
+      font-size: 6rem;
       font-weight: 700;
+      letter-spacing: 4px;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      opacity: 0; animation: slideUp 1s forwards 0.2s;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4)); /* Glow Text */
     }
+    
     .hero-sub {
-      margin: 10px 0 40px;
-      font-size: 1.2rem;
-      color: #cfcfcf;
+      font-size: 1.3rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0; animation: slideUp 1s forwards 0.4s;
+      margin-bottom: 60px;
     }
+
     .hero-products {
-      display: flex;
-      justify-content: center;
-      gap: 50px;
-      flex-wrap: wrap;
+      display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap;
+      opacity: 0; animation: fadeIn 1.5s forwards 0.8s;
+      perspective: 1000px;
     }
+    
     .hero-products img {
-      width: 220px;
-      height: auto;
-      border-radius: 10px;
-      background: #1a1a1a;
-      padding: 10px;
+      width: 180px;
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+      transition: transform 0.5s ease;
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    /* Staggered Floating Animation */
+    .hero-products img:nth-child(1) { animation-delay: 0s; }
+    .hero-products img:nth-child(2) { width: 240px; z-index: 2; animation-delay: 1s; }
+    .hero-products img:nth-child(3) { animation-delay: 2s; }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-25px); }
+        100% { transform: translateY(0px); }
     }
 
-   
-    .section {
-      padding: 80px 20px;
-      text-align: center;
-    }
-    .section h2 {
-      font-size: 3rem;
+    /* =========================================
+       4. FEATURES SECTION
+       ========================================= */
+    .section { padding: 100px 20px; text-align: center; position: relative; z-index: 1; }
+    
+    .section-title {
+      font-size: 3.5rem;
       margin-bottom: 20px;
+      color: var(--text-main);
     }
-    .section p {
-      color: #b5b5b5;
-      max-width: 700px;
-      margin: 0 auto 40px;
+    .section-title span { color: var(--gold); font-style: italic; font-weight: 400; }
+    
+    .section-desc {
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 60px;
+      font-size: 1.1rem;
+      line-height: 1.7;
     }
-
 
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 30px;
-      margin-top: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
+
     .product-card {
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 15px;
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      padding: 40px 20px;
+      border-radius: 20px;
       text-align: center;
-      transition: transform 0.3s;
+      border: 1px solid var(--border-color);
+      transition: all 0.4s ease;
+      position: relative;
+      box-shadow: var(--shadow-card);
     }
+
     .product-card:hover {
       transform: translateY(-10px);
+      border-color: var(--gold);
+      box-shadow: 0 20px 50px rgba(212, 175, 55, 0.15);
     }
+
     .product-card img {
-      max-width: 100%;
-      border-radius: 10px;
-      margin-bottom: 15px;
+      width: 160px; height: auto;
+      margin-bottom: 25px;
+      transition: transform 0.4s;
     }
+    .product-card:hover img { transform: scale(1.1) rotate(5deg); }
+
     .product-card h3 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
+      color: var(--text-main);
       margin-bottom: 10px;
     }
     .product-card p {
-      font-size: 1rem;
-      color: #ccc;
+      font-size: 0.9rem;
+      color: var(--text-muted);
     }
 
-   
+    /* =========================================
+       5. CTA & BUTTONS (Shine Animation)
+       ========================================= */
     .cta {
-      background: linear-gradient(to right, #111, #222);
+      padding: 120px 20px;
       text-align: center;
-      padding: 80px 20px;
+      position: relative;
+      background: var(--bg-card);
+      backdrop-filter: blur(5px);
+      border-top: 1px solid var(--border-color);
+      margin-top: 50px;
     }
-    .cta h2 {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-    }
-    .btn {
-      background: gold;
-      color: #000;
-       text-decoration: none; 
-      padding: 12px 30px;
-      border: none;
-      border-radius: 30px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-    .btn:hover {
-  background-color: #ff6333; 
-}
 
-  
+    .cta h2 { font-size: 3rem; margin-bottom: 40px; color: var(--text-main); }
+    
+    .btn-large {
+      display: inline-block;
+      background: var(--gold-gradient);
+      color: #000;
+      padding: 18px 50px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+      transition: all 0.3s;
+    }
+
+    /* Shine Keyframes */
+    @keyframes shine {
+        0% { left: -100%; }
+        20% { left: 100%; }
+        100% { left: 100%; }
+    }
+
+    .btn-large::after {
+        content: ""; position: absolute; top: 0; left: -100%;
+        width: 50%; height: 100%;
+        background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+        transform: skewX(-25deg);
+    }
+
+    .btn-large:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+    }
+    .btn-large:hover::after { animation: shine 0.75s; }
+
+    /* --- Footer --- */
     footer {
       text-align: center;
-      padding: 30px;
-      background: #0a0a0a;
-      color: #888;
-      font-size: 0.9rem;
+      padding: 40px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      position: relative; z-index: 2;
+    }
+
+    /* Scroll Reveal */
+    .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+    @keyframes fadeIn { to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* =========================================
+       6. RESPONSIVE MEDIA QUERIES
+       ========================================= */
+    @media (max-width: 900px) {
+        header { padding: 15px 25px; }
+        .nav-links { 
+            display: none; 
+            position: absolute; top: 80px; left: 0; right: 0;
+            background: var(--bg-card); flex-direction: column;
+            padding: 20px; border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .nav-links.active { display: flex; animation: slideDown 0.3s; }
+        .nav-links a { margin: 15px 0; display: block; }
+        
+        .hamburger { display: block; order: -1; }
+        
+        .hero h1 { font-size: 3.5rem; }
+        .hero-products img:nth-child(2) { width: 200px; }
+        .hero-products { gap: 15px; }
     }
   </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 </head>
-<body>
+<body class="dark-mode"> <canvas id="bgCanvas"></canvas>
 
 <header>
-  <a href="#" class="logo"><img src="/photos/zodiac perfume/brand logo white.png" alt="Sentique Logo"></a>
+  <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
+  
+  <a href="#" class="logo"><img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo" id="logoImg"></a>
 
-  <nav>
+  <nav class="nav-links" id="navLinks">
     <a href="/home">Home</a>
     <a href="/shopPage">Collections</a>
-    <a href="#">About</a>
-    <a href="#">Contact</a>
+    <a href="/zodiac">Zodiac Series</a>
+    <a href="/about">About</a>
   </nav>
 
-  <div class="user-section">
+  <div class="icons-section">
+    <button class="theme-btn" id="themeToggle"><i class="fas fa-sun"></i></button>
+
     <% if (!user) { %>
-      <!-- If NOT logged in -->
-      <a href="/login" class="btn-small">Login</a>
-      <a href="/signup" class="btn-small">Signup</a>
+      <a href="/login" style="color:var(--gold); font-weight:600; font-size:0.9rem;">Login</a>
     <% } else { %>
-      <!-- If logged in -->
       <div class="user-icon" id="userIcon">
         <i class="fas fa-user"></i>
       </div>
-      <span><%= user.name %></span> <!-- Show username -->
       <div class="dropdown" id="userDropdown">
-        <a href="/profile">My Profile</a>
-        <a href="/orders">My Orders</a>
-        <a href="/logout">Logout</a>
+        <div style="padding:15px; color:var(--gold); font-weight:600; border-bottom:1px solid var(--border-color); text-align:center;">
+            Hello, <%= user.name %>
+        </div>
+        <a href="/profile"><i class="fas fa-id-card"></i> Profile</a>
+        <a href="/profile/order-list"><i class="fas fa-box"></i> Orders</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
       </div>
     <% } %>
   </div>
 </header>
 
+<section class="hero">
+  <h1>SENTIQUE</h1>
+  <p class="hero-sub">Where the Stars Align with Your Scent</p>
+  
+  <div class="hero-products">
+    <img src="/photos/landing-images/landing-img2.0.png" alt="Perfume Left">
+    <img src="/photos/landing-images/landing-img3.png" alt="Perfume Center">
+    <img src="/photos/landing-images/landing-img2.png" alt="Perfume Right">
+  </div>
+</section>
 
-  <section class="hero">
-    <h1>SENTIQUE</h1>
-    <p class="hero-sub">Exclusive Scents, Inspired by the Stars</p>
-    <div class="hero-products">
-      <img src="/photos/landing-images/landing-img2.0.png" alt="Perfume 1">
-      <img src="/photos/landing-images/landing-img3.png" alt="Perfume 2">
-      <img src="/photos/landing-images/landing-img2.png" alt="Perfume 3">
+<section class="section reveal">
+  <h2 class="section-title">Exclusive <span>Collection</span></h2>
+  <p class="section-desc">Crafted with passion and aligned with the zodiac, Sentique perfumes embody the essence of your star sign. Discover the scent that speaks to your soul.</p>
+  
+  <div class="product-grid">
+    <div class="product-card">
+      <img src="/photos/landing-images/landing-img4.png" alt="Neonitre">
+      <h3>Neonitre</h3>
+      <p>Bold, timeless, and unapologetically you.</p>
+    </div>
+    
+    <div class="product-card">
+      <img src="/photos/landing-images/landing-img3.png" alt="Lovet">
+      <h3>Lovet</h3>
+      <p>Romantic notes interwoven with pure elegance.</p>
+    </div>
+    
+    <div class="product-card">
+      <img src="/photos/landing-images/landing-img1.png" alt="Libuos">
+      <h3>Libuos</h3>
+      <p>A mystical scent of luxury and mystery.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta reveal">
+  <h2>Your Zodiac. Your Scent. Your Signature.</h2>
+  <a class="btn-large" href="/home">Enter The World of Sentique</a>
+</section>
+
+<footer>
+  <p>&copy; 2025 Sentique – Scent Your Signature. All Rights Reserved.</p>
+</footer>
+
+<script>
+  // --- Canvas Particle Animation ---
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  let particlesArray = [];
+  
+  // Resize Canvas
+  function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // Particle Class
+  class Particle {
+      constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.1; // Small size for elegance
+          this.speedY = Math.random() * 0.3 - 0.15; // Slow floating vertical
+          this.speedX = Math.random() * 0.3 - 0.15; // Slow floating horizontal
+          this.opacity = Math.random() * 0.5 + 0.1;
+      }
+      update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x < 0) this.x = canvas.width;
+          if (this.x > canvas.width) this.x = 0;
+          if (this.y < 0) this.y = canvas.height;
+          if (this.y > canvas.height) this.y = 0;
+      }
+      draw(color) {
+          ctx.fillStyle = color;
+          ctx.globalAlpha = this.opacity;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+      }
+  }
+
+  function initParticles() {
+      particlesArray = [];
+      const particleCount = 120; // Number of stars/dust
+      for (let i = 0; i < particleCount; i++) {
+          particlesArray.push(new Particle());
+      }
+  }
+  initParticles();
+
+  function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const isDark = document.body.classList.contains('dark-mode');
+      const pColor = isDark ? 'rgba(212, 175, 55, 1)' : 'rgba(184, 134, 11, 1)'; // Gold vs Dark Gold
       
-    </div>
-  </section>
+      for (let i = 0; i < particlesArray.length; i++) {
+          particlesArray[i].update();
+          particlesArray[i].draw(pColor);
+      }
+      requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
 
+  // --- Theme Logic ---
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = themeToggle.querySelector('i');
+  const body = document.body;
+  const logo = document.getElementById('logoImg');
+
+  const savedTheme = localStorage.getItem('sentique-theme');
+  if(savedTheme === 'light') {
+      body.classList.remove('dark-mode');
+      themeIcon.className = 'fas fa-moon';
+      logo.style.filter = 'brightness(0)';
+  } else {
+      body.classList.add('dark-mode');
+      themeIcon.className = 'fas fa-sun';
+      logo.style.filter = 'brightness(0) invert(1)';
+  }
+
+  themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      const isDark = body.classList.contains('dark-mode');
+      
+      themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+      logo.style.filter = isDark ? 'brightness(0) invert(1)' : 'brightness(0)';
+      
+      localStorage.setItem('sentique-theme', isDark ? 'dark' : 'light');
+  });
+
+  // --- Mobile Menu ---
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('navLinks');
   
-  <section class="section">
-    <h2>Exclusive Scents</h2>
-    <p>Crafted with passion and aligned with the zodiac, Sentique perfumes embody the essence of your star sign.</p>
-    <div class="product-grid">
-      <div class="product-card">
-        <img src="/photos/landing-images/landing-img4.png" alt="Perfume">
-        <h3>Neonitre</h3>
-        <p>Bold and timeless fragrance</p>
-      </div>
-      <div class="product-card">
-        <img src="/photos/landing-images/landing-img3.png" alt="Perfume">
-        <h3>Lovet</h3>
-        <p>Romantic notes with elegance</p>
-      </div>
-      <div class="product-card">
-        <img src="/photos/landing-images/landing-img1.png" alt="Perfume">
-        <h3>Libuos</h3>
-        <p>Mystical scent of luxury</p>
-      </div>
-    </div>
-  </section>
+  hamburger.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+  });
 
- 
-  <section class="cta">
-    <h2>Your Zodiac. Your Scent. Your Signature.</h2>
-    <a class="btn" href="/home">Shop Now</a>
-  </section>
-
-  
-  <footer>
-    <p>&copy; 2025 Sentique – Scent Your Signature</p>
-  </footer>
-
-
-  <script>
+  // --- Dropdown Logic ---
   const userIcon = document.getElementById("userIcon");
   const userDropdown = document.getElementById("userDropdown");
 
-  userIcon.addEventListener("click", () => {
-    userDropdown.style.display =
-      userDropdown.style.display === "flex" ? "none" : "flex";
-  });
+  if(userIcon){
+    userIcon.addEventListener("click", (e) => {
+      e.stopPropagation();
+      userDropdown.style.display = userDropdown.style.display === "flex" ? "none" : "flex";
+    });
 
-  
-  document.addEventListener("click", (e) => {
-    if (!userIcon.contains(e.target) && !userDropdown.contains(e.target)) {
-      userDropdown.style.display = "none";
-    }
+    document.addEventListener("click", (e) => {
+      if (!userIcon.contains(e.target) && !userDropdown.contains(e.target)) {
+        userDropdown.style.display = "none";
+      }
+    });
+  }
+
+  // --- Scroll Reveal Animation ---
+  window.addEventListener('scroll', () => {
+    const reveals = document.querySelectorAll('.reveal');
+    const windowHeight = window.innerHeight;
+    const revealPoint = 150;
+
+    reveals.forEach(reveal => {
+        const revealTop = reveal.getBoundingClientRect().top;
+        if(revealTop < windowHeight - revealPoint) {
+            reveal.classList.add('active');
+        }
+    });
   });
 </script>
 

@@ -82,6 +82,60 @@ const addCategory = async (req, res) => {
   }
 };
 
+// const addCategoryOffer = async (req, res) => {
+//   try {
+//     const percentage = parseInt(req.body.percentage);
+//     const categoryId = req.body.categoryId;
+    
+//     if (percentage < 0 || percentage > 99) {
+//       return res.json({ status: false, message: "Offer percentage must be between 0 and 99" });
+//     }
+
+//     const category = await Category.findById(categoryId);
+//     if (!category) {
+//       return res.status(404).json({ status: false, message: "Category not found" });
+//     }
+
+//     const products = await Product.find({ category: category._id });
+
+//     const hasProductOffer = products.some(product => product.productOffer > percentage);
+//     if (hasProductOffer) {
+//       return res.json({ status: false, message: "A product in this category already has a better offer" });
+//     }
+    
+//     await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
+//     for (const product of products) {
+     
+//       const updatedVariants = product.variants.map(variant => {
+//         const discount = Math.floor(variant.regularPrice * (percentage / 100));
+//         const newSalePrice = variant.regularPrice - discount;
+        
+//         return {
+//           ...variant.toObject(),
+//           salePrice: newSalePrice
+//         };
+//       });
+
+//       await Product.updateOne(
+//         { _id: product._id },
+//         { 
+//           $set: { 
+//             variants: updatedVariants,
+//             productOffer: 0
+//           }
+//         }
+//       );
+
+//       console.log(`Updated product ${product._id} with ${updatedVariants.length} variants - Offer: ${percentage}%`);
+//     }
+
+//     res.json({ status: true, message: "Category offer added successfully" });
+//   } catch (error) {
+//     console.error("Error in addCategoryOffer:", error);
+//     res.status(500).json({ status: false, message: "Internal Server Error" });
+//   }
+// };
+
 const addCategoryOffer = async (req, res) => {
   try {
     const percentage = parseInt(req.body.percentage);
@@ -97,17 +151,17 @@ const addCategoryOffer = async (req, res) => {
     }
 
     const products = await Product.find({ category: category._id });
-
-    const hasProductOffer = products.some(product => product.productOffer > percentage);
-    if (hasProductOffer) {
-      return res.json({ status: false, message: "A product in this category already has a better offer" });
-    }
     
+    // Update category offer first
     await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
+
+    // Update each product with the higher offer (category or product)
     for (const product of products) {
-     
+      const productOffer = product.productOffer || 0;
+      const effectiveOffer = Math.max(percentage, productOffer);
+      
       const updatedVariants = product.variants.map(variant => {
-        const discount = Math.floor(variant.regularPrice * (percentage / 100));
+        const discount = Math.floor(variant.regularPrice * (effectiveOffer / 100));
         const newSalePrice = variant.regularPrice - discount;
         
         return {
@@ -116,17 +170,13 @@ const addCategoryOffer = async (req, res) => {
         };
       });
 
+      // IMPORTANT: Don't change productOffer - only update variants
       await Product.updateOne(
         { _id: product._id },
-        { 
-          $set: { 
-            variants: updatedVariants,
-            productOffer: 0
-          }
-        }
+        { $set: { variants: updatedVariants } }
       );
 
-      console.log(`Updated product ${product._id} with ${updatedVariants.length} variants - Offer: ${percentage}%`);
+      console.log(`Updated product ${product._id} - Category Offer: ${percentage}%, Product Offer: ${productOffer}%, Applied: ${effectiveOffer}%`);
     }
 
     res.json({ status: true, message: "Category offer added successfully" });
@@ -147,25 +197,35 @@ const removeCategoryOffer = async (req, res) => {
  
     const products = await Product.find({ category: categoryId });
 
+    // Update each product - revert to product offer if exists, else regular price
     for (const product of products) {
-      const updatedVariants = product.variants.map(variant => ({
-        ...variant.toObject(),
-        salePrice: variant.regularPrice
-      }));
+      const productOffer = product.productOffer || 0;
+      
+      const updatedVariants = product.variants.map(variant => {
+        let newSalePrice = variant.regularPrice;
+        
+        // If product has its own offer, apply it
+        if (productOffer > 0) {
+          const discount = Math.floor(variant.regularPrice * (productOffer / 100));
+          newSalePrice = variant.regularPrice - discount;
+        }
+        
+        return {
+          ...variant.toObject(),
+          salePrice: newSalePrice
+        };
+      });
 
+      // IMPORTANT: Don't touch productOffer - only update variants
       await Product.updateOne(
         { _id: product._id },
-        {
-          $set: {
-            variants: updatedVariants,
-            productOffer: 0
-          }
-        }
+        { $set: { variants: updatedVariants } }
       );
 
-      console.log(`Removed offer from product ${product._id} with ${updatedVariants.length} variants`);
+      console.log(`Removed category offer from product ${product._id} - Product Offer: ${productOffer}%`);
     }
     
+    // Remove category offer
     await Category.updateOne(
       { _id: categoryId },
       { $set: { categoryOffer: 0 } }
@@ -178,6 +238,50 @@ const removeCategoryOffer = async (req, res) => {
     return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
+
+
+// const removeCategoryOffer = async (req, res) => {
+//   try {
+//     const categoryId = req.body.categoryId;
+
+//     const category = await Category.findById(categoryId);
+//     if (!category) {
+//       return res.status(404).json({ status: false, message: "Category not found" });
+//     }
+ 
+//     const products = await Product.find({ category: categoryId });
+
+//     for (const product of products) {
+//       const updatedVariants = product.variants.map(variant => ({
+//         ...variant.toObject(),
+//         salePrice: variant.regularPrice
+//       }));
+
+//       await Product.updateOne(
+//         { _id: product._id },
+//         {
+//           $set: {
+//             variants: updatedVariants,
+//             productOffer: 0
+//           }
+//         }
+//       );
+
+//       console.log(`Removed offer from product ${product._id} with ${updatedVariants.length} variants`);
+//     }
+    
+//     await Category.updateOne(
+//       { _id: categoryId },
+//       { $set: { categoryOffer: 0 } }
+//     );
+
+//     return res.json({ status: true, message: "Category offer removed successfully" });
+
+//   } catch (error) {
+//     console.error("Error in removeCategoryOffer:", error);
+//     return res.status(500).json({ status: false, message: "Internal Server Error" });
+//   }
+// };
 
 const getListCategory = async (req, res) => {
   try {

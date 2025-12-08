@@ -14,10 +14,124 @@
   <script src="/js/checkout.js" defer></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-  <style>
+<style>
+/* =========================================
+   1. THEME CONFIGURATION (VARIABLES)
+   ========================================= */
+:root {
+  /* --- LIGHT MODE (Default) --- */
+  --bg-body: #ffffff;
+  --bg-card: #ffffff;
+  --bg-section: #f9fafb;
+  --bg-input: #ffffff;
+  --bg-hover: #f3f4f6;
+  
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-label: #22c55e;
+  
+  --border-color: #e5e5e5;
+  --border-light: #d1d5db;
+  
+  --accent-color: #22c55e;
+  --accent-hover: #16a34a;
+  --accent-light: #f0fdf4;
+  
+  --error-color: #ef4444;
+  --error-bg: #fee2e2;
+  --error-light: #fecaca;
+  
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.15);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.2);
+  
+  --scrollbar-track: #f3f4f6;
+  --scrollbar-thumb: #d1d5db;
+}
 
+body.dark-mode {
+  /* --- DARK MODE (Hybrid: Black BG, Green Text, Gold Buttons) --- */
+  
+  /* Backgrounds */
+  --bg-body: #0a0a0a;       /* Deep Black */
+  --bg-card: #171717;       /* Rich Charcoal */
+  --bg-section: #121212;    /* Dark Section */
+  --bg-input: #0f0f0f;      /* Input BG */
+  --bg-hover: #262626;      /* Hover */
+  
+  /* Text */
+  --text-primary: #ededed;  /* Soft White */
+  --text-secondary: #a3a3a3;/* Silver Grey */
+  --text-muted: #737373;    /* Dark Grey */
+  
+  /* KEEPING GREEN FOR TEXT/PRICES AS REQUESTED */
+  --text-label: #22c55e;    
+  --accent-color: #22c55e;  
+  --accent-hover: #16a34a; 
+  --accent-light: rgba(34, 197, 94, 0.15); /* Green Tint */
+  
+  /* Borders */
+  --border-color: #2e2e2e;
+  --border-light: #404040;
+  
+  /* States */
+  --error-color: #ff6b6b;
+  --error-bg: rgba(255, 107, 107, 0.1);
+  --error-light: rgba(255, 107, 107, 0.2);
+  
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
+  
+  --scrollbar-track: #0a0a0a;
+  --scrollbar-thumb: #2e2e2e;
+}
 
-   
+/* =========================================
+   2. GOLD OVERRIDES (BUTTONS & ICONS ONLY)
+   ========================================= */
+
+/* Force Buttons to be GOLD Gradient in Dark Mode */
+body.dark-mode .place-order-btn,
+body.dark-mode .apply-btn,
+body.dark-mode .add-address-btn,
+body.dark-mode .btn-submit,
+body.dark-mode .use-btn,
+body.dark-mode .action-button {
+    background: linear-gradient(135deg, #d4af37 0%, #e2c055 100%);
+    color: #000000 !important; /* Black text on Gold */
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(226, 192, 85, 0.15);
+    border: none;
+}
+
+body.dark-mode .place-order-btn:hover, 
+body.dark-mode .apply-btn:hover,
+body.dark-mode .action-button:hover {
+    background: linear-gradient(135deg, #e2c055 0%, #d4af37 100%);
+    transform: translateY(-1px);
+}
+
+/* Force "Home/Office" Icons to be GOLD */
+body.dark-mode .type-icon {
+    background: linear-gradient(135deg, #262626 0%, #171717 100%);
+    border: 1px solid #e2c055;
+    color: #e2c055 !important;
+}
+
+/* Force Security/Header Icons to be GOLD */
+body.dark-mode .security-badge svg,
+body.dark-mode .section-header svg {
+    stroke: #e2c055 !important;
+}
+
+/* Note: Price, Total, "Free", and Selection Borders remain GREEN 
+   because they use var(--accent-color) which we set to Green above. */
+
+/* =========================================
+   3. MAIN LAYOUT STYLES
+   ========================================= */
 * {
   margin: 0;
   padding: 0;
@@ -26,78 +140,75 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #ffffff;
+  background: var(--bg-body) !important;
   min-height: 100vh;
-  color: #2d3748;
+  color: var(--text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Breadcrumbs */
 .breadcrumbs {
   max-width: 1400px;
   margin: 20px auto;
   padding: 0 32px;
   font-size: 14px;
-  color: #718096;
+  color: var(--text-muted);
 }
-
 .breadcrumbs a {
-  color: #22c55e;
+  color: var(--accent-color);
   text-decoration: none;
 }
-
+.breadcrumbs span {
+  color: var(--text-primary);
+}
 .breadcrumbs a:hover {
   text-decoration: underline;
 }
 
-.breadcrumbs span {
-  color: #2d3748;
-}
-
+/* Checkout Container */
 .checkout-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px 32px;
 }
-
 .checkout-grid {
   display: grid;
   grid-template-columns: 1.8fr 1fr;
   gap: 36px;
 }
 
+/* Section Cards */
 .section-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   margin-bottom: 20px;
   transition: box-shadow 0.3s ease;
 }
-
 .section-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-md);
 }
 
 .section-header {
-  background: #f9fafb;
+  background: var(--bg-section);
   padding: 16px 24px;
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
-
 .section-header h2 {
-  color: #1f2937;
+  color: var(--text-primary);
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.025em;
 }
-
 .section-header svg {
   width: 24px;
   height: 24px;
-  stroke: #22c55e;
+  stroke: var(--accent-color);
 }
 
 .section-body {
@@ -105,59 +216,41 @@ body {
   max-height: 500px;
   overflow-y: auto;
 }
+.section-body::-webkit-scrollbar { width: 6px; }
+.section-body::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 10px; }
+.section-body::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
+.section-body.no-scroll { max-height: none; overflow-y: visible; }
 
-.section-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.section-body::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 10px;
-}
-
-.section-body::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 10px;
-}
-
-.section-body.no-scroll {
-  max-height: none;
-  overflow-y: visible;
-}
-
+/* Addresses Grid */
 .addresses-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 16px;
 }
-
 .address-option {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
   position: relative;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   cursor: pointer;
 }
-
 .address-option:hover {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  border-color: #d1d5db;
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-light);
 }
-
 .address-option.selected {
-  border-color: #22c55e;
-  box-shadow: 0 2px 6px rgba(34,197,94,0.2);
+  border-color: var(--accent-color);
+  box-shadow: 0 2px 6px var(--accent-light);
 }
-
 .address-option.default::before {
   content: 'DEFAULT';
   position: absolute;
   top: 12px;
   right: 48px;
-  background: #22c55e;
+  background: var(--accent-color);
   color: #ffffff;
   padding: 4px 12px;
   border-radius: 9999px;
@@ -172,11 +265,10 @@ body {
   gap: 12px;
   margin-bottom: 16px;
 }
-
 .type-icon {
   width: 40px;
   height: 40px;
-  background: #22c55e;
+  background: var(--accent-color);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -185,27 +277,24 @@ body {
   color: #ffffff;
   transition: background 0.3s ease;
 }
-
 .type-info h4 {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
-
 .type-info p {
   font-size: 12px;
-  color: #22c55e;
+  color: var(--text-label);
   font-weight: 600;
 }
 
 .address-details {
   padding: 12px;
-  background: #f9fafb;
+  background: var(--bg-section);
   border-radius: 6px;
-  border-left: 4px solid #22c55e;
+  border-left: 4px solid var(--accent-color);
 }
-
 .detail-row {
   display: flex;
   align-items: flex-start;
@@ -214,49 +303,38 @@ body {
   padding: 8px;
   border-radius: 6px;
   transition: background 0.3s ease;
-  background: #ffffff;
+  background: var(--bg-card);
 }
-
-.detail-row:hover {
-  background: #f3f4f6;
-}
-
-.detail-row:last-child {
-  margin-bottom: 0;
-}
-
+.detail-row:hover { background: var(--bg-hover); }
+.detail-row:last-child { margin-bottom: 0; }
 .detail-icon {
   font-size: 18px;
   width: 22px;
   flex-shrink: 0;
   margin-top: 2px;
 }
-
-.detail-text {
-  flex: 1;
-}
-
+.detail-text { flex: 1; }
 .detail-label {
   font-size: 11px;
-  color: #22c55e;
+  color: var(--text-label);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: 4px;
 }
-
 .detail-value {
   font-size: 14px;
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 500;
   line-height: 1.5;
 }
 
+/* Radio Indicator */
 .radio-indicator {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -264,15 +342,13 @@ body {
   position: absolute;
   top: 16px;
   right: 16px;
-  background: #ffffff;
+  background: var(--bg-card);
 }
-
 .address-option.selected .radio-indicator,
 .payment-option.selected .radio-indicator {
-  border-color: #22c55e;
-  background: #22c55e;
+  border-color: var(--accent-color);
+  background: var(--accent-color);
 }
-
 .radio-indicator::after {
   content: '✓';
   color: #ffffff;
@@ -282,22 +358,21 @@ body {
   transform: scale(0);
   transition: all 0.3s ease;
 }
-
 .address-option.selected .radio-indicator::after,
 .payment-option.selected .radio-indicator::after {
   opacity: 1;
   transform: scale(1);
 }
 
+/* Address Actions */
 .address-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
-
 .edit-btn, .delete-btn {
   padding: 6px 16px;
   border-radius: 6px;
@@ -307,30 +382,16 @@ body {
   transition: background 0.3s ease;
   border: none;
 }
-
-.edit-btn {
-  background: #6b7280;
-  color: #ffffff;
-}
-
-.edit-btn:hover {
-  background: #4b5563;
-}
-
-.delete-btn {
-  background: #ef4444;
-  color: #ffffff;
-}
-
-.delete-btn:hover {
-  background: #dc2626;
-}
+.edit-btn { background: var(--text-muted); color: #ffffff; }
+.edit-btn:hover { background: var(--text-secondary); }
+.delete-btn { background: var(--error-color); color: #ffffff; }
+.delete-btn:hover { background: #dc2626; }
 
 .add-address-btn {
   width: 100%;
   padding: 12px 20px;
   border-radius: 6px;
-  background: #22c55e;
+  background: var(--accent-color);
   color: #ffffff;
   font-weight: 600;
   font-size: 14px;
@@ -343,16 +404,14 @@ body {
   gap: 8px;
   margin-top: 20px;
 }
+.add-address-btn:hover { background: var(--accent-hover); }
 
-.add-address-btn:hover {
-  background: #16a34a;
-}
-
+/* Payment Options */
 .payment-option {
   padding: 16px;
   border-radius: 6px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border: 1px solid var(--border-color);
+  background: var(--bg-section);
   cursor: pointer;
   transition: all 0.3s ease;
   margin-bottom: 12px;
@@ -361,36 +420,29 @@ body {
   justify-content: space-between;
   position: relative;
 }
-
 .payment-option:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-color: var(--border-light);
+  box-shadow: var(--shadow-sm);
 }
-
 .payment-option.selected {
-  background: #f0fdf4;
-  border-color: #22c55e;
+  background: var(--accent-light);
+  border-color: var(--accent-color);
 }
-
 .payment-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
-.payment-icon {
-  font-size: 24px;
-}
-
+.payment-icon { font-size: 24px; }
 .payment-label {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .selected-payment-info {
-  background: #f0fdf4;
-  border: 1px solid #22c55e;
+  background: var(--accent-light);
+  border: 1px solid var(--accent-color);
   border-radius: 6px;
   padding: 12px 16px;
   margin-top: 12px;
@@ -400,57 +452,46 @@ body {
   font-weight: 600;
   color: #065f46;
 }
-
-.selected-payment-info .payment-icon {
-  font-size: 20px;
+body.dark-mode .selected-payment-info {
+  color: var(--accent-color);
 }
 
+.selected-payment-info .payment-icon { font-size: 20px; }
+
 .security-badge {
-  background: #f9fafb;
+  background: var(--bg-section);
   border-radius: 6px;
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #4b5563;
+  color: var(--text-secondary);
   font-weight: 600;
   font-size: 13px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
-
 .security-badge svg {
   width: 20px;
   height: 20px;
-  stroke: #22c55e;
+  stroke: var(--accent-color);
 }
 
+/* Cart & Summary */
 .summary-sticky {
   position: sticky;
   top: 20px;
 }
-
 .cart-items {
   max-height: 400px;
   overflow-y: auto;
   margin-bottom: 16px;
   padding-right: 6px;
 }
-
-.cart-items::-webkit-scrollbar {
-  width: 6px;
-}
-
-.cart-items::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 10px;
-}
-
-.cart-items::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 10px;
-}
+.cart-items::-webkit-scrollbar { width: 6px; }
+.cart-items::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 10px; }
+.cart-items::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
 
 .cart-item {
   display: flex;
@@ -458,20 +499,16 @@ body {
   gap: 12px;
   padding: 12px;
   border-radius: 6px;
-  background: #f9fafb;
+  background: var(--bg-section);
   margin-bottom: 10px;
   transition: background 0.3s ease;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
-
-.cart-item:hover {
-  background: #f3f4f6;
-}
-
+.cart-item:hover { background: var(--bg-hover); }
 .cart-item.out-of-stock-item {
   opacity: 0.7;
-  background: #fee2e2;
-  border-color: #ef4444;
+  background: var(--error-bg);
+  border-color: var(--error-color);
 }
 
 .item-image {
@@ -480,56 +517,45 @@ body {
   border-radius: 6px;
   object-fit: cover;
 }
-
-.item-details {
-  flex: 1;
-}
-
+.item-details { flex: 1; }
 .item-name {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 4px;
   font-size: 14px;
 }
-
 .item-subtitle {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
   font-weight: 500;
 }
-
 .item-price {
   font-weight: 600;
-  color: #22c55e;
+  color: var(--accent-color);
   font-size: 15px;
 }
-
 .out-of-stock {
-  color: #ef4444;
+  color: var(--error-color);
   font-weight: 600;
   font-size: 11px;
   margin-top: 4px;
-  background: #fee2e2;
+  background: var(--error-bg);
   padding: 4px 10px;
   border-radius: 4px;
   display: inline-block;
 }
 
-.coupon-section {
-  margin-bottom: 16px;
-}
-
+/* Coupons */
+.coupon-section { margin-bottom: 16px; }
 .coupon-input-group {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
 }
-
 .coupon-input-wrapper {
   flex: 1;
   position: relative;
 }
-
 .coupon-input-wrapper svg {
   position: absolute;
   left: 12px;
@@ -539,28 +565,26 @@ body {
   height: 18px;
   stroke: #9ca3af;
 }
-
 .coupon-input {
   width: 100%;
   padding: 10px 12px 10px 36px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-light);
   font-size: 13px;
   transition: all 0.3s ease;
-  background: #ffffff;
+  background: var(--bg-input);
+  color: var(--text-primary);
   font-weight: 500;
 }
-
 .coupon-input:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
-
 .apply-btn {
   padding: 10px 18px;
   border-radius: 6px;
-  background: #22c55e;
+  background: var(--accent-color);
   color: #ffffff;
   font-weight: 600;
   font-size: 13px;
@@ -568,74 +592,51 @@ body {
   cursor: pointer;
   transition: background 0.3s ease;
 }
-
-.apply-btn:hover {
-  background: #16a34a;
-}
-
+.apply-btn:hover { background: var(--accent-hover); }
 .coupon-success {
-  color: #22c55e;
+  color: var(--accent-color);
   font-size: 12px;
   font-weight: 600;
   display: none;
   align-items: center;
   gap: 6px;
 }
+.coupon-success.show { display: flex; }
 
-.coupon-success.show {
-  display: flex;
-}
-
+/* Pricing */
 .price-breakup {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
   padding-top: 16px;
 }
-
 .price-row {
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
-  color: #4b5563;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
 }
-
-.price-row span:last-child {
-  font-weight: 600;
-}
-
-.price-row.free {
-  color: #22c55e;
-}
-
-.price-row.discount {
-  color: #22c55e;
-  display: none;
-}
-
-.price-row.discount.show {
-  display: flex;
-}
+.price-row span:last-child { font-weight: 600; }
+.price-row.free { color: var(--accent-color); }
+.price-row.discount { color: var(--accent-color); display: none; }
+.price-row.discount.show { display: flex; }
 
 .total-row {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
   padding-top: 12px;
   display: flex;
   justify-content: space-between;
   font-size: 18px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
 }
-
-.total-amount {
-  color: #22c55e;
-}
+.total-amount { color: var(--accent-color); }
 
 .place-order-btn {
   width: 100%;
   padding: 12px 20px;
   border-radius: 6px;
-  background: #22c55e;
+  background: var(--accent-color);
   color: #ffffff;
   font-weight: 600;
   font-size: 16px;
@@ -647,29 +648,22 @@ body {
   justify-content: center;
   gap: 8px;
 }
-
-.place-order-btn:hover {
-  background: #16a34a;
-}
-
+.place-order-btn:hover { background: var(--accent-hover); }
 .place-order-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #d1d5db;
+  background: var(--border-light);
 }
-
-.place-order-btn:active {
-  transform: scale(0.96);
-}
-
+.place-order-btn:active { transform: scale(0.96); }
 .terms-text {
   text-align: center;
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--text-muted);
   margin-top: 12px;
   font-weight: 500;
 }
 
+/* Modals */
 .modal {
   display: none;
   position: fixed;
@@ -682,36 +676,21 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-.modal.show {
-  display: flex;
-}
-
+.modal.show { display: flex; }
 .modal-content {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 8px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-lg);
   position: relative;
 }
-
-.modal-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 10px;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 10px;
-}
+.modal-content::-webkit-scrollbar { width: 6px; }
+.modal-content::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 10px; }
+.modal-content::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
 
 .modal-header {
   display: flex;
@@ -719,21 +698,19 @@ body {
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
-
 .modal-header h2 {
   font-size: 20px;
   font-weight: 700;
-  color: #22c55e;
+  color: var(--accent-color);
 }
-
 .close-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: var(--bg-section);
+  border: 1px solid var(--border-color);
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-muted);
   transition: background 0.3s ease;
   width: 36px;
   height: 36px;
@@ -742,86 +719,66 @@ body {
   align-items: center;
   justify-content: center;
 }
-
 .close-btn:hover {
-  background: #ef4444;
+  background: var(--error-color);
   color: #ffffff;
-  border-color: #ef4444;
+  border-color: var(--error-color);
 }
 
 .form-group {
   margin-bottom: 16px;
   position: relative;
 }
-
 .form-row {
   display: flex;
   gap: 16px;
 }
-
-.form-row .form-group {
-  flex: 1;
-}
-
+.form-row .form-group { flex: 1; }
 .form-label {
   font-size: 12px;
   font-weight: 600;
-  color: #22c55e;
+  color: var(--text-label);
   margin-bottom: 6px;
   display: block;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
-.form-input,
-.form-select,
-.form-textarea {
+.form-input, .form-select, .form-textarea {
   width: 100%;
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-light);
   font-size: 13px;
   transition: all 0.3s ease;
-  background: #ffffff;
+  background: var(--bg-input);
+  color: var(--text-primary);
   font-weight: 500;
 }
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
+.form-input:focus, .form-select:focus, .form-textarea:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
-
-.form-input.error-field,
-.form-select.error-field,
-.form-textarea.error-field {
-  border-color: #ef4444 !important;
-  background-color: #fee2e2 !important;
+.form-input.error-field, .form-select.error-field, .form-textarea.error-field {
+  border-color: var(--error-color) !important;
+  background-color: var(--error-bg) !important;
 }
-
-.form-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
+.form-textarea { resize: vertical; min-height: 80px; }
 
 .checkbox-group {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
 .checkbox-group input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #22c55e;
+  accent-color: var(--accent-color);
 }
-
 .checkbox-group label {
   font-size: 13px;
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 500;
   cursor: pointer;
 }
@@ -832,9 +789,8 @@ body {
   gap: 12px;
   margin-top: 20px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
-
 .modal-btn {
   padding: 10px 24px;
   border-radius: 6px;
@@ -846,69 +802,46 @@ body {
   min-width: 120px;
   text-align: center;
 }
-
 .btn-cancel {
-  background: #f3f4f6;
-  color: #1f2937;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
-
-.btn-cancel:hover {
-  background: #e5e7eb;
-}
-
+.btn-cancel:hover { background: var(--border-light); }
 .btn-submit {
-  background: #22c55e;
+  background: var(--accent-color);
   color: #ffffff;
 }
-
-.btn-submit:hover:not(:disabled) {
-  background: #16a34a;
-}
-
-.btn-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.btn-submit:hover:not(:disabled) { background: var(--accent-hover); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .error-message {
-  color: #ef4444;
+  color: var(--error-color);
   font-size: 11px;
   margin-top: 4px;
   display: none;
   font-weight: 500;
 }
-
-.error-message.show {
-  display: block;
-}
+.error-message.show { display: block; }
 
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
-
-.empty-icon {
-  font-size: 60px;
-  margin-bottom: 16px;
-}
-
 .empty-state h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
+.empty-icon { font-size: 60px; margin-bottom: 16px; }
+.empty-state p { font-size: 14px; }
 
-.empty-state p {
-  font-size: 14px;
-}
-
-/* Animation CSS for SweetAlert2 */
+/* TRUCK ANIMATION (Swal2) */
 .swal2-order-animation {
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   border: 0;
   background: #010101;
   position: relative;
@@ -925,7 +858,6 @@ body {
   transition: transform 0.3s ease;
   font-family: Roboto, Arial;
 }
-
 .swal2-order-animation span {
   --o: 1;
   position: absolute;
@@ -940,16 +872,8 @@ body {
   opacity: var(--o);
   transition: opacity 0.3s ease;
 }
-
-.swal2-order-animation span.default {
-  transition-delay: 0.3s;
-}
-
-.swal2-order-animation span.success {
-  --offset: 16px;
-  --o: 0;
-}
-
+.swal2-order-animation span.default { transition-delay: 0.3s; }
+.swal2-order-animation span.success { --offset: 16px; --o: 0; }
 .swal2-order-animation span.success svg {
   width: 12px;
   height: 10px;
@@ -965,11 +889,7 @@ body {
   stroke-dashoffset: var(--offset);
   transition: stroke-dashoffset 0.3s ease;
 }
-
-.swal2-order-animation:active {
-  transform: scale(0.96);
-}
-
+.swal2-order-animation:active { transform: scale(0.96); }
 .swal2-order-animation .lines {
   opacity: 0;
   position: absolute;
@@ -981,7 +901,6 @@ body {
   left: 100%;
   box-shadow: 15px 0 0 #ffffff, 30px 0 0 #ffffff, 45px 0 0 #ffffff, 60px 0 0 #ffffff, 75px 0 0 #ffffff, 90px 0 0 #ffffff, 105px 0 0 #ffffff, 120px 0 0 #ffffff, 135px 0 0 #ffffff, 150px 0 0 #ffffff, 165px 0 0 #ffffff, 180px 0 0 #ffffff, 195px 0 0 #ffffff, 210px 0 0 #ffffff, 225px 0 0 #ffffff, 240px 0 0 #ffffff, 255px 0 0 #ffffff, 270px 0 0 #ffffff, 285px 0 0 #ffffff, 300px 0 0 #ffffff, 315px 0 0 #ffffff, 330px 0 0 #ffffff;
 }
-
 .swal2-order-animation .back,
 .swal2-order-animation .box {
   --start: #ffffff;
@@ -990,7 +909,6 @@ body {
   background: linear-gradient(var(--start), var(--stop));
   position: absolute;
 }
-
 .swal2-order-animation .truck {
   width: 60px;
   height: 41px;
@@ -1000,7 +918,6 @@ body {
   position: absolute;
   transform: translateX(24px);
 }
-
 .swal2-order-animation .truck:before, .swal2-order-animation .truck:after {
   --r: -90deg;
   content: "";
@@ -1014,16 +931,8 @@ body {
   transform-origin: 100% 50%;
   transform: rotate(var(--r));
 }
-
-.swal2-order-animation .truck:before {
-  top: 4px;
-}
-
-.swal2-order-animation .truck:after {
-  --r: 90deg;
-  bottom: 4px;
-}
-
+.swal2-order-animation .truck:before { top: 4px; }
+.swal2-order-animation .truck:after { --r: 90deg; bottom: 4px; }
 .swal2-order-animation .truck .back {
   left: 0;
   top: 0;
@@ -1031,7 +940,6 @@ body {
   height: 41px;
   z-index: 1;
 }
-
 .swal2-order-animation .truck .front {
   overflow: hidden;
   position: absolute;
@@ -1040,13 +948,11 @@ body {
   height: 41px;
   left: 60px;
 }
-
 .swal2-order-animation .truck .front:before, .swal2-order-animation .truck .front:after {
   content: "";
   position: absolute;
   display: block;
 }
-
 .swal2-order-animation .truck .front:before {
   height: 13px;
   width: 2px;
@@ -1054,7 +960,6 @@ body {
   top: 14px;
   background: linear-gradient(#6C7486, #3F4656);
 }
-
 .swal2-order-animation .truck .front:after {
   border-radius: 2px 9px 9px 2px;
   background: #e20707;
@@ -1062,7 +967,6 @@ body {
   height: 41px;
   right: 0;
 }
-
 .swal2-order-animation .truck .front .window {
   overflow: hidden;
   border-radius: 10px;
@@ -1076,20 +980,17 @@ body {
   z-index: 1;
   transform-origin: 0 50%;
 }
-
 .swal2-order-animation .truck .front .window:before, .swal2-order-animation .truck .front .window:after {
   content: "";
   position: absolute;
   right: 0;
 }
-
 .swal2-order-animation .truck .front .window:before {
   top: 0;
   bottom: 0;
   width: 14px;
   background: #1C212E;
 }
-
 .swal2-order-animation .truck .front .window:after {
   width: 14px;
   top: 7px;
@@ -1099,7 +1000,6 @@ body {
   transform: skewY(14deg);
   box-shadow: 0 7px 0 rgba(255, 255, 255, 0.14);
 }
-
 .swal2-order-animation .truck .light {
   width: 3px;
   height: 8px;
@@ -1110,7 +1010,6 @@ body {
   transform: scaleX(0.8);
   background: #f0dc5f;
 }
-
 .swal2-order-animation .truck .light:before {
   content: "";
   height: 4px;
@@ -1124,15 +1023,8 @@ body {
   margin-top: -2px;
   background: linear-gradient(90deg, #f0dc5f, rgba(240, 220, 95, 0.7), rgba(240, 220, 95, 0));
 }
-
-.swal2-order-animation .truck .light.top {
-  top: 4px;
-}
-
-.swal2-order-animation .truck .light.bottom {
-  bottom: 4px;
-}
-
+.swal2-order-animation .truck .light.top { top: 4px; }
+.swal2-order-animation .truck .light.bottom { bottom: 4px; }
 .swal2-order-animation .box {
   --start: #EDD9A9;
   --stop: #DCB773;
@@ -1141,7 +1033,6 @@ body {
   right: 100%;
   top: 21px;
 }
-
 .swal2-order-animation .box:before, .swal2-order-animation .box:after {
   content: "";
   top: 10px;
@@ -1149,71 +1040,84 @@ body {
   left: 0;
   right: 0;
 }
-
 .swal2-order-animation .box:before {
   height: 3px;
   margin-top: -1px;
   background: rgba(0, 0, 0, 0.1);
 }
-
 .swal2-order-animation .box:after {
   height: 1px;
   background: rgba(0, 0, 0, 0.15);
 }
-
 .swal2-order-animation.animate .default {
   --o: 0;
   transition-delay: 0s;
 }
-
 .swal2-order-animation.animate .success {
   --offset: 0;
   --o: 1;
   transition-delay: 7s;
 }
-
 .swal2-order-animation.animate .success svg {
   transition-delay: 7.3s;
 }
-
 .swal2-order-animation.animate .truck {
   animation: truck 10s ease forwards;
 }
-
 .swal2-order-animation.animate .truck:before {
   animation: door1 2.4s ease forwards 0.3s;
 }
-
 .swal2-order-animation.animate .truck:after {
   animation: door2 2.4s ease forwards 0.6s;
 }
-
 .swal2-order-animation.animate .truck .light:before, .swal2-order-animation.animate .truck .light:after {
   animation: light 10s ease forwards;
 }
-
 .swal2-order-animation.animate .box {
   animation: box 10s ease forwards;
 }
-
 .swal2-order-animation.animate .lines {
   animation: lines 10s ease forwards;
 }
 
+/* Animations */
+@keyframes truck {
+  10%, 30% { transform: translateX(-164px); }
+  40% { transform: translateX(-104px); }
+  60% { transform: translateX(-224px); }
+  75%, 100% { transform: translateX(24px); }
+}
+@keyframes lines {
+  0%, 30% { opacity: 0; transform: scaleY(0.7) translateX(0); }
+  35%, 65% { opacity: 1; }
+  70% { opacity: 0; }
+  100% { transform: scaleY(0.7) translateX(-400px); }
+}
+@keyframes light {
+  0%, 30% { opacity: 0; transform: perspective(2px) rotateY(-15deg) scaleX(0.88); }
+  40%, 100% { opacity: 1; transform: perspective(2px) rotateY(-15deg) scaleX(0.94); }
+}
+@keyframes door1 {
+  30%, 50% { transform: rotate(32deg); }
+}
+@keyframes door2 {
+  30%, 50% { transform: rotate(-32deg); }
+}
+@keyframes box {
+  8%, 10% { transform: translateX(40px); opacity: 1; }
+  25% { transform: translateX(112px); opacity: 1; }
+  26% { transform: translateX(112px); opacity: 0; }
+  27%, 100% { transform: translateX(0px); opacity: 0; }
+}
+
+/* BLOCKED ALERT */
 .blocked-alert-container {
   margin-bottom: 24px;
   animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .blocked-alert-card {
@@ -1224,6 +1128,11 @@ body {
   box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);
   overflow: hidden;
   position: relative;
+}
+/* Alert Dark Mode Override */
+body.dark-mode .blocked-alert-card {
+    background: linear-gradient(135deg, #2b1111 0%, #3f1212 100%);
+    border-color: #7f1d1d;
 }
 
 .blocked-alert-card::before {
@@ -1236,7 +1145,6 @@ body {
   background: linear-gradient(90deg, #ef4444, #f87171);
 }
 
-/* Header Section */
 .blocked-alert-header {
   display: flex;
   gap: 16px;
@@ -1255,6 +1163,7 @@ body {
   justify-content: center;
   border: 2px solid #fecaca;
 }
+body.dark-mode .alert-icon-wrapper { background: #450a0a; border-color: #7f1d1d; }
 
 .alert-icon {
   width: 24px;
@@ -1264,10 +1173,7 @@ body {
   stroke-linejoin: round;
 }
 
-.alert-text {
-  flex: 1;
-}
-
+.alert-text { flex: 1; }
 .alert-title {
   margin: 0 0 4px 0;
   color: #991b1b;
@@ -1275,6 +1181,7 @@ body {
   font-weight: 700;
   letter-spacing: -0.5px;
 }
+body.dark-mode .alert-title { color: #fecaca; }
 
 .alert-subtitle {
   margin: 0;
@@ -1283,20 +1190,18 @@ body {
   font-weight: 500;
   opacity: 0.9;
 }
+body.dark-mode .alert-subtitle { color: #f87171; }
 
-/* Items Container */
 .blocked-items-container {
-  background: white;
+  background: var(--bg-card);
   border-radius: 10px;
   padding: 16px;
   margin-bottom: 16px;
   border: 1px solid #fecaca;
 }
+body.dark-mode .blocked-items-container { background: #1a1a1a; border-color: #450a0a; }
 
-.blocked-items-header {
-  margin-bottom: 12px;
-}
-
+.blocked-items-header { margin-bottom: 12px; }
 .items-label {
   font-size: 12px;
   font-weight: 600;
@@ -1304,6 +1209,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+body.dark-mode .items-label { color: #f87171; }
 
 .blocked-items-list {
   list-style: none;
@@ -1324,11 +1230,13 @@ body {
   border-left: 3px solid #ef4444;
   transition: all 0.2s ease;
 }
+body.dark-mode .blocked-item { background: #2c0b0e; }
 
 .blocked-item:hover {
   background: #fee2e2;
   transform: translateX(4px);
 }
+body.dark-mode .blocked-item:hover { background: #450a0a; }
 
 .item-indicator {
   display: flex;
@@ -1344,20 +1252,12 @@ body {
   font-weight: 700;
   flex-shrink: 0;
 }
-
 .item-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-
-.item-name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 13px;
-}
-
 .item-reason {
   font-size: 12px;
   color: #7f1d1d;
@@ -1366,7 +1266,6 @@ body {
   border-radius: 4px;
   width: fit-content;
 }
-
 .item-icon {
   width: 20px;
   height: 20px;
@@ -1375,19 +1274,11 @@ body {
   opacity: 0;
   animation: checkSlideIn 0.5s ease forwards;
 }
-
 @keyframes checkSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Action Section */
 .blocked-alert-actions {
   background: linear-gradient(135deg, #fef2f2, #fee2e2);
   border-radius: 10px;
@@ -1398,6 +1289,7 @@ body {
   gap: 16px;
   border: 1px solid #fecaca;
 }
+body.dark-mode .blocked-alert-actions { background: #2c0b0e; border-color: #450a0a; }
 
 .action-message {
   display: flex;
@@ -1405,7 +1297,6 @@ body {
   gap: 10px;
   flex: 1;
 }
-
 .info-icon {
   width: 18px;
   height: 18px;
@@ -1414,12 +1305,12 @@ body {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
 .action-message span {
   font-size: 13px;
   color: #7f1d1d;
   font-weight: 500;
 }
+body.dark-mode .action-message span { color: #f87171; }
 
 .action-button {
   display: inline-flex;
@@ -1438,17 +1329,12 @@ body {
   white-space: nowrap;
   flex-shrink: 0;
 }
-
 .action-button:hover {
   background: linear-gradient(135deg, #dc2626, #ef4444);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
-
-.action-button:active {
-  transform: translateY(0);
-}
-
+.action-button:active { transform: translateY(0); }
 .btn-icon {
   width: 16px;
   height: 16px;
@@ -1456,588 +1342,289 @@ body {
   stroke-linejoin: round;
 }
 
-.coupon-section {
+/* Coupon Modal Styling (New) */
+.coupon-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+.coupon-modal.show { display: flex; }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.coupon-modal-content-wrapper {
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-.coupon-input-group {
+.coupon-modal-header-section {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+.coupon-modal-header-section h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.coupon-input-wrapper {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-
-.coupon-input {
+.coupon-modal-close {
+  background: none;
   border: none;
-  outline: none;
-  margin-left: 6px;
-}
-
-.apply-btn {
-  background-color: #111;
-  color: #fff;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
+  font-size: 24px;
   cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+.coupon-modal-close:hover { color: var(--text-primary); }
+
+.coupon-modal-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-light);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.coupon-list {
+  overflow-y: auto;
+  padding: 20px;
+  flex: 1;
+}
+
+.coupon-modal-card {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  background: var(--bg-section);
+}
+.coupon-modal-card:hover {
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.coupon-modal-content { flex: 1; }
+.coupon-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.coupon-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.coupon-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.coupon-status.active { background: #dcfce7; color: #166534; }
+.coupon-status.upcoming { background: #fef3c7; color: #92400e; }
+.coupon-status.expired { background: #fee2e2; color: #991b1b; }
+
+.coupon-modal-description {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.coupon-modal-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.detail-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.detail-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.coupon-usage-bar {
+  height: 6px;
+  background: var(--bg-hover);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.usage-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+  transition: width 0.3s ease;
+}
+
+.coupon-modal-actions {
+  display: flex;
+  gap: 8px;
+}
+.copy-btn, .use-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+.copy-btn {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+.copy-btn:hover { background: var(--border-light); }
+.use-btn {
+  background: var(--accent-color);
+  color: white;
+  flex: 1;
+}
+.use-btn:hover:not(:disabled) { background: var(--accent-hover); }
+.use-btn:disabled {
+  background: var(--border-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.coupon-modal-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+}
+.pagination-btn {
+  padding: 8px 14px;
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.pagination-btn:hover:not(:disabled) {
+  background: var(--accent-color);
+  color: white;
+}
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.page-info {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  min-width: 120px;
+  text-align: center;
 }
 
 .coupon-view-link {
   font-size: 14px;
-  color: #333;
+  color: var(--text-secondary);
 }
-
 .coupon-view-link a {
-  color: #007bff;
+  color: var(--accent-color);
   text-decoration: none;
 }
-
 .coupon-view-link a:hover {
   text-decoration: underline;
 }
 
-.coupon-success {
-  display: none;
-  align-items: center;
-  gap: 5px;
-  color: green;
-  font-weight: 500;
-}
-
-
-/* Responsive Design */
+/* Mobile Responsive */
 @media (max-width: 768px) {
-  .blocked-alert-card {
-    padding: 16px;
-  }
-
-  .blocked-alert-header {
-    gap: 12px;
-  }
-
-  .alert-icon-wrapper {
-    width: 40px;
-    height: 40px;
-  }
-
-  .alert-icon {
-    width: 20px;
-    height: 20px;
-  }
-
-  .alert-title {
-    font-size: 16px;
-  }
-
-  .blocked-items-list {
-    gap: 8px;
-  }
-
-  .blocked-item {
-    padding: 10px;
-  }
-
-  .blocked-alert-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .action-button {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .blocked-alert-card {
-    padding: 12px;
-  }
-
-  .alert-title {
-    font-size: 14px;
-  }
-
-  .alert-subtitle {
-    font-size: 12px;
-  }
-
-  .item-name {
-    font-size: 12px;
-  }
-
-  .item-reason {
-    font-size: 11px;
-  }
-}
-
-@keyframes truck {
-  10%, 30% {
-    transform: translateX(-164px);
-  }
-  40% {
-    transform: translateX(-104px);
-  }
-  60% {
-    transform: translateX(-224px);
-  }
-  75%, 100% {
-    transform: translateX(24px);
-  }
-}
-
-@keyframes lines {
-  0%, 30% {
-    opacity: 0;
-    transform: scaleY(0.7) translateX(0);
-  }
-  35%, 65% {
-    opacity: 1;
-  }
-  70% {
-    opacity: 0;
-  }
-  100% {
-    transform: scaleY(0.7) translateX(-400px);
-  }
-}
-
-@keyframes light {
-  0%, 30% {
-    opacity: 0;
-    transform: perspective(2px) rotateY(-15deg) scaleX(0.88);
-  }
-  40%, 100% {
-    opacity: 1;
-    transform: perspective(2px) rotateY(-15deg) scaleX(0.94);
-  }
-}
-
-@keyframes door1 {
-  30%, 50% {
-    transform: rotate(32deg);
-  }
-}
-
-@keyframes door2 {
-  30%, 50% {
-    transform: rotate(-32deg);
-  }
-}
-
-@keyframes box {
-  8%, 10% {
-    transform: translateX(40px);
-    opacity: 1;
-  }
-  25% {
-    transform: translateX(112px);
-    opacity: 1;
-  }
-  26% {
-    transform: translateX(112px);
-    opacity: 0;
-  }
-  27%, 100% {
-    transform: translateX(0px);
-    opacity: 0;
-  }
-}
-
-@media (max-width: 1024px) {
-  .checkout-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .summary-sticky {
-    position: static;
-  }
+  .blocked-alert-card { padding: 16px; }
+  .blocked-alert-header { gap: 12px; }
+  .alert-icon-wrapper { width: 40px; height: 40px; }
+  .alert-icon { width: 20px; height: 20px; }
+  .alert-title { font-size: 16px; }
+  .blocked-items-list { gap: 8px; }
+  .blocked-item { padding: 10px; }
+  .blocked-alert-actions { flex-direction: column; align-items: stretch; }
+  .action-button { width: 100%; justify-content: center; }
+  .checkout-grid { grid-template-columns: 1fr; }
+  .summary-sticky { position: static; }
 }
 
 @media (max-width: 640px) {
-  .checkout-container {
-    padding: 20px 16px;
-  }
-
-  .section-body {
-    padding: 16px;
-  }
-
-  .addresses-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-row {
-    flex-direction: column;
-  }
-
-  .modal-content {
-    padding: 20px;
-  }
-
-  .modal-btn {
-    min-width: 100%;
-  }
-
-  .swal2-order-animation {
-    max-width: 100%;
-  }
+  .checkout-container { padding: 20px 16px; }
+  .section-body { padding: 16px; }
+  .addresses-grid { grid-template-columns: 1fr; }
+  .form-row { flex-direction: column; }
+  .modal-content { padding: 20px; }
+  .modal-btn { min-width: 100%; }
+  .swal2-order-animation { max-width: 100%; }
+  .coupon-modal { padding: 10px; }
+  .coupon-modal-content-wrapper { max-height: 90vh; }
+  .coupon-modal-card { flex-direction: column; }
+  .coupon-modal-actions { width: 100%; }
+  .copy-btn, .use-btn { flex: 1; }
+  .coupon-modal-details { grid-template-columns: 1fr; }
+  .blocked-alert-card { padding: 12px; }
+  .alert-title { font-size: 14px; }
+  .alert-subtitle { font-size: 12px; }
+  .item-name { font-size: 12px; }
+  .item-reason { font-size: 11px; }
 }
+</style>
 
-.error-field {
-  border-color: #ef4444 !important;
-  background-color: #fee2e2 !important;
-}
-
-.error-field:focus {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
-}
-
-.error-message {
-  color: #ef4444;
-  font-size: 11px;
-  margin-top: 4px;
-  display: none;
-  font-weight: 500;
-  padding: 4px 8px;
-}
-
-.error-message.show {
-  display: block;
-}
-
-
-.coupon-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .coupon-modal.show {
-    display: flex;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .coupon-modal-content-wrapper {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    max-width: 600px;
-    width: 100%;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    animation: slideUp 0.3s ease;
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(30px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .coupon-modal-header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  .coupon-modal-header-section h2 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: #1f2937;
-  }
-
-  .coupon-modal-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #6b7280;
-    transition: color 0.2s;
-  }
-
-  .coupon-modal-close:hover {
-    color: #1f2937;
-  }
-
-  .coupon-modal-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    gap: 16px;
-  }
-
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #e5e7eb;
-    border-top-color: #22c55e;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .coupon-list {
-    overflow-y: auto;
-    padding: 20px;
-    flex: 1;
-  }
-
-  .coupon-modal-card {
-    display: flex;
-    gap: 12px;
-    padding: 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    transition: all 0.3s ease;
-  }
-
-  .coupon-modal-card:hover {
-    border-color: #22c55e;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
-  }
-
-  .coupon-modal-content {
-    flex: 1;
-  }
-
-  .coupon-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  .coupon-modal-title {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #1f2937;
-  }
-
-  .coupon-status {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .coupon-status.active {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .coupon-status.upcoming {
-    background: #fef3c7;
-    color: #92400e;
-  }
-
-  .coupon-status.expired {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .coupon-modal-description {
-    margin: 0 0 12px 0;
-    font-size: 13px;
-    color: #6b7280;
-    line-height: 1.4;
-  }
-
-  .coupon-modal-details {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
-  .detail-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .detail-label {
-    font-size: 12px;
-    color: #9ca3af;
-    font-weight: 500;
-  }
-
-  .detail-value {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1f2937;
-  }
-
-  .coupon-usage-bar {
-    height: 6px;
-    background: #f3f4f6;
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .usage-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #22c55e, #16a34a);
-    transition: width 0.3s ease;
-  }
-
-  .coupon-modal-actions {
-    display: flex;
-    gap: 8px;
-  }
-
-  .copy-btn,
-  .use-btn {
-    padding: 8px 14px;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-  }
-
-  .copy-btn {
-    background: #f3f4f6;
-    color: #374151;
-  }
-
-  .copy-btn:hover {
-    background: #e5e7eb;
-  }
-
-  .use-btn {
-    background: #22c55e;
-    color: white;
-    flex: 1;
-  }
-
-  .use-btn:hover:not(:disabled) {
-    background: #16a34a;
-  }
-
-  .use-btn:disabled {
-    background: #d1d5db;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .coupon-modal-pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    border-top: 1px solid #e5e7eb;
-  }
-
-  .pagination-btn {
-    padding: 8px 14px;
-    background: #f3f4f6;
-    color: #374151;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .pagination-btn:hover:not(:disabled) {
-    background: #22c55e;
-    color: white;
-  }
-
-  .pagination-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .page-info {
-    font-size: 14px;
-    font-weight: 500;
-    color: #6b7280;
-    min-width: 120px;
-    text-align: center;
-  }
-
-  /* Mobile responsive */
-  @media (max-width: 640px) {
-    .coupon-modal {
-      padding: 10px;
-    }
-
-    .coupon-modal-content-wrapper {
-      max-height: 90vh;
-    }
-
-    .coupon-modal-card {
-      flex-direction: column;
-    }
-
-    .coupon-modal-actions {
-      width: 100%;
-    }
-
-    .copy-btn,
-    .use-btn {
-      flex: 1;
-    }
-
-    .coupon-modal-details {
-      grid-template-columns: 1fr;
-    }
-  }
-
-
-
-  </style>
 
 </head>
 
@@ -2354,24 +1941,33 @@ body {
 </div>
 
 
-              <div class="price-breakup">
-                <div class="price-row">
-                  <span>Subtotal</span>
-                  <span>₹<%= (subtotal || 0).toLocaleString() %></span>
-                </div>
-                <div class="price-row free">
-                  <span>Shipping</span>
-                  <span>Free 🎉</span>
-                </div>
-                <div class="price-row discount" id="discountRow">
-                  <span>Discount</span>
-                  <span>-₹<%= (discount || 0).toLocaleString() %></span>
-                </div>
-                <div class="total-row">
-                  <span>Total</span>
-                  <span class="total-amount" id="totalAmount">₹<%= (total || 0).toLocaleString() %></span>
-                </div>
-              </div>
+             <div class="price-breakup">
+  <!-- Row 1: Subtotal -->
+  <div class="price-row">
+    <span>Subtotal</span>
+    <span>₹<%= (subtotal || 0).toLocaleString() %></span>
+  </div>
+ 
+  <!-- Row 2: Shipping (Always show ₹49) -->
+  <div class="price-row" id="shippingRow">
+    <span>Shipping</span>
+    <span>₹49</span>
+  </div>
+ 
+  <!-- Row 3: Discount (Show if discount > 0) -->
+  <div class="price-row discount <%= (discount || 0) > 0 ? 'show' : '' %>" id="discountRow">
+    <span>Discount</span>
+    <span id="discountValue">-₹<%= (discount || 0).toLocaleString() %></span>
+  </div>
+ 
+  <!-- Row 4: Total -->
+  <div class="total-row">
+    <span>Total</span>
+    <span class="total-amount" id="totalAmount">
+      ₹<%= (((subtotal || 0) - (discount || 0) + 49)).toLocaleString() %>
+    </span>
+  </div>
+</div>
 
               <button id="place-order-btn" class="place-order-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3360,43 +2956,22 @@ body {
 async function handleRazorpayPayment(addressId, couponCode = '') {
   try {
     console.log('💳 [STEP 1] Starting payment flow');
-    console.log('   Address ID:', addressId);
-    console.log('   Coupon Code:', couponCode);
-
+    
     const selectedAddressId = addressId || document.querySelector('.address-option.selected')?.getAttribute('data-address');
     const appliedCouponCode = couponCode || priceState.appliedCouponCode || '';
 
-    if (!selectedAddressId) {
-      throw new Error('Please select a delivery address');
-    }
+    if (!selectedAddressId) throw new Error('Please select a delivery address');
 
-    console.log('📍 Selected Address ID:', selectedAddressId);
-    console.log('🎟️ Coupon Code:', appliedCouponCode);
-
-    // ✅ CHECK AUTHENTICATION
-    console.log('🔐 [STEP 2] Checking authentication...');
-    const authCheck = await fetch('/payment/check-auth', { 
-      method: 'GET', 
-      credentials: 'include' 
-    });
+    // 1. Check Auth
+    const authCheck = await fetch('/payment/check-auth', { method: 'GET', credentials: 'include' });
     const authData = await authCheck.json();
-    
     if (!authData.isAuthenticated) {
-      console.error('❌ User not authenticated');
       window.location.href = '/login';
       return;
     }
 
-    console.log('✅ [STEP 3] User authenticated');
-
-    // ✅ STEP 1: PLACE ORDER (Store data in session)
-    console.log('🛒 [STEP 4] Placing order on server...');
-    console.log('📊 Sending to /order/place with:', {
-      addressId: selectedAddressId,
-      couponCode: appliedCouponCode,
-      paymentMethod: 'razorpay'
-    });
-
+    // 2. Place Order (Backend validation & session storage)
+    console.log('🛒 [STEP 2] Placing order...');
     const placeOrderResponse = await fetch('/order/place', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -3409,33 +2984,12 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
       })
     });
 
-    console.log('📥 [STEP 5] Response from /order/place');
-    console.log('   Status:', placeOrderResponse.status);
-    console.log('   Status Text:', placeOrderResponse.statusText);
-
-    if (!placeOrderResponse.ok) {
-      const errorData = await placeOrderResponse.json();
-      console.error('❌ Order placement failed:', errorData);
-      throw new Error(errorData.message || 'Failed to place order');
-    }
-
     const placeOrderData = await placeOrderResponse.json();
-    console.log('✅ [STEP 6] Order placed successfully');
-    console.log('   Response:', placeOrderData);
+    if (!placeOrderData.success) throw new Error(placeOrderData.message);
 
-    if (!placeOrderData.success) {
-      throw new Error(placeOrderData.message || 'Order placement failed');
-    }
-
-    // ✅ STEP 2: CREATE RAZORPAY ORDER
-    console.log('💳 [STEP 7] Creating Razorpay order...');
-
-    Swal.fire({
-      title: 'Processing...',
-      html: 'Creating payment order',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
+    // 3. Create Razorpay Order
+    console.log('💳 [STEP 3] Creating Razorpay ID...');
+    Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
     const createOrderResponse = await fetch('/payment/create-razorpayOrder', {
       method: 'POST',
@@ -3444,57 +2998,22 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
       body: JSON.stringify({}) 
     });
 
-    console.log('📥 [STEP 8] Response from /payment/create-razorpayOrder');
-    console.log('   Status:', createOrderResponse.status);
-
-    const contentType = createOrderResponse.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      console.error('❌ Non-JSON response');
-      throw new Error(`Server returned ${contentType || 'text/html'}`);
-    }
-
     const orderData = await createOrderResponse.json();
-    console.log('✅ [STEP 9] Razorpay order data received:', orderData);
+    if (!orderData.success) throw new Error(orderData.message);
 
-    if (!createOrderResponse.ok) {
-      throw new Error(orderData.message || 'Failed to create payment order');
-    }
-
-    if (!orderData.success) {
-      throw new Error(orderData.message || 'Failed to create payment order');
-    }
-
-    if (!orderData.keyId || !orderData.orderId) {
-      throw new Error('Invalid Razorpay configuration');
-    }
-
-    console.log('✅ [STEP 10] All validation passed');
-    console.log('   Key ID:', orderData.keyId);
-    console.log('   Order ID:', orderData.orderId);
-    console.log('   Amount:', orderData.amount);
-    console.log('   Discount Applied:', orderData.discountApplied);
-    console.log('   Final Amount:', orderData.finalAmount);
-
-    // ✅ STEP 3: OPEN RAZORPAY MODAL
     Swal.close();
-    
-    if (typeof Razorpay === 'undefined') {
-      throw new Error('Razorpay script not loaded');
-    }
 
+    // 4. Open Razorpay Options
     const options = {
       key: orderData.keyId,
-      amount: orderData.amount, // ✅ Already discounted
+      amount: orderData.amount,
       currency: orderData.currency || 'INR',
       name: 'Sentique',
       description: 'Online Purchase',
       order_id: orderData.orderId,
       
+      // Success Handler
       handler: async (response) => {
-        console.log('✅ [STEP 11] Payment successful!');
-        console.log('   Razorpay Order ID:', response.razorpay_order_id);
-        console.log('   Payment ID:', response.razorpay_payment_id);
-        
         await verifyRazorpayPayment(
           response.razorpay_order_id,
           response.razorpay_payment_id,
@@ -3503,15 +3022,23 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
           appliedCouponCode
         );
       },
-      
+
       theme: { color: '#22c55e' },
-      
+
       modal: {
+        // ✅ FIX IS HERE: Wait for backend response to get orderId
         ondismiss: async () => {
-          console.log('⚠️ User closed Razorpay modal');
+          console.log('⚠️ User closed payment modal');
+          Swal.fire({ 
+            title: 'Cancelling...', 
+            text: 'Recording payment status',
+            allowOutsideClick: false, 
+            didOpen: () => Swal.showLoading() 
+          });
           
           try {
-            await fetch('/payment/payment-failure', {
+            // Tell backend payment was cancelled (This creates the failed order doc)
+            const res = await fetch('/payment/payment-failure', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -3521,78 +3048,40 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
                 error_code: 'USER_CANCELLED'
               })
             });
+            
+            const data = await res.json();
+            Swal.close();
+
+            // ✅ CRITICAL FIX: Redirect using the orderId returned by backend
+            if (data.success && data.orderId) {
+               window.location.href = `/orderFailure?orderId=${data.orderId}`;
+            } else {
+               // Fallback if something goes wrong
+               console.error("No orderId returned");
+               window.location.href = `/orderFailure?error=PaymentCancelled`;
+            }
           } catch (err) {
-            console.error('Error marking payment as failed:', err);
+            console.error('Error in ondismiss:', err);
+            window.location.href = '/orderFailure';
           }
-          
-          Swal.close();
-          const amountText = document.getElementById('totalAmount')?.textContent || '₹0';
-          window.location.href = `/orderFailure?errorReason=Payment%20cancelled&amount=${encodeURIComponent(amountText)}&paymentMethod=Card`;
         }
       }
     };
 
-    console.log('🎯 [STEP 12] Opening Razorpay modal with options:', options);
-    
     const rzp = new Razorpay(options);
-
-  rzp.on('payment.failed', async (response) => {
-  console.log('❌ Payment failed:', response.error);
-
-  const razorpay_order_id = response.error.metadata?.order_id;
-  const error_description = response.error.description || "Payment failed";
-  const error_code = response.error.code || "UNKNOWN_ERROR";
-
-  try {
-    // 🔥 Tell backend to record failed order (returns MongoDB orderId)
-    const failRes = await fetch('/payment/payment-failure', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        razorpay_order_id,
-        error_description,
-        error_code
-      })
-    });
-
-    const data = await failRes.json();
-    console.log("📩 handlePaymentFailure response:", data);
-
-    if (data.success && data.orderId) {
-      // ✅ Redirect with correct MongoDB orderId
-      window.location.href = `/orderFailure?orderId=${data.orderId}`;
-    } else {
-      console.warn("⚠️ Failed to record payment properly:", data);
-      alert("Payment failed but could not be recorded. Please contact support.");
-    }
-  } catch (err) {
-    console.error('⚠️ Error recording payment failure:', err);
-    alert("Payment failed but could not be recorded.");
-  }
-
-  Swal.close();
-});
-  rzp.open();
-
-  } catch (err) {
-    console.error('❌ PAYMENT ERROR:', err.message);
-    console.error('Stack:', err.stack);
     
-    Swal.fire({
-      icon: 'error',
-      title: 'Payment Error',
-      html: `<div style="text-align: left; font-size: 0.9rem;">
-        <p><strong>Error:</strong> ${err.message}</p>
-        <p style="color: #666; margin-top: 12px; font-size: 0.85rem;">
-          Check browser console (F12) for detailed logs.
-        </p>
-      </div>`,
-      confirmButtonColor: '#ef4444'
+    // Handle Bank Failures
+    rzp.on('payment.failed', async (response) => {
+      await handlePaymentFailure(response.error);
     });
+
+    rzp.open();
+
+  } catch (err) {
+    console.error('❌ PAYMENT ERROR:', err);
+    Swal.fire({ icon: 'error', title: 'Error', text: err.message });
   }
 }
-
   // Helper function to verify payment
  async function verifyRazorpayPayment(razorpayOrderId, razorpayPaymentId, razorpaySignature, addressId, couponCode = '') {
   console.log('✅ Verifying payment with signature');
@@ -3887,47 +3376,57 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
         }
       });
     }
+function updateDisplay() {
+  const subtotal = typeof priceState.subtotal === 'number' ? priceState.subtotal : 0;
+  const discount = typeof priceState.discount === 'number' ? priceState.discount : 0;
+  const shippingCharge = 49;
 
-    function updateDisplay() {
-      const subtotal = typeof priceState.subtotal === 'number' ? priceState.subtotal : 0;
-      const discount = typeof priceState.discount === 'number' ? priceState.discount : 0;
-      
-      priceState.total = Math.max(0, subtotal - discount);
-      
-      const totalElem = document.getElementById('totalAmount');
-      if (totalElem) {
-        try {
-          totalElem.textContent = '₹' + parseFloat(priceState.total).toLocaleString('en-IN', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
-        } catch (err) {
-          totalElem.textContent = '₹' + priceState.total.toFixed(2);
-        }
-      }
+  priceState.total = Math.max(0, subtotal - discount + shippingCharge);
 
-      const discountRow = document.getElementById('discountRow');
-      if (discountRow) {
-        if (discount > 0) {
-          discountRow.classList.add('show');
-          const discountElem = discountRow.querySelector('span:last-child');
-          if (discountElem) {
-            try {
-              discountElem.textContent = '-₹' + parseFloat(discount).toLocaleString('en-IN', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              });
-            } catch (err) {
-              discountElem.textContent = '-₹' + discount.toFixed(2);
-            }
-          }
-        } else {
-          discountRow.classList.remove('show');
-        }
-      }
-
-      updateCouponUI();
+  // Show shipping charge row
+  const shippingRow = document.getElementById('shippingRow');
+  if (shippingRow) {
+    shippingRow.style.display = 'flex';
+    const shippingElem = shippingRow.querySelector('span:last-child');
+    if (shippingElem) {
+      shippingElem.textContent = '₹49';
     }
+  }
+
+  // Handle discount row
+  const discountRow = document.getElementById('discountRow');
+  const discountValueElem = document.getElementById('discountValue');
+  if (discountRow && discountValueElem) {
+    if (discount > 0) {
+      discountRow.classList.add('show');
+      try {
+        discountValueElem.textContent = '-₹' + parseFloat(discount).toLocaleString('en-IN', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      } catch (err) {
+        discountValueElem.textContent = '-₹' + discount.toFixed(2);
+      }
+    } else {
+      discountRow.classList.remove('show');
+    }
+  }
+
+  // Update total
+  const totalElem = document.getElementById('totalAmount');
+  if (totalElem) {
+    try {
+      totalElem.textContent = '₹' + parseFloat(priceState.total).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    } catch (err) {
+      totalElem.textContent = '₹' + priceState.total.toFixed(2);
+    }
+  }
+
+  updateCouponUI();
+}
 
     function updateCouponUI() {
       const couponInput = document.getElementById('couponInput');
@@ -4451,6 +3950,7 @@ function openRazorpayModal(orderData) {
     description: 'Order Payment',
     order_id: orderData.orderId,
     
+    // Success Handler
     handler: async (response) => {
       console.log('✅ Payment successful! Verifying...');
       await verifyPayment(
@@ -4463,23 +3963,58 @@ function openRazorpayModal(orderData) {
     theme: { color: '#22c55e' },
 
     modal: {
-      ondismiss: () => {
+      // ✅ FIX IS HERE: Handle User Closing the Popup
+      ondismiss: async () => {
         console.log('⚠️ User closed payment modal');
+        
+        // 1. Show loading while we save the failed order
         Swal.fire({
-          icon: 'info',
-          title: 'Payment Cancelled',
-          text: 'Your items remain in cart. You can retry anytime.',
-          confirmButtonColor: '#3b82f6'
+          title: 'Cancelling...',
+          text: 'Recording payment status',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
         });
+
+        try {
+          // 2. Call backend to create the "Failed" order
+          const response = await fetch('/payment/payment-failure', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              razorpay_order_id: orderData.orderId,
+              error_description: 'Payment cancelled by user',
+              error_code: 'USER_CANCELLED'
+            })
+          });
+
+          const data = await response.json();
+          console.log("🛑 Failure recorded:", data);
+          
+          Swal.close();
+
+          // 3. ✅ REDIRECT USING THE ORDER ID FROM BACKEND
+          if (data.success && data.orderId) {
+             window.location.href = `/orderFailure?orderId=${data.orderId}`;
+          } else {
+             // Fallback only if backend didn't return an ID
+             console.error("No orderId returned from failure endpoint");
+             window.location.href = `/orderFailure?error=PaymentCancelled`;
+          }
+
+        } catch (err) {
+          console.error('Error in ondismiss:', err);
+          window.location.href = '/orderFailure?error=UnknownError';
+        }
       }
     }
   };
 
   const rzp = new Razorpay(options);
 
-  // Handle payment failure event
+  // Handle Bank Declines / Network Failures
   rzp.on('payment.failed', async (response) => {
-    console.log('❌ Payment failed:', response.error);
+    console.log('❌ Payment failed event:', response.error);
     await handlePaymentFailure(response.error);
   });
 
@@ -4659,6 +4194,35 @@ async function retryFailedOrder(orderId) {
     Swal.fire('Error', error.message, 'error');
   }
 }
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Check if dark mode is saved in localStorage
+    const savedTheme = localStorage.getItem('sentique-theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+
+    // 2. Listen for dark mode changes from header
+    // (When user toggles theme in header, body class changes)
+    // This will automatically apply to checkout page too
+    
+    // Optional: Force dark mode on page load if header set it
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isDarkMode = document.body.classList.contains('dark-mode');
+          localStorage.setItem('sentique-theme', isDarkMode ? 'dark' : 'light');
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  });
 </script>
 
 </body>
