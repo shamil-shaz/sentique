@@ -1,98 +1,96 @@
 <%- include("../partials/admin/header.ejs") %>
 
 <style>
+  /* 1. GLOBAL RESET & OVERFLOW FIX */
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
 
-  .dashboard-main {
-    margin-left: 240px;
-    padding: 100px 45px 50px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden; /* Force hide horizontal scrollbar */
   }
 
+  /* 2. MAIN LAYOUT */
+  .dashboard-main {
+    margin-left: 240px;
+    padding: 100px 30px 50px; /* Reduced side padding slightly */
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    width: auto; /* Allow auto width to respect margin */
+    transition: all 0.3s ease;
+  }
+
+  /* 3. HEADER & FILTERS */
   .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 40px;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Critical for responsiveness */
     gap: 20px;
   }
 
   .dashboard-title {
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 800;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: -0.5px;
   }
 
   .filter-section {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
     background: white;
-    padding: 16px 24px;
+    padding: 12px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Ensures buttons drop to next line */
+    max-width: 100%; /* Prevent filter box from overflowing */
   }
 
   .filter-btn {
-    padding: 10px 18px;
+    padding: 8px 16px;
     border: 2px solid #e2e8f0;
     background: white;
     border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
     font-size: 13px;
-    transition: all 0.3s ease;
+    font-weight: 600;
     color: #7a8293;
     text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap; /* Keep button text on one line */
   }
 
-  .filter-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
-  }
-
-  .filter-btn.active {
+  .filter-btn.active, .filter-btn:hover {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   }
 
   .date-range-form {
     display: flex;
     gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .date-input {
-    padding: 10px 14px;
+    padding: 8px 12px;
     border: 2px solid #e2e8f0;
     border-radius: 8px;
     font-size: 13px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    background: white;
-  }
-
-  .date-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    max-width: 130px; /* Limit width of date inputs */
   }
 
   .apply-btn {
-    padding: 10px 20px;
+    padding: 8px 16px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
@@ -100,18 +98,13 @@
     cursor: pointer;
     font-weight: 700;
     font-size: 13px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   }
 
-  .apply-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-  }
-
+  /* 4. KPI GRID */
   .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    /* Uses minmax to auto-fit. If screen is tiny, it goes to 1 column */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
     gap: 16px;
     margin-bottom: 32px;
   }
@@ -122,22 +115,11 @@
     padding: 24px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     border-left: 5px solid #667eea;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Critical: Cuts off any glowing effects causing scroll */
   }
 
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.1), transparent);
-    border-radius: 50%;
-  }
-
+  /* KPI Colors */
   .kpi-card:nth-child(1) { border-left-color: #667eea; }
   .kpi-card:nth-child(2) { border-left-color: #48bb78; }
   .kpi-card:nth-child(3) { border-left-color: #f6ad55; }
@@ -145,79 +127,53 @@
   .kpi-card:nth-child(5) { border-left-color: #4299e1; }
   .kpi-card:nth-child(6) { border-left-color: #9f7aea; }
 
-  .kpi-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-  }
-
-  .kpi-content {
-    position: relative;
-    z-index: 1;
-  }
-
-  .kpi-label {
-    font-size: 11px;
-    color: #7a8293;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-  }
-
   .kpi-value {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
     color: #1a202c;
     margin-bottom: 8px;
+    word-break: break-all; /* Prevents long numbers from stretching screen */
   }
 
   .kpi-growth {
     font-size: 12px;
     font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
     padding: 4px 8px;
     border-radius: 6px;
     width: fit-content;
   }
+  .kpi-growth.positive { color: #48bb78; background: rgba(72, 187, 120, 0.1); }
+  .kpi-growth.negative { color: #fc8181; background: rgba(252, 129, 129, 0.1); }
 
-  .kpi-growth.positive { 
-    color: #48bb78;
-    background: rgba(72, 187, 120, 0.1);
-  }
-
-  .kpi-growth.negative { 
-    color: #fc8181;
-    background: rgba(252, 129, 129, 0.1);
-  }
-
-  .content-grid {
+  /* 5. CONTENT GRIDS */
+  .content-grid, .grid-2 {
     display: grid;
-    grid-template-columns: 2fr 1fr;
     gap: 24px;
     margin-bottom: 24px;
+    width: 100%;
   }
+  
+  .content-grid { grid-template-columns: 2fr 1fr; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
 
   .card {
     background: white;
     border-radius: 14px;
-    padding: 28px;
+    padding: 24px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-  }
-
-  .card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    overflow: hidden; /* Ensures chart or table doesn't poke out */
   }
 
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
     border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 15px;
   }
 
   .card-title {
@@ -228,203 +184,112 @@
 
   .chart-container {
     position: relative;
-    height: 320px;
+    height: 300px;
+    width: 100%;
   }
 
-  .chart-filter-btn {
-    padding: 6px 12px;
-    border: 1px solid #e2e8f0;
-    background: white;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 12px;
-    transition: all 0.3s ease;
-    color: #7a8293;
-  }
-
-  .chart-filter-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
-  }
-
-  .chart-filter-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: transparent;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  }
-
+  /* 6. TABLES (The usual suspect for overflow) */
   .table-container {
-    overflow-x: auto;
+    width: 100%;
+    overflow-x: auto; /* Allows table to scroll internally */
+    -webkit-overflow-scrolling: touch;
+    margin-top: 10px;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
+    white-space: nowrap; /* Forces horizontal scroll instead of ugly wrapping */
+  }
+
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
   }
 
   th {
-    text-align: left;
-    padding: 14px 12px;
-    font-size: 11px;
-    font-weight: 800;
-    color: #7a8293;
-    border-bottom: 2px solid #f0f0f0;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
     background: #f9fafb;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #7a8293;
   }
 
-  td {
-    padding: 14px 12px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  tr:hover {
-    background-color: #fafbff;
-  }
-
-  .customer-cell {
-    font-weight: 700;
-    color: #1a202c;
-  }
+  td { font-size: 13px; }
 
   .status-badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 24px;
+    padding: 5px 10px;
+    border-radius: 20px;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
-
-  .status-placed {
-    background: rgba(246, 173, 85, 0.15);
-    color: #f6ad55;
-  }
-
-  .status-confirmed {
-    background: rgba(102, 126, 234, 0.15);
-    color: #667eea;
-  }
-
-  .status-processing {
-    background: rgba(66, 153, 225, 0.15);
-    color: #4299e1;
-  }
-
-  .status-shipped {
-    background: rgba(159, 122, 234, 0.15);
-    color: #9f7aea;
-  }
-
-  .status-delivered {
-    background: rgba(72, 187, 120, 0.15);
-    color: #48bb78;
-  }
-
-  .status-cancelled {
-    background: rgba(252, 129, 129, 0.15);
-    color: #fc8181;
-  }
+  
+  /* Status Colors */
+  .status-placed { background: rgba(246, 173, 85, 0.15); color: #f6ad55; }
+  .status-confirmed { background: rgba(102, 126, 234, 0.15); color: #667eea; }
+  .status-processing { background: rgba(66, 153, 225, 0.15); color: #4299e1; }
+  .status-shipped { background: rgba(159, 122, 234, 0.15); color: #9f7aea; }
+  .status-delivered { background: rgba(72, 187, 120, 0.15); color: #48bb78; }
+  .status-cancelled { background: rgba(252, 129, 129, 0.15); color: #fc8181; }
 
   .stat-item {
-    padding: 14px 0;
-    border-bottom: 1px solid #f0f0f0;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
   }
 
-  .stat-item:last-child {
-    border-bottom: none;
+  /* 7. MEDIA QUERIES (The Fixes) */
+
+  /* Tablet & Smaller Laptops */
+  @media (max-width: 1200px) {
+    .content-grid { grid-template-columns: 1fr; } /* Stack charts */
   }
 
-  .stat-label {
-    font-size: 13px;
-    color: #7a8293;
-    font-weight: 700;
-  }
-
-  .stat-value {
-    font-size: 16px;
-    font-weight: 800;
-    color: #1a202c;
-  }
-
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-bottom: 24px;
-  }
-
-  @media (max-width: 1400px) {
-    .content-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 1024px) {
+  /* Mobile & Tablet Portrait */
+  @media (max-width: 991px) {
     .dashboard-main {
-      margin-left: 0;
-      padding: 80px 25px 30px;
-    }
-
-    .kpi-grid {
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-    }
-
-    .kpi-value {
-      font-size: 22px;
-    }
-
-    .dashboard-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .filter-section {
+      margin-left: 0; /* Remove sidebar margin */
+      padding: 80px 15px 30px; /* Reduce padding to prevent push */
       width: 100%;
     }
 
-    .grid-2 {
-      grid-template-columns: 1fr;
+    .grid-2 { grid-template-columns: 1fr; } /* Stack 2-column grids */
+  }
+
+  /* Mobile Phones */
+  @media (max-width: 768px) {
+    .dashboard-title { font-size: 24px; }
+    
+    .filter-section {
+      width: 100%;
+      justify-content: flex-start;
+      padding: 15px;
+    }
+    
+    /* Make date inputs full width on mobile */
+    .date-input { width: 45%; max-width: none; }
+    .date-range-form { width: 100%; }
+
+    .kpi-grid {
+      grid-template-columns: 1fr; /* Force 1 column for KPIs on mobile */
+    }
+
+    .card { padding: 15px; } /* Less padding inside cards */
+    
+    /* Force chart buttons to scroll if they don't fit */
+    .card-header > div:last-child {
+      width: 100%;
+      overflow-x: auto;
+      display: flex;
+      padding-bottom: 5px;
     }
   }
 
-  @media (max-width: 768px) {
-    .dashboard-title {
-      font-size: 28px;
-    }
-
-    table {
-      font-size: 12px;
-    }
-
-    td, th {
-      padding: 10px 8px;
-    }
-
-    .card {
-      padding: 16px;
-    }
-
-    .kpi-card {
-      padding: 16px;
-    }
-
-    .kpi-value {
-      font-size: 20px;
-    }
+  @media (max-width: 480px) {
+    .date-input { width: 100%; } /* Full width date inputs */
+    .filter-btn { width: 100%; text-align: center; } /* Stack filter buttons */
   }
 </style>
 

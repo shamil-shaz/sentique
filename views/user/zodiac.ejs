@@ -536,8 +536,7 @@
 <script>
     const initialProducts = <%- JSON.stringify(products || []) %>;
 
-    // --- 1. DEBOUNCE UTILITY FUNCTION ---
-    // This prevents the API from being called on every single keystroke
+   
     function debounce(func, delay) {
         let timeoutId;
         return function (...args) {
@@ -548,9 +547,7 @@
         };
     }
 
-    // --- 2. ANIMATIONS & UI SETUP ---
-    
-    // Responsive 3D Carousel
+
     (function generate3DCarousel() {
       const carousel = document.getElementById('carousel3d');
       if (!carousel) return;
@@ -587,7 +584,7 @@
       updateCarousel();
     })();
 
-    // Particles Background
+ 
     (function bgEffects() {
       const pContainer = document.getElementById('particlesContainer');
       if(!pContainer) return;
@@ -602,13 +599,13 @@
       }
     })();
 
-    // --- 3. SEARCH & FILTER LOGIC ---
+   
     const searchInput = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearchBtn');
     const filterForm = document.getElementById('filterForm');
     const productsGrid = document.getElementById('productsGrid');
 
-    // Toggle Filters (Mobile)
+  
     document.getElementById('toggleFilters').addEventListener('click', () => {
       document.getElementById('filters').classList.add('show');
       document.getElementById('filterOverlay').classList.add('show');
@@ -621,41 +618,39 @@
     document.getElementById('closeFilter').addEventListener('click', closeFilters);
     document.getElementById('filterOverlay').addEventListener('click', closeFilters);
 
-    // --- DEBOUNCED SEARCH IMPLEMENTATION ---
-    
-    // Create the delayed fetch function (500ms delay)
+ 
     const debouncedFetch = debounce(() => {
         fetchAndRender();
     }, 500);
 
-    // Listen for typing
+    
     searchInput.addEventListener('input', () => {
-        // 1. Show/Hide clear button immediately
+        
         clearBtn.style.display = searchInput.value.trim() ? 'block' : 'none';
-        // 2. Trigger the delayed search
+        
         debouncedFetch();
     });
 
-    // Immediate search on 'Enter' key or Search Button click
+
     document.querySelector('.shop-search-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        fetchAndRender(); // No delay if they hit enter
+        fetchAndRender(); 
     });
 
-    // Clear Button Logic
+    
     clearBtn.addEventListener('click', () => {
         searchInput.value = ''; 
         clearBtn.style.display = 'none'; 
-        fetchAndRender(); // Fetch all products immediately
+        fetchAndRender(); 
     });
 
-    // Apply Filters Button
+    
     document.getElementById('applyFiltersBtn').addEventListener('click', () => {
         fetchAndRender();
         if(window.innerWidth < 992) closeFilters();
     });
 
-    // --- 4. FETCH API & RENDER ---
+    
     async function fetchAndRender() {
       let qs = new URLSearchParams();
       
@@ -687,7 +682,7 @@
       }
     }
 
-    // Helper: Calculate Display Price
+    
     function getPrice(p) {
       if(p.variants && p.variants.length > 0) {
         // Logic must match backend logic for consistency
@@ -701,7 +696,7 @@
       return p.salePrice || p.price || 0;
     }
 
-    // Render HTML Cards
+    
     function renderHTML(products) {
       productsGrid.innerHTML = '';
       
@@ -744,7 +739,7 @@
       fetchAndRender();
     }
 
-    // --- TOAST & WISHLIST ---
+   
     function showModernToast(type, title, message) {
         const container = document.getElementById('customToastContainer');
         const toast = document.createElement('div');

@@ -1,559 +1,363 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin - Users</title>
+  <title>Admin - Users Management</title>
 
-  <!-- Bootstrap for pagination styling -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="/adminthings/dashboard.css">
   <style>
+    /* --- 1. CORE RESET & VARIABLES --- */
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --surface: #ffffff;
+      --bg: #f3f4f6;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      display: flex;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      background: linear-gradient(135deg, #f0f4f8 0%, #d9e4ec 100%);
+      overflow-x: hidden; /* Prevents horizontal scroll on the main window */
     }
 
-    .content {
-      flex: 1;
-      padding-left: 260px;
-      padding-top: 100px;
-      padding-right: 30px;
-      padding-bottom: 40px;
-      width: 100%;
-      max-width: 1600px;
-      margin: 0 auto;
+    /* --- 2. LAYOUT STRUCTURE --- */
+    /* This is the container for all your page content */
+    .main-content-wrapper {
+      margin-left: 195px; /* Width of your sidebar */
+      padding: 80px;
+      width: calc(100% - 195px);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 24px; /* Consistent vertical spacing */
     }
 
-    /* Header Section */
+    /* --- 3. PAGE HEADER --- */
     .page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
-      padding: 0 10px;
-    }
-
-    .page-header h1 {
-      font-size: 32px;
-      font-weight: 700;
-      color: #2c3e50;
-      margin: 0;
-    }
-
-    .header-stats {
-      display: flex;
+      flex-wrap: wrap;
       gap: 20px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.025em;
+    }
+
+    .stats-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .stat-badge {
-      background: white;
-      padding: 12px 24px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-
-    .stat-badge .stat-number {
-      font-size: 24px;
-      font-weight: 700;
-      color: #0ea5e9;
-      display: block;
-    }
-
-    .stat-badge .stat-label {
-      font-size: 12px;
-      color: #7f8c8d;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
-    }
-
-    /* Search and Filter Container */
-    .controls-container {
-      background: white;
-      padding: 25px 30px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      margin-bottom: 25px;
-    }
-
-    .search-filter-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .search-wrapper {
-      position: relative;
-      flex: 1;
-    }
-
-    .search-input-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 20px;
-      font-size: 18px;
-      color: #95a5a6;
-      pointer-events: none;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 16px 50px 16px 52px;
-      border: 2px solid #ecf0f1;
-      border-radius: 12px;
-      font-size: 15px;
-      transition: all 0.3s ease;
-      outline: none;
-      background: #fafbfc;
-    }
-
-    .search-input:focus {
-      border-color: #0ea5e9;
-      background: white;
-      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
-    }
-
-    .clear-search {
-      position: absolute;
-      right: 16px;
-      background: #e8eaed;
-      border: none;
-      color: #5f6368;
-      cursor: pointer;
-      font-size: 18px;
-      padding: 6px 10px;
-      border-radius: 50%;
-      display: none;
-      transition: all 0.2s;
-      line-height: 1;
-    }
-
-    .clear-search:hover {
-      background: #d1d5db;
-      color: #1f2937;
-    }
-
-    .clear-search.active {
-      display: block;
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .filter-btn {
-      padding: 12px 20px;
-      border: 2px solid #ecf0f1;
-      background: white;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: #5f6368;
-    }
-
-    .filter-btn:hover {
-      border-color: #0ea5e9;
-      color: #0ea5e9;
-    }
-
-    .filter-btn.active {
-      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-      border-color: #0ea5e9;
-      color: white;
-    }
-
-    .search-stats {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #7f8c8d;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 999px; /* Pill shape */
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      box-shadow: var(--shadow-sm);
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .search-stats strong {
-      color: #2c3e50;
-      font-weight: 600;
+    .stat-badge strong {
+      color: var(--text);
+      font-weight: 800;
+      font-size: 14px;
     }
 
-    /* Table Container */
-    .table-container {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      overflow: hidden;
+    /* --- 4. CONTROLS BAR (Search & Filters) --- */
+    .controls-bar {
+      background: var(--surface);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
-    .table-wrapper {
+    .search-group {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 42px; /* Fixed height for alignment */
+      padding: 0 40px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f9fafb;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: none;
+    }
+    .clear-search.active { display: block; }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      height: 42px; /* Matches search input height */
+      padding: 0 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      background: #f9fafb;
+      color: var(--text);
+      border-color: #d1d5db;
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* --- 5. DATA TABLE --- */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden; /* Clips rounded corners */
+    }
+
+    .table-responsive {
+      width: 100%;
       overflow-x: auto;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      white-space: nowrap; /* Prevents wrapping */
     }
 
     thead {
-      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+      background: #f9fafb;
+      border-bottom: 1px solid var(--border);
     }
 
     th {
-      padding: 18px 16px;
       text-align: left;
-      font-weight: 600;
-      color: white;
+      padding: 14px 24px;
+      font-size: 11px;
       text-transform: uppercase;
-      font-size: 12px;
-      letter-spacing: 1px;
-      white-space: nowrap;
-    }
-
-    th:first-child {
-      padding-left: 24px;
-      border-radius: 0;
-    }
-
-    th:last-child {
-      text-align: center;
-    }
-
-    tbody tr {
-      transition: all 0.2s;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    tbody tr:hover {
-      background: #f8f9fa;
-      transform: scale(1.002);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-
-    tbody tr:last-child {
-      border-bottom: none;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      color: var(--text-muted);
     }
 
     td {
-      padding: 18px 16px;
-      color: #2c3e50;
+      padding: 16px 24px;
       font-size: 14px;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle; /* Critical for alignment */
     }
 
-    td:first-child {
-      padding-left: 24px;
-      font-weight: 600;
-      color: #7f8c8d;
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background-color: #f9fafb; }
+
+    /* User Profile Alignment */
+    .user-flex {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    td:last-child {
-      text-align: center;
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #e0e7ff;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0; /* Prevents squashing */
     }
 
-    .user-name {
-      font-weight: 600;
-      color: #2c3e50;
+    .user-meta {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.3;
     }
 
-    .user-email {
-      color: #5f6368;
-    }
+    .user-meta .name { font-weight: 600; }
+    .user-meta .email { font-size: 12px; color: var(--text-muted); }
 
-    .user-phone {
-      color: #5f6368;
-      font-family: 'Courier New', monospace;
-    }
-
-    .highlight {
-      background: linear-gradient(120deg, #ffd93d 0%, #fff176 100%);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
-      color: #2c3e50;
-    }
-
-    /* Status Badges */
-    .status-badge {
+    /* Status Pills */
+    .status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
+      padding: 4px 10px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
-
-    .status-active {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .status-blocked {
-      background: #f8d7da;
-      color: #721c24;
-    }
+    .status-active { background: #dcfce7; color: #166534; }
+    .status-blocked { background: #fee2e2; color: #991b1b; }
 
     /* Action Buttons */
-    .action-cell {
+    .btn-action {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-block-user { background: #fee2e2; color: #991b1b; }
+    .btn-unblock-user { background: #dcfce7; color: #166534; }
+    .btn-action:hover { opacity: 0.8; }
+
+    /* --- 6. PAGINATION & MESSAGES --- */
+    .pagination-wrapper {
       display: flex;
       justify-content: center;
-      gap: 8px;
+      padding-top: 10px;
     }
-
-    .btn-block {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
+    
+    .page-link {
+      color: var(--text-muted);
       border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.3s;
-      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+      margin: 0 2px;
+      border-radius: 6px;
     }
-
-    .btn-block:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-    }
-
-    .btn-block:active {
-      transform: translateY(0);
-    }
-
-    .btn-unblock {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    .page-item.active .page-link {
+      background-color: var(--primary);
       color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.3s;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
 
-    .btn-unblock:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    }
-
-    .btn-unblock:active {
-      transform: translateY(0);
-    }
-
-    /* No Results */
     .no-results {
+      padding: 40px;
       text-align: center;
-      padding: 80px 20px;
+      color: var(--text-muted);
+      display: none;
     }
 
-    .no-results-icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-      opacity: 0.3;
-    }
-
-    .no-results-text {
-      font-size: 20px;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 8px;
-    }
-
-    .no-results-hint {
-      font-size: 14px;
-      color: #95a5a6;
-    }
-
-    /* Pagination */
-    .pagination-container {
-      margin-top: 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .pagination {
-      display: flex;
-      gap: 8px;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .pagination .page-item {
-      list-style: none;
-    }
-
-    .pagination .page-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      border: 2px solid #ecf0f1;
-      background: white;
-      color: #5f6368;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .pagination .page-link:hover {
-      background: #0ea5e9;
-      color: white;
-      border-color: #0ea5e9;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(14, 165, 233, 0.3);
-    }
-
-    .pagination .page-item.active .page-link {
-      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-      border-color: #0ea5e9;
-      color: white;
-      box-shadow: 0 4px 8px rgba(14, 165, 233, 0.4);
-    }
-
-    /* Responsive Design */
+    /* --- 7. RESPONSIVE MEDIA QUERIES --- */
+    
+    /* Laptop & Tablet */
     @media (max-width: 1024px) {
-      .content {
-        padding-left: 20px;
-        padding-right: 20px;
-        padding-top: 80px;
+      .main-content-wrapper {
+        margin-left: 0;
+        width: 100%;
+        padding: 80px 24px 24px 24px; /* Add top padding for header */
       }
+    }
 
+    /* Mobile */
+    @media (max-width: 768px) {
       .page-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 15px;
+      }
+      
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch; /* Full width children */
+        padding: 12px;
       }
 
-      .header-stats {
+      .search-group {
         width: 100%;
-        justify-content: space-between;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .page-header h1 {
-        font-size: 24px;
-      }
-
-      .stat-badge {
-        padding: 10px 16px;
-      }
-
-      .stat-badge .stat-number {
-        font-size: 20px;
-      }
-
-      .search-filter-row {
-        grid-template-columns: 1fr;
-      }
-
-      .controls-container {
-        padding: 20px;
+        min-width: auto;
       }
 
       .filter-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr; /* 3 Equal buttons */
         width: 100%;
-        justify-content: space-between;
       }
 
       .filter-btn {
-        flex: 1;
-        padding: 10px 12px;
-        font-size: 13px;
-      }
-
-      th, td {
-        padding: 14px 12px;
-        font-size: 13px;
-      }
-
-      td:first-child, th:first-child {
-        padding-left: 16px;
-      }
-
-      .btn-block, .btn-unblock {
-        padding: 8px 16px;
-        font-size: 12px;
-      }
-    }
-
-    @media (max-width: 576px) {
-      .content {
-        padding: 60px 15px 30px 15px;
-      }
-
-      .page-header h1 {
-        font-size: 20px;
-      }
-
-      .header-stats {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
-      .stat-badge {
-        flex: 1;
-        min-width: calc(50% - 5px);
-      }
-
-      .search-input {
-        padding: 14px 45px 14px 45px;
-        font-size: 14px;
-      }
-
-      .controls-container {
-        padding: 15px;
-      }
-
-      table {
+        padding: 0 10px;
+        text-align: center;
+        justify-content: center;
         font-size: 12px;
       }
 
       th, td {
-        padding: 12px 8px;
+        padding: 12px 16px;
       }
-
-      .pagination .page-link {
-        width: 36px;
-        height: 36px;
-        font-size: 13px;
-      }
+      
+      /* Make table font slightly smaller on mobile */
+      .user-meta .name { font-size: 13px; }
+      .user-meta .email { font-size: 11px; }
     }
   </style>
-
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -561,68 +365,53 @@
 <%- include("../partials/admin/header.ejs") %>
 
 <body>
-  <div class="content">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1>👥 Users Management</h1>
-      <div class="header-stats">
+
+  <main class="main-content-wrapper">
+    
+    <header class="page-header">
+      <h1 class="page-title">Users Management</h1>
+      <div class="stats-group">
         <div class="stat-badge">
-          <span class="stat-number" id="totalUsers"><%= typeof totalUsers !== 'undefined' ? totalUsers : users.length %></span>
-          <span class="stat-label">Total Users</span>
+          Total: <strong id="totalUsers"><%= typeof totalUsers !== 'undefined' ? totalUsers : users.length %></strong>
         </div>
         <div class="stat-badge">
-          <span class="stat-number" id="activeUsers"><%= typeof activeUsersCount !== 'undefined' ? activeUsersCount : users.filter(u => !u.isBlocked).length %></span>
-          <span class="stat-label">Active</span>
+          Active: <strong style="color: #166534;"><%= typeof activeUsersCount !== 'undefined' ? activeUsersCount : users.filter(u => !u.isBlocked).length %></strong>
         </div>
         <div class="stat-badge">
-          <span class="stat-number" id="blockedUsers"><%= typeof blockedUsersCount !== 'undefined' ? blockedUsersCount : users.filter(u => u.isBlocked).length %></span>
-          <span class="stat-label">Blocked</span>
+          Blocked: <strong style="color: #991b1b;"><%= typeof blockedUsersCount !== 'undefined' ? blockedUsersCount : users.filter(u => u.isBlocked).length %></strong>
         </div>
       </div>
-    </div>
+    </header>
 
-
-
-    
-    
-    <!-- Search and Filter Controls -->
-    <div class="controls-container">
-      <div class="search-filter-row">
-        <div class="search-wrapper">
-          <div class="search-input-container">
-            <span class="search-icon">🔍</span>
-            <input 
-              type="text" 
-              class="search-input" 
-              id="userSearch" 
-              placeholder="Search by name, email, or phone number..."
-              autocomplete="off"
-            />
-            <button class="clear-search" id="clearSearch">✕</button>
-          </div>
-          <div class="search-stats">
-            📊 Showing <strong><span id="visibleCount"><%= users.length %></span></strong> of <strong><%= users.length %></strong> users
-          </div>
-        </div>
-        <div class="filter-group">
-          <button class="filter-btn <%= (!filterStatus || filterStatus === 'all') ? 'active' : '' %>" data-filter="all">All</button>
-          <button class="filter-btn <%= filterStatus === 'active' ? 'active' : '' %>" data-filter="active">Active</button>
-          <button class="filter-btn <%= filterStatus === 'blocked' ? 'active' : '' %>" data-filter="blocked">Blocked</button>
-        </div>
+    <section class="controls-bar">
+      <div class="search-group">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          class="search-input" 
+          id="userSearch" 
+          placeholder="Search by name, email or phone..." 
+          autocomplete="off"
+        >
+        <button class="clear-search" id="clearSearch">✕</button>
       </div>
-    </div>
 
-    <!-- User Table -->
-    <div class="table-container">
-      <div class="table-wrapper">
+      <div class="filter-group">
+        <button class="filter-btn <%= (!filterStatus || filterStatus === 'all') ? 'active' : '' %>" data-filter="all">All</button>
+        <button class="filter-btn <%= filterStatus === 'active' ? 'active' : '' %>" data-filter="active">Active</button>
+        <button class="filter-btn <%= filterStatus === 'blocked' ? 'active' : '' %>" data-filter="blocked">Blocked</button>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Full Name</th>     
-              <th>Email Address</th>
+              <th>User Info</th>
               <th>Phone Number</th>
               <th>Status</th>
+              <th style="text-align: right;">Action</th>
             </tr>
           </thead>
           <tbody id="userTableBody">
@@ -632,38 +421,55 @@
                   data-email="<%= user.email.toLowerCase() %>"
                   data-phone="<%= user.phone %>"
                   data-status="<%= user.isBlocked ? 'blocked' : 'active' %>">
-                <td><%= index + 1 %></td>
-                <td class="user-name"><%= user.name %></td>
-                <td class="user-email"><%= user.email %></td>
-                <td class="user-phone"><%= user.phone %></td>
+                
                 <td>
-                  <div class="action-cell">
-                    <% if (!user.isBlocked) { %>
-                      <button type="button" class="btn-block swal-btn" data-id="<%= user._id %>" data-action="block">
-                        Block
-                      </button>
-                    <% } else { %>
-                      <button type="button" class="btn-unblock swal-btn" data-id="<%= user._id %>" data-action="unblock">
-                        Unblock
-                      </button>
-                    <% } %>
+                  <div class="user-flex">
+                    <div class="avatar-circle" data-name="<%= user.name %>">
+                      <%= user.name.charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="user-meta">
+                      <span class="name"><%= user.name %></span>
+                      <span class="email"><%= user.email %></span>
+                    </div>
                   </div>
+                </td>
+                
+                <td style="font-family: monospace; color: var(--text-muted);">
+                  <%= user.phone %>
+                </td>
+
+                <td>
+                  <% if (!user.isBlocked) { %>
+                    <span class="status-pill status-active">Active</span>
+                  <% } else { %>
+                    <span class="status-pill status-blocked">Blocked</span>
+                  <% } %>
+                </td>
+
+                <td style="text-align: right;">
+                  <% if (!user.isBlocked) { %>
+                    <button class="btn-action btn-block-user swal-btn" data-id="<%= user._id %>" data-action="block">
+                      Block
+                    </button>
+                  <% } else { %>
+                    <button class="btn-action btn-unblock-user swal-btn" data-id="<%= user._id %>" data-action="unblock">
+                      Unblock
+                    </button>
+                  <% } %>
                 </td>
               </tr>
             <% }) %>
           </tbody>
         </table>
       </div>
-      <div id="noResults" class="no-results" style="display: none;">
-        <div class="no-results-icon">🔍</div>
-        <div class="no-results-text">No users found</div>
-        <div class="no-results-hint">Try adjusting your search or filter criteria</div>
-      </div>
-    </div>
 
-    <!-- Pagination -->
-    <div class="pagination-container" id="paginationContainer">
-      <nav aria-label="Page navigation">
+      <div id="noResults" class="no-results">
+        <p>No users found matching your search.</p>
+      </div>
+    </section>
+
+    <div class="pagination-wrapper" id="paginationContainer">
+      <nav>
         <ul class="pagination">
           <% for (let i = 1; i <= totalPages; i++) { %>
             <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
@@ -674,81 +480,45 @@
       </nav>
     </div>
 
-    <!-- Flash Messages -->
     <% if (successMessage && successMessage.length > 0) { %>
-      <div class="alert alert-success">
+      <div class="alert alert-success" style="margin-top: 20px;">
         <%= successMessage %>
       </div>
     <% } %>
     <% if (errorMessage && errorMessage.length > 0) { %>
-      <div class="alert alert-danger">
+      <div class="alert alert-danger" style="margin-top: 20px;">
         <%= errorMessage %>
       </div>
     <% } %>
-  </div>
+
+  </main>
 
   <script>
-    // Block/Unblock functionality
-    document.querySelectorAll('.swal-btn').forEach(button => {
-      button.addEventListener('click', function () {
-        const id = this.dataset.id;
-        const action = this.dataset.action;
-        const url = action === 'block' ? '/admin/blockCustomer' : '/admin/unblockCustomer';
-
-        Swal.fire({
-          title: action === 'block' ? 'Block User?' : 'Unblock User?',
-          text: action === 'block'
-            ? "This user will lose access to their account."
-            : "This user will regain full access.",
-          icon: action === 'block' ? 'warning' : 'question',
-          showCancelButton: true,
-          confirmButtonColor: action === 'block' ? '#ef4444' : '#10b981',
-          cancelButtonColor: '#95a5a6',
-          confirmButtonText: action === 'block' ? 'Yes, block user' : 'Yes, unblock user',
-          cancelButtonText: 'Cancel',
-          buttonsStyling: true,
-          customClass: {
-            confirmButton: 'swal-btn-custom',
-            cancelButton: 'swal-btn-custom'
-          }
-        }).then((result) => {
-          if (result.isConfirmed) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = url;
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'id';
-            input.value = id;
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
-          }
-        });
-      });
+    // --- 1. Dynamic Avatar Colors ---
+    document.querySelectorAll('.avatar-circle').forEach(av => {
+      const name = av.getAttribute('data-name') || '';
+      const colors = ['#e0e7ff', '#dcfce7', '#fee2e2', '#fef3c7', '#f3e8ff'];
+      const textColors = ['#4338ca', '#15803d', '#b91c1c', '#b45309', '#7e22ce'];
+      const idx = name.length % colors.length;
+      av.style.backgroundColor = colors[idx];
+      av.style.color = textColors[idx];
     });
 
-    // Search and Filter functionality
+    // --- 2. Search & Filter Logic ---
     const searchInput = document.getElementById('userSearch');
-    const clearSearchBtn = document.getElementById('clearSearch');
+    const clearBtn = document.getElementById('clearSearch');
     const userRows = document.querySelectorAll('.user-row');
     const noResults = document.getElementById('noResults');
-    const visibleCount = document.getElementById('visibleCount');
-    const paginationContainer = document.getElementById('paginationContainer');
     const tableBody = document.getElementById('userTableBody');
-    const filterBtns = document.querySelectorAll('.filter-btn');
-
+    const pagination = document.getElementById('paginationContainer');
+    
     let currentFilter = '<%= filterStatus || 'all' %>';
-
-    function highlightText(text, query) {
-      if (!query) return text;
-      const regex = new RegExp(`(${query})`, 'gi');
-      return text.replace(regex, '<span class="highlight">$1</span>');
-    }
 
     function performSearch() {
       const query = searchInput.value.toLowerCase().trim();
-      let visibleRows = 0;
+      let visible = 0;
+
+      clearBtn.classList.toggle('active', query.length > 0);
 
       userRows.forEach(row => {
         const name = row.dataset.name;
@@ -761,90 +531,73 @@
 
         if (matchesSearch && matchesFilter) {
           row.style.display = '';
-          visibleRows++;
-
-          const nameCell = row.querySelector('.user-name');
-          const emailCell = row.querySelector('.user-email');
-          const phoneCell = row.querySelector('.user-phone');
-
-          const originalName = nameCell.dataset.original || nameCell.textContent;
-          const originalEmail = emailCell.dataset.original || emailCell.textContent;
-          const originalPhone = phoneCell.dataset.original || phoneCell.textContent;
-
-          nameCell.dataset.original = originalName;
-          emailCell.dataset.original = originalEmail;
-          phoneCell.dataset.original = originalPhone;
-
-          if (query) {
-            nameCell.innerHTML = highlightText(originalName, query);
-            emailCell.innerHTML = highlightText(originalEmail, query);
-            phoneCell.innerHTML = highlightText(originalPhone, query);
-          } else {
-            nameCell.textContent = originalName;
-            emailCell.textContent = originalEmail;
-            phoneCell.textContent = originalPhone;
-          }
+          visible++;
         } else {
           row.style.display = 'none';
         }
       });
 
-      visibleCount.textContent = visibleRows;
-      
-      if (visibleRows === 0) {
-        tableBody.parentElement.style.display = 'none';
+      if (visible === 0) {
+        tableBody.style.display = 'none';
         noResults.style.display = 'block';
       } else {
-        tableBody.parentElement.style.display = '';
+        tableBody.style.display = 'table-row-group';
         noResults.style.display = 'none';
       }
 
-      if (query || currentFilter !== 'all') {
-        paginationContainer.style.display = 'none';
-      } else {
-        paginationContainer.style.display = 'flex';
-      }
-
-      clearSearchBtn.classList.toggle('active', query.length > 0);
+      // Hide Pagination if searching locally
+      pagination.style.display = (query.length > 0) ? 'none' : 'flex';
     }
 
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const filter = this.dataset.filter;
-        const currentUrl = new URL(window.location.href);
-        if (filter === 'all') {
-          currentUrl.searchParams.delete('filter');
-        } else {
-          currentUrl.searchParams.set('filter', filter);
-        }
-        currentUrl.searchParams.set('page', '1');
-        window.location.href = currentUrl.toString();
-      });
-    });
-
     searchInput.addEventListener('input', performSearch);
-
-    clearSearchBtn.addEventListener('click', () => {
+    clearBtn.addEventListener('click', () => {
       searchInput.value = '';
-      searchInput.focus();
       performSearch();
     });
 
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        searchInput.value = '';
-        performSearch();
-      }
+    // Filter Buttons (Server Reload)
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const filter = this.dataset.filter;
+        const url = new URL(window.location.href);
+        if (filter === 'all') url.searchParams.delete('filter');
+        else url.searchParams.set('filter', filter);
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+      });
+    });
+
+    // --- 3. Block/Unblock Actions ---
+    document.querySelectorAll('.swal-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const id = this.dataset.id;
+        const action = this.dataset.action;
+        const isBlock = action === 'block';
+
+        Swal.fire({
+          title: isBlock ? 'Block User?' : 'Unblock User?',
+          text: isBlock ? "They will lose access immediately." : "Access will be restored.",
+          icon: isBlock ? 'warning' : 'info',
+          showCancelButton: true,
+          confirmButtonColor: isBlock ? '#ef4444' : '#10b981',
+          cancelButtonColor: '#9ca3af',
+          confirmButtonText: isBlock ? 'Yes, Block' : 'Yes, Unblock'
+        }).then((res) => {
+          if (res.isConfirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = isBlock ? '/admin/blockCustomer' : '/admin/unblockCustomer';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = id;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+          }
+        });
+      });
     });
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
