@@ -61,7 +61,7 @@ const adminRouter = require('./routes/adminRouter');
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly: true,
-        sameSite: 'none', // ✅ Important for localhost:5173
+        sameSite: 'none', 
         secure: false
       }
     }));

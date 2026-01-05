@@ -1,0 +1,357 @@
+<%- include("../partials/user/header.ejs") %>
+
+<style>
+/* ================= THEME VARIABLES ================= */
+:root {
+  --chat-bg:#f8fafc;
+  --wrapper-bg:#ffffff;
+  --border:#e2e8f0;
+  --user:#4f46e5;
+  --admin:#ffffff;
+  --text:#1e293b;
+  --muted:#64748b;
+  --header:#0f172a;
+  --input-bg:#ffffff;
+}
+
+/* DARK MODE */
+body.dark-mode {
+  --chat-bg:#0f172a;
+  --wrapper-bg:#1a1a1a;
+  --border:#2a2a2a;
+  --user:#6366f1;
+  --admin:#222222;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --header:#000000;
+  --input-bg:#121212;
+}
+
+/* ================= LAYOUT ================= */
+.contact-wrapper{
+  max-width:500px;
+  margin:1rem auto;
+  height:75vh;
+  background:var(--wrapper-bg);
+  border:1px solid var(--border);
+  border-radius:16px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  color:var(--text);
+}
+
+/* ================= HEADER ================= */
+.chat-header{
+  background:var(--header);
+  color:#fff;
+  padding:16px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+/* ================= CHAT BODY ================= */
+.chat-body{
+  flex:1;
+  background:var(--chat-bg);
+  padding:16px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* ================= MESSAGE ================= */
+.msg-box{max-width:80%;display:flex;flex-direction:column;}
+.msg-box.user{align-self:flex-end;}
+.msg-box.admin{align-self:flex-start;}
+
+.bubble{
+  padding:12px 16px;
+  font-size:14px;
+  line-height:1.5;
+  word-wrap:break-word;
+}
+
+.user .bubble{
+  background:var(--user);
+  color:#fff;
+  border-radius:18px 18px 2px 18px;
+}
+
+.admin .bubble{
+  background:var(--admin);
+  border:1px solid var(--border);
+  border-radius:18px 18px 18px 2px;
+  color:var(--text);
+}
+
+.meta{
+  font-size:10px;
+  color:var(--muted);
+  margin-top:4px;
+  text-align:right;
+}
+
+/* ================= BOT CARD ================= */
+.bot-card{
+  background:var(--wrapper-bg);
+  border:1px solid var(--border);
+  padding:14px;
+  border-radius:14px;
+  max-width:85%;
+}
+
+.bot-card p{font-weight:600;margin-bottom:8px;}
+
+.option-btn{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  background:var(--user);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* ================= ORDER ITEM ================= */
+.order-item{
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  margin-top:6px;
+  cursor:pointer;
+  font-size:13px;
+  background:var(--chat-bg);
+}
+
+/* ================= FOOTER ================= */
+.chat-footer{
+  border-top:1px solid var(--border);
+  padding:14px;
+  display:flex;
+  gap:10px;
+  background:var(--wrapper-bg);
+}
+
+.chat-footer textarea{
+  flex:1;
+  resize:none;
+  border-radius:10px;
+  border:1px solid var(--border);
+  padding:10px;
+  background:var(--input-bg);
+  color:var(--text);
+}
+
+.chat-footer textarea::placeholder{
+  color:var(--muted);
+}
+
+.send-btn{
+  background:var(--user);
+  border:none;
+  color:#fff;
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* MOBILE */
+@media (max-width:768px){
+  .contact-wrapper{
+    max-width:100%;
+    height:calc(100vh - 70px);
+    margin:0;
+    border-radius:0;
+    border:none;
+  }
+
+  .msg-box{max-width:90%;}
+  .chat-footer{padding:10px;}
+}
+
+/* SMALL MOBILE */
+@media (max-width:420px){
+  .bubble{font-size:13px;}
+  .chat-header{padding:12px;}
+}
+</style>
+
+
+<div class="contact-wrapper">
+
+  <!-- HEADER -->
+  <div class="chat-header">
+    <i class="fas fa-headset"></i>
+    <div>
+      <strong>Sentique Support</strong><br>
+      <small>Online</small>
+    </div>
+  </div>
+
+  <!-- CHAT BODY -->
+  <div class="chat-body" id="chatArea">
+
+    <% if(messages.length > 0){ %>
+      <% messages.forEach(msg => { %>
+        <div class="msg-box <%= msg.sender %>">
+          <div class="bubble"><%= msg.message %></div>
+          <div class="meta">
+            <%= new Date(msg.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) %>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p id="startMsg" style="text-align:center;color:#888;margin-top:40px;">
+        Say <b>Hi</b> 👋 to start chat
+      </p>
+    <% } %>
+
+  </div>
+
+  <!-- INPUT -->
+  <form class="chat-footer" id="chatForm">
+    <textarea id="messageInput" rows="1" placeholder="Type a message..." required></textarea>
+    <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+  </form>
+
+</div>
+
+<script>
+const chatArea = document.getElementById("chatArea");
+const chatForm = document.getElementById("chatForm");
+const input = document.getElementById("messageInput");
+
+let stage = "idle";
+const orders = <%- JSON.stringify(orders) %>;
+
+function scrollBottom() {
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+/* ================= SERVER SEND ================= */
+async function sendMessage(message, issueType = "general") {
+  const res = await fetch("/contact/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, issueType })
+  });
+  return res.json();
+}
+
+/* ================= UI BUBBLES ================= */
+function userBubble(text) {
+  chatArea.insertAdjacentHTML("beforeend", `
+    <div class="msg-box user">
+      <div class="bubble">${text}</div>
+    </div>
+  `);
+  scrollBottom();
+}
+
+function botBubble(text) {
+  chatArea.insertAdjacentHTML("beforeend", `
+    <div class="msg-box admin">
+      <div class="bubble">${text}</div>
+    </div>
+  `);
+  scrollBottom();
+}
+
+/* ================= BOT OPTIONS ================= */
+function showOptions() {
+  chatArea.insertAdjacentHTML("beforeend", `
+    <div class="bot-card" id="botOptions">
+      <p>Select your issue</p>
+      <button class="option-btn" onclick="selectIssue('order')">Order Issue</button>
+      <button class="option-btn" onclick="selectIssue('wallet')">Wallet Issue</button>
+      <button class="option-btn" onclick="selectIssue('general')">General Query</button>
+    </div>
+  `);
+  scrollBottom();
+}
+
+window.selectIssue = function(type) {
+  document.getElementById("botOptions")?.remove();
+  stage = type;
+
+  if (type === "order") showOrders();
+  else if (type === "wallet") botBubble("Please explain your wallet issue.");
+  else botBubble("Please describe your issue.");
+};
+
+/* ================= ORDER FLOW (FIXED) ================= */
+function showOrders() {
+  let html = `<div class="bot-card" id="orderList"><p>Select Order</p>`;
+
+  if (orders.length === 0) {
+    html += `<small>No orders found</small>`;
+  } else {
+    orders.forEach(o => {
+      html += `
+        <div class="order-item"
+             onclick="selectOrder('${o.orderId}','${o.status}')">
+          <strong>${o.orderId}</strong><br>
+          <small>Status: ${o.status}</small>
+        </div>
+      `;
+    });
+  }
+
+  html += `</div>`;
+  chatArea.insertAdjacentHTML("beforeend", html);
+  scrollBottom();
+}
+
+/* ✅ MAKE THIS GLOBAL */
+window.selectOrder = async function(orderId, status) {
+  document.getElementById("orderList")?.remove();
+
+  const formattedMsg =
+`[ORDER ISSUE]
+Order ID: ${orderId}
+Status: ${status}`;
+
+  userBubble(`Order ID: ${orderId}`);
+  await sendMessage(formattedMsg, "order");
+
+  botBubble("✅ Order details sent to admin.");
+  stage = "idle";
+};
+
+/* ================= FORM SUBMIT ================= */
+chatForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  document.getElementById("startMsg")?.remove();
+  userBubble(text);
+
+  if (stage === "wallet") {
+    await sendMessage(`[WALLET ISSUE]\n${text}`, "wallet");
+    botBubble("Wallet issue sent to admin.");
+    stage = "idle";
+    return;
+  }
+
+  if (stage === "general") {
+    await sendMessage(text, "general");
+    botBubble("Admin will reply shortly.");
+    stage = "idle";
+    return;
+  }
+
+  await sendMessage(text);
+  setTimeout(showOptions, 500);
+});
+</script>
+
+

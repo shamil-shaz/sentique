@@ -1,0 +1,251 @@
+<%- include("../partials/admin/header.ejs") %>
+
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-light: #f0f1ff;
+    --bg-main: #f8fafc;
+    --white: #ffffff;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --admin-msg-bg: #4f46e5;
+  }
+
+  body {
+    background: var(--bg-main);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* 🔥 FIX HEADER + SIDEBAR */
+  .admin-content-wrapper {
+    margin-left: 260px;
+    padding-top: 80px;
+    min-height: 100vh;
+  }
+
+  /* Chat Container */
+  .chat-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    height: calc(100vh - 120px);
+    background: var(--white);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+  }
+
+  /* Header */
+  .chat-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--white);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn {
+    padding: 6px;
+    border-radius: 8px;
+    color: var(--text-muted);
+  }
+
+  .back-btn:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .avatar-circle {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--primary), #818cf8);
+    color: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  .user-meta h4 {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .status-indicator {
+    font-size: 12px;
+    color: #10b981;
+  }
+
+  /* Messages */
+  .chat-body {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #fbfcfe;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .msg-group {
+    max-width: 75%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .msg-group.user { align-self: flex-start; }
+  .msg-group.admin { align-self: flex-end; }
+
+  .message {
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .user .message {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+  }
+
+  .admin .message {
+    background: var(--admin-msg-bg);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+
+  .time-stamp {
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--text-muted);
+  }
+
+  /* Order link */
+  .order-link {
+    color: #38bdf8;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
+  /* Footer */
+  .chat-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+    background: var(--white);
+  }
+
+  .input-wrapper {
+    background: #f1f5f9;
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    gap: 10px;
+  }
+
+  textarea {
+    flex: 1;
+    border: none;
+    resize: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .send-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    cursor: pointer;
+  }
+
+  .send-btn:hover {
+    background: var(--primary-hover);
+  }
+
+  /* 📱 Responsive */
+  @media (max-width: 768px) {
+    .admin-content-wrapper {
+      margin-left: 0;
+      padding-top: 70px;
+    }
+    .chat-container {
+      margin: 0;
+      height: calc(100vh - 70px);
+      border-radius: 0;
+    }
+    .msg-group { max-width: 90%; }
+  }
+</style>
+
+<div class="admin-content-wrapper">
+  <div class="chat-container">
+
+    <!-- HEADER -->
+    <header class="chat-header">
+      <div class="header-left">
+        <a href="/admin/contact" class="back-btn">←</a>
+        <div class="avatar-circle"><%= user.name.charAt(0) %></div>
+        <div class="user-meta">
+          <h4><%= user.name %></h4>
+          <div class="status-indicator">Active</div>
+        </div>
+      </div>
+      <small style="color:var(--text-muted)"><%= user.email %></small>
+    </header>
+
+    <!-- CHAT BODY -->
+    <main class="chat-body" id="chatBody">
+      <% messages.forEach(msg => { %>
+        <div class="msg-group <%= msg.sender === 'admin' ? 'admin' : 'user' %>">
+          <div class="message">
+            <% 
+              const orderMatch = msg.message.match(/Order ID:\s*([A-Za-z0-9-]+)/);
+              if (orderMatch) {
+                const orderId = orderMatch[1];
+            %>
+              <%- msg.message.replace(
+                orderMatch[0],
+                `<a href="/admin/orders?orderId=${orderId}" class="order-link">Order ID: ${orderId}</a>`
+              ) %>
+            <% } else { %>
+              <%= msg.message %>
+            <% } %>
+          </div>
+          <span class="time-stamp">
+            <%= new Date(msg.createdAt).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) %>
+          </span>
+        </div>
+      <% }) %>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="chat-footer">
+      <form action="/admin/contact/<%= user._id %>/send" method="POST">
+        <div class="input-wrapper">
+          <textarea name="message" placeholder="Write a reply…" required></textarea>
+          <button class="send-btn">Send</button>
+        </div>
+      </form>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+  const chatBody = document.getElementById("chatBody");
+  chatBody.scrollTop = chatBody.scrollHeight;
+</script>

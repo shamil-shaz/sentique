@@ -8,7 +8,15 @@ const Coupon = require("../../models/couponSchema");
 
 const getAdminOrderList = async (req, res) => {
   try {
-    const orders = await Order.find({})
+
+      const { orderId } = req.query; 
+
+ 
+    const query = {};
+    if (orderId) {
+      query.orderId = orderId;
+    }
+     const orders = await Order.find(query)
       .sort({ createdOn: -1 })
       .populate("user")
       .populate("orderItems.product")

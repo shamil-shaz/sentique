@@ -454,6 +454,73 @@
   .dark-mode .page-item.active .page-link { background: linear-gradient(135deg, #d4af37 0%, #f0d978 100%) !important; color: #000 !important; }
   .dark-mode .filters-toggle { background: #333 !important; color: #fff !important; }
   .dark-mode .toast { background: #222 !important; color: #fff !important; border-left-color: #d4af37 !important; }
+
+  /* PRODUCT RATING */
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.rating i {
+  color: #facc15; /* gold */
+}
+
+.rating .empty {
+  color: #d1d5db;
+}
+
+.rating-count {
+  font-size: 12px;
+  color: #6b7280;
+  margin-left: 6px;
+}
+
+/* DARK MODE */
+.dark-mode .rating i {
+  color: #d4af37;
+}
+
+.dark-mode .rating .empty {
+  color: #555;
+}
+
+.dark-mode .rating-count {
+  color: #aaa;
+}
+
+@media (max-width: 768px) {
+  .shop-search-bar {
+    position: relative;
+    z-index: 10; /* LOWER than mobile menu */
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-nav {
+    text-align: center;
+  }
+
+  .mobile-nav a {
+    padding: 14px 0;
+    font-size: 15px;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-nav {
+    position: fixed;
+    top: 60px;            /* height of header */
+    left: 0;
+    width: 100%;
+    background: var(--bg-nav);
+    z-index: 3000;        /* HIGHER than search & filters */
+  }
+}
+
+
 </style>
 
 <body>
@@ -577,12 +644,44 @@
                 <div class="product-meta">
                   <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "N/A" %></div>
                   <div><strong>Category:</strong> <%= product.category ? product.category.name : "N/A" %></div>
-                  <div>
-                    <span class="price">₹<%= product.salePrice %></span>
-                    <% if(product.regularPrice > product.salePrice){ %>
-                      <span class="old-price">₹<%= product.regularPrice %></span>
-                    <% } %>
-                  </div>
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+
+  <!-- PRICE (UNCHANGED LOGIC) -->
+  <div>
+    <span class="price">₹<%= product.salePrice %></span>
+    <% if(product.regularPrice > product.salePrice){ %>
+      <span class="old-price">₹<%= product.regularPrice %></span>
+    <% } %>
+  </div>
+
+  <!-- ⭐ PRODUCT RATING -->
+  <div class="rating">
+    <% 
+      let rating = product.averageRating || 0;
+      let fullStars = Math.floor(rating);
+      let halfStar = rating % 1 >= 0.5;
+      let emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    %>
+
+    <% for(let i = 0; i < fullStars; i++) { %>
+      <i class="fa fa-star"></i>
+    <% } %>
+
+    <% if(halfStar) { %>
+      <i class="fa fa-star-half-alt"></i>
+    <% } %>
+
+    <% for(let i = 0; i < emptyStars; i++) { %>
+      <i class="fa fa-star empty"></i>
+    <% } %>
+
+    <span class="rating-count">
+      (<%= product.totalReviews || 0 %>)
+    </span>
+  </div>
+
+</div>
+
                 </div>
               </div>
             </article>

@@ -389,7 +389,7 @@ const loadDashboard = async (req, res) => {
     return res.redirect('/admin/login');
   }
   try {
-    // --- 1. Date Filter Setup ---
+    
     const dateFilter = req.query.filter || 'monthly';
     const customStartDate = req.query.startDate ? new Date(req.query.startDate) : null;
     const customEndDate = req.query.endDate ? new Date(req.query.endDate) : null;
@@ -420,12 +420,12 @@ const loadDashboard = async (req, res) => {
         endDate = customEndDate || today;
         endDate.setHours(23, 59, 59, 999);
         break;
-      default: // monthly
+      default: 
         startDate = new Date(today.getFullYear(), today.getMonth(), 1);
         endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
     }
 
-    // --- 2. Calculate Item-Level Counts (Accurate Status) ---
+    
     const itemStats = await Order.aggregate([
       { $match: { createdOn: { $gte: startDate, $lte: endDate } } },
       { $unwind: "$orderItems" },
@@ -435,7 +435,7 @@ const loadDashboard = async (req, res) => {
           deliveredItems: { $sum: { $cond: [{ $eq: ["$orderItems.status", "Delivered"] }, "$orderItems.quantity", 0] } },
           returnedItems: { $sum: { $cond: [{ $eq: ["$orderItems.status", "Returned"] }, "$orderItems.quantity", 0] } },
           cancelledItems: { $sum: { $cond: [{ $eq: ["$orderItems.status", "Cancelled"] }, "$orderItems.quantity", 0] } },
-          // Active/Pending Items (Placed, Confirmed, Processing, Shipped, OutForDelivery)
+          
           activeItems: { 
             $sum: { 
               $cond: [{ 
@@ -447,7 +447,7 @@ const loadDashboard = async (req, res) => {
         }
       }
     ]);
-    // Default values if no orders found
+   
     const stats = itemStats[0] || { 
       deliveredItems: 0, 
       returnedItems: 0, 
@@ -456,7 +456,7 @@ const loadDashboard = async (req, res) => {
       returnRequestItems: 0 
     };
 
-    // --- 3. Total Revenue Calculation (Excluding Cancelled/Returned) ---
+    
     const totalRevenueAgg = await Order.aggregate([
       { $match: { createdOn: { $gte: startDate, $lte: endDate } } },
       { $unwind: "$orderItems" },
@@ -469,12 +469,12 @@ const loadDashboard = async (req, res) => {
     ]);
     const totalSales = totalRevenueAgg[0]?.totalRevenue || 0;
 
-    // --- 4. Growth Calculation ---
+    
     const timeDiff = endDate.getTime() - startDate.getTime();
     const prevStartDate = new Date(startDate.getTime() - timeDiff);
     const prevEndDate = new Date(endDate.getTime() - timeDiff);
 
-    // Previous Revenue
+
     const prevRevenueAgg = await Order.aggregate([
       { $match: { createdOn: { $gte: prevStartDate, $lte: prevEndDate } } },
       { $unwind: "$orderItems" },
@@ -487,11 +487,11 @@ const loadDashboard = async (req, res) => {
     ]);
     const prevSales = prevRevenueAgg[0]?.totalRevenue || 0;
 
-    // Previous Order Count
+  
     const totalOrders = await Order.countDocuments({ createdOn: { $gte: startDate, $lte: endDate } });
     const prevOrders = await Order.countDocuments({ createdOn: { $gte: prevStartDate, $lte: prevEndDate } });
 
-    // Calculate Percentages
+  
     let salesGrowth = 0;
     if (prevSales > 0) {
       salesGrowth = ((totalSales - prevSales) / prevSales) * 100;
@@ -506,7 +506,7 @@ const loadDashboard = async (req, res) => {
       ordersGrowth = 100;
     }
 
-    // --- 5. Chart Data ---
+ 
     let chartDateFormat;
     switch (dateFilter) {
       case 'daily': chartDateFormat = '%H:00'; break;
@@ -529,7 +529,6 @@ const loadDashboard = async (req, res) => {
     const chartLabels = chartAgg.map(d => d._id);
     const chartData = chartAgg.map(d => d.sales);
 
-    // --- 6. General Stats & Tables ---
     const totalUsers = await User.countDocuments();
     
     // Recent Orders
@@ -613,18 +612,18 @@ const loadDashboard = async (req, res) => {
     const conversionRate = totalUsers > 0 ? ((totalOrders / totalUsers) * 100).toFixed(2) : 0;
     const averageOrderValue = totalOrders > 0 ? (totalSales / totalOrders).toFixed(2) : 0;
 
-    // --- 7. RENDER with MAPPED Variables ---
+  
     res.render('dashboard', {
       error,
       totalUsers,
       totalOrders,
       totalSales: totalSales.toFixed(2),
       
-      // MAPPING ITEM STATS TO EJS VARIABLES
-      pendingOrders: stats.activeItems, // Mapped activeItems -> pendingOrders
-      deliveredOrders: stats.deliveredItems, // Mapped deliveredItems -> deliveredOrders
-      cancelledOrders: stats.cancelledItems, // Mapped cancelledItems -> cancelledOrders
-      returnRequests: stats.returnRequestItems, // Mapped returnRequestItems -> returnRequests
+     
+      pendingOrders: stats.activeItems, 
+      deliveredOrders: stats.deliveredItems, 
+      cancelledOrders: stats.cancelledItems, 
+      returnRequests: stats.returnRequestItems,
       
       ordersGrowth: ordersGrowth.toFixed(1),
       salesGrowth: salesGrowth.toFixed(1),
@@ -702,8 +701,7 @@ const getDashboardChartData = async (req, res) => {
         endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
         format = '%Y-%m-%d';
     }
-    
-    // Consistent chart logic summing VALID ITEMS
+ 
     const chartData = await Order.aggregate([
       { $match: { createdOn: { $gte: startDate, $lte: endDate } } },
       { $unwind: "$orderItems" },

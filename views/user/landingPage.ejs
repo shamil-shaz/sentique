@@ -186,13 +186,16 @@
       display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap;
       opacity: 0; animation: fadeIn 1.5s forwards 0.8s;
       perspective: 1000px;
+  
+      
     }
     
     .hero-products img {
-      width: 180px;
+      width: 250px;
       filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
       transition: transform 0.5s ease;
       animation: float 6s ease-in-out infinite;
+      border-radius: 10px;
     }
     
     /* Staggered Floating Animation */
@@ -237,7 +240,7 @@
     .product-card {
       background: var(--bg-card);
       backdrop-filter: blur(10px);
-      padding: 40px 20px;
+      padding: 30px 20px;
       border-radius: 20px;
       text-align: center;
       border: 1px solid var(--border-color);
@@ -253,9 +256,10 @@
     }
 
     .product-card img {
-      width: 160px; height: auto;
-      margin-bottom: 25px;
+      width: 250px; height: auto;
+      margin-bottom: 15px;
       transition: transform 0.4s;
+      border-radius: 10px;
     }
     .product-card:hover img { transform: scale(1.1) rotate(5deg); }
 
@@ -360,6 +364,94 @@
         .hero-products img:nth-child(2) { width: 200px; }
         .hero-products { gap: 15px; }
     }
+
+    /* =========================================
+   OUR STORY SECTION
+   ========================================= */
+.story-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 20px;
+}
+
+.story-content {
+    flex: 1;
+    text-align: left;
+}
+
+.story-image {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.story-image img {
+    width: 100%;
+    max-width: 450px;
+    border-radius: 30px;
+    filter: drop-shadow(var(--shadow-card));
+    border: 1px solid var(--border-color);
+}
+
+/* Decorative Gold Ring behind image */
+.story-image::before {
+    content: '';
+    position: absolute;
+    width: 110%;
+    height: 110%;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    top: -5%;
+    left: -5%;
+    opacity: 0.2;
+    animation: rotate 20s linear infinite;
+    z-index: -1;
+}
+
+.story-badge {
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.story-title {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-bottom: 30px;
+    color: var(--text-main);
+}
+
+.story-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .story-section {
+        flex-direction: column-reverse;
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .story-content { text-align: center; }
+    .story-title { font-size: 2.5rem; }
+}
   </style>
 </head>
 <body class="dark-mode"> <canvas id="bgCanvas"></canvas>
@@ -373,7 +465,7 @@
     <a href="/home">Home</a>
     <a href="/shopPage">Collections</a>
     <a href="/zodiac">Zodiac Series</a>
-    <a href="/about">About</a>
+    
   </nav>
 
   <div class="icons-section">
@@ -402,9 +494,27 @@
   <p class="hero-sub">Where the Stars Align with Your Scent</p>
   
   <div class="hero-products">
-    <img src="/photos/landing-images/landing-img2.0.png" alt="Perfume Left">
-    <img src="/photos/landing-images/landing-img3.png" alt="Perfume Center">
-    <img src="/photos/landing-images/landing-img2.png" alt="Perfume Right">
+    <img src="/photos/zodiac perfume/landing-img-2.png" alt="Perfume Left">
+      <img src="/photos/landing-images/landing image-3.png" alt="Perfume Center" >
+    <img src="/photos/zodiac perfume/landing-1.png" alt="Perfume Right">
+  
+    
+  </div>
+</section>
+<section class="story-section reveal">
+  <div class="story-image">
+    <img src="/photos/zodiac perfume/story line image.png" alt="Sentique Craftsmanship">
+  </div>
+  
+  <div class="story-content">
+    <span class="story-badge">Our Heritage</span>
+    <h2 class="story-title">Crafting Your <br><span>Identity</span></h2>
+    <p class="story-text">
+        Sentique was created with one belief — a fragrance should feel <strong>personal</strong>. Every scent we offer is carefully chosen or crafted to reflect emotion, character, and identity.
+    </p>
+    <p class="story-text">
+        From luxury-inspired perfumes to our own zodiac-based creations, each fragrance is made using first-quality ingredients and blended with care. At Sentique, we don’t just sell perfumes — <strong>we help you wear your signature.</strong>
+    </p>
   </div>
 </section>
 
@@ -414,22 +524,25 @@
   
   <div class="product-grid">
     <div class="product-card">
-      <img src="/photos/landing-images/landing-img4.png" alt="Neonitre">
+      <img src="/photos/landing-images/landing-img-3.png" alt="Neonitre">
       <h3>Neonitre</h3>
       <p>Bold, timeless, and unapologetically you.</p>
     </div>
+      
     
     <div class="product-card">
-      <img src="/photos/landing-images/landing-img3.png" alt="Lovet">
+      <img src="/photos/landing-images/landing-image-4.png" alt="Libuos">
+      <h3>Libuos</h3>
+      <p>A mystical scent of luxury and mystery.</p>
+    </div>
+    
+    <div class="product-card">
+      <img src="/photos/landing-images/landing-img-1.png" alt="Lovet">
       <h3>Lovet</h3>
       <p>Romantic notes interwoven with pure elegance.</p>
     </div>
     
-    <div class="product-card">
-      <img src="/photos/landing-images/landing-img1.png" alt="Libuos">
-      <h3>Libuos</h3>
-      <p>A mystical scent of luxury and mystery.</p>
-    </div>
+  
   </div>
 </section>
 

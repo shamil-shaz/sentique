@@ -244,7 +244,6 @@ const getWishlistCount = async (req, res) => {
 };
 
 
-
 module.exports = {
   loadWishlist,
   addToWishlist,

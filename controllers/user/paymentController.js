@@ -362,7 +362,7 @@ console.log(" Final Price Breakdown:", {
               );
             }
           } else {
-            // Product without variants - reduce main stock
+            
             const oldStock = product.stock;
             product.stock = Math.max((product.stock || 0) - item.quantity, 0);
             console.log(
@@ -810,184 +810,6 @@ const retryPaymentForFailedOrder = async (req, res) => {
   }
 };
 
-// const getOrderList = async (req, res) => {
-//   try {
-//     const userId = req.session.user?.id || req.session.user?._id;
-
-//     console.log("👤 Fetching orders for user:", userId);
-//     console.log("   Session user:", req.session.user);
-
-//     if (!userId) {
-//       console.error(" No user ID in session");
-//       return res.status(401).json({
-//         success: false,
-//         message: "User not authenticated",
-//       });
-//     }
-
-//     const orders = await Order.find({ user: userId })
-//       .populate("orderItems.product")
-//       .populate("coupon")
-
-//       .sort({ createdOn: -1 });
-
-//     console.log(" Orders found:", orders.length);
-
-//     if (!orders || orders.length === 0) {
-//       console.log("⚠ No orders found for user");
-//       return res.render("orderList", {
-//         orders: [],
-//         addresses: [],
-//         user: req.session.user,
-//         itemStats: {
-//           totalItems: 0,
-//           processing: 0,
-//           delivered: 0,
-//           paymentFailed: 0,
-//           totalSpent: 0,
-//         },
-//         customerName: req.session.user?.name || "User",
-//         currentPage: 1,
-//         totalPages: 1,
-//         ordersPerPage: 0,
-//         totalOrders: 0,
-//         message: "No orders found",
-//       });
-//     }
-
-//     orders.forEach((order) => {
-//       order.dynamicTotal = order.finalAmount || order.totalPrice || 0;
-
-//       if (!order.orderId) {
-//         order.orderId = order._id.toString();
-//       }
-
-//       if (order.deliveryAddress) {
-//         const addr = order.deliveryAddress;
-//         order.shipTo = `${addr.name || "Unknown"}, ${addr.city || ""}, ${
-//           addr.state || ""
-//         }`.trim();
-//       } else {
-//         order.shipTo = "Address not available";
-//       }
-
-//       if (order.orderItems && Array.isArray(order.orderItems)) {
-//         order.orderItems = order.orderItems.map((item) => ({
-//           ...(item.toObject ? item.toObject() : item),
-//           productId: item.product?._id,
-//           productName: item.product?.productName || item.productName,
-//           productImage: item.product?.images?.[0] || item.image,
-//           variantSize: item.variantSize || "N/A",
-//           quantity: item.quantity || 0,
-//           price: item.price || 0,
-//           total: item.total || item.price * item.quantity,
-//           status: item.status || "Processing",
-//         }));
-//       }
-//     });
-
-//     const totalItems = orders.reduce((count, order) => {
-//       return count + (order.orderItems?.length || 0);
-//     }, 0);
-
-//     const processingCount = orders.filter(
-//       (o) => o.status === "Processing" || o.status === "Pending"
-//     ).length;
-
-//     const deliveredCount = orders.filter(
-//       (o) => o.status === "Delivered"
-//     ).length;
-
-//     const failedCount = orders.filter(
-//       (o) =>
-//         o.status === "Failed" ||
-//         o.status === "Payment Failed" ||
-//         o.paymentStatus === "Failed"
-//     ).length;
-
-//     const cancelledCount = orders.filter(
-//       (o) => o.status === "Cancelled"
-//     ).length;
-
-//     const totalSpent = orders
-//       .filter(
-//         (o) =>
-//           o.paymentStatus === "Completed" ||
-//           o.status === "Delivered" ||
-//           o.status === "Shipped"
-//       )
-//       .reduce((sum, o) => {
-//         const amount = o.finalAmount || o.totalPrice || 0;
-//         return sum + amount;
-//       }, 0);
-
-//     console.log("📊 Order statistics:", {
-//       totalItems,
-//       processingCount,
-//       deliveredCount,
-//       failedCount,
-//       cancelledCount,
-//       totalSpent,
-//     });
-
-//     const itemStats = {
-//       totalItems,
-//       processing: processingCount,
-//       delivered: deliveredCount,
-//       cancelled: cancelledCount,
-//       paymentFailed: failedCount,
-//       totalSpent: Math.round(totalSpent * 100) / 100,
-//     };
-
-//     const addressDoc = await Address.findOne({ userId });
-//     const userAddresses =
-//       addressDoc && Array.isArray(addressDoc.address) ? addressDoc.address : [];
-
-//     console.log("📍 User addresses found:", userAddresses.length);
-
-//     return res.render("orderList", {
-//       orders: orders,
-//       addresses: userAddresses,
-//       user: req.session.user,
-//       itemStats,
-//       customerName: req.session.user?.name || "Customer",
-//       currentPage: 1,
-//       totalPages: 1,
-//       ordersPerPage: orders.length,
-//       totalOrders: orders.length,
-//       success: true,
-//     });
-//   } catch (error) {
-//     console.error("❌ getOrderList error:", {
-//       message: error.message,
-//       stack: error.stack,
-//       type: error.constructor.name,
-//     });
-
-//     return res.render("orderList", {
-//       orders: [],
-//       addresses: [],
-//       user: req.session.user,
-//       itemStats: {
-//         totalItems: 0,
-//         processing: 0,
-//         delivered: 0,
-//         paymentFailed: 0,
-//         totalSpent: 0,
-//       },
-//       customerName: req.session.user?.name || "User",
-//       currentPage: 1,
-//       totalPages: 1,
-//       ordersPerPage: 0,
-//       totalOrders: 0,
-//       error: error.message,
-//     });
-//   }
-// };
-
-
-
-
 
 const getOrderList = async (req, res) => {
   try {
@@ -995,12 +817,10 @@ const getOrderList = async (req, res) => {
     if (!userId) return res.redirect('/login');
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 10; // Increased limit slightly so live search has more items to show
+    const limit = 10; 
     const statusFilter = req.query.status || "";
     const timeFilter = req.query.time || "";
-    
-    // Note: We keep server search support for "Enter" key, 
-    // but the main typing interaction will be handled by client-side JS.
+  
     const searchTerm = req.query.search || ""; 
 
     let query = { user: userId };
@@ -1033,8 +853,7 @@ const getOrderList = async (req, res) => {
 
     orders = orders.map(order => {
       order.dynamicTotal = order.finalAmount || order.totalPrice || 0;
-
-      // Item Filtering Logic
+      
       if (statusFilter && order.status !== statusFilter) {
         const matchingItems = order.orderItems.filter(item => item.status === statusFilter);
         if (matchingItems.length > 0) order.orderItems = matchingItems;
@@ -1071,9 +890,6 @@ const getOrderList = async (req, res) => {
     res.render("orderList", { orders: [], user: req.session.user, customerName: "User", currentPage: 1, totalPages: 0, currentStatus: "", currentTime: "", currentSearch: "", itemStats: {}, error: "Error loading orders" });
   }
 };
-
-module.exports = { getOrderList };
-
 
 
 

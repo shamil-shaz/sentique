@@ -14,7 +14,7 @@ const adminOrderController=require('../controllers/admin/adminOrderController')
 const adminCouponsController=require('../controllers/admin/adminCouponsController')
 const dashboardController=require('../controllers/admin/dashboardController')
 const salesReportController=require('../controllers/admin/salesReportController')
-
+const adminContactController = require("../controllers/admin/adminContactController");
 
 const { userAuth, adminAuth } = require('../middlewares/auth');
 const { uploadProductImage, uploadCategoryImage } = require("../middlewares/imageUpload");
@@ -112,5 +112,11 @@ router.get('/salesReport', adminAuth, salesReportController.getSalesReport);
 router.get('/salesReport/export-excel', adminAuth, salesReportController.exportSalesReportToExcel);
 router.get('/salesReport/export-pdf', adminAuth, salesReportController.exportSalesReportToPDF);
 
+
+/////-----contact------
+
+router.get("/contact", adminContactController.getContactInbox);
+router.get("/contact/:userId", adminContactController.getUserChat);
+router.post("/contact/:userId/send", adminContactController.sendAdminMessage);
 
 module.exports = router;

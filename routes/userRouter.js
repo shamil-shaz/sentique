@@ -16,7 +16,7 @@ const invoiceController=require('../controllers/user/invoiceController.js')
 const paymentController=require('../controllers/user/paymentController.js')
 const couponController=require('../controllers/user/couponController.js')
 const referralController=require('../controllers/user/referralController')
-
+const contactController=require('../controllers/user/contactController.js')
 
 const multer = require("multer");
 
@@ -84,7 +84,7 @@ router.get("/auth/google/callback", checkBlockedUser, (req, res, next) => {
       };
 
         console.log("Google user logged in with referral code:", user.refferalCode);
-      return res.redirect("/home");
+      return res.redirect("/");
     } catch (err) {
       console.error("Session creation error:", err);
       return res.render("signup", { errorMessage: "Login failed. Please try again." });
@@ -167,7 +167,6 @@ router.post('/checkout/edit-address/:id', userAuth, checkoutController.editAddre
 router.get("/orderSuccess",userAuth,orderController.getOrderSuccess)
 router.get('/orderDetails/:orderId', userAuth, orderController.getOrderDetails);
 router.post('/orders/:orderId/cancel', userAuth, orderController.cancelAllOrder);
-//router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel', userAuth, orderController.cancelSingleOrder);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/return', userAuth, orderController.returnSingleOrder);
 router.post('/orders/:orderId/return',userAuth, orderController.returnAllOrder);
 router.post('/orders/:orderId/items/:itemIndex/:variantSize/cancel-return', userAuth, orderController.cancelReturnSingleOrder);
@@ -220,6 +219,13 @@ router.get("/profile/referral/details", userAuth, referralController.getReferral
 router.get("/profile/referral/referred-users", userAuth, referralController.getReferredUsers);
 router.post("/profile/referral/apply", userAuth, referralController.applyReferralCode);
 router.get("/profile/referral/leaderboard", referralController.getReferralLeaderboard);
+
+
+
+/////-------------contact-----------
+
+router.get('/contact',userAuth,contactController.getContactPage)
+router.post("/contact/send", userAuth, contactController.sendMessage);
 
 
 module.exports = router;

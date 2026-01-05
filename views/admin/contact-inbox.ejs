@@ -1,0 +1,265 @@
+<%- include("../partials/admin/header.ejs") %>
+
+<style>
+  :root {
+    --primary-color: #4f46e5;
+    --primary-light: #eef2ff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --bg-page: #f8fafc;
+    --white: #ffffff;
+    --border: #e2e8f0;
+  }
+
+  body {
+    background-color: var(--bg-page);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* 🔥 FIX FOR HEADER + SIDEBAR */
+  .admin-content-wrapper {
+    margin-left: 280px;   /* Sidebar width */
+    padding-top: 80px;    /* Header height */
+    min-height: 100vh;
+  }
+
+  .inbox-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  /* Header */
+  .page-title-area {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .page-title-area h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .stats-badge {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Search */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 14px 20px 14px 45px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+  }
+
+  .clear-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: none; /* hidden by default */
+}
+
+.clear-icon:hover {
+  color: var(--primary-color);
+}
+
+
+  /* List */
+  .inbox-card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .user-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: 0.2s;
+  }
+
+  .user-row:hover {
+    background: #fcfdfe;
+  }
+
+  .avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-color), #818cf8);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .user-details h4 {
+    margin: 0 0 4px;
+    font-size: 16px;
+  }
+
+  .user-details p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .view-btn {
+    padding: 8px 16px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .user-row:hover .view-btn {
+    background: var(--primary-color);
+    color: #fff;
+  }
+
+  /* Empty */
+  .empty-state {
+    padding: 80px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  /* 📱 Mobile */
+  @media (max-width: 768px) {
+    .admin-content-wrapper {
+      margin-left: 0;
+      padding-top: 70px;
+    }
+
+    .user-row {
+      grid-template-columns: auto 1fr;
+    }
+
+    .view-btn {
+      display: none;
+    }
+  }
+</style>
+
+<div class="admin-content-wrapper">
+
+  <div class="inbox-container">
+
+    <div class="page-title-area">
+      <div>
+        <h2>Customer Support</h2>
+        <p style="font-size:14px;color:var(--text-muted);">
+          Manage and respond to user inquiries
+        </p>
+      </div>
+      <div class="stats-badge">
+        <%= users.length %> Conversations
+      </div>
+    </div>
+<div class="search-wrapper">
+  <span class="search-icon">🔍</span>
+
+  <input
+    type="text"
+    id="searchInput"
+    class="search-input"
+    placeholder="Search by name or email..."
+    onkeyup="filterUsers()"
+  />
+
+  <!-- ❌ Clear Icon -->
+  <span id="clearSearch" class="clear-icon" onclick="clearSearch()">✕</span>
+</div>
+
+
+    <div class="inbox-card" id="userList">
+      <% if (users.length > 0) { %>
+        <% users.forEach(user => { %>
+          <a href="/admin/contact/<%= user._id %>" class="user-row">
+            <div class="avatar"><%= user.name.charAt(0) %></div>
+
+            <div class="user-details">
+              <h4><%= user.name %></h4>
+              <p><%= user.email %></p>
+            </div>
+
+            <span class="view-btn">Open Chat</span>
+          </a>
+        <% }) %>
+      <% } else { %>
+        <div class="empty-state">
+          <h3>No messages yet</h3>
+          <p>When users contact you, they appear here.</p>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById("searchInput");
+  const clearIcon = document.getElementById("clearSearch");
+
+  function filterUsers() {
+    const filter = searchInput.value.toLowerCase();
+    const rows = document.querySelectorAll(".user-row");
+
+    // Show / hide clear icon
+    clearIcon.style.display = filter ? "block" : "none";
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(filter) ? "" : "none";
+    });
+  }
+
+  function clearSearch() {
+    searchInput.value = "";
+    clearIcon.style.display = "none";
+
+    document.querySelectorAll(".user-row").forEach(row => {
+      row.style.display = "";
+    });
+
+    searchInput.focus();
+  }
+</script>
+

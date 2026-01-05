@@ -1190,6 +1190,42 @@ body.dark-mode .nav-logo img {
 body.dark-mode .brand img {
   filter: invert(1) !important;
 }
+
+/* ===============================
+   PRODUCT RATING DISPLAY
+   =============================== */
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #777;
+}
+
+.product-rating i {
+  color: #f5c518; /* Gold star */
+  font-size: 12px;
+}
+
+.product-rating .empty {
+  color: #ccc;
+}
+
+.product-rating span {
+  margin-left: 6px;
+  font-size: 10px;
+  color: #666;
+}
+
+/* Dark mode support */
+body.dark-mode .product-rating span {
+  color: #aaa;
+}
+
+body.dark-mode .product-rating .empty {
+  color: #555;
+}
+
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1290,6 +1326,31 @@ body.dark-mode .brand img {
             <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
             <p><span class="sale-price">₹<%= salePrice %></span><% if (discount > 0) { %><span class="regular-price">₹<%= regularPrice %></span><% } %></p>
           </div>
+          <%
+  const rating = product.averageRating || 0;
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+%>
+
+<div class="product-rating">
+  <% for(let i = 0; i < fullStars; i++) { %>
+    <i class="fas fa-star"></i>
+  <% } %>
+
+  <% if(halfStar) { %>
+    <i class="fas fa-star-half-alt"></i>
+  <% } %>
+
+  <% for(let i = 0; i < emptyStars; i++) { %>
+    <i class="fas fa-star empty"></i>
+  <% } %>
+
+  <span>
+    (<%= product.totalReviews || 0 %> ratings)  %> 
+  </span>
+</div>
+
         </div>
       <% }) %>
     <% } else { %>
@@ -1376,8 +1437,10 @@ body.dark-mode .brand img {
             </a>
             <div class="product-icons">
               <button class="icon-btn wishlist" onclick="addToWishlist('<%= product._id %>')">
-                <i class="fas fa-heart"></i>
+                <i class="far fa-heart"></i>
               </button>
+
+              
             </div>
             <% if (discountNew > 0) { %>
               <div class="offer-badge"><%= discountNew %>% OFF</div>
@@ -1389,6 +1452,31 @@ body.dark-mode .brand img {
             <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
             <p><span class="sale-price">₹<%= salePriceNew %></span><% if (discountNew > 0) { %><span class="regular-price">₹<%= regularPriceNew %></span><% } %></p>
           </div>
+          <%
+  const rating = product.averageRating || 0;
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+%>
+
+<div class="product-rating">
+  <% for(let i = 0; i < fullStars; i++) { %>
+    <i class="fas fa-star"></i>
+  <% } %>
+
+  <% if(halfStar) { %>
+    <i class="fas fa-star-half-alt"></i>
+  <% } %>
+
+  <% for(let i = 0; i < emptyStars; i++) { %>
+    <i class="fas fa-star empty"></i>
+  <% } %>
+
+  <span>
+    (<%= product.totalReviews || 0 %> ratings)  %> 
+  </span>
+</div>
+
         </div>
       <% }) %>
     <% } else { %>
@@ -1431,7 +1519,7 @@ body.dark-mode .brand img {
             </a>
             <div class="product-icons">
               <button class="icon-btn wishlist" onclick="addToWishlist('<%= product._id %>')">
-                <i class="fas fa-heart"></i>
+                <i class="far fa-heart"></i>
               </button>
             </div>
             <% if (discountBest > 0) { %>
@@ -1444,6 +1532,31 @@ body.dark-mode .brand img {
             <div><strong>Category:</strong> <%= product.category ? product.category.name : "No Category" %></div>
             <p><span class="sale-price">₹<%= salePriceBest %></span><% if (discountBest > 0) { %><span class="regular-price">₹<%= regularPriceBest %></span><% } %></p>
           </div>
+          <%
+  const rating = product.averageRating || 0;
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+%>
+
+<div class="product-rating">
+  <% for(let i = 0; i < fullStars; i++) { %>
+    <i class="fas fa-star"></i>
+  <% } %>
+
+  <% if(halfStar) { %>
+    <i class="fas fa-star-half-alt"></i>
+  <% } %>
+
+  <% for(let i = 0; i < emptyStars; i++) { %>
+    <i class="fas fa-star empty"></i>
+  <% } %>
+
+  <span>
+    (<%= product.totalReviews || 0 %> ratings) %> 
+  </span>
+</div>
+
         </div>
       <% }) %>
     <% } else { %>

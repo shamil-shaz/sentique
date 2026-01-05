@@ -47,19 +47,12 @@ const verifyLogin = async (req, res) => {
   }
 };
 
-
-
-
-
-
 const logout = (req, res) => {
   try {
    
     if (req.session.admin) {
       delete req.session.admin;
     }
-
-
     return res.redirect('/admin/login');
   } catch (error) {
     console.log("Unexpected error during admin logout:", error);

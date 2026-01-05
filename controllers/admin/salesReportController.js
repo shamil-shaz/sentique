@@ -408,4 +408,8 @@ const exportSalesReportToPDF = async (req, res) => {
   }
 };
 
-module.exports = { getSalesReport, exportSalesReportToExcel, exportSalesReportToPDF };
+module.exports = { 
+  getSalesReport, 
+  exportSalesReportToExcel,
+  exportSalesReportToPDF 
+  };

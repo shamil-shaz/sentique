@@ -210,7 +210,6 @@ const getAvailableCouponsHTML = async (req, res) => {
   }
 };
 
-
 const getCouponDetails = async (req, res) => {
   try {
     const { couponId } = req.params;
@@ -502,7 +501,7 @@ const recordCouponUsage = async (req, res) => {
     await coupon.save();
 
     console.log('Current usage after save:', coupon.appliedUsers.length);
-    console.log(`✅ Coupon ${coupon.couponCode} usage recorded!`);
+    console.log(` Coupon ${coupon.couponCode} usage recorded!`);
 
     res.json({
       success: true,

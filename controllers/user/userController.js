@@ -10,6 +10,38 @@ const Wallet = require("../../models/walletSchema");
 const mongoose = require("mongoose");
 const Review=require("../../models/reviewSchema")
 
+
+async function attachReviewStats(products) {
+  if (!products || products.length === 0) return;
+
+  const productIds = products.map(p => p._id);
+
+  const reviewStats = await Review.aggregate([
+    { $match: { productId: { $in: productIds } } },
+    {
+      $group: {
+        _id: "$productId",
+        averageRating: { $avg: "$rating" },
+        totalReviews: { $sum: 1 }
+      }
+    }
+  ]);
+
+  const reviewMap = {};
+  reviewStats.forEach(r => {
+    reviewMap[r._id.toString()] = {
+      averageRating: Number(r.averageRating.toFixed(1)),
+      totalReviews: r.totalReviews
+    };
+  });
+
+  products.forEach(p => {
+    const id = p._id.toString();
+    p.averageRating = reviewMap[id]?.averageRating || 0;
+    p.totalReviews = reviewMap[id]?.totalReviews || 0;
+  });
+}
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -76,6 +108,9 @@ const loadHomepage = async (req, res) => {
       return products;
     };
 
+
+
+
   
     const [products, newArrivals, bestSelling] = await Promise.all([
       fetchProducts({}, { createdAt: -1 }, 4),
@@ -83,6 +118,11 @@ const loadHomepage = async (req, res) => {
       fetchProducts({}, { soldCount: -1 }, 4)
     ]);
 
+
+
+await attachReviewStats(products);
+await attachReviewStats(newArrivals);
+await attachReviewStats(bestSelling);
     
     let userData = null;
     if (sessionUser?.id) {
@@ -385,7 +425,7 @@ const verifyOtp = async (req, res) => {
 
             return res.status(200).json({
                 success: true,
-                redirectUrl: "/home",
+                redirectUrl: "/",
             });
 
         } else {
@@ -553,7 +593,7 @@ const login = async (req, res) => {
     return res.json({
       success: true,
       message: "Login successful",
-      redirectUrl: "/home"
+      redirectUrl: "/"
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -646,9 +686,9 @@ const loadShopingPage = async (req, res) => {
       }
     }
 
-  
     let productsAggregation = [
       { $match: filterQuery },
+
       {
         $addFields: {
           minSalePrice: {
@@ -662,9 +702,11 @@ const loadShopingPage = async (req, res) => {
           }
         }
       },
+
       { $sort: {} },
       { $skip: skip },
       { $limit: limit },
+
       {
         $lookup: {
           from: "brands",
@@ -674,6 +716,7 @@ const loadShopingPage = async (req, res) => {
         }
       },
       { $unwind: "$brand" },
+
       {
         $lookup: {
           from: "categories",
@@ -682,38 +725,79 @@ const loadShopingPage = async (req, res) => {
           as: "category"
         }
       },
-      { $unwind: "$category" }
+      { $unwind: "$category" },
+
+      
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "productId",
+          as: "reviews"
+        }
+      },
+      {
+        $addFields: {
+          totalReviews: { $size: "$reviews" },
+          averageRating: {
+            $cond: [
+              { $gt: [{ $size: "$reviews" }, 0] },
+              { $round: [{ $avg: "$reviews.rating" }, 1] },
+              0
+            ]
+          }
+        }
+      },
+
+      {
+        $lookup: {
+          from: "orders",
+          let: { productId: "$_id" },
+          pipeline: [
+            { $match: { paymentStatus: "Paid", orderStatus: "Delivered" } },
+            { $unwind: "$items" },
+            {
+              $match: {
+                $expr: { $eq: ["$items.productId", "$$productId"] }
+              }
+            }
+          ],
+          as: "orders"
+        }
+      },
+      {
+        $addFields: {
+          totalBuyers: {
+            $size: {
+              $setUnion: ["$orders.userId"]
+            }
+          }
+        }
+      }
     ];
-    
+
     let sortStage = {};
-    if (sort === "priceLow") {
-      sortStage.minSalePrice = 1;
-    } else if (sort === "priceHigh") {
-      sortStage.minSalePrice = -1;
-    } else if (sort === "nameAZ") {
-      sortStage.productName = 1;
-    } else if (sort === "nameZA") {
-      sortStage.productName = -1;
-    } else {
-      sortStage.createdAt = -1;
-    }
+    if (sort === "priceLow") sortStage.minSalePrice = 1;
+    else if (sort === "priceHigh") sortStage.minSalePrice = -1;
+    else if (sort === "nameAZ") sortStage.productName = 1;
+    else if (sort === "nameZA") sortStage.productName = -1;
+    else sortStage.createdAt = -1;
+
     productsAggregation[2] = { $sort: sortStage };
 
     let products = await Product.aggregate(productsAggregation).exec();
 
-   
     products = products.map(p => ({ ...p, _id: p._id.toString() }));
     products = products.filter(
       p => p.category && p.category.isListed && p.brand && !p.brand.isBlocked
     );
 
-   
     products.forEach(p => {
       if (p.variants && p.variants.length > 0) {
-        const cheapestVariant = p.variants.reduce((minVariant, currentVariant) => {
-          const minPrice = minVariant.salePrice || minVariant.regularPrice || Infinity;
-          const currentPrice = currentVariant.salePrice || currentVariant.regularPrice || Infinity;
-          return currentPrice < minPrice ? currentVariant : minVariant;
+        const cheapestVariant = p.variants.reduce((min, cur) => {
+          const minPrice = min.salePrice || min.regularPrice || Infinity;
+          const curPrice = cur.salePrice || cur.regularPrice || Infinity;
+          return curPrice < minPrice ? cur : min;
         }, { salePrice: Infinity, regularPrice: Infinity });
 
         p.salePrice = cheapestVariant.salePrice || cheapestVariant.regularPrice || 0;
@@ -724,7 +808,6 @@ const loadShopingPage = async (req, res) => {
       }
     });
 
-   
     const totalProducts = await Product.countDocuments(filterQuery);
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -739,13 +822,16 @@ const loadShopingPage = async (req, res) => {
       selectedBrands,
       sort,
       search,
-      priceRange,
+      priceRange
     });
+
   } catch (error) {
     console.error("Error in loadShopingPage:", error);
     res.redirect("/pageNotFound");
   }
 };
+
+
 const searchProductsApi = async (req, res) => {
   try {
     const query = req.query.query || "";
@@ -754,18 +840,18 @@ const searchProductsApi = async (req, res) => {
       return res.json({ success: true, results: [] });
     }
 
-    // Find top 5 matching products
+    
     const products = await Product.find({
       productName: { $regex: query, $options: "i" },
       isBlocked: false,
-      "variants.stock": { $gt: 0 } // Optional: ensure stock exists
+      "variants.stock": { $gt: 0 } 
     })
     .select("productName images variants")
     .limit(5);
 
-    // Format results for frontend
+   
     const results = products.map(p => {
-      // Logic to find lowest price from variants (same as your shop logic)
+      
       let price = 0;
       if (p.variants && p.variants.length > 0) {
         const cheapest = p.variants.reduce((min, curr) => {
@@ -793,58 +879,6 @@ const searchProductsApi = async (req, res) => {
 };
 
 
-// const loadProductDetails = async (req, res) => {
-  
-//   try {
-//     const productId = req.params.id || req.query.id;
-
-//     if (!productId) {
-//       return res.redirect("/shopPage");
-//     }
-  
-//     const product = await Product.findOne({
-//       _id: productId,
-//       isBlocked: false,
-//     })
-//       .populate("brand", "brandName brandImage")
-//       .populate("category", "categoryName categoryImage")
-//       .lean();
-
-//     if (!product) {
-//       return res.redirect("/shopPage");
-//     }
-
-   
-// const relatedProducts = await Product.find({
-//   category: product.category,
-//   _id: { $ne: product._id },
-//   isBlocked: false
-// })
-// .populate("brand", "brandName")
-// .populate("category", "name")
-
-// .limit(3)
-// .lean();
-
-
-//     res.render("productDetails", {
-//       product,
-//       relatedProducts,
-//     });
-
-//      console.log("Related Products:", relatedProducts.map(p => ({
-//   name: p.productName,
-//   category: p.category,
-//   brand: p.brand
-// })));
-//   } catch (error) {
-//     console.error("Error loading product details:", error);
-//     res.redirect("/shopPage");
-//   }
-// };
-
-
-
 const addReview = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.user?._id;
@@ -858,7 +892,7 @@ const addReview = async (req, res) => {
 
     const { productId, rating, comment } = req.body;
 
-    // Validate inputs
+    
     if (!productId || !rating || !comment?.trim()) {
       return res.status(400).json({
         success: false,
@@ -866,7 +900,7 @@ const addReview = async (req, res) => {
       });
     }
 
-    // Validate rating
+    
     const ratingNum = parseInt(rating);
     if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
       return res.status(400).json({
@@ -875,7 +909,7 @@ const addReview = async (req, res) => {
       });
     }
 
-    // Validate comment length
+    
     if (comment.trim().length < 5) {
       return res.status(400).json({
         success: false,
@@ -890,7 +924,7 @@ const addReview = async (req, res) => {
       });
     }
 
-    // Check if product exists
+   
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({
@@ -899,7 +933,7 @@ const addReview = async (req, res) => {
       });
     }
 
-    // Check if user already reviewed this product (unique index will also prevent this)
+    
     const existingReview = await Review.findOne({ userId, productId });
     if (existingReview) {
       return res.status(400).json({
@@ -908,7 +942,7 @@ const addReview = async (req, res) => {
       });
     }
 
-    // Create new review
+   
     const review = await Review.create({
       userId,
       productId,
@@ -916,10 +950,10 @@ const addReview = async (req, res) => {
       comment: comment.trim()
     });
 
-    // Fetch all reviews for this product to calculate average
+    
     const allReviews = await Review.find({ productId });
 
-    // Calculate average rating
+    
     const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0);
     const averageRating = (totalRating / allReviews.length).toFixed(1);
 
@@ -941,7 +975,7 @@ const addReview = async (req, res) => {
   } catch (error) {
     console.error("Review Error:", error);
     
-    // Handle duplicate review error from unique index
+    
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -956,7 +990,7 @@ const addReview = async (req, res) => {
   }
 };
 
-// Load Product Details with reviews
+
 const loadProductDetails = async (req, res) => {
   try {
     const productId = req.query.id || req.params.id;
@@ -965,7 +999,7 @@ const loadProductDetails = async (req, res) => {
       return res.redirect("/shopPage");
     }
 
-    // Fetch product with brand and category
+    
     const product = await Product.findOne({
       _id: productId,
       isBlocked: false
@@ -984,7 +1018,7 @@ const loadProductDetails = async (req, res) => {
       return res.redirect("/shopPage");
     }
 
-    // Fetch related products (same category, max 4)
+    
     const relatedProducts = await Product.find({
       category: product.category._id,
       _id: { $ne: product._id },
@@ -998,7 +1032,7 @@ const loadProductDetails = async (req, res) => {
       .limit(4)
       .lean();
 
-    // Fetch reviews with user information
+   
     const reviews = await Review.find({ productId: product._id })
       .populate({
         path: "userId",
@@ -1007,7 +1041,7 @@ const loadProductDetails = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Calculate rating statistics
+ 
     let averageRating = 0;
     const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
@@ -1015,13 +1049,13 @@ const loadProductDetails = async (req, res) => {
       const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
       averageRating = (totalRating / reviews.length).toFixed(1);
 
-      // Count reviews for each rating
+   
       reviews.forEach(review => {
         ratingDistribution[review.rating]++;
       });
     }
 
-    // Check if current user has already reviewed this product
+    
     let userHasReviewed = false;
     let userReview = null;
 
@@ -1031,15 +1065,14 @@ const loadProductDetails = async (req, res) => {
       userHasReviewed = !!userReview;
     }
 
-    // Calculate percentage for each rating
+  
     const ratingPercentage = {};
     Object.keys(ratingDistribution).forEach(star => {
       ratingPercentage[star] = reviews.length > 0
         ? Math.round((ratingDistribution[star] / reviews.length) * 100)
         : 0;
     });
-
-    // Render product details page
+    
     res.render("productDetails", {
       product,
       relatedProducts,
@@ -1059,7 +1092,7 @@ const loadProductDetails = async (req, res) => {
   }
 };
 
-// Get product rating via AJAX (for real-time updates)
+
 const getProductRating = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -1071,10 +1104,10 @@ const getProductRating = async (req, res) => {
       });
     }
 
-    // Fetch all reviews for the product
+   
     const reviews = await Review.find({ productId }).lean();
 
-    // Calculate statistics
+    
     let averageRating = 0;
     const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
@@ -1087,7 +1120,7 @@ const getProductRating = async (req, res) => {
       });
     }
 
-    // Calculate percentage for each rating
+    
     const ratingPercentage = {};
     Object.keys(ratingDistribution).forEach(star => {
       ratingPercentage[star] = reviews.length > 0
@@ -1113,111 +1146,6 @@ const getProductRating = async (req, res) => {
 };
 
 
-
-
-
-
-
-// const addReview = async (req, res) => {
-//   try {
-//     const userId = req.session.user?.id || req.user?._id;
-
-//     if (!userId) {
-//       return res.status(401).json({
-//         success: false,
-//         message: "Please login to write a review"
-//       });
-//     }
-
-//     const { productId, rating, comment } = req.body;
-
-//     if (!productId || !rating || !comment.trim()) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "All fields are required"
-//       });
-//     }
-
-//     const existing = await Review.findOne({ userId, productId });
-
-//     if (existing) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "You already reviewed this product"
-//       });
-//     }
-
-//     await Review.create({
-//       userId,
-//       productId,
-//       rating,
-//       comment
-//     });
-
-//     return res.json({
-//       success: true,
-//       message: "Review added successfully"
-//     });
-
-//   } catch (error) {
-//     console.error("Review Error:", error);
-//     return res.status(500).json({ success: false, message: "Internal Server Error" });
-//   }
-// };
-
-
-// const loadProductDetails = async (req, res) => {
-//   try {
-//     const productId = req.params.id || req.query.id;
-
-//     if (!productId) {
-//       return res.redirect("/shopPage");
-//     }
-  
-//     // Fetch Product
-//     // We populate category to get its name/image
-//     const product = await Product.findOne({
-//       _id: productId,
-//       isBlocked: false,
-//     })
-//       .populate("brand", "brandName brandImage")
-//       .populate("category", "name categoryImage") // Adjust 'name' if your schema uses 'categoryName'
-//       .lean();
-
-//     if (!product) {
-//       return res.redirect("/shopPage");
-//     }
-
-//     // Fetch Related Products
-//     // CRITICAL FIX: Since product.category is an object (populated), we access product.category._id
-//     const relatedProducts = await Product.find({
-//       category: product.category._id, 
-//       _id: { $ne: product._id }, // Exclude current product
-//       isBlocked: false
-//     })
-//     .populate("brand", "brandName")
-//     .limit(4)
-//     .lean();
-
-//     // Fetch Reviews
-//     const reviews = await Review.find({ productId: product._id })
-//       .populate("userId", "name") // Get reviewer name
-//       .sort({ createdAt: -1 })    // Show newest first
-//       .lean();
-
-//     // Render Page
-//     res.render("productDetails", {
-//       product,
-//       relatedProducts,
-//       reviews, // <--- Passed to EJS to fix the error
-//       user: req.user || req.session.user || null
-//     });
-
-//   } catch (error) {
-//     console.error("Error loading product details:", error);
-//     res.redirect("/shopPage");
-//   }
-// };
 
 module.exports = {
     loadLandingPage,

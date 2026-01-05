@@ -1,640 +1,436 @@
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  }
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body { 
-      font-family: 'Inter', sans-serif; 
-      background: #f5f7fa; 
-      color: #1a202c;
-      line-height: 1.6;
-    }
-    
-    .main-content { 
-      margin-left: 240px; 
-      margin-top: 70px; 
-      padding: 32px 40px;
-      min-height: calc(100vh - 70px);
-    }
-    
-    /* Header Section */
-    .page-header {
-      margin-bottom: 32px;
-    }
-    
-    .page-header h2 {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a202c;
-      margin-bottom: 8px;
-    }
-    
-    .page-header p {
-      color: #718096;
-      font-size: 14px;
-    }
-    
-    /* Top Actions Bar */
-    .top-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    
-.search-wrapper {
-      flex: 1;
-      max-width: 400px;
-      position: relative;
-    }
-    
-    .search-form {
-      display: flex;
-      gap: 0;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      transition: all 0.2s;
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .search-form:focus-within {
-      border-color: #4f9df9;
-      box-shadow: 0 2px 8px rgba(79, 157, 249, 0.15);
-    }
-    
-    .search-input {
-      flex: 1;
-      padding: 12px 16px;
-      border: none;
-      outline: none;
-      font-size: 14px;
-      font-family: 'Inter', sans-serif;
-      background: transparent;
-    }
-    
-    .search-input::placeholder {
-      color: #a0aec0;
-    }
-    
-    .search-form .search-btn {
-      padding: 12px 24px;
-      border: none;
-      background: #4f9df9;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background 0.2s;
-      font-family: 'Inter', sans-serif;
-    }
-    
-    .search-form .search-btn:hover {
-      background: #3b82f6;
-    }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+  }
 
-    .cancel-search-btn {
-      padding: 0 12px;
-      border: none;
-      background: transparent;
-      color: #a0aec0;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 400;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  .main-content {
+    margin-left: 260px; /* Adjusted for standard sidebars */
+    padding: 2rem;
+    transition: all 0.3s ease;
+  }
 
-    .cancel-search-btn:hover {
-      color: #dc2626;
-      transform: scale(1.1);
-    }
+  /* Header Section */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
 
-    @media (max-width: 768px) {
-      .search-wrapper {
-        max-width: 100%;
-        flex: 1;
-      }
+  .header-title h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
 
-      .search-form {
-        width: 100%;
-      }
+  .header-title p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
 
-      .search-input {
-        padding: 10px 12px;
-        font-size: 13px;
-      }
+  /* Modern Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
 
-      .search-form .search-btn {
-        padding: 10px 16px;
-        font-size: 13px;
-      }
-    }
-    
-    .search-form button {
-      padding: 12px 24px;
-      border: none;
-      background: #4f9df9;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background 0.2s;
-      font-family: 'Inter', sans-serif;
-    }
-    
-    .search-form button:hover {
-      background: #3b82f6;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
-      font-family: 'Inter', sans-serif;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
-    }
-    
-    /* Stats Cards (Optional) */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-    
-    .stat-card {
-      background: white;
-      padding: 10px;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      transition: all 0.3s;
-    }
-    
-    .stat-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-      border-color: #cbd5e0;
-    }
-    
-    /* Filter Pills */
-    .filter-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      color: #4a5568;
-      background: white;
-      border: 2px solid #e2e8f0;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    
-    .filter-pill:hover {
-      border-color: #4f9df9;
-      color: #4f9df9;
-    }
-    
-    .filter-pill.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border-color: transparent;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
-    }
-    
-    /* Table Container */
-    .table-container {
-      background: rgb(216, 216, 216);
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      overflow: hidden;
-    }
-    
-    .brand-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .brand-table thead {
-      background: #f7fafc;
-      border-bottom: 2px solid #e2e8f0;
-    }
-    
-    .brand-table th {
-      padding: 16px 20px;
-      text-align: left;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #4a5568;
-    }
-    
-    .brand-table td {
-      padding: 20px;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 14px;
-      color: #2d3748;
-      vertical-align: middle;
-    }
-    
-    .brand-table tbody tr {
-      transition: background 0.2s;
-    }
-    
-    .brand-table tbody tr:hover {
-      background: #f8fafc;
-    }
-    
-    .brand-table tbody tr:last-child td {
-      border-bottom: none;
-    }
-    
-    .brand-name {
-      font-weight: 600;
-      color: #1a202c;
-    }
-    
-    .brand-logo-cell {
-      width: 100px;
-    }
-    
-    .brand-logo {
-      width: 90px;
-      height: 90px;
-      object-fit: contain;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      padding: 8px;
-      background: #f9fafb;
-    }
-    
-    /* Status Badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
-    
-    .badge-success {
-      background: #d1fae5;
-      color: #065f46;
-    }
-    
-    .badge-danger {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    
-    /* Action Buttons */
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .action-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    
-    .btn-unlist {
-      background: #fef2f2;
-      color: #dc2626;
-      border: 1px solid #fecaca;
-    }
-    
-    .btn-unlist:hover {
-      background: #dc2626;
-      color: white;
-      border-color: #dc2626;
-    }
-    
-    .btn-list {
-      background: #f0fdf4;
-      color: #16a34a;
-      border: 1px solid #bbf7d0;
-    }
-    
-    .btn-list:hover {
-      background: #16a34a;
-      color: white;
-      border-color: #16a34a;
-    }
-    
-    /* Pagination */
-    .pagination-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      margin-top: 32px;
-      padding: 20px;
-    }
-    
-    .pagination-btn, .pagination-number {
-      padding: 10px 16px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-      background: white;
-      border: 1px solid #e2e8f0;
-      color: #4a5568;
-    }
-    
-    .pagination-btn:hover {
-      background: #4f9df9;
-      color: white;
-      border-color: #4f9df9;
-    }
-    
-    .pagination-number.active {
-      background: #4f9df9;
-      color: white;
-      border-color: #4f9df9;
-      font-weight: 600;
-    }
-    
-    .pagination-btn.disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-    
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-    }
-    
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.3;
-    }
-    
-    .empty-state h3 {
-      font-size: 18px;
-      color: #4a5568;
-      margin-bottom: 8px;
-    }
-    
-    .empty-state p {
-      color: #a0aec0;
-      font-size: 14px;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .main-content {
-        margin-left: 0;
-        padding: 20px;
-      }
-      
-      .top-actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .search-wrapper {
-        max-width: 100%;
-      }
-      
-      .brand-table {
-        font-size: 13px;
-      }
-      
-      .brand-table th,
-      .brand-table td {
-        padding: 12px;
-      }
-      
-      .brand-logo {
-        width: 60px;
-        height: 45px;
-      }
-      
-      .action-buttons {
-        flex-direction: column;
-      }
-    }
-  </style>
+  .stat-card {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
 
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+
+  /* Action Bar */
+  .toolbar {
+    background: var(--card-bg);
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+  }
+
+  .search-form {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 0.75rem;
+    padding: 2px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .search-form:focus-within {
+    background: white;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  .search-input {
+    background: transparent;
+    border: none;
+    padding: 0.6rem 1rem;
+    width: 100%;
+    outline: none;
+    font-size: 0.9rem;
+  }
+
+  .search-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.6rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  /* Table Styling */
+  .table-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .brand-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .brand-table th {
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .brand-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+  }
+
+  .brand-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .brand-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 4px;
+  }
+
+  .brand-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  /* Badges & Buttons */
+  .badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .badge-success { background: #dcfce7; color: #166534; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.75rem;
+    border: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--primary-hover); }
+
+  .action-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-outline-danger {
+    border: 1px solid var(--danger);
+    color: var(--danger);
+  }
+
+  .btn-outline-danger:hover {
+    background: var(--danger);
+    color: white;
+  }
+
+  .btn-outline-success {
+    border: 1px solid var(--success);
+    color: var(--success);
+  }
+
+  .btn-outline-success:hover {
+    background: var(--success);
+    color: white;
+  }
+
+  /* Filter Pills */
+  .filter-group {
+    display: flex;
+    gap: 0.5rem;
+    background: #f1f5f9;
+    padding: 0.25rem;
+    border-radius: 0.75rem;
+  }
+
+  .filter-pill {
+    padding: 0.5rem 1rem;
+    border-radius: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .filter-pill.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 1024px) {
+    .main-content { margin-left: 0; padding: 1.5rem; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  }
+
+  @media (max-width: 768px) {
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .search-wrapper { max-width: 100%; }
+    .brand-table thead { display: none; }
+    .brand-table tr { 
+        display: block; 
+        border: 1px solid var(--border-color); 
+        margin-bottom: 1rem; 
+        border-radius: 0.75rem;
+    }
+    .brand-table td { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 0.75rem 1rem;
+        text-align: right;
+    }
+    .brand-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-muted);
+        text-align: left;
+    }
+  }
+</style>
 
 <body>
 
 <%- include("../partials/admin/header.ejs") %>
 
 <div class="main-content">
-  <!-- Page Header -->
   <div class="page-header">
-    <h2>Brand Management</h2>
-    <p>Manage and organize your product brands</p>
+    <div class="header-title">
+      <h2>Brand Management</h2>
+      <p>Manage and organize your product brands</p>
+    </div>
+    <button class="btn-primary" onclick="window.location.href='/admin/addbrand'">
+      <i class="fas fa-plus"></i> Add New Brand
+    </button>
   </div>
 
-  <!-- Stats Cards -->
   <div class="stats-grid">
-    <div class="stat-card" onclick="window.location.href='/admin/brands'" style="cursor: pointer;">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="stat-card" onclick="window.location.href='/admin/brands'">
+      <div style="display: flex; justify-content: space-between;">
         <div>
-          <p style="color: #718096; font-size: 13px; font-weight: 500; margin-bottom: 8px;">TOTAL BRANDS</p>
-          <h3 style="font-size: 32px; font-weight: 700; color: #1a202c;"><%= totalBrands || data.length %></h3>
+          <p style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Total Brands</p>
+          <h3 style="font-size: 1.8rem; margin-top: 0.5rem;"><%= totalBrands || data.length %></h3>
         </div>
-        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-          📦
+        <div class="stat-icon" style="background: rgba(79, 70, 229, 0.1); color: var(--primary);">
+          <i class="fas fa-boxes"></i>
         </div>
       </div>
     </div>
 
-    <div class="stat-card" onclick="window.location.href='/admin/brands?status=listed'" style="cursor: pointer;">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="stat-card" onclick="window.location.href='/admin/brands?status=listed'">
+      <div style="display: flex; justify-content: space-between;">
         <div>
-          <p style="color: #718096; font-size: 13px; font-weight: 500; margin-bottom: 8px;">LISTED BRANDS</p>
-          <h3 style="font-size: 32px; font-weight: 700; color: #16a34a;"><%= listedBrands || data.filter(b => !b.isBlocked).length %></h3>
+          <p style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Listed</p>
+          <h3 style="font-size: 1.8rem; margin-top: 0.5rem; color: var(--success);"><%= listedBrands || data.filter(b => !b.isBlocked).length %></h3>
         </div>
-        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-          ✓
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+          <i class="fas fa-check-circle"></i>
         </div>
       </div>
     </div>
 
-    <div class="stat-card" onclick="window.location.href='/admin/brands?status=unlisted'" style="cursor: pointer;">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="stat-card" onclick="window.location.href='/admin/brands?status=unlisted'">
+      <div style="display: flex; justify-content: space-between;">
         <div>
-          <p style="color: #718096; font-size: 13px; font-weight: 500; margin-bottom: 8px;">UNLISTED BRANDS</p>
-          <h3 style="font-size: 32px; font-weight: 700; color: #dc2626;"><%= unlistedBrands || data.filter(b => b.isBlocked).length %></h3>
+          <p style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Unlisted</p>
+          <h3 style="font-size: 1.8rem; margin-top: 0.5rem; color: var(--danger);"><%= unlistedBrands || data.filter(b => b.isBlocked).length %></h3>
         </div>
-        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-          ✕
+        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+          <i class="fas fa-times-circle"></i>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Filter Pills -->
-  <div style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
-    <a href="/admin/brands" class="filter-pill <%= (!status || status === '') ? 'active' : '' %>">
-      All Brands
-    </a>
-    <a href="/admin/brands?status=listed" class="filter-pill <%= status === 'listed' ? 'active' : '' %>">
-      Listed
-    </a>
-    <a href="/admin/brands?status=unlisted" class="filter-pill <%= status === 'unlisted' ? 'active' : '' %>">
-      Unlisted
-    </a>
-  </div>
+  <div class="toolbar">
+    <div class="filter-group">
+      <a href="/admin/brands" class="filter-pill <%= (!status || status === '') ? 'active' : '' %>">All</a>
+      <a href="/admin/brands?status=listed" class="filter-pill <%= status === 'listed' ? 'active' : '' %>">Listed</a>
+      <a href="/admin/brands?status=unlisted" class="filter-pill <%= status === 'unlisted' ? 'active' : '' %>">Unlisted</a>
+    </div>
 
-   <div class="top-actions">
     <div class="search-wrapper">
       <form action="/admin/brands" method="GET" class="search-form" id="searchForm">
         <input 
           type="text" 
           name="search" 
-          placeholder="Search brands by name..." 
+          placeholder="Search brands..." 
           value="<%= search || '' %>"
           id="searchInput"
           class="search-input"
         />
-        <button type="submit" class="search-btn">Search</button>
         <% if (search && search.trim() !== '') { %>
-          <button 
-            type="button" 
-            class="cancel-search-btn" 
-            onclick="clearSearch(event)"
-            title="Clear search"
-          >
-            ✕
+          <button type="button" class="cancel-search-btn" onclick="clearSearch(event)" style="background:none; border:none; padding: 0 10px; color: var(--text-muted); cursor:pointer;">
+            <i class="fas fa-times"></i>
           </button>
         <% } %>
+        <button type="submit" class="search-btn">Search</button>
       </form>
     </div>
-    <button class="btn-primary" onclick="window.location.href='/admin/addbrand'">
-      + Add New Brand
-    </button>
   </div>
 
-  <!-- Success/Error Messages -->
-  <% if (success) { %>
-    <script>
-      Swal.fire({ 
-        icon: "success", 
-        title: "Success!", 
-        text: "<%= success %>", 
-        showConfirmButton: false, 
-        timer: 2500,
-        toast: true,
-        position: 'top-end'
-      });
-    </script>
-  <% } %>
-  <% if (error) { %>
-    <script>
-      Swal.fire({ 
-        icon: "error", 
-        title: "Error!", 
-        text: "<%= error %>", 
-        confirmButtonColor: "#dc2626"
-      });
-    </script>
-  <% } %>
-
-  <!-- Table Container -->
-  <div class="table-container">
+  <div class="table-card">
     <table class="brand-table">
       <thead>
         <tr>
-          <th>Brand Name</th>
-          <th>Logo</th>
+          <th>Brand Details</th>
           <th>Status</th>
-          <th>Actions</th>
+          <th style="text-align: right;">Actions</th>
         </tr>
       </thead>
       <tbody>
         <% if (data && data.length > 0) { %>
           <% data.forEach(brand => { %>
             <tr>
-              <td class="brand-name"><%= brand.brandName %></td>
-              <td class="brand-logo-cell">
-                <img 
-                  src="<%= brand.brandImage[0] %>" 
-                  alt="<%= brand.brandName %>" 
-                  class="brand-logo"
-                />
+              <td data-label="Brand Details">
+                <div class="brand-info">
+                  <img src="<%= brand.brandImage[0] %>" alt="" class="brand-logo" />
+                  <span class="brand-name"><%= brand.brandName %></span>
+                </div>
               </td>
-              <td>
+              <td data-label="Status">
                 <% if (brand.isBlocked) { %>
                   <span class="badge badge-danger">Unlisted</span>
                 <% } else { %>
                   <span class="badge badge-success">Listed</span>
                 <% } %>
               </td>
-              <td>
-                <div class="action-buttons">
-                  <% if (!brand.isBlocked) { %>
-                    <a 
-                      href="/admin/blockBrand?id=<%= brand._id %>" 
-                      class="action-btn btn-unlist confirm-action" 
-                      data-action="unlist"
-                    >
-                      Unlist
-                    </a>
-                  <% } else { %>
-                    <a 
-                      href="/admin/unblockBrand?id=<%= brand._id %>" 
-                      class="action-btn btn-list confirm-action" 
-                      data-action="list"
-                    >
-                      List
-                    </a>
-                  <% } %>
-                </div>
+              <td data-label="Actions" style="text-align: right;">
+                <% if (!brand.isBlocked) { %>
+                  <a href="/admin/blockBrand?id=<%= brand._id %>" class="action-btn btn-outline-danger confirm-action" data-action="unlist">
+                    <i class="fas fa-ban"></i> Unlist
+                  </a>
+                <% } else { %>
+                  <a href="/admin/unblockBrand?id=<%= brand._id %>" class="action-btn btn-outline-success confirm-action" data-action="list">
+                    <i class="fas fa-check"></i> List
+                  </a>
+                <% } %>
               </td>
             </tr>
           <% }) %>
         <% } else { %>
           <tr>
-            <td colspan="4">
-              <div class="empty-state">
-                <div class="empty-state-icon">📦</div>
-                <h3>No brands found</h3>
-                <p>Start by adding your first brand</p>
-              </div>
+            <td colspan="3" style="text-align: center; padding: 4rem;">
+              <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem; display: block;"></i>
+              <h3 style="color: var(--text-muted);">No brands found</h3>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Try adjusting your filters or search terms.</p>
             </td>
           </tr>
         <% } %>
@@ -642,98 +438,48 @@
     </table>
   </div>
 
-  <!-- Pagination -->
   <% if (totalPages > 1) { %>
-    <div class="pagination-wrapper">
+    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
       <% if(currentPage > 1) { %>
-        <a href="?search=<%= search %>&page=<%= currentPage - 1 %>" class="pagination-btn">
-          Previous
-        </a>
-      <% } else { %>
-        <span class="pagination-btn disabled">Previous</span>
+        <a href="?search=<%= search %>&page=<%= currentPage - 1 %>" class="filter-pill active">Prev</a>
+      <% } %>
+      
+      <% for(let i = 1; i <= totalPages; i++) { %>
+        <a href="?search=<%= search %>&page=<%= i %>" class="filter-pill <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
       <% } %>
 
-      <% 
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-        
-        if (startPage > 1) { %>
-          <a href="?search=<%= search %>&page=1" class="pagination-number">1</a>
-          <% if (startPage > 2) { %>
-            <span class="pagination-number disabled">...</span>
-          <% } %>
-        <% }
-        
-        for(let i = startPage; i <= endPage; i++) { %>
-          <% if(i === currentPage) { %>
-            <span class="pagination-number active"><%= i %></span>
-          <% } else { %>
-            <a href="?search=<%= search %>&page=<%= i %>" class="pagination-number"><%= i %></a>
-          <% } %>
-        <% }
-        
-        if (endPage < totalPages) { %>
-          <% if (endPage < totalPages - 1) { %>
-            <span class="pagination-number disabled">...</span>
-          <% } %>
-          <a href="?search=<%= search %>&page=<%= totalPages %>" class="pagination-number"><%= totalPages %></a>
-        <% } %>
-
       <% if(currentPage < totalPages) { %>
-        <a href="?search=<%= search %>&page=<%= currentPage + 1 %>" class="pagination-btn">
-          Next
-        </a>
-      <% } else { %>
-        <span class="pagination-btn disabled">Next</span>
+        <a href="?search=<%= search %>&page=<%= currentPage + 1 %>" class="filter-pill active">Next</a>
       <% } %>
     </div>
   <% } %>
 </div>
 
 <script>
+  function clearSearch(event) {
+    event.preventDefault();
+    document.getElementById('searchInput').value = '';
+    window.location.href = '/admin/brands';
+  }
 
-
-   function clearSearch(event) {
-      event.preventDefault();
-      
-      // Clear the input
-      document.getElementById('searchInput').value = '';
-      
-      // Redirect to brands page without search parameter
-      window.location.href = '/admin/brands';
-    }
-
-    // Optional: Show/hide cancel button dynamically as user types
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        const cancelBtn = document.querySelector('.cancel-search-btn');
-        if (cancelBtn) {
-          if (e.target.value.trim() === '') {
-            cancelBtn.style.display = 'none';
-          } else {
-            cancelBtn.style.display = 'flex';
-          }
-        }
-      });
-    }
   document.addEventListener("DOMContentLoaded", () => {
-    
     document.querySelector("tbody").addEventListener("click", function(e) {
-      if(e.target && e.target.classList.contains("confirm-action")) {
+      const target = e.target.closest(".confirm-action");
+      if(target) {
         e.preventDefault();
-        const url = e.target.getAttribute("href");
-        const action = e.target.dataset.action;
+        const url = target.getAttribute("href");
+        const action = target.dataset.action;
         
         Swal.fire({
-          title: `${action.charAt(0).toUpperCase() + action.slice(1)} Brand`,
-          text: `Are you sure you want to ${action} this brand?`,
+          title: `Are you sure?`,
+          text: `You are about to ${action} this brand.`,
           icon: "warning",
           showCancelButton: true,
-          confirmButtonColor: action === 'list' ? "#16a34a" : "#dc2626",
-          cancelButtonColor: "#6b7280",
+          confirmButtonColor: action === 'list' ? "#10b981" : "#ef4444",
+          cancelButtonColor: "#64748b",
           confirmButtonText: `Yes, ${action} it!`,
-          cancelButtonText: "Cancel"
+          background: '#ffffff',
+          borderRadius: '1rem'
         }).then(result => { 
           if(result.isConfirmed) {
             window.location.href = url;
@@ -745,4 +491,3 @@
 </script>
 
 </body>
-</html>

@@ -76,7 +76,7 @@ a { text-decoration: none; color: var(--text-main); transition: 0.3s; }
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 40px;
+    padding: 7px 40px;
     background-color: var(--bg-nav);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
@@ -206,20 +206,91 @@ nav.nav-links a:hover, nav.nav-links a.active {
     nav.nav-links { display: none; }
     .hamburger { display: block; }
 }
+
+
+@media screen and (max-width: 768px) {
+
+    .navbar {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        padding: 12px 16px;
+    }
+
+    /* Hamburger LEFT */
+    .hamburger {
+        display: flex;
+        justify-content: flex-start;
+        font-size: 22px;
+    }
+
+    /* Logo CENTER */
+    .nav-logo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .nav-logo img {
+        width: 105px;
+    }
+
+    /* Icons RIGHT */
+    .nav-icons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+    }
+
+    /* Hide desktop nav links */
+    nav.nav-links {
+        display: none;
+    }
+
+    /* Mobile nav dropdown */
+    .mobile-nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        z-index: 999;
+    }
+}
+
+@media screen and (max-width: 768px) {
+
+    .mobile-nav {
+        text-align: center;
+    }
+
+    .mobile-nav a {
+        padding: 14px 0;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .mobile-nav a:hover {
+        background-color: var(--hover-color);
+        border-radius: 6px;
+    }
+}
+
+
 </style>
 
-<div class="top-bar">
-    Summer Sale on All Branded Perfumes – Up to 20% Off + Free Express Delivery 
-    <a href="/shopPage">Shop Now</a>
-</div>
+
 
 <header class="navbar">
+
+        <div class="hamburger" id="hamburger">
+        <i class="fa fa-bars"></i>
+    </div>
 
     <div class="nav-logo">
         <a href="/home"><img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo"></a>
     </div>
 
-    <div class="hamburger" id="hamburger"><i class="fa fa-bars"></i></div>
+
 
     <nav class="nav-links" id="navLinks">
         <a href="/home">Home</a>
@@ -270,7 +341,7 @@ nav.nav-links a:hover, nav.nav-links a.active {
         <a href="/home">Home</a>
         <a href="/shopPage">Shop</a>
         <a href="/contact">Contact</a>
-        <a href="/about">About</a>
+        <a href="/">About</a>
         
         <hr style="border: 0; border-top: 1px solid var(--border-color);">
 
