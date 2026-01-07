@@ -1,9 +1,7 @@
-const Category = require('../../models/categorySchema')
-const Product=require("../../models/productSchema")
-const mongoose =require('mongoose');
-const cloudinary = require('../../config/cloudinary');
-
-
+const Category = require("../../models/categorySchema");
+const Product = require("../../models/productSchema");
+const mongoose = require("mongoose");
+const { cloudinary } = require("../../config/cloudinary");
 
 const categoryInfo = async (req, res) => {
   try {
@@ -13,9 +11,9 @@ const categoryInfo = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const filter = {
-      name: { $regex: ".*" + search + ".*", $options: "i" }
+      name: { $regex: ".*" + search + ".*", $options: "i" },
     };
-   
+
     const categoryData = await Category.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -30,14 +28,13 @@ const categoryInfo = async (req, res) => {
     }
 
     res.render("category", {
-      cat: categoryData, 
+      cat: categoryData,
       currentPage: page,
       totalPages,
       totalCategories,
       search,
       message,
     });
-
   } catch (error) {
     console.error("Error in categoryInfo:", error);
     res.redirect("/admin/pageerror");
@@ -47,136 +44,125 @@ const categoryInfo = async (req, res) => {
 const addCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
-    const trimmedName = name.trim();
-    console.log('Received category:', { name: trimmedName, description, image: !!req.file });
 
-    
+    if (!name || !description || !req.file) {
+      return res
+        .status(400)
+        .json({ error: "All fields (Name, Description, Image) are required" });
+    }
+
+    const trimmedName = name.trim();
+    const trimmedDesc = description.trim();
+
+    if (!/^[A-Za-z\s]{3,20}$/.test(trimmedName)) {
+      return res.status(400).json({
+        error:
+          "Category name must only contain letters and be 3–20 characters long",
+      });
+    }
+
+    if (trimmedDesc.length < 5 || trimmedDesc.length > 50) {
+      return res.status(400).json({
+        error: "Description must be between 5 and 50 characters",
+      });
+    }
+
     const existingCategory = await Category.findOne({
-      name: { $regex: `^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+      name: { $regex: `^${trimmedName}$`, $options: "i" },
     });
 
     if (existingCategory) {
-      console.log(`Duplicate category detected: "${trimmedName}" matches "${existingCategory.name}"`);
-      return res.status(400).json({ error: 'Category already exists' });
+      return res
+        .status(400)
+        .json({ error: "This category name already exists" });
     }
 
-    let imageUrl = null;
-    if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
-      console.log('Image uploaded:', imageUrl);
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "image/webp",
+    ];
+    if (!allowedMimeTypes.includes(req.file.mimetype)) {
+      return res
+        .status(400)
+        .json({ error: "Only JPG, JPEG, PNG, and WEBP images are allowed" });
     }
+
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "sentique/categories",
+    });
 
     const newCategory = new Category({
       name: trimmedName,
-      description: description.trim(),
-      image: imageUrl,
-      isListed: true
+      description: trimmedDesc,
+      image: result.secure_url,
+      imagePublicId: result.public_id,
+      isListed: true,
     });
 
     await newCategory.save();
-    console.log('Category added:', trimmedName);
-    return res.status(201).json({ message: 'Category added successfully' });
+
+    return res.status(201).json({
+      success: true,
+      message: "Category added successfully",
+    });
   } catch (error) {
-    console.error('Error in addCategory:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error in addCategory:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-// const addCategoryOffer = async (req, res) => {
-//   try {
-//     const percentage = parseInt(req.body.percentage);
-//     const categoryId = req.body.categoryId;
-    
-//     if (percentage < 0 || percentage > 99) {
-//       return res.json({ status: false, message: "Offer percentage must be between 0 and 99" });
-//     }
-
-//     const category = await Category.findById(categoryId);
-//     if (!category) {
-//       return res.status(404).json({ status: false, message: "Category not found" });
-//     }
-
-//     const products = await Product.find({ category: category._id });
-
-//     const hasProductOffer = products.some(product => product.productOffer > percentage);
-//     if (hasProductOffer) {
-//       return res.json({ status: false, message: "A product in this category already has a better offer" });
-//     }
-    
-//     await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
-//     for (const product of products) {
-     
-//       const updatedVariants = product.variants.map(variant => {
-//         const discount = Math.floor(variant.regularPrice * (percentage / 100));
-//         const newSalePrice = variant.regularPrice - discount;
-        
-//         return {
-//           ...variant.toObject(),
-//           salePrice: newSalePrice
-//         };
-//       });
-
-//       await Product.updateOne(
-//         { _id: product._id },
-//         { 
-//           $set: { 
-//             variants: updatedVariants,
-//             productOffer: 0
-//           }
-//         }
-//       );
-
-//       console.log(`Updated product ${product._id} with ${updatedVariants.length} variants - Offer: ${percentage}%`);
-//     }
-
-//     res.json({ status: true, message: "Category offer added successfully" });
-//   } catch (error) {
-//     console.error("Error in addCategoryOffer:", error);
-//     res.status(500).json({ status: false, message: "Internal Server Error" });
-//   }
-// };
 
 const addCategoryOffer = async (req, res) => {
   try {
     const percentage = parseInt(req.body.percentage);
     const categoryId = req.body.categoryId;
-    
+
     if (percentage < 0 || percentage > 99) {
-      return res.json({ status: false, message: "Offer percentage must be between 0 and 99" });
+      return res.json({
+        status: false,
+        message: "Offer percentage must be between 0 and 99",
+      });
     }
 
     const category = await Category.findById(categoryId);
     if (!category) {
-      return res.status(404).json({ status: false, message: "Category not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Category not found" });
     }
 
     const products = await Product.find({ category: category._id });
-    
-    // Update category offer first
-    await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
 
-    // Update each product with the higher offer (category or product)
+    await Category.updateOne(
+      { _id: categoryId },
+      { $set: { categoryOffer: percentage } }
+    );
+
     for (const product of products) {
       const productOffer = product.productOffer || 0;
       const effectiveOffer = Math.max(percentage, productOffer);
-      
-      const updatedVariants = product.variants.map(variant => {
-        const discount = Math.floor(variant.regularPrice * (effectiveOffer / 100));
+
+      const updatedVariants = product.variants.map((variant) => {
+        const discount = Math.floor(
+          variant.regularPrice * (effectiveOffer / 100)
+        );
         const newSalePrice = variant.regularPrice - discount;
-        
+
         return {
           ...variant.toObject(),
-          salePrice: newSalePrice
+          salePrice: newSalePrice,
         };
       });
 
-      // IMPORTANT: Don't change productOffer - only update variants
       await Product.updateOne(
         { _id: product._id },
         { $set: { variants: updatedVariants } }
       );
 
-      console.log(`Updated product ${product._id} - Category Offer: ${percentage}%, Product Offer: ${productOffer}%, Applied: ${effectiveOffer}%`);
+      console.log(
+        `Updated product ${product._id} - Category Offer: ${percentage}%, Product Offer: ${productOffer}%, Applied: ${effectiveOffer}%`
+      );
     }
 
     res.json({ status: true, message: "Category offer added successfully" });
@@ -192,96 +178,58 @@ const removeCategoryOffer = async (req, res) => {
 
     const category = await Category.findById(categoryId);
     if (!category) {
-      return res.status(404).json({ status: false, message: "Category not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Category not found" });
     }
- 
+
     const products = await Product.find({ category: categoryId });
 
-    // Update each product - revert to product offer if exists, else regular price
     for (const product of products) {
       const productOffer = product.productOffer || 0;
-      
-      const updatedVariants = product.variants.map(variant => {
+
+      const updatedVariants = product.variants.map((variant) => {
         let newSalePrice = variant.regularPrice;
-        
-        // If product has its own offer, apply it
+
         if (productOffer > 0) {
-          const discount = Math.floor(variant.regularPrice * (productOffer / 100));
+          const discount = Math.floor(
+            variant.regularPrice * (productOffer / 100)
+          );
           newSalePrice = variant.regularPrice - discount;
         }
-        
+
         return {
           ...variant.toObject(),
-          salePrice: newSalePrice
+          salePrice: newSalePrice,
         };
       });
 
-      // IMPORTANT: Don't touch productOffer - only update variants
       await Product.updateOne(
         { _id: product._id },
         { $set: { variants: updatedVariants } }
       );
 
-      console.log(`Removed category offer from product ${product._id} - Product Offer: ${productOffer}%`);
+      console.log(
+        `Removed category offer from product ${product._id} - Product Offer: ${productOffer}%`
+      );
     }
-    
-    // Remove category offer
+
     await Category.updateOne(
       { _id: categoryId },
       { $set: { categoryOffer: 0 } }
     );
 
-    return res.json({ status: true, message: "Category offer removed successfully" });
-
+    return res.json({
+      status: true,
+      message: "Category offer removed successfully",
+    });
   } catch (error) {
     console.error("Error in removeCategoryOffer:", error);
-    return res.status(500).json({ status: false, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, message: "Internal Server Error" });
   }
 };
-
-
-// const removeCategoryOffer = async (req, res) => {
-//   try {
-//     const categoryId = req.body.categoryId;
-
-//     const category = await Category.findById(categoryId);
-//     if (!category) {
-//       return res.status(404).json({ status: false, message: "Category not found" });
-//     }
- 
-//     const products = await Product.find({ category: categoryId });
-
-//     for (const product of products) {
-//       const updatedVariants = product.variants.map(variant => ({
-//         ...variant.toObject(),
-//         salePrice: variant.regularPrice
-//       }));
-
-//       await Product.updateOne(
-//         { _id: product._id },
-//         {
-//           $set: {
-//             variants: updatedVariants,
-//             productOffer: 0
-//           }
-//         }
-//       );
-
-//       console.log(`Removed offer from product ${product._id} with ${updatedVariants.length} variants`);
-//     }
-    
-//     await Category.updateOne(
-//       { _id: categoryId },
-//       { $set: { categoryOffer: 0 } }
-//     );
-
-//     return res.json({ status: true, message: "Category offer removed successfully" });
-
-//   } catch (error) {
-//     console.error("Error in removeCategoryOffer:", error);
-//     return res.status(500).json({ status: false, message: "Internal Server Error" });
-//   }
-// };
 
 const getListCategory = async (req, res) => {
   try {
@@ -290,7 +238,7 @@ const getListCategory = async (req, res) => {
       return res.json({ status: false, message: "Category ID is required" });
     }
 
-    await Category.updateOne({ _id: categoryId }, { $set: { isListed: true } }); 
+    await Category.updateOne({ _id: categoryId }, { $set: { isListed: true } });
     res.json({ status: true, message: "Category listed successfully" });
   } catch (error) {
     console.error("Error in getListCategory:", error);
@@ -305,7 +253,10 @@ const getUnlistCategory = async (req, res) => {
       return res.json({ status: false, message: "Category ID is required" });
     }
 
-    await Category.updateOne({ _id: categoryId }, { $set: { isListed: false } });
+    await Category.updateOne(
+      { _id: categoryId },
+      { $set: { isListed: false } }
+    );
     res.json({ status: true, message: "Category unlisted successfully" });
   } catch (error) {
     console.error("Error in getUnlistCategory:", error);
@@ -336,80 +287,94 @@ const getEditCategory = async (req, res) => {
 
 const editCategory = async (req, res) => {
   try {
+    const { categoryName, description } = req.body;
     const id = req.params.id;
-    const { categoryName, description, deleteImage } = req.body;
-    const trimmedName = categoryName.trim();
-    console.log('Editing category:', { id, name: trimmedName, description, deleteImage, image: !!req.file });
-  
-    if (!trimmedName || trimmedName.length < 3) {
-      console.log('Validation failed: Category name is too short or empty');
-      return res.status(400).json({ error: 'Category name is required and must be at least 3 characters' });
+
+    if (!categoryName || !description) {
+      return res.status(400).json({
+        error: "Name and description are required",
+      });
     }
-  
+
+    const trimmedName = categoryName.trim();
+    const trimmedDesc = description.trim();
+
+    if (!/^[A-Za-z ]{3,30}$/.test(trimmedName)) {
+      return res.status(400).json({
+        error:
+          "Category name must contain only letters and be 3–30 characters long",
+      });
+    }
+
+    if (trimmedDesc.length < 3 || trimmedDesc.length > 50) {
+      return res.status(400).json({
+        error: "Description must be between 3 and 50 characters",
+      });
+    }
+
     const existingCategory = await Category.findOne({
-      name: { $regex: `^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' },
-      _id: { $ne: id }
+      name: { $regex: `^${trimmedName}$`, $options: "i" },
+      _id: { $ne: id },
     });
 
     if (existingCategory) {
-      console.log(`Duplicate category detected: "${trimmedName}" matches "${existingCategory.name}"`);
-      return res.status(400).json({ error: 'Category already exists' });
+      return res.status(400).json({
+        error: "Category name already exists",
+      });
     }
 
     const category = await Category.findById(id);
     if (!category) {
-      console.log(`Category not found: ID ${id}`);
-      return res.status(404).json({ error: 'Category not found' });
+      return res.status(404).json({ error: "Category not found" });
     }
-   
+
     if (req.file) {
+      const allowedMimeTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
+      ];
+      if (!allowedMimeTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({
+          error: "Only JPG, JPEG, PNG, WEBP images are allowed",
+        });
+      }
+
       if (category.imagePublicId) {
-        try {
-          await cloudinary.uploader.destroy(category.imagePublicId);
-          console.log('Cloudinary image deleted:', category.imagePublicId);
-        } catch (err) {
-          console.error('Cloudinary deletion error:', err);
-        }
-      }
-      category.image = req.file.path || req.file.location;
-      category.imagePublicId = req.file.filename || req.file.public_id;
-      console.log('New image uploaded:', category.image);
-    }
-   
-    if ((deleteImage === 'true' || deleteImage === true) && !req.file && category.imagePublicId) {
-      try {
         await cloudinary.uploader.destroy(category.imagePublicId);
-        console.log('Cloudinary image deleted:', category.imagePublicId);
-        category.image = null;
-        category.imagePublicId = null;
-      } catch (err) {
-        console.error('Cloudinary deletion error:', err);
       }
+
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "sentique/categories",
+      });
+
+      category.image = result.secure_url;
+      category.imagePublicId = result.public_id;
     }
-   
-    category.name = trimmedName;
-    category.description = description.trim();
+
+    category.name = trimmedName.toLowerCase();
+    category.description = trimmedDesc;
+
     await category.save();
 
-    console.log('Category updated:', trimmedName);
-    res.json({ success: true, message: 'Category updated successfully' });
-  } catch (err) {
-    console.error('Edit Category Error:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    return res.json({
+      success: true,
+      message: "Category updated successfully",
+    });
+  } catch (error) {
+    console.error("Error in editCategory:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-
-
-module.exports={
-    categoryInfo,
-    addCategory,
-    addCategoryOffer,
-    removeCategoryOffer,
-    getListCategory,
-    getUnlistCategory,
-    getEditCategory,
-    editCategory,
-  
-
-}
+module.exports = {
+  categoryInfo,
+  addCategory,
+  addCategoryOffer,
+  removeCategoryOffer,
+  getListCategory,
+  getUnlistCategory,
+  getEditCategory,
+  editCategory,
+};

@@ -6,9 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 const mongoose = require("mongoose");
-const { cloudinary } = require('../../config/cloudinary');
-
-
+const { cloudinary } = require("../../config/cloudinary");
 
 const getProductAddPage = async (req, res) => {
   try {
@@ -18,88 +16,128 @@ const getProductAddPage = async (req, res) => {
       category: category,
       brand: brand,
       error: req.flash("error"),
-      success: req.flash("success")
+      success: req.flash("success"),
     });
   } catch (error) {
     console.error("Error fetching add product page:", error);
     req.flash("error", "Failed to load add product page");
-    res.redirect('/pageerror');
+    res.redirect("/pageerror");
   }
 };
 
 const addProducts = async (req, res) => {
   try {
     const data = req.body;
-    console.log('Received product:', {
+
+    console.log("Received product:", {
       productName: data.productName?.trim(),
       description: data.description?.trim(),
       longDescription: data.longDescription?.trim(),
       brand: data.brand,
       category: data.category,
-      imageCount: data.croppedImages?.filter(img => img).length,
-      variantCount: Array.isArray(data.variantSize) ? data.variantSize.length : 1
+      imageCount: data.croppedImages?.filter((img) => img).length,
+      variantCount: Array.isArray(data.variantSize)
+        ? data.variantSize.length
+        : 1,
     });
 
-    if (!data.productName?.trim()) throw new Error("Product name is required");
-    if (data.productName.trim().length < 3) throw new Error("Product name must be at least 3 characters");
-    if (!data.description?.trim()) throw new Error("Short description is required");
-    if (data.description.trim().length < 3) throw new Error("Short description must be at least 3 characters");
-    if (!data.longDescription?.trim()) throw new Error("Long description is required");
-    if (data.longDescription.trim().length < 10) throw new Error("Long description must be at least 10 characters");
+    const nameTrimmed = data.productName?.trim();
+    const alphaRegex = /^[a-zA-Z\s]+$/;
+
+    if (!nameTrimmed) throw new Error("Product name is required");
+    if (!alphaRegex.test(nameTrimmed))
+      throw new Error("Product name must only contain letters");
+    if (nameTrimmed.length < 3)
+      throw new Error("Product name must be at least 3 characters");
+    if (data.productName.trim().length < 3)
+      throw new Error("Product name must be at least 3 characters");
+    if (!data.description?.trim())
+      throw new Error("Short description is required");
+    if (data.description.trim().length < 3)
+      throw new Error("Short description must be at least 3 characters");
+    if (!data.longDescription?.trim())
+      throw new Error("Long description is required");
+    if (data.longDescription.trim().length < 10)
+      throw new Error("Long description must be at least 10 characters");
     if (!data.brand) throw new Error("Brand is required");
     if (!data.category) throw new Error("Category is required");
 
     const existingProduct = await Product.findOne({
-      productName: { $regex: `^${data.productName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+      productName: {
+        $regex: `^${data.productName
+          .trim()
+          .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        $options: "i",
+      },
     });
     if (existingProduct) {
-      console.log(`Duplicate product detected: "${data.productName.trim()}" matches "${existingProduct.productName}"`);
+      console.log(
+        `Duplicate product detected: "${data.productName.trim()}" matches "${
+          existingProduct.productName
+        }"`
+      );
       throw new Error("Product name already exists");
     }
 
     const brandObj = await Brand.findById(data.brand);
+
     const categoryObj = await Category.findById(data.category);
+
+    console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", categoryObj);
+
     if (!brandObj) throw new Error("Invalid brand");
     if (!categoryObj) throw new Error("Invalid category");
 
-    if (!data.croppedImages || data.croppedImages.length === 0) throw new Error("At least 2 images are required");
-    const validImages = data.croppedImages.filter(img => img);
-    if (validImages.length < 2) throw new Error("At least 2 images are required");
+    if (!data.croppedImages || data.croppedImages.length === 0)
+      throw new Error("At least 2 images are required");
+    const validImages = data.croppedImages.filter((img) => img);
+    if (validImages.length < 2)
+      throw new Error("At least 2 images are required");
     if (validImages.length > 4) throw new Error("Maximum 4 images allowed");
 
     const images = [];
     for (let base64 of validImages) {
       const upload = await cloudinary.uploader.upload(base64, {
         folder: "sentique/products",
-        format: 'jpg'
+        format: "jpg",
       });
       images.push(upload.secure_url);
     }
 
-    if (!data.variantSize || !data.variantStock || !data.variantRegularPrice || !data.variantSalePrice) {
+    if (!data.variantSize || !data.variantStock || !data.variantRegularPrice) {
       throw new Error("At least one variant is required");
     }
 
-    const sizes = Array.isArray(data.variantSize) ? data.variantSize : [data.variantSize];
-    const stocks = Array.isArray(data.variantStock) ? data.variantStock : [data.variantStock];
-    const regPrices = Array.isArray(data.variantRegularPrice) ? data.variantRegularPrice : [data.variantRegularPrice];
-    const salePrices = Array.isArray(data.variantSalePrice) ? data.variantSalePrice : [data.variantSalePrice];
+    const sizes = Array.isArray(data.variantSize)
+      ? data.variantSize
+      : [data.variantSize];
+    const stocks = Array.isArray(data.variantStock)
+      ? data.variantStock
+      : [data.variantStock];
+    const regPrices = Array.isArray(data.variantRegularPrice)
+      ? data.variantRegularPrice
+      : [data.variantRegularPrice];
 
     if (sizes.length < 1) throw new Error("At least one variant is required");
+
+    const categogyPercentage = 100 - categoryObj.categoryOffer;
 
     const variants = sizes.map((size, i) => ({
       size: Number(size),
       stock: Number(stocks[i]),
       regularPrice: Number(regPrices[i]),
-      salePrice: Number(salePrices[i])
+      salePrice: Number(Math.floor((regPrices[i] * categogyPercentage) / 100)),
     }));
 
     for (const variant of variants) {
       if (variant.size <= 0) throw new Error("Size must be positive");
       if (variant.stock < 0) throw new Error("Stock cannot be negative");
-      if (variant.regularPrice <= 0) throw new Error("Regular price must be positive");
-      if (variant.salePrice < 0) throw new Error("Sale price cannot be negative");
-      if (variant.salePrice > variant.regularPrice) throw new Error("Sale price must be ≤ regular price");
+      if (variant.regularPrice <= 0)
+        throw new Error("Regular price must be positive");
+      if (variant.salePrice < 0)
+        throw new Error("Sale price cannot be negative");
+      if (variant.salePrice > variant.regularPrice)
+        throw new Error("Sale price must be ≤ regular price");
     }
 
     const product = new Product({
@@ -110,15 +148,20 @@ const addProducts = async (req, res) => {
       category: categoryObj._id,
       images,
       variants,
-      status: variants.some(v => v.stock > 0) ? "Available" : "Out of stock",
-      slug: data.productName.trim().toLowerCase().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "")
+      status: variants.some((v) => v.stock > 0) ? "Available" : "Out of stock",
+      slug: data.productName
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, ""),
     });
 
     await product.save();
-    console.log('Product added:', data.productName.trim());
+    console.log("Product added:", data.productName.trim());
     req.flash("success", "Product added successfully!");
 
-    if (req.get('Accept').includes('application/json')) {
+    if (req.get("Accept").includes("application/json")) {
       return res.status(201).json({ message: "Product added successfully" });
     }
     res.redirect("/admin/products");
@@ -126,7 +169,7 @@ const addProducts = async (req, res) => {
     console.error("Add product error:", error.message);
     req.flash("error", error.message);
 
-    if (req.get('Accept').includes('application/json')) {
+    if (req.get("Accept").includes("application/json")) {
       return res.status(400).json({ error: error.message });
     }
     res.redirect("/admin/addProducts");
@@ -147,14 +190,17 @@ const getAllProducts = async (req, res) => {
     if (search) {
       query.$or = [
         { productName: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
+        { description: { $regex: search, $options: "i" } },
       ];
     }
 
     if (selectedCategory) {
       const category = mongoose.Types.ObjectId.isValid(selectedCategory)
         ? await Category.findOne({ _id: selectedCategory, isListed: true })
-        : await Category.findOne({ name: new RegExp(`^${selectedCategory}$`, "i"), isListed: true });
+        : await Category.findOne({
+            name: new RegExp(`^${selectedCategory}$`, "i"),
+            isListed: true,
+          });
 
       if (category) query.category = category._id;
       else query.category = null;
@@ -164,12 +210,12 @@ const getAllProducts = async (req, res) => {
       const brand = mongoose.Types.ObjectId.isValid(selectedBrand)
         ? await Brand.findOne({ _id: selectedBrand, isBlocked: false })
         : await Brand.findOne({
-          $or: [
-            { brandName: new RegExp(`^${selectedBrand}$`, "i") },
-            { name: new RegExp(`^${selectedBrand}$`, "i") }
-          ],
-          isBlocked: false
-        });
+            $or: [
+              { brandName: new RegExp(`^${selectedBrand}$`, "i") },
+              { name: new RegExp(`^${selectedBrand}$`, "i") },
+            ],
+            isBlocked: false,
+          });
 
       if (brand) query.brand = brand._id;
       else query.brand = null;
@@ -189,7 +235,7 @@ const getAllProducts = async (req, res) => {
         .lean(),
       Product.countDocuments(query),
       Category.find({ isListed: true }).lean(),
-      Brand.find({ isBlocked: false }).lean()
+      Brand.find({ isBlocked: false }).lean(),
     ]);
 
     res.render("products", {
@@ -205,7 +251,7 @@ const getAllProducts = async (req, res) => {
       successMessage: req.flash("success"),
       errorMessage: req.flash("error"),
       totalProducts: count,
-      hasProducts: productData.length > 0
+      hasProducts: productData.length > 0,
     });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -213,8 +259,6 @@ const getAllProducts = async (req, res) => {
     return res.redirect("/admin/products");
   }
 };
-
-
 
 const calculateSalePrice = (regularPrice, productOffer, categoryOffer) => {
   const maxOffer = Math.max(productOffer || 0, categoryOffer || 0);
@@ -224,14 +268,16 @@ const calculateSalePrice = (regularPrice, productOffer, categoryOffer) => {
   return regularPrice;
 };
 
-
 const addProductOffer = async (req, res) => {
   try {
     const { productId, percentage } = req.body;
     const percentNum = parseInt(percentage);
-    
+
     if (percentNum < 0 || percentNum > 99) {
-      return res.json({ status: false, message: "Offer percentage must be between 0 and 99" });
+      return res.json({
+        status: false,
+        message: "Offer percentage must be between 0 and 99",
+      });
     }
 
     const findProduct = await Product.findOne({ _id: productId });
@@ -242,36 +288,36 @@ const addProductOffer = async (req, res) => {
     const findCategory = await Category.findOne({ _id: findProduct.category });
     const categoryOffer = findCategory?.categoryOffer || 0;
 
-    
     if (categoryOffer > percentNum) {
-      return res.json({ 
-        status: false, 
-        message: `This product's category already has a better offer of ${categoryOffer}%. Please add an offer higher than ${categoryOffer}%` 
+      return res.json({
+        status: false,
+        message: `This product's category already has a better offer of ${categoryOffer}%. Please add an offer higher than ${categoryOffer}%`,
       });
     }
-    
+
     const effectiveOffer = Math.max(percentNum, categoryOffer);
 
-    const updatedVariants = findProduct.variants.map(variant => ({
+    const updatedVariants = findProduct.variants.map((variant) => ({
       ...variant.toObject(),
-      salePrice: variant.regularPrice - Math.floor(variant.regularPrice * (effectiveOffer / 100))
+      salePrice:
+        variant.regularPrice -
+        Math.floor(variant.regularPrice * (effectiveOffer / 100)),
     }));
 
-   
     await Product.updateOne(
       { _id: productId },
       {
         $set: {
           variants: updatedVariants,
-          productOffer: percentNum
-        }
+          productOffer: percentNum,
+        },
       }
     );
-    
+
     if (categoryOffer > 0 && percentNum > categoryOffer) {
-      return res.json({ 
-        status: true, 
-        message: `Product offer of ${percentNum}% added successfully! (Higher than category offer of ${categoryOffer}%)` 
+      return res.json({
+        status: true,
+        message: `Product offer of ${percentNum}% added successfully! (Higher than category offer of ${categoryOffer}%)`,
       });
     }
 
@@ -282,7 +328,6 @@ const addProductOffer = async (req, res) => {
   }
 };
 
-
 const removeProductOffer = async (req, res) => {
   try {
     const { productId } = req.body;
@@ -292,21 +337,21 @@ const removeProductOffer = async (req, res) => {
       return res.json({ status: false, message: "Product not found" });
     }
 
-   
     const findCategory = await Category.findOne({ _id: findProduct.category });
     const categoryOffer = findCategory?.categoryOffer || 0;
 
-    
-    const updatedVariants = findProduct.variants.map(variant => {
+    const updatedVariants = findProduct.variants.map((variant) => {
       let salePrice = variant.regularPrice;
-      
+
       if (categoryOffer > 0) {
-        salePrice = variant.regularPrice - Math.floor(variant.regularPrice * (categoryOffer / 100));
+        salePrice =
+          variant.regularPrice -
+          Math.floor(variant.regularPrice * (categoryOffer / 100));
       }
-      
+
       return {
         ...variant.toObject(),
-        salePrice
+        salePrice,
       };
     });
 
@@ -315,16 +360,17 @@ const removeProductOffer = async (req, res) => {
       {
         $set: {
           variants: updatedVariants,
-          productOffer: 0
-        }
+          productOffer: 0,
+        },
       }
     );
 
     console.log(`Product offer removed: ${productId}`);
 
-    const message = categoryOffer > 0 
-      ? `Product offer removed. Category offer (${categoryOffer}%) is now applied.`
-      : "Product offer removed successfully";
+    const message =
+      categoryOffer > 0
+        ? `Product offer removed. Category offer (${categoryOffer}%) is now applied.`
+        : "Product offer removed successfully";
 
     res.json({ status: true, message });
   } catch (error) {
@@ -332,7 +378,6 @@ const removeProductOffer = async (req, res) => {
     res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
-
 
 const updateProduct = async (req, res) => {
   try {
@@ -346,8 +391,8 @@ const updateProduct = async (req, res) => {
       variantSize,
       variantStock,
       variantRegularPrice,
-      variantSalePrice, 
-      productImagesBase64
+      variantSalePrice,
+      productImagesBase64,
     } = req.body;
 
     const productId = req.params.id;
@@ -357,24 +402,29 @@ const updateProduct = async (req, res) => {
     }
 
     const product = await Product.findById(productId);
+
     if (!product) {
       req.flash("error", "Product not found");
       return res.redirect("/admin/products");
     }
-    
 
-    if (!productName?.trim() || !description?.trim() || !longDescription?.trim() || !brand || !category) {
+    if (
+      !productName?.trim() ||
+      !description?.trim() ||
+      !longDescription?.trim() ||
+      !brand ||
+      !category
+    ) {
       req.flash("error", "All fields are required!");
       return res.redirect(`/admin/edit-product/${productId}`);
     }
 
-  
     const originalName = product.productName;
     const newName = productName.trim();
     if (newName !== originalName) {
       const existing = await Product.findOne({
-        productName: { $regex: `^${newName}$`, $options: 'i' },
-        _id: { $ne: productId }
+        productName: { $regex: `^${newName}$`, $options: "i" },
+        _id: { $ne: productId },
       });
       if (existing) {
         req.flash("error", "Product name already exists");
@@ -387,33 +437,67 @@ const updateProduct = async (req, res) => {
     product.longDescription = longDescription.trim();
     product.brand = brand;
     product.category = category;
-   
+
     const sizeArr = Array.isArray(variantSize) ? variantSize : [variantSize];
-    const stockArr = Array.isArray(variantStock) ? variantStock : [variantStock];
-    const rPriceArr = Array.isArray(variantRegularPrice) ? variantRegularPrice : [variantRegularPrice];
-    const sPriceArr = Array.isArray(variantSalePrice) ? variantSalePrice : [variantSalePrice];
+    const stockArr = Array.isArray(variantStock)
+      ? variantStock
+      : [variantStock];
+    const rPriceArr = Array.isArray(variantRegularPrice)
+      ? variantRegularPrice
+      : [variantRegularPrice];
+    const sPriceArr = Array.isArray(variantSalePrice)
+      ? variantSalePrice
+      : [variantSalePrice];
 
     const newVariants = [];
+
+    const categoryOfProduct = await Category.findById(category);
+
+    let categoryOffer = 0;
+    let productOff = 0;
+
+    if (categoryOfProduct.categoryOffer === 0) {
+      categoryOffer = 0;
+    } else {
+      categoryOffer = 100 - categoryOfProduct.categoryOffer;
+    }
+
+    if (product.productOffer === 0) {
+      productOff = 0;
+    } else {
+      productOff = 100 - product.productOffer;
+    }
+
+    console.log(categoryOffer);
+    console.log(productOff);
+
+    let offer = 0;
+
+    if (categoryOffer < productOff) {
+      offer = categoryOffer;
+    } else {
+      offer = productOff;
+    }
+
     for (let i = 0; i < sizeArr.length; i++) {
       const sizeVal = Number(sizeArr[i]);
       let stockVal = Number(stockArr[i]) || 0;
       const rPriceVal = Number(rPriceArr[i]) || 1;
-      
-      let sPriceVal = Number(sPriceArr[i]);
-      if (isNaN(sPriceVal)) sPriceVal = 0;
 
+      let sPriceVal = Number(Math.floor((rPriceVal * offer) / 100));
+
+      if (isNaN(sPriceVal)) sPriceVal = 0;
       if (sizeVal <= 0) continue;
       if (stockVal < 0) stockVal = 0;
-      
       if (sPriceVal > rPriceVal) {
-        sPriceVal = rPriceVal; 
+        sPriceVal = rPriceVal;
       }
 
       newVariants.push({
         size: sizeVal,
         stock: stockVal,
         regularPrice: rPriceVal,
-        salePrice: sPriceVal 
+        salePrice: sPriceVal,
       });
     }
 
@@ -423,14 +507,15 @@ const updateProduct = async (req, res) => {
     }
     product.variants = newVariants;
 
-   
     let deletedIndexesArr = [];
     if (deletedImages) {
-      deletedIndexesArr = deletedImages.split(",").map(i => Number(i));
+      deletedIndexesArr = deletedImages.split(",").map((i) => Number(i));
     }
 
     if (product.images && product.images.length && deletedIndexesArr.length) {
-      const imagesToDelete = product.images.filter((img, idx) => deletedIndexesArr.includes(idx));
+      const imagesToDelete = product.images.filter((img, idx) =>
+        deletedIndexesArr.includes(idx)
+      );
       for (const url of imagesToDelete) {
         try {
           const parts = url.split("/");
@@ -441,17 +526,20 @@ const updateProduct = async (req, res) => {
           console.error("Failed to delete image from Cloudinary:", err);
         }
       }
-      product.images = product.images.filter((img, idx) => !deletedIndexesArr.includes(idx));
+      product.images = product.images.filter(
+        (img, idx) => !deletedIndexesArr.includes(idx)
+      );
     }
 
- 
     if (productImagesBase64) {
-      const imagesArr = Array.isArray(productImagesBase64) ? productImagesBase64 : [productImagesBase64];
+      const imagesArr = Array.isArray(productImagesBase64)
+        ? productImagesBase64
+        : [productImagesBase64];
       for (const base64 of imagesArr) {
         try {
-          const result = await cloudinary.uploader.upload(base64, { 
+          const result = await cloudinary.uploader.upload(base64, {
             folder: "sentique/products",
-            format: 'jpg'
+            format: "jpg",
           });
           product.images.push(result.secure_url);
         } catch (err) {
@@ -471,24 +559,24 @@ const updateProduct = async (req, res) => {
       return res.redirect(`/admin/edit-product/${productId}`);
     }
 
-   
     product.slug = product.productName
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
-   
-    product.status = product.variants.some(v => v.stock > 0) ? "Available" : "Out of stock";
+    product.status = product.variants.some((v) => v.stock > 0)
+      ? "Available"
+      : "Out of stock";
     product.updatedAt = new Date();
 
     await product.save();
 
-    req.flash('success', 'Product updated successfully!');
-    res.redirect('/admin/products');
+    req.flash("success", "Product updated successfully!");
+    res.redirect("/admin/products");
   } catch (err) {
     console.error("Update product error:", err);
-    req.flash('error', err.message || 'Something went wrong!');
+    req.flash("error", err.message || "Something went wrong!");
     res.redirect(`/admin/edit-product/${req.params.id}`);
   }
 };
@@ -519,7 +607,7 @@ const toggleProductStatus = async (req, res) => {
       message: isBlocked
         ? "Product unlisted successfully"
         : "Product listed successfully",
-      status: product.isBlocked ? "Unlisted" : "Listed"
+      status: product.isBlocked ? "Unlisted" : "Listed",
     });
   } catch (error) {
     console.error("Toggle product status error:", error);
@@ -537,8 +625,8 @@ const getEditProductPage = async (req, res) => {
     }
 
     const product = await Product.findById(productId)
-      .populate('brand', 'brandName name _id')
-      .populate('category', 'name _id')
+      .populate("brand", "brandName name _id")
+      .populate("category", "name _id")
       .lean();
 
     if (!product) {
@@ -552,7 +640,10 @@ const getEditProductPage = async (req, res) => {
     const brands = await Brand.find({ isBlocked: false }).lean();
 
     const productBrandId = product.brand ? product.brand._id.toString() : null;
-    if (productBrandId && !brands.find(b => b._id.toString() === productBrandId)) {
+    if (
+      productBrandId &&
+      !brands.find((b) => b._id.toString() === productBrandId)
+    ) {
       const blockedBrand = await Brand.findById(productBrandId).lean();
       if (blockedBrand) brands.push(blockedBrand);
     }
@@ -563,7 +654,7 @@ const getEditProductPage = async (req, res) => {
       brands,
       variants: product.variants || [],
       error: req.flash("error"),
-      success: req.flash("success")
+      success: req.flash("success"),
     });
   } catch (error) {
     console.error("Error fetching product for edit:", error);
@@ -572,7 +663,6 @@ const getEditProductPage = async (req, res) => {
   }
 };
 
-
 const deleteProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -580,10 +670,11 @@ const deleteProduct = async (req, res) => {
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Delete product error:", error);
-    return res.status(500).json({ success: false, message: 'Error deleting product' });
+    return res
+      .status(500)
+      .json({ success: false, message: "Error deleting product" });
   }
 };
-
 
 module.exports = {
   getProductAddPage,
@@ -594,5 +685,5 @@ module.exports = {
   toggleProductStatus,
   getEditProductPage,
   updateProduct,
-  deleteProduct
+  deleteProduct,
 };

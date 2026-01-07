@@ -713,6 +713,11 @@
       e.target.parentElement.parentElement.classList.remove('error');
     }
   });
+  function updateSubmitState() {
+  const hasError = document.querySelector('.form-group.error');
+  submitBtn.disabled = !!hasError;
+}
+
 
   // Input validation with visual feedback
   function validateField(field, errorElement, validator, errorMessage) {
@@ -732,22 +737,59 @@
     return isValid;
   }
 
-  // Real-time validation
- // Real-time validation
+
 fullName.addEventListener('blur', () => {
-  validateField(
-    fullName, 
-    error1, 
-    val => val.length >= 3 && val.length <= 20, 
-    val => val.length < 3 
-      ? 'Full name must be at least 3 characters' 
-      : 'Full name cannot exceed 20 characters'
-  );
+  const val = fullName.value.trim();
+
+  let errorMsg = null;
+
+  if (val.length < 3) {
+    errorMsg = 'Full name must be at least 3 characters';
+  } else if (val.length > 20) {
+    errorMsg = 'Full name cannot exceed 20 characters';
+  } else if (!/^[A-Za-z ]+$/.test(val)) {
+    errorMsg = 'Only alphabets and spaces are allowed';
+  }
+
+  if (errorMsg) {
+    validateField(fullName, error1, () => false, errorMsg);
+  } else {
+    validateField(fullName, error1, () => true, '');
+  }
+});
+
+fullName.addEventListener('input', (e) => {
+
+  e.target.value = e.target.value.replace(/[^A-Za-z ]/g, '');
+
+  const val = e.target.value.trim();
+
+  if (!val) {
+    error1.innerHTML = '';
+    updateSubmitState();
+    return;
+  }
+
+  if (val.length < 3) {
+    validateField(fullName, error1, () => false, 'Full name must be at least 3 characters');
+  } else if (val.length > 20) {
+    validateField(fullName, error1, () => false, 'Full name cannot exceed 20 characters');
+  } else {
+    validateField(fullName, error1, () => true, '');
+  }
+
+  updateSubmitState();
 });
 
 phone.addEventListener('blur', () => {
-  validateField(phone, error2, val => /^[0-9]{10}$/.test(val), 'Enter a valid 10-digit phone number');
+  validateField(
+    phone,
+    error2,
+    val => isValidIndianPhone(val),
+    'Enter a valid mobile number'
+  );
 });
+
 
 email.addEventListener('blur', () => {
   validateField(email, error3, val => /^\S+@\S+\.\S+$/.test(val), 'Enter a valid email address');
@@ -757,7 +799,7 @@ confirmPassword.addEventListener('blur', () => {
   validateField(confirmPassword, error6, val => val === password.value, 'Passwords do not match');
 });
 
-// Clear error states on input
+
 [fullName, phone, email, password, confirmPassword].forEach(input => {
   input.addEventListener('input', () => {
     const formGroup = input.parentElement.parentElement;
@@ -767,50 +809,95 @@ confirmPassword.addEventListener('blur', () => {
   });
 });
 
+[email, password, confirmPassword].forEach(input => {
+  input.addEventListener('input', updateSubmitState);
+});
+
+function isValidIndianPhone(number) {
+ 
+  if (!/^[6-9]\d{9}$/.test(number)) return false;
+
+  if (/^(\d)\1{9}$/.test(number)) return false;
+
+ 
+  if (number === '1234567890') return false;
+
+
+  if (number === '9876543210') return false;
+
+  return true;
+}
+phone.addEventListener('input', (e) => {
+
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+
+  const val = e.target.value;
+
+  if (!val) {
+    error2.innerHTML = '';
+    updateSubmitState();
+    return;
+  }
+
+  if (!isValidIndianPhone(val)) {
+    validateField(phone, error2, () => false, 'Enter a valid mobile number');
+  } else {
+    validateField(phone, error2, () => true, '');
+  }
+
+  updateSubmitState();
+});
+
+
 function validateFields() {
   let valid = true;
 
-  // Reset all errors
+  
   [error1, error2, error3, error5, error6].forEach(err => err.innerHTML = "");
-  document.querySelectorAll('.form-group').forEach(group => {
-    group.classList.remove('error', 'success');
-  });
 
-  // Full Name - Updated validation
-  const nameVal = fullName.value.trim();
-  const nameError = nameVal.length < 3 
-    ? 'Full name must be at least 3 characters'
-    : nameVal.length > 20
-    ? 'Full name cannot exceed 20 characters'
-    : null;
 
-  if (nameError) {
-    validateField(fullName, error1, () => false, nameError);
-    valid = false;
-  } else {
-    validateField(fullName, error1, () => true, '');
-  }
+const nameVal = fullName.value.trim();
+let nameError = null;
 
-  // Phone
-  if (!validateField(phone, error2, val => /^[0-9]{10}$/.test(val), 'Enter a valid 10-digit phone number')) {
-    valid = false;
-  }
+if (nameVal.length < 3) {
+  nameError = 'Full name must be at least 3 characters';
+} else if (nameVal.length > 20) {
+  nameError = 'Full name cannot exceed 20 characters';
+} else if (!/^[A-Za-z ]+$/.test(nameVal)) {
+  nameError = 'Only alphabets and spaces are allowed';
+}
 
-  // Email
+if (nameError) {
+  validateField(fullName, error1, () => false, nameError);
+  valid = false;
+} else {
+  validateField(fullName, error1, () => true, '');
+}
+
+
+  
+  if (!validateField(phone, error2, val => isValidIndianPhone(val), 'Enter a valid mobile number')) {
+  valid = false;
+}
+
+
   if (!validateField(email, error3, val => /^\S+@\S+\.\S+$/.test(val), 'Enter a valid email address')) {
     valid = false;
   }
 
-  // Password
+
   const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
   if (!validateField(password, error5, val => strongPasswordRegex.test(val), 'Password must be at least 6 characters with uppercase, lowercase, number, and symbol')) {
     valid = false;
   }
 
-  // Confirm Password
+  
   if (!validateField(confirmPassword, error6, val => val === password.value, 'Passwords do not match')) {
     valid = false;
   }
+
+  updateSubmitState();
+
 
   return valid;
 }
@@ -843,9 +930,15 @@ function validateFields() {
   }
 
   submitBtn.addEventListener("click", async () => {
-    if (!validateFields()) return;
 
-    setLoadingState(true);
+  if (document.querySelector('.form-group.error')) {
+    return;
+  }
+
+  if (!validateFields()) return;
+
+  setLoadingState(true);
+
 
     try {
       const exists = await checkEmailExists(email.value.trim());
@@ -935,6 +1028,9 @@ if (googleError) {
       submitBtn.click();
     }
   });
+
+  updateSubmitState();
+
 </script>
 
 </body>

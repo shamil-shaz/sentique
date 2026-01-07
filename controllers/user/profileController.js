@@ -1,4 +1,3 @@
-
 const User = require("../../models/userSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
@@ -8,8 +7,7 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 const cloudinary = require("cloudinary").v2;
 const path = require("path");
-const multer=require('multer')
-
+const multer = require("multer");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -37,40 +35,39 @@ function generateOtp() {
   return otp;
 }
 
-const   sendVerificationEmail= async (email, otp)=>{
-    try {
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD
-            }
-        });
+const sendVerificationEmail = async (email, otp, subject = "Your OTP") => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASSWORD,
+      },
+    });
 
-        const mailOptions={
-             from: process.env.NODEMAILER_EMAIL,
-            to: email,
-            subject: "Your OTP for password reset",
-            text: `Your OTP is ${otp}`,
-            html: `<b>Your OTP: ${otp}</b>`,
+    const mailOptions = {
+      from: process.env.NODEMAILER_EMAIL,
+      to: email,
+      subject: subject,
 
-        }
-          console.log(otp)
+      text: `Your OTP is ${otp}`,
+      html: `<b>Your OTP: ${otp}</b>`,
+    };
+    console.log(otp);
 
-         const info = await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
 
-        console.log("Email sent:", info.messageId);
-      
+    console.log("Email sent:", info.messageId);
 
-        return true;
-    } catch (error) {
-        console.error("Error sending email:", error);
-        return false;
-    }
-}
+    return true;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return false;
+  }
+};
 
 const securePassword = async (password) => {
   try {
@@ -97,24 +94,26 @@ const handleForgotPassword = async (req, res) => {
 
     const findUser = await User.findOne({ email });
     if (!findUser) {
-      return res.json({ success: false, message: "User with this email does not exist" });
+      return res.json({
+        success: false,
+        message: "User with this email does not exist",
+      });
     }
 
     const otp = generateOtp();
-      req.session.forgotOtp = otp;
-      req.session.forgotEmail = email;
-      req.session.otpExpiry = Date.now() + 1 * 60 * 1000; 
+    req.session.forgotOtp = otp;
+    req.session.forgotEmail = email;
+    req.session.forgotOtpTime = Date.now(); // start time
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD
-            }
-
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASSWORD,
+      },
     });
 
     const mailOptions = {
@@ -125,19 +124,20 @@ const handleForgotPassword = async (req, res) => {
       html: `<p>Your OTP for password reset is: <b>${otp}</b></p>`,
     };
 
-   await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     console.log("OTP email sent:", otp);
 
     return res.json({ success: true, message: "OTP sent successfully!" });
-
   } catch (err) {
     console.error("Forgot password error:", err);
-    return res.json({ success: false, message: "Something went wrong. Try again later." });
+    return res.json({
+      success: false,
+      message: "Something went wrong. Try again later.",
+    });
   }
 };
 
-
-const OTP_EXPIRY_TIME = 60000; 
+const OTP_EXPIRY_TIME = 60000;
 
 const loadForgotPageOtp = async (req, res) => {
   try {
@@ -155,9 +155,11 @@ const verifyForgotOtp = async (req, res) => {
   try {
     const enteredOtp = req.body.otp;
 
-   
     if (!req.session.forgotOtp) {
-      return res.json({ success: false, message: "OTP not found. Please request a new OTP." });
+      return res.json({
+        success: false,
+        message: "OTP not found. Please request a new OTP.",
+      });
     }
 
     const currentTime = Date.now();
@@ -165,13 +167,14 @@ const verifyForgotOtp = async (req, res) => {
     const timeDifference = currentTime - otpGeneratedTime;
 
     if (timeDifference > OTP_EXPIRY_TIME) {
-     
       delete req.session.forgotOtp;
       delete req.session.forgotOtpTime;
-      return res.json({ success: false, message: "OTP has expired. Please request a new OTP." });
+      return res.json({
+        success: false,
+        message: "OTP has expired. Please request a new OTP.",
+      });
     }
 
-   
     if (enteredOtp == req.session.forgotOtp) {
       delete req.session.forgotOtp;
       delete req.session.forgotOtpTime;
@@ -181,7 +184,12 @@ const verifyForgotOtp = async (req, res) => {
     }
   } catch (error) {
     console.error("Error verifying OTP:", error);
-    res.status(500).json({ success: false, message: "An error occurred while verifying OTP." });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "An error occurred while verifying OTP.",
+      });
   }
 };
 
@@ -189,65 +197,86 @@ const resendOtp = async (req, res) => {
   try {
     const otp = generateOtp();
     const email = req.session.forgotEmail;
-    
+
     req.session.forgotOtp = otp;
-    req.session.forgotOtpTime = Date.now(); 
-    
+    req.session.forgotOtpTime = Date.now();
+
     console.log("Resend OTP email:", email);
 
     const emailSent = await sendVerificationEmail(email, otp);
-    
+
     if (emailSent) {
       console.log("Resend OTP:", otp);
-      res.status(200).json({ success: true, message: "OTP resent successfully" });
+      res
+        .status(200)
+        .json({ success: true, message: "OTP resent successfully" });
     } else {
-      res.status(500).json({ success: false, message: "Failed to send email. Please try again." });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Failed to send email. Please try again.",
+        });
     }
   } catch (error) {
     console.error("Error resending OTP:", error);
-    res.status(500).json({ success: false, message: "Error resending OTP. Please try again later." });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error resending OTP. Please try again later.",
+      });
   }
 };
 
 const sendForgotPasswordOtp = async (req, res) => {
   try {
     const { email } = req.body;
-  
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.json({ success: false, message: "Email not found" });
     }
 
     const otp = generateOtp();
-    
 
     req.session.forgotEmail = email;
     req.session.forgotOtp = otp;
-    req.session.forgotOtpTime = Date.now(); 
-    
+    req.session.forgotOtpTime = Date.now();
+
     console.log("Generated OTP:", otp);
 
     const emailSent = await sendVerificationEmail(email, otp);
-    
+
     if (emailSent) {
-      res.json({ success: true, message: "OTP sent to email", redirectUrl: "/forgot-password-otp" });
+      res.json({
+        success: true,
+        message: "OTP sent to email",
+        redirectUrl: "/forgot-password-otp",
+      });
     } else {
-      res.status(500).json({ success: false, message: "Failed to send OTP email" });
+      res
+        .status(500)
+        .json({ success: false, message: "Failed to send OTP email" });
     }
   } catch (error) {
     console.error("Error sending forgot password OTP:", error);
-    res.status(500).json({ success: false, message: "Error sending OTP. Please try again later." });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error sending OTP. Please try again later.",
+      });
   }
 };
 
-const loadResetPasswordPage=async(req,res)=>{
-    try {
-        res.render("reset-password")
-    } catch(error){
-        res.redirect("/pageNotFound")
-
-    }
-}
+const loadResetPasswordPage = async (req, res) => {
+  try {
+    res.render("reset-password");
+  } catch (error) {
+    res.redirect("/pageNotFound");
+  }
+};
 
 const resetPassword = async (req, res) => {
   try {
@@ -255,7 +284,10 @@ const resetPassword = async (req, res) => {
     const email = req.session.forgotEmail;
 
     if (!email) {
-      return res.json({ success: false, message: "Session expired. Please try again." });
+      return res.json({
+        success: false,
+        message: "Session expired. Please try again.",
+      });
     }
 
     if (newPassword !== confirmPassword) {
@@ -264,17 +296,19 @@ const resetPassword = async (req, res) => {
 
     const passwrdHash = await bcrypt.hash(newPassword, 10);
 
-    await User.updateOne(
-      { email: email },
-      { $set: { password: passwrdHash } }
-    );
+    await User.updateOne({ email: email }, { $set: { password: passwrdHash } });
 
     req.session.forgotEmail = null;
 
-    return res.json({ success: true, message: "Password updated successfully" });
+    return res.json({
+      success: true,
+      message: "Password updated successfully",
+    });
   } catch (error) {
     console.error("Reset password error:", error);
-    return res.status(500).json({ success: false, message: "Something went wrong." });
+    return res
+      .status(500)
+      .json({ success: false, message: "Something went wrong." });
   }
 };
 
@@ -297,16 +331,22 @@ const sendEmailOtp = async (req, res) => {
     const userId = req.session.user?.id;
 
     if (!userId) return res.json({ success: false, message: "Unauthorized" });
-    if (!newEmail || !password) return res.json({ success: false, message: "Email and password required" });
+    if (!newEmail || !password)
+      return res.json({
+        success: false,
+        message: "Email and password required",
+      });
 
     const user = await User.findById(userId);
     if (!user) return res.json({ success: false, message: "User not found" });
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.json({ success: false, message: "Incorrect password" });
+    if (!match)
+      return res.json({ success: false, message: "Incorrect password" });
 
     const existingUser = await User.findOne({ email: newEmail });
-    if (existingUser) return res.json({ success: false, message: "Email already in use" });
+    if (existingUser)
+      return res.json({ success: false, message: "Email already in use" });
 
     const otp = generateOtp();
     const token = crypto.randomBytes(32).toString("hex");
@@ -316,15 +356,25 @@ const sendEmailOtp = async (req, res) => {
       token,
       type: "change-email",
       newEmail,
-      expiry: Date.now() + 3 * 60 * 1000 
+      expiry: Date.now() + 1 * 60 * 1000,
     };
 
     console.log(`Email Change OTP: ${otp} sent to ${newEmail}`);
 
-    const emailSent = await sendVerificationEmail(newEmail, otp, "OTP for Email Change");
-    if (!emailSent) return res.json({ success: false, message: "Failed to send OTP" });
+    const emailSent = await sendVerificationEmail(
+      newEmail,
+      otp,
+      "OTP for Email Change"
+    );
+    if (!emailSent)
+      return res.json({ success: false, message: "Failed to send OTP" });
 
-    res.json({ success: true, message: "OTP sent successfully", token, type: "change-email" });
+    res.json({
+      success: true,
+      message: "OTP sent successfully",
+      token,
+      type: "change-email",
+    });
   } catch (err) {
     console.error("sendEmailOtp error:", err);
     res.json({ success: false, message: "Error sending OTP" });
@@ -341,13 +391,20 @@ const initChangePassword = async (req, res) => {
     if (newPassword !== confirmPassword)
       return res.json({ success: false, message: "Passwords do not match" });
     if (newPassword.length < 6)
-      return res.json({ success: false, message: "Password must be at least 6 characters" });
+      return res.json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
 
     const user = await User.findById(userId);
     if (!user) return res.json({ success: false, message: "User not found" });
 
     const match = await bcrypt.compare(currentPassword, user.password);
-    if (!match) return res.json({ success: false, message: "Incorrect current password" });
+    if (!match)
+      return res.json({
+        success: false,
+        message: "Incorrect current password",
+      });
 
     const otp = generateOtp();
     const token = crypto.randomBytes(32).toString("hex");
@@ -358,28 +415,36 @@ const initChangePassword = async (req, res) => {
       type: "change-password",
       email: user.email,
       newPassword,
-      expiry: Date.now() + 3 * 60 * 1000 
+      expiry: Date.now() + 1 * 60 * 1000,
     };
 
     console.log(`Password Change OTP: ${otp} sent to ${user.email}`);
 
-    const emailSent = await sendVerificationEmail(user.email, otp, "OTP for Password Change");
-    if (!emailSent) return res.json({ success: false, message: "Failed to send OTP" });
+    const emailSent = await sendVerificationEmail(
+      user.email,
+      otp,
+      "OTP for Password Change"
+    );
+    if (!emailSent)
+      return res.json({ success: false, message: "Failed to send OTP" });
 
-    res.json({ success: true, message: "OTP sent successfully", token, type: "change-password" });
+    res.json({
+      success: true,
+      message: "OTP sent successfully",
+      token,
+      type: "change-password",
+    });
   } catch (err) {
     console.error("initChangePassword error:", err);
     res.json({ success: false, message: "Error sending OTP" });
   }
 };
 
-
 const loadOtpVerifyPage = (req, res) => {
   const { type } = req.query;
   const otpData = req.session.otpData;
-  
-  console.log("Loading OTP page for type:", type);
 
+  console.log("Loading OTP page for type:", type);
 
   if (!otpData || otpData.type !== type) {
     req.flash("error", "Invalid OTP session");
@@ -392,12 +457,11 @@ const loadOtpVerifyPage = (req, res) => {
     return res.redirect("/profile");
   }
 
-
   res.render("change-email-otp", {
     type,
     token: otpData.token,
     message: "",
-    expiryTime: otpData.expiry  
+    expiryTime: otpData.expiry,
   });
 };
 
@@ -408,71 +472,66 @@ const verifyOtp = async (req, res) => {
 
     console.log("Verifying OTP - Type:", type);
 
-
     if (!otpData || otpData.type !== type || otpData.token !== token) {
       return res.json({
         success: false,
-        message: "Invalid OTP session or token"
+        message: "Invalid OTP session or token",
       });
     }
 
-  
     const currentTime = Date.now();
     if (currentTime > otpData.expiry) {
       console.warn("OTP expired");
       delete req.session.otpData;
       return res.json({
         success: false,
-        message: "OTP has expired. Please request a new OTP."
+        message: "OTP has expired. Please request a new OTP.",
       });
     }
 
- 
     if (String(otp) !== String(otpData.otp)) {
       console.warn("OTP mismatch");
       return res.json({
         success: false,
-        message: "Incorrect OTP. Please try again."
+        message: "Incorrect OTP. Please try again.",
       });
     }
-
 
     console.log("OTP verified successfully");
 
     try {
       if (type === "change-email") {
         await User.findByIdAndUpdate(req.session.user.id, {
-          email: otpData.newEmail
+          email: otpData.newEmail,
         });
         console.log("Email updated successfully");
       } else if (type === "change-password") {
         const hashed = await bcrypt.hash(otpData.newPassword, 10);
         await User.findByIdAndUpdate(req.session.user.id, {
-          password: hashed
+          password: hashed,
         });
         console.log("Password updated successfully");
       }
 
- 
       delete req.session.otpData;
 
       return res.json({
         success: true,
         redirectUrl: "/profile",
-        message: "Update successful"
+        message: "Update successful",
       });
     } catch (updateError) {
       console.error("Error updating user:", updateError);
       return res.json({
         success: false,
-        message: "Error updating profile. Please try again."
+        message: "Error updating profile. Please try again.",
       });
     }
   } catch (err) {
     console.error("verifyOtp error:", err);
     return res.json({
       success: false,
-      message: "Error verifying OTP"
+      message: "Error verifying OTP",
     });
   }
 };
@@ -485,20 +544,18 @@ const resendProfileOtp = async (req, res) => {
     if (!otpData || otpData.type !== type) {
       return res.json({
         success: false,
-        message: "No OTP session found"
+        message: "No OTP session found",
       });
     }
 
-    
     const otp = generateOtp();
-    const newExpiry = Date.now() + 1 * 60 * 1000; 
+    const newExpiry = Date.now() + 1 * 60 * 1000;
 
     otpData.otp = otp;
     otpData.expiry = newExpiry;
 
     console.log("New OTP generated for type:", type);
 
-   
     let emailAddress, emailSubject;
 
     if (type === "change-email") {
@@ -509,12 +566,16 @@ const resendProfileOtp = async (req, res) => {
       emailSubject = "OTP for Password Change";
     }
 
-    const emailSent = await sendVerificationEmail(emailAddress, otp, emailSubject);
+    const emailSent = await sendVerificationEmail(
+      emailAddress,
+      otp,
+      emailSubject
+    );
 
     if (!emailSent) {
       return res.json({
         success: false,
-        message: "Failed to resend OTP. Please try again."
+        message: "Failed to resend OTP. Please try again.",
       });
     }
 
@@ -525,17 +586,16 @@ const resendProfileOtp = async (req, res) => {
       message: "OTP resent successfully",
       token: otpData.token,
       type: otpData.type,
-      expiryTime: newExpiry  
+      expiryTime: newExpiry,
     });
   } catch (err) {
     console.error("resendOtp error:", err);
     return res.json({
       success: false,
-      message: "Error resending OTP"
+      message: "Error resending OTP",
     });
   }
 };
-
 
 const loadEditProfile = async (req, res) => {
   try {
@@ -553,66 +613,96 @@ const updateProfile = async (req, res) => {
   try {
     const userId = req.session.user?.id;
     if (!userId) {
-      return res.status(401).json({ success: false, message: "User not logged in" });
+      return res
+        .status(401)
+        .json({ success: false, message: "User not logged in" });
     }
     let { name, phone } = req.body;
-   
+
     name = name?.trim();
     phone = phone?.trim();
 
-    if (!name || name.length < 3 || name.length > 20) {
-      return res.status(400).json({ success: false, message: "Name must be between 3 and 20 characters long." });
-    }
-    const nameRegex = /^[a-zA-Z\s'-]+$/;
-    if (!nameRegex.test(name)) {
-      return res.status(400).json({ success: false, message: "Name can only contain letters, spaces, apostrophes, and hyphens. No numbers allowed." });
-    }
-    
-    if (phone) {
-      if (phone.length !== 10) {
-        return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits." });
-      }
-      const phoneRegex = /^[0-9]{10}$/;
-      if (!phoneRegex.test(phone)) {
-        return res.status(400).json({ success: false, message: "Phone number must contain only numbers." });
-      }
 
-     
-      const digits = phone.split('').map(Number);
-      const uniqueDigits = new Set(digits);
-      if (uniqueDigits.size === 1) {
-        return res.status(400).json({ success: false, message: "Phone number cannot consist of all identical digits (e.g., 1111111111)." });
-      }
+    if (!name) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Name is required." });
+    }
 
-      
-      const isAscending = digits.every((d, i) => i === 0 || d === digits[i - 1] + 1);
-      if (isAscending) {
-        return res.status(400).json({ success: false, message: "Phone number cannot be in strictly ascending order (e.g., 1234567890)." });
-      }
+    if (name.length < 3 || name.length > 20) {
+      return res.status(400).json({
+        success: false,
+        message: "Name must be between 3 and 20 characters.",
+      });
+    }
 
    
-      const isDescending = digits.every((d, i) => i === 0 || d === digits[i - 1] - 1);
-      if (isDescending) {
-        return res.status(400).json({ success: false, message: "Phone number cannot be in strictly descending order (e.g., 9876543210)." });
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!nameRegex.test(name)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Name can contain only alphabets and spaces. Numbers and special characters are not allowed.",
+      });
+    }
+
+
+    if (phone) {
+      
+      if (!/^\d{10}$/.test(phone)) {
+        return res.status(400).json({
+          success: false,
+          message: "Phone number must contain exactly 10 digits.",
+        });
       }
-  
-      let maxConsecutive = 1;
-      let currentConsecutive = 1;
-      for (let i = 1; i < 10; i++) {
-        if (digits[i] === digits[i - 1]) {
-          currentConsecutive++;
-          maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
-        } else {
-          currentConsecutive = 1;
-        }
+
+      if (/^(\d)\1{9}$/.test(phone)) {
+        return res.status(400).json({
+          success: false,
+          message: "Phone number cannot contain all same digits.",
+        });
       }
-      if (maxConsecutive > 2) {
-        return res.status(400).json({ success: false, message: "Phone number cannot have more than 2 consecutive identical digits (e.g., no 000 or 111)." });
+
+      const digits = phone.split("").map(Number);
+
+      
+      const ascending = digits.every(
+        (d, i) => i === 0 || d === digits[i - 1] + 1
+      );
+
+
+      const descending = digits.every(
+        (d, i) => i === 0 || d === digits[i - 1] - 1
+      );
+
+      if (ascending || descending) {
+        return res.status(400).json({
+          success: false,
+          message: "Sequential phone numbers are not allowed.",
+        });
+      }
+    }
+
+    if (req.file) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({
+          success: false,
+          message: "Only JPG, JPEG and PNG images are allowed.",
+        });
+      }
+
+      if (req.file.size > 2 * 1024 * 1024) {
+        return res.status(400).json({
+          success: false,
+          message: "Image size must be less than 2MB.",
+        });
       }
     }
 
     let updateData = { name, phone };
-   
+
     if (req.file) {
       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
         folder: "sentique/profile",
@@ -620,9 +710,13 @@ const updateProfile = async (req, res) => {
       updateData.image = uploadResult.secure_url;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
     if (!updatedUser) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     req.session.user = {
@@ -631,49 +725,46 @@ const updateProfile = async (req, res) => {
       email: updatedUser.email,
       phone: updatedUser.phone,
       image: updatedUser.image,
- 
     };
 
-   
     await req.session.save();
 
-    res.json({ 
-      success: true, 
-      message: "Profile updated successfully", 
-      user: updatedUser 
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser,
     });
   } catch (error) {
     console.error("Error updating profile:", error);
-    res.status(500).json({ success: false, message: "Server error while updating profile" });
-  
-  
+    res
+      .status(500)
+      .json({ success: false, message: "Server error while updating profile" });
   }
 };
 
 const getSecurityPage = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
-    
+
     if (!userId) {
-      return res.redirect('/login');
-    }
-   
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.redirect('/pageNotFound');
+      return res.redirect("/login");
     }
 
-    res.render('security', {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.redirect("/pageNotFound");
+    }
+
+    res.render("security", {
       user: user,
-      activePage: 'security'
+      activePage: "security",
     });
   } catch (error) {
-    console.error('Security page error:', error);
-    res.redirect('/pageNotFound');
+    console.error("Security page error:", error);
+    res.redirect("/pageNotFound");
   }
 };
-
 
 module.exports = {
   loadForgotPassword,
@@ -695,5 +786,5 @@ module.exports = {
   loadEditProfile,
   updateProfile,
   getSecurityPage,
-  sendForgotPasswordOtp
+  sendForgotPasswordOtp,
 };

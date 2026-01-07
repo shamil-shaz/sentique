@@ -1,5 +1,4 @@
-
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const User = require("../../models/userSchema");
 
 const customerInfo = async (req, res) => {
@@ -30,10 +29,20 @@ const customerInfo = async (req, res) => {
 
     const count = await User.countDocuments(filter);
     const totalUsers = await User.countDocuments({ isAdmin: false });
-    const activeUsersCount = await User.countDocuments({ isAdmin: false, isBlocked: false });
-    const blockedUsersCount = await User.countDocuments({ isAdmin: false, isBlocked: true });
+    const activeUsersCount = await User.countDocuments({
+      isAdmin: false,
+      isBlocked: false,
+    });
+    const blockedUsersCount = await User.countDocuments({
+      isAdmin: false,
+      isBlocked: true,
+    });
 
-    console.log('Rendering customers:', { totalUsers, activeUsersCount, blockedUsersCount }); 
+    console.log("Rendering customers:", {
+      totalUsers,
+      activeUsersCount,
+      blockedUsersCount,
+    });
     res.render("customers", {
       users: userData,
       totalPages: Math.ceil(count / limit),
@@ -55,22 +64,22 @@ const customerInfo = async (req, res) => {
 
 const customerBlocked = async (req, res) => {
   try {
-    console.log('Block request:', req.body); 
+    console.log("Block request:", req.body);
     const id = req.body.id;
     if (!id) {
-      console.log('No ID provided');
+      console.log("No ID provided");
       req.flash("error", "User ID is required!");
       return res.redirect("/admin/customers");
     }
 
     if (!mongoose.isValidObjectId(id)) {
-      console.log('Invalid ObjectId:', id);
+      console.log("Invalid ObjectId:", id);
       req.flash("error", "Invalid user ID!");
       return res.redirect("/admin/customers");
     }
 
     const user = await User.findById(id);
-    console.log('User found:', user); 
+    console.log("User found:", user);
     if (!user) {
       req.flash("error", "User not found!");
       return res.redirect("/admin/customers");
@@ -81,8 +90,11 @@ const customerBlocked = async (req, res) => {
       return res.redirect("/admin/customers");
     }
 
-    const result = await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
-    console.log('Block update result:', result); 
+    const result = await User.updateOne(
+      { _id: id },
+      { $set: { isBlocked: true } }
+    );
+    console.log("Block update result:", result);
     if (result.modifiedCount === 0) {
       req.flash("error", "Failed to block user: No changes made!");
       return res.redirect("/admin/customers");
@@ -99,29 +111,32 @@ const customerBlocked = async (req, res) => {
 
 const customerUnBlocked = async (req, res) => {
   try {
-    console.log('Unblock request:', req.body); 
+    console.log("Unblock request:", req.body);
     const id = req.body.id;
     if (!id) {
-      console.log('No ID provided');
+      console.log("No ID provided");
       req.flash("error", "User ID is required!");
       return res.redirect("/admin/customers");
     }
 
     if (!mongoose.isValidObjectId(id)) {
-      console.log('Invalid ObjectId:', id);
+      console.log("Invalid ObjectId:", id);
       req.flash("error", "Invalid user ID!");
       return res.redirect("/admin/customers");
     }
 
     const user = await User.findById(id);
-    console.log('User found:', user); 
+    console.log("User found:", user);
     if (!user) {
       req.flash("error", "User not found!");
       return res.redirect("/admin/customers");
     }
 
-    const result = await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
-    console.log('Unblock update result:', result); 
+    const result = await User.updateOne(
+      { _id: id },
+      { $set: { isBlocked: false } }
+    );
+    console.log("Unblock update result:", result);
     if (result.modifiedCount === 0) {
       req.flash("error", "Failed to unblock user: No changes made!");
       return res.redirect("/admin/customers");

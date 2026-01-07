@@ -395,224 +395,196 @@
     </form>
   </div>
 
-  <script>
-    let selectedNewImage = null;
-    let currentImageDeleted = false;
-    const categoryId = '<%= category._id %>';
+<script>
+  let selectedNewImage = null;
+  let currentImageDeleted = false;
+  const categoryId = '<%= category._id %>';
 
-    // Form validation and submission
-    const form = document.getElementById("editCategoryForm");
+  /* ================= FORM VALIDATION ================= */
+  const form = document.getElementById("editCategoryForm");
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      
-      const nameInput = document.getElementById("categoryName");
-      const descInput = document.getElementById("categoryDesc");
-      const nameError = document.getElementById("nameError");
-      const descError = document.getElementById("descError");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-      let valid = true;
+    const nameInput = document.getElementById("categoryName");
+    const descInput = document.getElementById("categoryDesc");
+    const nameError = document.getElementById("nameError");
+    const descError = document.getElementById("descError");
 
-      // Reset errors
-      nameError.textContent = "";
-      descError.textContent = "";
+    nameError.textContent = "";
+    descError.textContent = "";
 
-      // Validate name
-      if (nameInput.value.trim() === "") {
-        nameError.textContent = "Category name is required";
-        valid = false;
-      } else if (nameInput.value.trim().length < 3) {
-        nameError.textContent = "Category name must be at least 3 characters";
-        valid = false;
-      } else if (!/^[a-zA-Z\s]+$/.test(nameInput.value.trim())) {
-        nameError.textContent = "Category name should only contain letters";
-        valid = false;
-      }
+    let valid = true;
 
-      // Validate description
-      if (descInput.value.trim() === "") {
-        descError.textContent = "Description is required";
-        valid = false;
-      } else if (descInput.value.trim().length < 5) {
-        descError.textContent = "Description must be at least 5 characters";
-        valid = false;
-      }
-
-      if (valid) {
-        submitForm();
-      }
-    });
-
-function submitForm() {
-  const updateBtn = document.getElementById('updateBtn');
-  updateBtn.classList.add('btn-loading');
-  updateBtn.disabled = true;
-
-  const formData = new FormData();
-  formData.append('categoryName', document.getElementById('categoryName').value.trim());
-  formData.append('description', document.getElementById('categoryDesc').value.trim());
-
-  if (currentImageDeleted) {
-    formData.append('deleteImage', true);
-  }
-  if (selectedNewImage) {
-    formData.append('image', selectedNewImage);
-  }
-
-  fetch(`/admin/editCategory/${categoryId}`, {
-    method: 'POST',
-    body: formData
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: data.message,
-        showConfirmButton: false,
-        timer: 1500
-      }).then(() => {
-        window.location.href = '/admin/category?edited=true';
-      });
-    } else {
-      throw new Error(data.error || "Update failed");
+    if (!nameInput.value.trim()) {
+      nameError.textContent = "Category name is required";
+      valid = false;
+    } else if (nameInput.value.trim().length < 3) {
+      nameError.textContent = "Minimum 3 characters required";
+      valid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(nameInput.value.trim())) {
+      nameError.textContent = "Only letters allowed";
+      valid = false;
     }
-  })
-  .catch(error => {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error!',
-      text: error.message
-    });
-  })
-  .finally(() => {
-    updateBtn.classList.remove('btn-loading');
-    updateBtn.disabled = false;
+
+    if (!descInput.value.trim()) {
+      descError.textContent = "Description is required";
+      valid = false;
+    } else if (descInput.value.trim().length < 5) {
+      descError.textContent = "Minimum 5 characters required";
+      valid = false;
+    }
+
+    /* ❗ EDGE CASE */
+    if (currentImageDeleted && !selectedNewImage) {
+      Swal.fire(
+        "Image Required",
+        "Upload a new image after deleting the current one",
+        "error"
+      );
+      valid = false;
+    }
+
+    if (valid) submitForm();
   });
-}
 
+  /* ================= SUBMIT ================= */
+  function submitForm() {
+    const updateBtn = document.getElementById("updateBtn");
+    updateBtn.classList.add("btn-loading");
+    updateBtn.disabled = true;
 
-    // Delete current image
-    async function deleteCurrentImage() {
-      const result = await Swal.fire({
-        title: 'Delete Current Image?',
-        text: "This will permanently delete the current image!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#e74c3c',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
+    const formData = new FormData();
+    formData.append("categoryName", document.getElementById("categoryName").value.trim());
+    formData.append("description", document.getElementById("categoryDesc").value.trim());
+
+    if (currentImageDeleted) {
+      formData.append("deleteImage", true);
+    }
+    if (selectedNewImage) {
+      formData.append("image", selectedNewImage);
+    }
+
+    fetch(`/admin/editCategory/${categoryId}`, {
+      method: "POST",
+      body: formData
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Category updated",
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.href = "/admin/category";
+          });
+        } else {
+          throw new Error(data.error || "Update failed");
+        }
+      })
+      .catch(err => {
+        Swal.fire("Error", err.message, "error");
+      })
+      .finally(() => {
+        updateBtn.classList.remove("btn-loading");
+        updateBtn.disabled = false;
       });
+  }
 
-      if (result.isConfirmed) {
-        currentImageDeleted = true;
-        document.getElementById('currentImage').style.display = 'none';
-        document.querySelector('.current-image-actions').innerHTML = '<div style="color: #e74c3c; font-weight: 600;">✓ Image marked for deletion</div>';
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Marked for Deletion',
-          text: 'Current image will be deleted when you save changes.',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      }
-    }
+  /* ================= DELETE CURRENT IMAGE ================= */
+  async function deleteCurrentImage() {
+    const confirm = await Swal.fire({
+      title: "Delete current image?",
+      text: "You must upload a new image after deleting",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#e74c3c"
+    });
 
-    // New image upload functionality
-    document.getElementById('categoryImage').addEventListener('change', handleNewImageSelect);
-
-    function handleNewImageSelect(event) {
-      const file = event.target.files[0];
-      if (file) {
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-          displayErrorMessage('image-error', 'File size should be less than 5MB');
-          return;
-        }
-
-        if (!file.type.match('image.*')) {
-          displayErrorMessage('image-error', 'Please select a valid image file');
-          return;
-        }
-
-        selectedNewImage = file;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const preview = document.getElementById('imagePreview');
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-          document.getElementById('removeImageBtn').style.display = 'inline-block';
-          document.querySelector('.upload-text').textContent = 'New image selected: ' + file.name;
-        };
-        reader.readAsDataURL(file);
-        clearErrorMessage('image-error');
-      }
-    }
-
-    function removeNewImage() {
+    if (confirm.isConfirmed) {
+      currentImageDeleted = true;
       selectedNewImage = null;
-      document.getElementById('categoryImage').value = '';
-      document.getElementById('imagePreview').style.display = 'none';
-      document.getElementById('removeImageBtn').style.display = 'none';
-      document.querySelector('.upload-text').textContent = 'Click to upload new image or drag and drop';
-      clearErrorMessage('image-error');
+
+      document.getElementById("currentImage").style.display = "none";
+      document.querySelector(".current-image-actions").innerHTML =
+        "<strong style='color:#e74c3c'>✓ Image deleted. Upload new image.</strong>";
+
+      Swal.fire({
+        icon: "info",
+        title: "Upload Required",
+        text: "Please upload a new image before saving",
+        timer: 1800,
+        showConfirmButton: false
+      });
+    }
+  }
+
+  /* ================= IMAGE UPLOAD ================= */
+  document.getElementById("categoryImage").addEventListener("change", handleNewImageSelect);
+
+  function handleNewImageSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    /* ❌ BLOCK if old image not deleted */
+    if (!currentImageDeleted) {
+      showImgError("Delete the current image before uploading a new one");
+      e.target.value = "";
+      return;
     }
 
-    // Drag and drop functionality
-    const uploadContainer = document.querySelector('.image-upload-container');
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      uploadContainer.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
+    if (!allowedTypes.includes(file.type)) {
+      showImgError("Only JPG, PNG, WEBP images allowed");
+      e.target.value = "";
+      return;
     }
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-      uploadContainer.addEventListener(eventName, highlight, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      uploadContainer.addEventListener(eventName, unhighlight, false);
-    });
-
-    function highlight(e) {
-      uploadContainer.classList.add('dragover');
+    if (file.size > 5 * 1024 * 1024) {
+      showImgError("Image must be under 5MB");
+      e.target.value = "";
+      return;
     }
 
-    function unhighlight(e) {
-      uploadContainer.classList.remove('dragover');
-    }
+    selectedNewImage = file;
+    clearImgError();
 
-    uploadContainer.addEventListener('drop', handleDrop, false);
+    const reader = new FileReader();
+    reader.onload = () => {
+      document.getElementById("imagePreview").src = reader.result;
+      document.getElementById("imagePreview").style.display = "block";
+      document.getElementById("removeImageBtn").style.display = "inline-block";
+      document.querySelector(".upload-text").textContent = "New image selected";
+    };
+    reader.readAsDataURL(file);
+  }
 
-    function handleDrop(e) {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      
-      if (files.length > 0) {
-        document.getElementById('categoryImage').files = files;
-        handleNewImageSelect({ target: { files: files } });
-      }
-    }
+  function removeNewImage() {
+    selectedNewImage = null;
+    document.getElementById("categoryImage").value = "";
+    document.getElementById("imagePreview").style.display = "none";
+    document.getElementById("removeImageBtn").style.display = "none";
+    document.querySelector(".upload-text").textContent = "Click to upload new image";
+    clearImgError();
+  }
 
-    // Error handling functions
-    function displayErrorMessage(elementId, message) {
-      const errorElement = document.getElementById(elementId);
-      errorElement.textContent = message;
-      errorElement.style.display = "block";
-    }
+  /* ================= IMAGE ERROR HELPERS ================= */
+  function showImgError(msg) {
+    const el = document.getElementById("image-error");
+    el.textContent = msg;
+    el.style.display = "block";
+  }
 
-    function clearErrorMessage(elementId) {
-      const errorElement = document.getElementById(elementId);
-      errorElement.textContent = "";
-      errorElement.style.display = "none";
-    }
-  </script>
+  function clearImgError() {
+    const el = document.getElementById("image-error");
+    el.textContent = "";
+    el.style.display = "none";
+  }
+</script>
+
 
 </body>
 </html>

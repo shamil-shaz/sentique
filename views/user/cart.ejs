@@ -1,6 +1,5 @@
 <%- include('../../views/partials/user/header') %>
 
-
 <style>
     /* =========================================
        1. THEME VARIABLES (Premium Retail)
@@ -316,9 +315,7 @@
     }
     .shop-button:hover { background: var(--brand-gold); color: black; transform: translateY(-2px); }
 
-    /* =========================================
-       7. RESPONSIVE
-       ========================================= */
+
     @media (max-width: 992px) {
         .cart-container { grid-template-columns: 1fr; }
         .cart-summary { position: static; margin-top: 20px; }
@@ -343,8 +340,6 @@
     }
 </style>
 
-
-
 <div class="cart-page">
   <div class="page-header">
     <div class="breadcrumb">
@@ -354,223 +349,236 @@
   </div>
 
   <% if (cartItems && cartItems.length > 0) { %>
-    <div class="cart-container">
-      <div class="cart-items-section">
-        <% 
-        cartItems.forEach(item => {
-          const isOutOfStock = item.isOutOfStock;
-          const isBlocked = item.isBlocked;
-          const isUnavailable = isOutOfStock || isBlocked;
-          const maxQtyPerOrder = 5;
-          const availableQty = item.availableQty;
-        %>
-          <div class="cart-item <%= isUnavailable ? 'unavailable-item' : '' %>" 
-               data-product-id="<%= item.productId._id %>"
-               data-variant-size="<%= item.variant.size %>"
-               data-unavailable="<%= isUnavailable %>"
-               data-out-of-stock="<%= isOutOfStock %>"
-               data-blocked="<%= isBlocked %>"
-               data-block-reason="<%= item.blockReason || '' %>"
-               data-product-name="<%= item.productId.productName || 'Unknown Product' %>">
-            
-            <!-- Product Image -->
-            <div class="product-image-wrapper">
-              <% if (item.productId && item.productId.images && item.productId.images.length > 0) { %>
-                <img src="<%= item.productId.images[0] %>" 
-                     alt="<%= item.productId.productName || 'Product' %>"
-                     class="product-image"
-                     onerror="this.onerror=null; this.src='https://via.placeholder.com/120x120?text=No+Image'">
-              <% } else { %>
-                <img src="https://via.placeholder.com/120x120?text=No+Image" 
-                     alt="No Image"
-                     class="product-image">
-              <% } %>
-              
-              <% if (isBlocked) { %>
-                <div class="unavailable-overlay">
-                  <% if (item.blockReason) { %>
-                    <% if (item.blockReason.indexOf('Product') !== -1) { %>
-                      PRODUCT BLOCKED
-                    <% } else if (item.blockReason.indexOf('Brand') !== -1) { %>
-                      BRAND BLOCKED
-                    <% } else if (item.blockReason.indexOf('Category') !== -1) { %>
-                      CATEGORY BLOCKED
-                    <% } else { %>
-                      TEMPORARILY BLOCKED
-                    <% } %>
-                  <% } else { %>
-                    TEMPORARILY BLOCKED
-                  <% } %>
-                </div>
-              <% } else if (isOutOfStock) { %>
-                <div class="unavailable-overlay">OUT OF STOCK</div>
-              <% } %>
-            </div>
+  <div class="cart-container">
+    <div class="cart-items-section">
+      <%
+      cartItems.forEach(item => {
+      const isOutOfStock = item.isOutOfStock;
+      const isBlocked = item.isBlocked;
+      const isUnavailable = isOutOfStock || isBlocked;
+      const maxQtyPerOrder = 5;
+      const availableQty = item.availableQty;
+      %>
+      <div class="cart-item <%= isUnavailable ? 'unavailable-item' : '' %>"
+        data-product-id="<%= item.productId._id %>"
+        data-variant-size="<%= item.variant.size %>"
+        data-unavailable="<%= isUnavailable %>"
+        data-out-of-stock="<%= isOutOfStock %>"
+        data-blocked="<%= isBlocked %>"
+        data-block-reason="<%= item.blockReason || '' %>"
+        data-product-name="<%= item.productId.productName || 'Unknown Product' %>">
 
-            <!-- Product Details -->
-            <div class="product-details">
-              <h3 class="product-name"><%= item.productId.productName || 'Unknown Product' %></h3>
-              
-              <div class="product-meta">
-                <% if (item.variant.size) { %>
-                  <span class="variant-info"><strong>Variant:</strong> <%= item.variant.size %> ml</span>
-                <% } %>
-              </div>
-              
-              <% if (isBlocked) { %>
-                <span class="stock-info unavailable">
-                  <i class="fas fa-ban"></i> 
-                  <% if (item.blockReason && item.blockReason.includes('Product')) { %>
-                    Product Blocked by Admin
-                  <% } else if (item.blockReason && item.blockReason.includes('Brand')) { %>
-                    Brand Blocked by Admin
-                  <% } else if (item.blockReason && item.blockReason.includes('Category')) { %>
-                    Category Blocked by Admin
-                  <% } else { %>
-                    Temporarily Blocked
-                  <% } %>
-                </span>
-              <% } else if (isOutOfStock) { %>
-                <span class="stock-info unavailable">
-                  <i class="fas fa-times-circle"></i> Out of Stock
-                </span>
-              <% } else if (item.productId.stock <= 5) { %>
-                <span class="stock-info low-stock">
-                  <i class="fas fa-exclamation-triangle"></i> Only <%= item.productId.stock %> left
-                </span>
-              <% } else { %>
-                <span class="stock-info">
-                  <i class="fas fa-check-circle"></i> In Stock
-                </span>
-              <% } %>
+        <!-- Product Image -->
+        <div class="product-image-wrapper">
+          <% if (item.productId && item.productId.images &&
+          item.productId.images.length > 0) { %>
+          <img src="<%= item.productId.images[0] %>"
+            alt="<%= item.productId.productName %>" class="product-image">
+          <% } else { %>
+          <img src="https://via.placeholder.com/120x120?text=No+Image"
+            alt="No Image" class="product-image">
+          <% } %>
 
-              <div class="price-info">
-                <span class="current-price">₹<%= (item.variant.salePrice || item.price).toLocaleString() %></span>
-                <% if (item.variant.regularPrice && item.variant.salePrice < item.variant.regularPrice) { %>
-                  <span class="original-price">₹<%= item.variant.regularPrice.toLocaleString() %></span>
-                <% } %>
-              </div>
-
-              <div class="quantity-control">
-                <button 
-                  <%= isUnavailable || item.quantity <= 1 ? 'disabled' : '' %> 
-                  id="minus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
-                  onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', -1, <%= availableQty %>, <%= item.quantity %>)">
-                  −
-                </button>
-                <input 
-                  id="qty-<%= item.productId._id %>-<%= item.variant.size %>" 
-                  type="number" 
-                  value="<%= item.quantity %>" 
-                  min="1" 
-                  max="<%= availableQty %>"
-                  readonly
-                  <%= isUnavailable ? 'disabled' : '' %>>
-                <button 
-                  <%= isUnavailable || item.quantity >= availableQty ? 'disabled' : '' %> 
-                  id="plus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
-                  onclick="changeQuantity('<%= item.productId._id %>', '<%= item.variant.size %>', 1, <%= availableQty %>, <%= item.quantity %>)">
-                  +
-                </button>
-              </div>
-
-              <!-- Stock Message (AFTER quantity control) -->
-              <div data-stock-message style="display: none;"></div>
-              
-              <% if (!isUnavailable && item.quantity >= maxQtyPerOrder) { %>
-                <small style="color: #ffc107; font-size: 0.8rem;">
-                  <i class="fas fa-info-circle"></i> Maximum <%= maxQtyPerOrder %> items per order
-                </small>
-              <% } %>
-            </div>
-
-            <!-- Item Actions -->
-            <div class="item-actions">
-              <div class="item-total" id="subtotal-<%= item.productId._id %>-<%= item.variant.size %>">
-                ₹<%= ((item.variant.salePrice || item.price) * item.quantity).toLocaleString() %>
-              </div>
-
-              <div class="action-buttons">
-                <% if (isOutOfStock && !isBlocked) { %>
-                  <button class="wishlist-button" 
-                          onclick="moveToWishlist('<%= item.productId._id %>', '<%= item.variant.size %>')">
-                    <i class="fas fa-heart"></i> Wishlist
-                  </button>
-                <% } %>
-                <button class="remove-button" 
-                        onclick="removeFromCart('<%= item.productId._id %>', '<%= item.variant.size %>')">
-                  <i class="fas fa-trash"></i> Remove
-                </button>
-              </div>
-            </div>
+          <% if (isBlocked) { %>
+          <div class="unavailable-overlay">
+            <% if (item.blockReason && item.blockReason.includes('Brand')) { %>
+            BRAND BLOCKED
+            <% } else if (item.blockReason &&
+            item.blockReason.includes('Category')) { %> CATEGORY BLOCKED
+            <% } else { %> PRODUCT BLOCKED <% } %>
           </div>
-        <% }); %>
-      </div>
-
-      <!-- Cart Summary -->
-      <div class="cart-summary">
-        <h3>Cart Total</h3>
-        
-        <% if (outOfStockCount > 0) { %>
-          <div class="unavailable-notice">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong><%= outOfStockCount %></strong> product<%= outOfStockCount > 1 ? 's are' : ' is' %> out of stock
-          </div>
-        <% } %>
-
-        <% if (blockedCount > 0 && blockedProducts && blockedProducts.length > 0) { %>
-          <div class="blocked-notice">
-            <div style="display: flex; align-items: flex-start; gap: 10px;">
-              <i class="fas fa-ban" style="margin-top: 2px; flex-shrink: 0;"></i>
-              <div style="flex: 1;">
-                <strong style="display: block; margin-bottom: 8px;">
-                  <strong><%= blockedCount %></strong> product<%= blockedCount > 1 ? 's are' : ' is' %> temporarily blocked by admin
-                </strong>
-                <div style="font-size: 0.85rem; line-height: 1.6;">
-                  <% blockedProducts.forEach((product, index) => { %>
-                    <div style="margin-bottom: 5px;">
-                      • <%= product.reason %>
-                    </div>
-                  <% }); %>
-                </div>
-                <div style="margin-top: 10px; font-size: 0.85rem; color: #dc3545; font-weight: 500;">
-                  ⚠️ Please remove these items before proceeding to checkout
-                </div>
-              </div>
-            </div>
-          </div>
-        <% } %>
-        
-        <div class="summary-row">
-          <span class="summary-label">Subtotal:</span>
-          <span class="summary-value" id="cart-subtotal">₹<%= totalPrice.toLocaleString() %></span>
+          <% } else if (isOutOfStock) { %>
+          <div class="unavailable-overlay">OUT OF STOCK</div>
+          <% } %>
         </div>
 
-        <div class="summary-row">
-  <span class="summary-label">Shipping:</span>
-  <span class="summary-value">₹49</span>
-</div>
+        <!-- Product Details -->
+        <div class="product-details">
+          <h3 class="product-name"><%= item.productId.productName ||
+            'Unknown Product' %></h3>
 
-<div class="summary-row">
-  <span class="summary-label">Total:</span>
-  <span class="summary-value" id="cart-total">₹<%= (totalPrice + 49).toLocaleString() %></span>
-</div>
+          <div class="product-meta">
+            <% if (item.variant.size) { %>
+            <span class="variant-info"><strong>Variant:</strong> <%=
+              item.variant.size %> ml</span>
+            <% } %>
+          </div>
 
-        <button id="checkout-button" class="checkout-button" onclick="proceedToCheckout()">
-          Proceed to checkout
-        </button>
+          <% if (isBlocked) { %>
+          <span class="stock-info unavailable">
+            <i class="fas fa-ban"></i>
+            <% if (item.blockReason && item.blockReason.includes('Product')) {
+            %>
+            Product Blocked by Admin
+            <% } else if (item.blockReason &&
+            item.blockReason.includes('Brand')) { %>
+            Brand Blocked by Admin
+            <% } else if (item.blockReason &&
+            item.blockReason.includes('Category')) { %>
+            Category Blocked by Admin
+            <% } else { %>
+            Temporarily Blocked
+            <% } %>
+          </span>
+          <% } else if (isOutOfStock) { %>
+          <span class="stock-info unavailable">
+            <i class="fas fa-times-circle"></i> Out of Stock
+          </span>
+          <% } else if (item.productId.stock <= 5) { %>
+          <span class="stock-info low-stock">
+            <i class="fas fa-exclamation-triangle"></i> Only <%=
+            item.productId.stock %> left
+          </span>
+          <% } else { %>
+          <span class="stock-info">
+            <i class="fas fa-check-circle"></i> In Stock
+          </span>
+          <% } %>
+
+          <div class="price-info">
+            <span class="current-price">₹<%= (item.variant.salePrice ||
+              item.price).toLocaleString() %></span>
+            <% if (item.variant.regularPrice && item.variant.salePrice <
+            item.variant.regularPrice) { %>
+            <span class="original-price">₹<%=
+              item.variant.regularPrice.toLocaleString() %></span>
+            <% } %>
+          </div>
+
+          <div class="quantity-control">
+            <button
+              <%=isUnavailable || item.quantity <=1 ? 'disabled' : '' %>
+              id="minus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
+              onclick="changeQuantity('<%= item.productId._id %>', '<%=
+              item.variant.size %>', -1, <%= availableQty %>, <%= item.quantity
+              %>)">
+              −
+            </button>
+            <input
+              id="qty-<%= item.productId._id %>-<%= item.variant.size %>"
+              type="number"
+              value="<%= item.quantity %>"
+              min="1"
+              max="<%= availableQty %>"
+              readonly
+              <%=isUnavailable ? 'disabled' : '' %>>
+            <button
+              <%=isUnavailable || item.quantity>= availableQty ? 'disabled' : ''
+              %>
+              id="plus-btn-<%= item.productId._id %>-<%= item.variant.size %>"
+              onclick="changeQuantity('<%= item.productId._id %>', '<%=
+              item.variant.size %>', 1, <%= availableQty %>, <%= item.quantity
+              %>)">
+              +
+            </button>
+          </div>
+
+          <div data-stock-message style="display: none;"></div>
+
+          <% if (!isUnavailable && item.quantity >= maxQtyPerOrder) { %>
+          <small style="color: #ffc107; font-size: 0.8rem;">
+            <i class="fas fa-info-circle"></i> Maximum <%= maxQtyPerOrder %>
+            items per order
+          </small>
+          <% } %>
+        </div>
+
+        <!-- Item Actions -->
+        <div class="item-actions">
+          <div class="item-total"
+            id="subtotal-<%= item.productId._id %>-<%= item.variant.size %>">
+            ₹<%= ((item.variant.salePrice || item.price) *
+            item.quantity).toLocaleString() %>
+          </div>
+
+          <div class="action-buttons">
+            <% if (isOutOfStock && !isBlocked) { %>
+            <button class="wishlist-button"
+              onclick="moveToWishlist('<%= item.productId._id %>', '<%= item.variant.size %>')">
+              <i class="fas fa-heart"></i> Wishlist
+            </button>
+            <% } %>
+            <button class="remove-button"
+              onclick="removeFromCart('<%= item.productId._id %>', '<%= item.variant.size %>')">
+              <i class="fas fa-trash"></i> Remove
+            </button>
+          </div>
+        </div>
       </div>
+      <% }); %>
     </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary">
+      <h3>Cart Total</h3>
+
+      <% if (outOfStockCount > 0) { %>
+      <div class="unavailable-notice">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong><%= outOfStockCount %></strong> product<%= outOfStockCount > 1 ?
+        's are' : ' is' %> out of stock
+      </div>
+      <% } %>
+
+      <% if (blockedCount > 0 && blockedProducts && blockedProducts.length > 0)
+      { %>
+      <div class="blocked-notice">
+        <div style="display: flex; align-items: flex-start; gap: 10px;">
+          <i class="fas fa-ban" style="margin-top: 2px; flex-shrink: 0;"></i>
+          <div style="flex: 1;">
+            <strong style="display: block; margin-bottom: 8px;">
+              <strong><%= blockedCount %></strong> product<%= blockedCount > 1 ?
+              's are' : ' is' %> temporarily blocked by admin
+            </strong>
+            <div style="font-size: 0.85rem; line-height: 1.6;">
+              <% blockedProducts.forEach((product, index) => { %>
+              <div style="margin-bottom: 5px;">
+                • <%= product.reason %>
+              </div>
+              <% }); %>
+            </div>
+            <div
+              style="margin-top: 10px; font-size: 0.85rem; color: #dc3545; font-weight: 500;">
+              ⚠️ Please remove these items before proceeding to checkout
+            </div>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="summary-row">
+        <span class="summary-label">Subtotal:</span>
+        <span class="summary-value" id="cart-subtotal">₹<%=
+          totalPrice.toLocaleString() %></span>
+      </div>
+
+      <div class="summary-row">
+        <span class="summary-label">Shipping:</span>
+        <span class="summary-value">₹49</span>
+      </div>
+
+      <div class="summary-row">
+        <span class="summary-label">Total:</span>
+        <span class="summary-value" id="cart-total">₹<%= (totalPrice +
+          49).toLocaleString() %></span>
+      </div>
+
+      <button id="checkout-button" class="checkout-button"
+        onclick="proceedToCheckout()">
+        Proceed to checkout
+      </button>
+    </div>
+  </div>
 
   <% } else { %>
-    <div class="empty-state">
-      <i class="fas fa-shopping-cart"></i>
-      <h2>Your Cart is Empty</h2>
-      <p>Add some amazing products to your cart!</p>
-      <a href="/shopPage" class="shop-button">
-        Start Shopping
-      </a>
-    </div>
+  <div class="empty-state">
+    <i class="fas fa-shopping-cart"></i>
+    <h2>Your Cart is Empty</h2>
+    <p>Add some amazing products to your cart!</p>
+    <a href="/shopPage" class="shop-button">
+      Start Shopping
+    </a>
+  </div>
   <% } %>
 </div>
 
@@ -587,6 +595,14 @@
     console.log('Validating ' + cartItems.length + ' items...');
 
     for (const item of cartItems) {
+
+      if (item.getAttribute('data-blocked') === 'true') {
+    // Reset any existing stock warning messages if the item became blocked
+    const stockMessage = item.querySelector('[data-stock-message]');
+    if (stockMessage) stockMessage.style.display = 'none';
+    item.classList.remove('out-of-stock-qty-issue');
+    continue; 
+  }
       const productId = item.getAttribute('data-product-id');
       const variantSize = item.getAttribute('data-variant-size');
       

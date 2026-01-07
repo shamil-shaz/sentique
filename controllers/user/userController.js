@@ -220,7 +220,8 @@ const signup = async (req, res) => {
     }
 
     const securePass = await securePassword(password);
-    const otp = Math.floor(1000 + Math.random() * 9000);
+    const otp = generateOtp();
+
     console.log("Generated OTP:", otp);
     console.log("OTP for user", email, "is", otp);
 
@@ -233,7 +234,8 @@ const signup = async (req, res) => {
     };
     req.session.userOtp = otp;
     
-    req.session.otpExpirationTime = Date.now() + 600000;
+    req.session.otpExpirationTime = Date.now() + 60000;
+
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -476,7 +478,8 @@ const sendOtp = async (req, res) => {
         req.session.userData = { email, fullName, phone, password };
         req.session.userOtp = otp;
        
-        req.session.otpExpirationTime = Date.now() + 600000;
+        req.session.otpExpirationTime = Date.now() + 60000; // 1 minute
+
 
         const emailSent = await sendVerificationEmail(email, otp);
 
@@ -516,7 +519,8 @@ const resendOtp = async (req, res) => {
         
        
         req.session.userOtp = otp;
-        req.session.otpExpirationTime = Date.now() + 600000; 
+       req.session.otpExpirationTime = Date.now() + 60000; // 1 minute
+
 
         const emailSent = await sendVerificationEmail(userData.email, otp);
 

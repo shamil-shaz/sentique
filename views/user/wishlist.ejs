@@ -1,8 +1,11 @@
 <%- include("../partials/user/header.ejs") %>
 
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -695,132 +698,196 @@
         .wishlist-grid { gap: clamp(12px, 3vw, 20px); }
         .product-body { padding: clamp(10px, 2.5vw, 12px) clamp(12px, 3vw, 14px); }
         .product-meta { gap: clamp(4px, 1.5vw, 6px); }
+
+.move-all-btn:disabled {
+    background: #9ca3af !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.unlisted-overlay {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(220, 38, 38, 0.95);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    z-index: 25;
+    font-weight: 800;
+    font-size: 14px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
     </style>
 </head>
-
 <body>
-    <div class="site-wrapper">
-        <div class="wishlist-header">
-            <h1><i class="fa fa-heart"></i> My Wishlist <span class="wishlist-count">(<span id="wishlistCount"><%= totalItems %></span> items)</span></h1>
-            <% if(wishlistItems.length > 0) { %>
-                <button class="move-all-btn" onclick="moveAllToBag()">
-                    <i class="fa fa-shopping-cart"></i> Move All to Cart
-                </button>
-            <% } %>
-        </div>
+<div class="site-wrapper">
+    <div class="wishlist-header">
+        <h1>
+            <i class="fa fa-heart"></i>
+            My Wishlist
+            <span class="wishlist-count">
+                (<span id="wishlistCount"><%= totalItems %></span> items)
+            </span>
+        </h1>
 
-        <div class="wishlist-grid" id="wishlistGrid">
-            <% if(wishlistItems.length === 0) { %>
-                <div class="empty-wishlist">
-                    <div class="empty-icon"><i class="fa fa-heart"></i></div>
-                    <h3>Your Wishlist is Empty</h3>
-                    <p>Save your favorite items here and never lose track of them!</p>
-                    <a href="/shopPage" class="browse-btn">
-                        <i class="fa fa-search"></i> Start Shopping
-                    </a>
-                </div>
-            <% } else { %>
-                <% wishlistItems.forEach(item => { %>
-                    <% 
-                        const product = item.productId;
-                        if (!product) return;
+        <%
+        let hasUnlisted = false;
+        if (wishlistItems && wishlistItems.length > 0) {
+            hasUnlisted = wishlistItems.some(item => {
+                const p = item.productId;
+                return p &&
+                    (p.isBlocked ||
+                    p.status !== 'Available' ||
+                    (p.category && p.category.isListed === false) ||
+                    (p.brand && p.brand.isBlocked === true));
+            });
+        }
+        %>
 
-                        // Find cheapest variant (lowest salePrice, fallback to regularPrice)
-                        let cheapestVariant = null;
-                        let lowestSalePrice = Infinity;
-                        let regularPriceOfCheapest = 0;
+        <button class="move-all-btn"
+            onclick="moveAllToBag()"
+            <%= hasUnlisted ? 'disabled' : '' %>
+            title="<%= hasUnlisted ? 'Please remove unlisted or blocked items first' : '' %>">
+            <i class="fa fa-shopping-cart"></i> Move All to Cart
+        </button>
+    </div>
 
-                        product.variants?.forEach(v => {
-                            const price = v.salePrice > 0 ? v.salePrice : v.regularPrice;
-                            if (price < lowestSalePrice) {
-                                lowestSalePrice = price;
-                                regularPriceOfCheapest = v.regularPrice;
-                                cheapestVariant = v;
-                            }
-                        });
+    <div class="wishlist-grid" id="wishlistGrid">
+        <% if (wishlistItems.length === 0) { %>
 
-                        if (!cheapestVariant) {
-                            lowestSalePrice = product.salePrice || product.price || 0;
-                            regularPriceOfCheapest = product.price || 0;
-                        }
-
-                        const defaultSize = cheapestVariant?.size || '';
-                    %>
-
-                    <article class="wishlist-card" data-product-id="<%= product._id %>">
-                        <div class="image-wrap">
-                            <!-- Fixed: Click image → go to product detail -->
-                            <a href="/productDetails?id=<%= product._id %>">
-                                <img src="<%= product.images?.[0] || 'https://via.placeholder.com/350?text=No+Image' %>" 
-                                     alt="<%= product.productName %>" loading="lazy">
-                            </a>
-
-                            <div class="product-icons">
-                                <button class="remove-wishlist-btn" data-id="<%= product._id %>" aria-label="Remove">
-                                    <i class="fa fa-times"></i>
-                                </button>
-                            </div>
-
-                            <% if(product.discount > 0) { %>
-                                <div class="discount-badge"><%= product.discount %>% OFF</div>
-                            <% } %>
-                        </div>
-
-                        <div class="product-body">
-                            <h5><%= product.productName %></h5>
-                            <div class="product-meta">
-                                <div><strong>Brand:</strong> <%= product.brand?.brandName || 'No Brand' %></div>
-                                <div><strong>Category:</strong> <%= product.category?.name || 'No Category' %></div>
-                                <div>
-                                    <!-- Fixed: Correct regular price from same variant -->
-                                    <span class="price">₹<%= lowestSalePrice %></span>
-                                    <% if(regularPriceOfCheapest > lowestSalePrice) { %>
-                                        <span class="old-price">₹<%= regularPriceOfCheapest %></span>
-                                    <% } %>
-                                </div>
-
-                                <% if(product.variants && product.variants.length > 0) { %>
-                                    <select class="variant-select" data-product-id="<%= product._id %>">
-                                        <% product.variants.forEach(v => { %>
-                                            <option value="<%= v.size %>" <%= v.size === defaultSize ? 'selected' : '' %>>
-                                                <%= v.size %> ml - ₹<%= v.salePrice > 0 ? v.salePrice : v.regularPrice %>
-                                            </option>
-                                        <% }) %>
-                                    </select>
-                                <% } %>
-                            </div>
-
-                            <div class="product-actions">
-                                <button class="add-to-cart-btn <%= !defaultSize ? 'disabled' : '' %>"
-                                        data-id="<%= product._id %>"
-                                        data-variant-id="<%= defaultSize %>"
-                                        <%= !defaultSize ? 'disabled' : '' %>>
-                                    <i class="fa fa-shopping-cart"></i> Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-                <% }) %>
-            <% } %>
-        </div>
-
-        <% if(totalPages > 1) { %>
-            <div class="pagination">
-                <a href="/wishlist?page=<%= currentPage > 1 ? currentPage - 1 : 1 %>" <%= currentPage === 1 ? 'class="disabled"' : '' %>><i class="fa fa-chevron-left"></i> Previous</a>
-                <% for(let i = 1; i <= totalPages; i++) { %>
-                    <% if(i === currentPage) { %>
-                        <span class="current"><%= i %></span>
-                    <% } else { %>
-                        <a href="/wishlist?page=<%= i %>"><%= i %></a>
-                    <% } %>
-                <% } %>
-                <a href="/wishlist?page=<%= currentPage < totalPages ? currentPage + 1 : totalPages %>" <%= currentPage === totalPages ? 'class="disabled"' : '' %>>Next <i class="fa fa-chevron-right"></i></a>
+            <div class="empty-wishlist">
+                <div class="empty-icon"><i class="fa fa-heart"></i></div>
+                <h3>Your Wishlist is Empty</h3>
+                <p>Save your favorite items here and never lose track of them!</p>
+                <a href="/shopPage" class="browse-btn">
+                    <i class="fa fa-search"></i> Start Shopping
+                </a>
             </div>
+
+        <% } else { %>
+
+        <% wishlistItems.forEach(item => { %>
+        <% const product = item.productId; %>
+
+        <% if (product) { %>
+
+        <%
+        const isProductBlocked = product.isBlocked || product.status !== 'Available';
+        const isCategoryBlocked = product.category && product.category.isListed === false;
+        const isBrandBlocked = product.brand && product.brand.isBlocked === true;
+        const isUnavailable = isProductBlocked || isCategoryBlocked || isBrandBlocked;
+
+        let blockMessage = "PRODUCT UNLISTED";
+        if (isBrandBlocked) blockMessage = "BRAND UNLISTED";
+        else if (isCategoryBlocked) blockMessage = "CATEGORY UNLISTED";
+
+        let cheapestVariant = null;
+        let lowestSalePrice = Infinity;
+        let regularPriceOfCheapest = 0;
+
+        if (product.variants && product.variants.length > 0) {
+            product.variants.forEach(v => {
+                const price = v.salePrice > 0 ? v.salePrice : v.regularPrice;
+                if (price < lowestSalePrice) {
+                    lowestSalePrice = price;
+                    regularPriceOfCheapest = v.regularPrice;
+                    cheapestVariant = v;
+                }
+            });
+        }
+
+        if (!cheapestVariant) {
+            lowestSalePrice = product.salePrice || product.price || 0;
+            regularPriceOfCheapest = product.price || 0;
+        }
+
+        const defaultSize = cheapestVariant ? cheapestVariant.size : '';
+        %>
+
+        <article class="wishlist-card"
+            data-product-id="<%= product._id %>"
+            style="<%= isUnavailable ? 'opacity:0.8;filter:grayscale(0.7);position:relative;' : '' %>">
+
+            <% if (isUnavailable) { %>
+                <div class="unlisted-overlay"><%= blockMessage %></div>
+            <% } %>
+
+            <div class="image-wrap">
+                <a href="<%= isUnavailable ? '#' : '/productDetails?id=' + product._id %>">
+                    <img
+                        src="<%= (product.images && product.images[0]) ? product.images[0] : 'https://via.placeholder.com/350?text=No+Image' %>"
+                        alt="<%= product.productName %>"
+                        loading="lazy">
+                </a>
+
+                <div class="product-icons">
+                    <button class="remove-wishlist-btn" data-id="<%= product._id %>">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-body">
+                <h5><%= product.productName %></h5>
+
+                <div class="product-meta">
+                    <div>
+                        <strong>Brand:</strong>
+                        <%= (product.brand && product.brand.brandName) || 'No Brand' %>
+                    </div>
+                    <div>
+                        <strong>Category:</strong>
+                        <%= (product.category && product.category.name) || 'No Category' %>
+                    </div>
+                    <div>
+                        <span class="price">₹<%= lowestSalePrice %></span>
+                        <% if (regularPriceOfCheapest > lowestSalePrice) { %>
+                            <span class="old-price">₹<%= regularPriceOfCheapest %></span>
+                        <% } %>
+                    </div>
+
+                    <% if (product.variants && product.variants.length > 0 && !isUnavailable) { %>
+                        <select class="variant-select" data-product-id="<%= product._id %>">
+                            <% product.variants.forEach(v => { %>
+                                <option value="<%= v.size %>" <%= v.size === defaultSize ? 'selected' : '' %>>
+                                    <%= v.size %> ml - ₹<%= v.salePrice > 0 ? v.salePrice : v.regularPrice %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    <% } %>
+                </div>
+
+                <div class="product-actions">
+                    <% if (isUnavailable) { %>
+                        <button class="add-to-cart-btn disabled" disabled>
+                            <i class="fa fa-ban"></i> Unavailable
+                        </button>
+                    <% } else { %>
+                        <button
+                            class="add-to-cart-btn <%= !defaultSize ? 'disabled' : '' %>"
+                            data-id="<%= product._id %>"
+                            data-variant-id="<%= defaultSize %>"
+                            <%= !defaultSize ? 'disabled' : '' %>>
+                            <i class="fa fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    <% } %>
+                </div>
+            </div>
+        </article>
+
+        <% } %>
+        <% }) %>
         <% } %>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
+    <script>
     // Toast for Add to Cart
     const Toast = Swal.mixin({
         toast: true,

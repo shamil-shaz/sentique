@@ -75,102 +75,151 @@
 <body>
   <div class="brand-form">
     <h3>Add New Brand</h3>
+
     <form id="brandForm" enctype="multipart/form-data">
+
+      <!-- ✅ BRAND NAME -->
       <div class="form-group">
         <label for="brandName">Brand Name</label>
-        <input type="text" id="brandName" name="brandName" placeholder="Enter brand name"/>
-        <div id="brandNameError" class="error-message">Brand name is required</div>
+        <input 
+          type="text" 
+          id="brandName" 
+          name="brandName" 
+          placeholder="Enter brand name"
+        />
+        <div id="brandNameError" class="error-message"></div>
       </div>
 
+      <!-- ✅ LOGO UPLOAD -->
       <div class="form-group">
         <label for="brandLogo">Logo Upload</label>
-        <input type="file" id="brandLogo" name="brandImage"/>
-        <div id="brandLogoError" class="error-message">Logo is required</div>
+        <input 
+          type="file" 
+          id="brandLogo" 
+          name="brandImage"
+        />
+        <div id="brandLogoError" class="error-message"></div>
+
+        <!-- ✅ IMAGE PREVIEW -->
+        <img
+          id="logoPreview"
+          style="display:none; margin-top:10px; width:120px; border-radius:8px;"
+          alt="Logo Preview"
+        />
       </div>
 
       <div class="form-actions">
         <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
         <button type="submit" class="btn-add">Add</button>
       </div>
+
     </form>
   </div>
 
-  <script>
-    const form = document.getElementById("brandForm");
-    const brandName = document.getElementById("brandName");
-    const brandLogo = document.getElementById("brandLogo");
-    const brandNameError = document.getElementById("brandNameError");
-    const brandLogoError = document.getElementById("brandLogoError");
-    const cancelBtn = document.getElementById("cancelBtn");
+<script>
+  const form = document.getElementById("brandForm");
+  const brandName = document.getElementById("brandName");
+  const brandLogo = document.getElementById("brandLogo");
+  const brandNameError = document.getElementById("brandNameError");
+  const brandLogoError = document.getElementById("brandLogoError");
+  const cancelBtn = document.getElementById("cancelBtn");
+  const logoPreview = document.getElementById("logoPreview");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
 
-      // Reset error messages
-      brandNameError.style.display = "none";
-      brandLogoError.style.display = "none";
+  // 🔹 IMAGE PREVIEW + TYPE VALIDATION
+  brandLogo.addEventListener("change", () => {
+    brandLogoError.style.display = "none";
 
-      let valid = true;
+    const file = brandLogo.files[0];
+    if (!file) return;
 
-      // Validate brand name
-      if (!brandName.value.trim()) {
-        brandNameError.style.display = "block";
-        valid = false;
-      }
+    if (!allowedTypes.includes(file.type)) {
+      brandLogoError.textContent = "Only JPG, JPEG, PNG, WEBP images are allowed";
+      brandLogoError.style.display = "block";
+      brandLogo.value = "";
+      logoPreview.style.display = "none";
+      return;
+    }
 
-      // Validate brand logo
-      if (!brandLogo.files[0]) {
-        brandLogoError.style.display = "block";
-        valid = false;
-      }
+    const reader = new FileReader();
+    reader.onload = () => {
+      logoPreview.src = reader.result;
+      logoPreview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  });
 
-      if (!valid) return;
+  // 🔹 FORM SUBMIT VALIDATION
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      // Collect form data
-      const formData = new FormData(form);
+    brandNameError.style.display = "none";
+    brandLogoError.style.display = "none";
 
-      try {
-        const res = await fetch("/admin/addBrand", {
-          method: "POST",
-          body: formData
-        });
+    let valid = true;
+    const name = brandName.value.trim();
+    const file = brandLogo.files[0];
 
-        const data = await res.json();
+    // Brand name validation
+    if (!name) {
+      brandNameError.textContent = "Brand name is required";
+      brandNameError.style.display = "block";
+      valid = false;
+    } else if (name.length < 3) {
+      brandNameError.textContent = "Brand name must be at least 3 characters";
+      brandNameError.style.display = "block";
+      valid = false;
+    } else if (name.length > 20) {
+      brandNameError.textContent = "Brand name must not exceed 20 characters";
+      brandNameError.style.display = "block";
+      valid = false;
+    }
 
-        if (res.ok) {
-          Swal.fire({
-            icon: "success",
-            title: data.message || "Brand added successfully",
-            showConfirmButton: false,
-            timer: 1000
-          }).then(() => {
-            window.location.href = "/admin/brands";
-          });
+    // Logo validation
+    if (!file) {
+      brandLogoError.textContent = "Brand logo is required";
+      brandLogoError.style.display = "block";
+      valid = false;
+    } else if (!allowedTypes.includes(file.type)) {
+      brandLogoError.textContent = "Only JPG, JPEG, PNG, WEBP images are allowed";
+      brandLogoError.style.display = "block";
+      valid = false;
+    }
 
-          // Reset form after success
-          form.reset();
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: data.error || "Something went wrong",
-            showConfirmButton: true
-          });
-        }
-      } catch (err) {
+    if (!valid) return;
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/admin/addBrand", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
         Swal.fire({
-          icon: "error",
-          title: "Server Error",
-          text: err.message
-        });
+          icon: "success",
+          title: data.message || "Brand added successfully",
+          showConfirmButton: false,
+          timer: 1000
+        }).then(() => window.location.href = "/admin/brands");
+      } else {
+        Swal.fire({ icon: "error", title: data.error || "Something went wrong" });
       }
-    });
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
+    }
+  });
 
-    // Cancel button
-    cancelBtn.addEventListener("click", () => {
-      brandNameError.style.display = "none";
-      brandLogoError.style.display = "none";
-      window.location.href = "/admin/brands";
-    });
-  </script>
+  cancelBtn.addEventListener("click", () => {
+    window.location.href = "/admin/brands";
+  });
+</script>
+
+
+
 </body>
 </html>

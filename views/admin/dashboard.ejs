@@ -383,13 +383,13 @@
       </div>
     </div>
 
-    <div class="kpi-card">
-      <div class="kpi-content">
-        <div class="kpi-label">🔄 Returns</div>
-        <div class="kpi-value"><%= returnRequests %></div>
-        <div class="kpi-growth">Under review</div>
-      </div>
-    </div>
+   <div class="kpi-card">
+  <div class="kpi-content">
+    <div class="kpi-label">🔄 Returned Items</div>
+    <div class="kpi-value"><%= returnedOrders %></div> 
+    <div class="kpi-growth positive">Admin Approved</div>
+  </div>
+</div>
   </div>
 
   <!-- Charts & Stats -->
@@ -412,29 +412,27 @@
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">📊 Analytics</div>
-      </div>
-      <div>
-        <div class="stat-item">
-          <span class="stat-label">Conversion Rate</span>
-          <span class="stat-value"><%= conversionRate %>%</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Avg Order Value</span>
-          <span class="stat-value">₹<%= averageOrderValue %></span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Cancelled</span>
-          <span class="stat-value" style="color: #fc8181;"><%= cancelledOrders %></span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Return Requests</span>
-          <span class="stat-value" style="color: #ed8936;"><%= returnRequests %></span>
-        </div>
-      </div>
+   <div class="card">
+  <div class="card-header">
+    <div class="card-title">📊 Analytics</div>
+  </div>
+  <div>
+    <div class="stat-item">
+      <span class="stat-label">Pending Requests</span>
+      <span class="stat-value" style="color: #ed8936;"><%= returnRequests %> items</span>
     </div>
+    
+    <div class="stat-item">
+      <span class="stat-label">Approved Returns</span>
+      <span class="stat-value" style="color: #48bb78;"><%= returnedOrders %> items</span>
+    </div>
+
+    <div class="stat-item">
+      <span class="stat-label">Cancelled</span>
+      <span class="stat-value" style="color: #fc8181;"><%= cancelledOrders %> items</span>
+    </div>
+  </div>
+</div>
   </div>
 
   <!-- Recent Orders -->

@@ -1,8 +1,13 @@
 <%- include("../partials/admin/header.ejs") %>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"
+  rel="stylesheet" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+  rel="stylesheet">
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -530,7 +535,7 @@ textarea { resize: vertical; min-height: 80px; }
   font-weight: 600;
 }
 
-/* Variant Modal */
+
 .variant-modal {
   display: none;
   position: fixed;
@@ -540,7 +545,7 @@ textarea { resize: vertical; min-height: 80px; }
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
-  z-index: 10000;
+  z-index: 1000;
   animation: fadeIn 0.2s ease;
 }
 
@@ -702,21 +707,25 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
     <p>Create a new product with images, details, and variant options</p>
   </div>
 
-  <% if (locals.flash && locals.flash.error && locals.flash.error.length > 0) { %>
-    <div class="alert-error">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
-      <%= locals.flash.error[0] %>
-    </div>
+  <% if (locals.flash && locals.flash.error && locals.flash.error.length > 0) {
+  %>
+  <div class="alert-error">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+    <%= locals.flash.error[0] %>
+  </div>
   <% } %>
-  <% if (locals.flash && locals.flash.success && locals.flash.success.length > 0) { %>
-    <div class="alert-success">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-      </svg>
-      <%= locals.flash.success[0] %>
-    </div>
+  <% if (locals.flash && locals.flash.success && locals.flash.success.length >
+  0) { %>
+  <div class="alert-success">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M5 13l4 4L19 7"></path>
+    </svg>
+    <%= locals.flash.success[0] %>
+  </div>
   <% } %>
 
   <div class="container">
@@ -729,22 +738,31 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
             <% for(let i=1; i<=4; i++){ %>
             <div class="image-box" id="image-box-<%=i%>">
               <div class="image-preview-wrapper">
-                <img id="preview-image<%=i%>" alt="Image <%=i%>" style="display:none;"/>
+                <img id="preview-image<%=i%>" alt="Image <%=i%>"
+                  style="display:none;" />
                 <div class="image-placeholder" id="placeholder-<%=i%>">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
                   <div>Image <%=i%></div>
                 </div>
               </div>
-              
-              <label class="upload-label" for="file-input-<%=i%>">Choose Image</label>
-              <input type="file" id="file-input-<%=i%>" class="product-image-input" data-index="<%=i%>" accept="image/*"/>
-              <input type="hidden" id="cropped-image<%=i%>" name="croppedImages[]"/>
-              
+
+              <label class="upload-label" for="file-input-<%=i%>">Choose
+                Image</label>
+              <input type="file" id="file-input-<%=i%>"
+                class="product-image-input" data-index="<%=i%>"
+                accept="image/*" />
+              <input type="hidden" id="cropped-image<%=i%>"
+                name="croppedImages[]" />
+
               <div class="image-buttons">
-                <button type="button" class="save-btn" onclick="triggerCrop('<%=i%>')">Crop</button>
-                <button type="button" class="cancel-btn" onclick="resetImage('<%=i%>')">Reset</button>
+                <button type="button" class="save-btn"
+                  onclick="triggerCrop('<%=i%>')">Crop</button>
+                <button type="button" class="cancel-btn"
+                  onclick="resetImage('<%=i%>')">Reset</button>
               </div>
               <p class="error-message" id="productImage<%=i%>-error"></p>
             </div>
@@ -755,19 +773,20 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
         <div class="right">
           <div class="form-section">
             <div class="section-title">Basic Information</div>
-            
+
             <div class="form-group">
               <label>Product Name <span class="required">*</span></label>
-              <input type="text" name="productName" placeholder="Enter product name"/>
+              <input type="text" name="productName"
+                placeholder="Enter product name" />
               <p class="error-message" id="productName-error"></p>
             </div>
 
             <div class="form-group">
               <label>Brand <span class="required">*</span></label>
               <select name="brand">
-                <option value="">Select a brand</option>
+                <option value>Select a brand</option>
                 <% brand.forEach(b => { %>
-                  <option value="<%=b._id%>"><%=b.brandName%></option>
+                <option value="<%=b._id%>"><%=b.brandName%></option>
                 <% }) %>
               </select>
               <p class="error-message" id="brand-error"></p>
@@ -776,9 +795,9 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
             <div class="form-group">
               <label>Category <span class="required">*</span></label>
               <select name="category">
-                <option value="">Select a category</option>
+                <option value>Select a category</option>
                 <% category.forEach(c => { %>
-                  <option value="<%=c._id%>"><%=c.name%></option>
+                <option value="<%=c._id%>"><%=c.name%></option>
                 <% }) %>
               </select>
               <p class="error-message" id="category-error"></p>
@@ -787,50 +806,60 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
 
           <div class="form-section">
             <div class="section-title">Description</div>
-            
+
             <div class="form-group">
               <label>Short Description <span class="required">*</span></label>
-              <textarea name="description" rows="3" placeholder="Brief product description (min 3 characters)"></textarea>
+              <textarea name="description" rows="3"
+                placeholder="Brief product description (min 3 characters)"></textarea>
               <p class="error-message" id="description-error"></p>
             </div>
 
             <div class="form-group">
               <label>Long Description <span class="required">*</span></label>
-              <textarea name="longDescription" rows="4" placeholder="Detailed product description (min 10 characters)"></textarea>
+              <textarea name="longDescription" rows="4"
+                placeholder="Detailed product description (min 10 characters)"></textarea>
               <p class="error-message" id="longDescription-error"></p>
             </div>
           </div>
 
           <div class="form-section">
-            <div class="section-title">Product Variants (At least 1 required)</div>
-            
+            <div class="section-title">Product Variants (At least 1
+              required)</div>
+
             <div class="variants-display" id="variantsDisplay">
               <div class="variant-empty-state" id="emptyState">
                 <i class="fas fa-box-open"></i>
-                <p>No variants added yet. Click "Add Variant" to get started.</p>
+                <p>No variants added yet. Click "Add Variant" to get
+                  started.</p>
               </div>
             </div>
 
-            <button type="button" class="add-variant-btn" onclick="openVariantModal()">
-              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            <button type="button" class="add-variant-btn"
+              onclick="openVariantModal()">
+              <svg width="20" height="20" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2" d="M12 4v16m8-8H4"></path>
               </svg>
               Add Variant
             </button>
-            
+
             <p class="error-message" id="variant-error"></p>
-            
+
             <div id="hiddenVariantsContainer"></div>
           </div>
 
           <div class="button-row">
             <button type="submit" class="btn-green">
-              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              <svg width="20" height="20" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
               Add Product
             </button>
-            <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">Cancel</button>
+            <button type="button" class="btn-red"
+              onclick="window.location.href='/admin/products'">Cancel</button>
           </div>
         </div>
       </div>
@@ -841,10 +870,12 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
 <div id="cropper-modal">
   <div class="modal-content">
     <h3>Crop Image</h3>
-    <img id="cropper-image"/>
+    <img id="cropper-image" />
     <div class="modal-buttons">
-      <button type="button" class="save-btn" onclick="cropImage()">Apply Crop</button>
-      <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button type="button" class="save-btn" onclick="cropImage()">Apply
+        Crop</button>
+      <button type="button" class="cancel-btn"
+        onclick="closeModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -852,19 +883,22 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
 <div class="variant-modal" id="variantModal">
   <div class="variant-modal-content">
     <div class="variant-modal-header">
-      <h3><i class="fas fa-cubes"></i> <span id="modalTitle">Add Product Variant</span></h3>
-      <button type="button" class="modal-close-btn" onclick="closeVariantModal()">
+      <h3><i class="fas fa-cubes"></i> <span id="modalTitle">Add Product
+          Variant</span></h3>
+      <button type="button" class="modal-close-btn"
+        onclick="closeVariantModal()">
         <i class="fas fa-times"></i>
       </button>
     </div>
-    
+
     <div class="variant-modal-body">
       <div class="modal-form-group">
         <label for="modalSize">
           <i class="fas fa-ruler"></i> Size (ml)
           <span class="required">*</span>
         </label>
-        <input type="number" id="modalSize" placeholder="Enter size in ml (e.g., 50, 100)" min="1" />
+        <input type="number" id="modalSize"
+          placeholder="Enter size in ml (e.g., 50, 100)" min="1" />
         <small class="input-hint">Product size in milliliters</small>
       </div>
 
@@ -873,7 +907,8 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
           <i class="fas fa-warehouse"></i> Stock Quantity
           <span class="required">*</span>
         </label>
-        <input type="number" id="modalStock" placeholder="Enter available stock" min="0" />
+        <input type="number" id="modalStock" placeholder="Enter available stock"
+          min="0" />
         <small class="input-hint">Number of units available</small>
       </div>
 
@@ -882,32 +917,36 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
           <i class="fas fa-tag"></i> Regular Price (₹)
           <span class="required">*</span>
         </label>
-        <input type="number" id="modalRegularPrice" placeholder="Enter regular price" min="0" step="0.01" />
+        <input type="number" id="modalRegularPrice"
+          placeholder="Enter regular price" min="0" step="0.01" />
         <small class="input-hint">Original selling price</small>
       </div>
 
-      <div class="modal-form-group">
+      <!-- <div class="modal-form-group">
         <label for="modalSalePrice">
           <i class="fas fa-tags"></i> Sale Price (₹)
           <span class="required">*</span>
         </label>
         <input type="number" id="modalSalePrice" placeholder="Enter sale price" min="0" step="0.01" />
         <small class="input-hint">Discounted price (must be ≤ regular price)</small>
-      </div>
+      </div> -->
     </div>
-    
+
     <div class="variant-modal-footer">
-      <button type="button" class="btn-modal-cancel" onclick="closeVariantModal()">
+      <button type="button" class="btn-modal-cancel"
+        onclick="closeVariantModal()">
         <i class="fas fa-times"></i> Cancel
       </button>
       <button type="button" class="btn-modal-save" onclick="saveVariant()">
-        <i class="fas fa-check"></i> <span id="saveButtonText">Add Variant</span>
+        <i class="fas fa-check"></i> <span id="saveButtonText">Add
+          Variant</span>
       </button>
     </div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
 // Image Cropper Variables
 let cropper, currentImageIndex = null;
@@ -1059,7 +1098,7 @@ function openVariantModal(index = null) {
     document.getElementById('modalSize').value = variant.size;
     document.getElementById('modalStock').value = variant.stock;
     document.getElementById('modalRegularPrice').value = variant.regularPrice;
-    document.getElementById('modalSalePrice').value = variant.salePrice;
+    //document.getElementById('modalSalePrice').value = variant.salePrice;
   } else {
     // Add mode
     document.getElementById('modalTitle').textContent = 'Add Product Variant';
@@ -1067,7 +1106,7 @@ function openVariantModal(index = null) {
     document.getElementById('modalSize').value = '';
     document.getElementById('modalStock').value = '';
     document.getElementById('modalRegularPrice').value = '';
-    document.getElementById('modalSalePrice').value = '';
+   // document.getElementById('modalSalePrice').value = '';
   }
   
   variantModalElement.style.display = 'block';
@@ -1083,7 +1122,7 @@ function saveVariant() {
   const size = parseFloat(document.getElementById('modalSize').value);
   const stock = parseInt(document.getElementById('modalStock').value);
   const regularPrice = parseFloat(document.getElementById('modalRegularPrice').value);
-  const salePrice = parseFloat(document.getElementById('modalSalePrice').value);
+  //const salePrice = parseFloat(document.getElementById('modalSalePrice').value);
   
   // Validation
   if (!size || size <= 0) {
@@ -1101,17 +1140,17 @@ function saveVariant() {
     return;
   }
   
-  if (isNaN(salePrice) || salePrice < 0) {
-    Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price cannot be negative', confirmButtonColor: '#ef4444' });
-    return;
-  }
+ // if (isNaN(salePrice) || salePrice < 0) {
+ //   Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price cannot be negative', confirmButtonColor: '#ef4444' });
+  //  return;
+  //}
   
-  if (salePrice > regularPrice) {
-    Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price must be less than or equal to regular price', confirmButtonColor: '#ef4444' });
-    return;
-  }
+  //if (salePrice > regularPrice) {
+   // Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price must be less than or equal to regular price', confirmButtonColor: '#ef4444' });
+   // return;
+  //}
   
-  const variant = { size, stock, regularPrice, salePrice };
+  const variant = { size, stock, regularPrice };
   
   if (editingIndex !== null) {
     // Update existing variant
@@ -1190,10 +1229,7 @@ function renderVariants() {
           <span class="variant-detail-label"><i class="fas fa-tag"></i> Regular Price</span>
           <span class="variant-detail-value">₹${variant.regularPrice.toFixed(2)}</span>
         </div>
-        <div class="variant-detail-item">
-          <span class="variant-detail-label"><i class="fas fa-tags"></i> Sale Price</span>
-          <span class="variant-detail-value" style="color: #48bb78;">₹${variant.salePrice.toFixed(2)}</span>
-        </div>
+        
       </div>
     `;
     display.appendChild(card);
@@ -1203,7 +1239,6 @@ function renderVariants() {
       <input type="hidden" name="variantSize[]" value="${variant.size}">
       <input type="hidden" name="variantStock[]" value="${variant.stock}">
       <input type="hidden" name="variantRegularPrice[]" value="${variant.regularPrice}">
-      <input type="hidden" name="variantSalePrice[]" value="${variant.salePrice}">
     `;
   });
 }
@@ -1243,18 +1278,48 @@ function validateForm() {
   clearErrors();
   let valid = true;
 
-  // Image validation
-  let imageCount = 0;
-  for (let i = 1; i <= 4; i++) {
-    if (document.getElementById(`cropped-image${i}`).value) {
-      imageCount++;
+  // Image validation variables
+  let croppedCount = 0;
+  let uncroppedFound = false;
+  const totalSlots = 4;
+
+  // Single loop to handle all image logic
+  for (let i = 1; i <= totalSlots; i++) {
+    const fileInput = document.getElementById(`file-input-${i}`);
+    const croppedInput = document.getElementById(`cropped-image${i}`);
+    const imageBox = document.getElementById(`image-box-${i}`);
+
+    // Reset previous error highlights
+    imageBox.style.borderColor = "#e2e8f0";
+
+    // 1. Check if user selected a file but didn't click "Apply Crop"
+    if (fileInput.files.length > 0 && !croppedInput.value) {
+      uncroppedFound = true;
+      imageBox.style.borderColor = "#f56565"; // Highlight specific uncropped box in red
+    }
+
+    // 2. Count images that have been successfully cropped
+    if (croppedInput.value) {
+      croppedCount++;
     }
   }
-  if (imageCount < 2) {
-    showError('productImage1-error', 'At least 2 images are required');
-    valid = false;
+
+  // Error 1: Uncropped images exist
+  if (uncroppedFound) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Crop Required',
+      text: 'Please crop all selected images before saving. Boxes in red need attention.',
+      confirmButtonColor: '#4299e1'
+    });
+    return false; // Exit immediately so they fix the images first
   }
-  if (imageCount > 4) {
+
+  // Error 2: Total count checks
+  if (croppedCount < 2) {
+    showError('productImage1-error', 'At least 2 cropped images are required');
+    valid = false;
+  } else if (croppedCount > 4) {
     showError('productImage1-error', 'Maximum 4 images allowed');
     valid = false;
   }
@@ -1266,18 +1331,17 @@ function validateForm() {
   const brand = document.getElementsByName('brand')[0];
   const category = document.getElementsByName('category')[0];
 
-  if (!name.value.trim()) {
+const nameValue = name.value.trim();
+  const alphaRegex = /^[a-zA-Z\s]+$/; // Letters and spaces only
+
+  if (!nameValue) {
     showError('productName-error', 'Product name is required');
     valid = false;
-  } else if (name.value.trim().length < 3) {
+  } else if (nameValue.length < 3) {
     showError('productName-error', 'Product name must be at least 3 characters');
     valid = false;
-  }
-  if (!desc.value.trim()) {
-    showError('description-error', 'Short description is required');
-    valid = false;
-  } else if (desc.value.trim().length < 3) {
-    showError('description-error', 'Short description must be at least 3 characters');
+  } else if (!alphaRegex.test(nameValue)) {
+    showError('productName-error', 'Product name must contain only alphabetic characters');
     valid = false;
   }
   if (!longDesc.value.trim()) {

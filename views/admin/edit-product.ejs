@@ -1,10 +1,16 @@
 <%- include("../partials/admin/header.ejs") %>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"
+  rel="stylesheet" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+  rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
 /* --- RESET & BASE --- */
@@ -387,81 +393,98 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
 
   <% if (locals.success && locals.success.length > 0) { %>
-    <div class="alert alert-success">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-      </svg>
-      <%= locals.success[0] %>
-    </div>
+  <div class="alert alert-success">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M5 13l4 4L19 7"></path>
+    </svg>
+    <%= locals.success[0] %>
+  </div>
   <% } %>
 
-  <div id="validationErrorsContainer" class="validation-errors" style="display:none;">
+  <div id="validationErrorsContainer" class="validation-errors"
+    style="display:none;">
     <div style="display:flex; justify-content:space-between;">
       <h3>Please fix the following errors:</h3>
-      <button type="button" class="validation-close" onclick="document.getElementById('validationErrorsContainer').style.display='none'" style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
+      <button type="button" class="validation-close"
+        onclick="document.getElementById('validationErrorsContainer').style.display='none'"
+        style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
     </div>
     <ul id="validationErrorsList"></ul>
   </div>
 
   <div class="container">
-    <form id="editProductForm" action="/admin/edit-product/<%= product._id %>" method="POST" onsubmit="return validateForm(event)">
+    <form id="editProductForm" action="/admin/edit-product/<%= product._id %>"
+      method="POST" onsubmit="return validateForm(event)">
       <div class="form-wrapper">
 
         <div class="left">
           <div class="section-title">Product Images</div>
           <div class="images-grid">
-            <% for (let i = 0; i < 4; i++) { 
-                 const img = product.images && product.images[i] ? product.images[i] : null;
-                 let previewSrc = '/photos/default.jpg';
-                 if (img) previewSrc = img.startsWith('http') || img.startsWith('data:') || img.startsWith('/') ? img : '/uploads/' + img;
+            <% for (let i = 0; i < 4; i++) {
+            const img = product.images && product.images[i] ? product.images[i]
+            : null;
+            let previewSrc = '/photos/default.jpg';
+            if (img) previewSrc = img.startsWith('http') ||
+            img.startsWith('data:') || img.startsWith('/') ? img : '/uploads/' +
+            img;
             %>
-            <div class="image-box <%= img ? 'has-image' : '' %>" id="image-box-<%= i %>">
+            <div class="image-box <%= img ? 'has-image' : '' %>"
+              id="image-box-<%= i %>">
               <div class="image-label">Image <%= i + 1 %></div>
-              <div class="image-preview-wrapper <%= img ? 'has-content' : '' %>" id="wrapper-<%= i %>">
-                <img id="preview-image-<%= i %>" 
-                     src="<%= previewSrc %>" 
-                     data-original-name="<%= img || '' %>" 
-                     data-original-index="<%= img ? i : '' %>" 
-                     class="preview-img" 
-                     alt="Product Image <%= i + 1 %>"/>
+              <div class="image-preview-wrapper <%= img ? 'has-content' : '' %>"
+                id="wrapper-<%= i %>">
+                <img id="preview-image-<%= i %>"
+                  src="<%= previewSrc %>"
+                  data-original-name="<%= img || '' %>"
+                  data-original-index="<%= img ? i : '' %>"
+                  class="preview-img"
+                  alt="Product Image <%= i + 1 %>" />
               </div>
-              
+
               <label class="upload-label" for="file-input-<%= i %>">
                 <%= img ? 'Change Image' : 'Upload Image' %>
               </label>
-              <input type="file" 
-                     id="file-input-<%= i %>" 
-                     accept="image/*" 
-                     class="product-image-input" 
-                     data-slot="<%= i %>" />
-              
+              <input type="file"
+                id="file-input-<%= i %>"
+                accept="image/*"
+                class="product-image-input"
+                data-slot="<%= i %>" />
+
               <div class="image-buttons">
-                <button type="button" class="cancel-btn" onclick="resetImage('<%= i %>')">Reset</button>
+                <button type="button" class="cancel-btn"
+                  onclick="resetImage('<%= i %>')">Reset</button>
                 <% if (img) { %>
-                  <button type="button" class="delete-btn" onclick="markDeleteExisting('<%= i %>')">Delete</button>
+                <button type="button" class="delete-btn"
+                  onclick="markDeleteExisting('<%= i %>')">Delete</button>
                 <% } %>
               </div>
             </div>
             <% } %>
           </div>
-          <input type="hidden" name="deletedImages" id="deletedImages" value=""/>
+          <input type="hidden" name="deletedImages" id="deletedImages" value />
         </div>
 
         <div class="right">
           <div class="form-section">
             <div class="section-title">Basic Information</div>
-            
+
             <div class="form-group">
               <label>Product Name <span class="required">*</span></label>
-              <input type="text" name="productName" value="<%= product.productName %>" placeholder="Enter product name" required />
+              <input type="text" name="productName"
+                value="<%= product.productName %>"
+                placeholder="Enter product name" required />
             </div>
 
             <div class="form-group">
               <label>Brand <span class="required">*</span></label>
               <select name="brand" required>
-                <option value="">Select a brand</option>
+                <option value>Select a brand</option>
                 <% brands.forEach(b => { %>
-                  <option value="<%= b._id %>" <%= (product.brand && (product.brand._id ? product.brand._id.toString() : product.brand.toString()) === b._id.toString()) ? 'selected' : '' %>><%= b.brandName || b.name %></option>
+                <option value="<%= b._id %>" <%=(product.brand &&
+                  (product.brand._id ? product.brand._id.toString() :
+                  product.brand.toString()) === b._id.toString()) ? 'selected' :
+                  '' %>><%= b.brandName || b.name %></option>
                 <% }) %>
               </select>
             </div>
@@ -469,9 +492,12 @@ textarea { resize: vertical; min-height: 80px; }
             <div class="form-group">
               <label>Category <span class="required">*</span></label>
               <select name="category" required>
-                <option value="">Select a category</option>
+                <option value>Select a category</option>
                 <% cat.forEach(c => { %>
-                  <option value="<%= c._id %>" <%= (product.category && (product.category._id ? product.category._id.toString() : product.category.toString()) === c._id.toString()) ? 'selected' : '' %>><%= c.name %></option>
+                <option value="<%= c._id %>" <%=(product.category &&
+                  (product.category._id ? product.category._id.toString() :
+                  product.category.toString()) === c._id.toString()) ?
+                  'selected' : '' %>><%= c.name %></option>
                 <% }) %>
               </select>
             </div>
@@ -481,12 +507,16 @@ textarea { resize: vertical; min-height: 80px; }
             <div class="section-title">Description</div>
             <div class="form-group">
               <label>Short Description <span class="required">*</span></label>
-              <textarea name="description" rows="3" placeholder="Brief product description" required><%= product.description %></textarea>
+              <textarea name="description" rows="3"
+                placeholder="Brief product description"
+                required><%= product.description %></textarea>
             </div>
 
             <div class="form-group">
               <label>Long Description <span class="required">*</span></label>
-              <textarea name="longDescription" rows="4" placeholder="Detailed product description" required><%= product.longDescription || product.Longdescription || '' %></textarea>
+              <textarea name="longDescription" rows="4"
+                placeholder="Detailed product description"
+                required><%= product.longDescription || product.Longdescription || '' %></textarea>
             </div>
           </div>
 
@@ -507,41 +537,48 @@ textarea { resize: vertical; min-height: 80px; }
                   </thead>
                   <tbody id="variants-tbody">
                     <% if (product.variants && product.variants.length > 0) { %>
-                      <% product.variants.forEach((v, index) => { %>
-                        <tr class="variant-row-item">
-                          <td><strong><%= index + 1 %></strong></td>
-                          <td class="variant-size"><%= v.size %> ml</td>
-                          <td class="variant-stock"><%= v.stock %></td>
-                          <td class="variant-price">₹<%= v.regularPrice.toFixed(2) %></td>
-                          <td class="variant-price">₹<%= v.salePrice.toFixed(2) %></td>
-                          <td>
-                            <div class="variant-actions">
-                              <button type="button" class="view-btn" onclick="openVariantModal(<%= index %>)">
-                                <i class="fas fa-eye"></i> View
-                              </button>
-                              <button type="button" class="delete-variant-btn" onclick="deleteVariant(<%= index %>)">
-                                <i class="fas fa-trash"></i> Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      <% }) %>
+                    <% product.variants.forEach((v, index) => { %>
+                    <tr class="variant-row-item">
+                      <td><strong><%= index + 1 %></strong></td>
+                      <td class="variant-size"><%= v.size %> ml</td>
+                      <td class="variant-stock"><%= v.stock %></td>
+                      <td class="variant-price">₹<%= v.regularPrice.toFixed(2)
+                        %></td>
+                      <td class="variant-price">₹<%= v.salePrice.toFixed(2)
+                        %></td>
+                      <td>
+                        <div class="variant-actions">
+                          <button type="button" class="view-btn"
+                            onclick="openVariantModal(<%= index %>)">
+                            <i class="fas fa-eye"></i> View
+                          </button>
+                          <button type="button" class="delete-variant-btn"
+                            onclick="deleteVariant(<%= index %>)">
+                            <i class="fas fa-trash"></i> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <% }) %>
                     <% } else { %>
-                      <tr class="variant-row-item">
-                        <td colspan="6" style="text-align:center;">No variants found</td>
-                      </tr>
+                    <tr class="variant-row-item">
+                      <td colspan="6" style="text-align:center;">No variants
+                        found</td>
+                    </tr>
                     <% } %>
                   </tbody>
                 </table>
               </div>
 
-              <button type="button" class="add-variant-btn" onclick="addNewVariant()">
+              <button type="button" class="add-variant-btn"
+                onclick="addNewVariant()">
                 <i class="fas fa-plus-circle"></i> Add New Variant
               </button>
 
               <div class="variants-info">
                 <i class="fas fa-info-circle"></i>
-                <span>Click View to edit variant details. You can add multiple size/price combinations.</span>
+                <span>Click View to edit variant details. You can add multiple
+                  size/price combinations.</span>
               </div>
             </div>
           </div>
@@ -550,18 +587,21 @@ textarea { resize: vertical; min-height: 80px; }
 
           <div class="button-row">
             <button type="submit" class="btn-green">
-              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              <svg width="20" height="20" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
               Update Product
             </button>
-            <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">Cancel</button>
+            <button type="button" class="btn-red"
+              onclick="window.location.href='/admin/products'">Cancel</button>
           </div>
         </div>
 
       </div>
     </form>
-  </div> 
+  </div>
 </div>
 
 <div id="variantModal" class="variant-modal">
@@ -570,33 +610,39 @@ textarea { resize: vertical; min-height: 80px; }
       <div style="display:flex; align-items:center; gap:8px;">
         <i class="fas fa-boxes"></i> Edit Variant
       </div>
-      <button onclick="closeVariantModal()" style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
+      <button onclick="closeVariantModal()"
+        style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
     </div>
-    
+
     <div class="variant-modal-body">
       <div class="variant-form-group">
         <label>Size (ml) <span class="required">*</span></label>
-        <input type="number" id="modalSize" placeholder="e.g., 100, 250, 500" required />
+        <input type="number" id="modalSize" placeholder="e.g., 100, 250, 500"
+          required />
       </div>
-      
+
       <div class="variant-form-group">
         <label>Stock Quantity <span class="required">*</span></label>
-        <input type="number" id="modalStock" placeholder="e.g., 50" min="0" required />
+        <input type="number" id="modalStock" placeholder="e.g., 50" min="0"
+          required />
       </div>
-      
+
       <div class="variant-form-group">
         <label>Regular Price <span class="required">*</span></label>
-        <input type="number" id="modalRegularPrice" placeholder="e.g., 299.99" step="0.01" required />
+        <input type="number" id="modalRegularPrice" placeholder="e.g., 299.99"
+          step="0.01" required />
       </div>
-      
+
       <div class="variant-form-group">
-        <label>Sale Price <span class="required">*</span></label>
-        <input type="number" id="modalSalePrice" placeholder="e.g., 199.99" step="0.01" required />
+        <label>Sale Price </label>
+        <input type="number" id="modalSalePrice" placeholder="e.g., 199.99"
+          step="0.01" disabled />
       </div>
     </div>
 
     <div class="variant-modal-footer">
-      <button type="button" class="variant-close-btn" onclick="closeVariantModal()">
+      <button type="button" class="variant-close-btn"
+        onclick="closeVariantModal()">
         <i class="fas fa-times"></i> Close
       </button>
       <button type="button" class="variant-save-btn" onclick="saveVariant()">
@@ -609,15 +655,18 @@ textarea { resize: vertical; min-height: 80px; }
 <div id="cropper-modal">
   <div class="modal-content">
     <h4>Crop Image</h4>
-    <img id="cropper-image" src="" />
+    <img id="cropper-image" src />
     <div class="modal-buttons">
-      <button type="button" class="save-btn" id="cropper-save">Apply Crop</button>
-      <button type="button" class="cancel-btn" id="cropper-cancel">Cancel</button>
+      <button type="button" class="save-btn" id="cropper-save">Apply
+        Crop</button>
+      <button type="button" class="cancel-btn"
+        id="cropper-cancel">Cancel</button>
     </div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -935,7 +984,7 @@ function validateForm(event) {
   let errors = [];
   let fieldErrors = {};
 
-  // Check images
+  // --- IMAGE VALIDATION: At least 3 required ---
   let existingCount = 0;
   for (let i = 0; i < 4; i++) {
     const preview = document.getElementById(`preview-image-${i}`);
@@ -944,19 +993,30 @@ function validateForm(event) {
     }
   }
   const newCount = document.querySelectorAll('input[name="productImagesBase64[]"]').length;
-  const totalImages = existingCount + newCount - deletedIndexes.size;
-  
-  if (totalImages < 1) {
-    errors.push('At least one image is required');
-    fieldErrors['image-0'] = 'At least one image is required';
+  const totalImages = existingCount + newCount; // total actual images
+
+  if (totalImages < 3) {
+    errors.push('At least 3 images are required');
+    fieldErrors['image-0'] = 'At least 3 images are required';
   }
   if (totalImages > 4) {
     errors.push('Maximum 4 images allowed');
-    fieldErrors['image-0'] = 'Maximum 4 images allowed';
   }
 
-  // Check basic fields
+  // --- NAME VALIDATION: Strictly Alphabetic ---
   const name = document.getElementsByName('productName')[0];
+  const nameValue = name ? name.value.trim() : "";
+  const alphaRegex = /^[a-zA-Z\s]+$/;
+
+  if (!nameValue) {
+    errors.push('Product name is required');
+    fieldErrors['productName'] = 'Product name is required';
+  } else if (!alphaRegex.test(nameValue)) {
+    errors.push('Product name must contain only letters and spaces');
+    fieldErrors['productName'] = 'Product name must contain only letters and spaces';
+  }
+  
+  // ... rest of the existing validation (Description, Category, etc.)
   const desc = document.getElementsByName('description')[0];
   const longDesc = document.getElementsByName('longDescription')[0];
   const brand = document.getElementsByName('brand')[0];

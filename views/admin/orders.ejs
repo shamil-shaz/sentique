@@ -741,6 +741,36 @@
             .modal-content { width: 95%; margin: 10% auto; }
             .detail-grid { grid-template-columns: 1fr; }
         }
+
+        /* ================= HIDE SCROLLBAR (SCROLL STILL WORKS) ================= */
+
+/* PAGE SCROLL */
+body::-webkit-scrollbar {
+  display: none;
+}
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* TABLE HORIZONTAL SCROLL */
+.table-wrapper::-webkit-scrollbar {
+  display: none;
+}
+.table-wrapper {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* MODAL SCROLL */
+.modal-content::-webkit-scrollbar {
+  display: none;
+}
+.modal-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
     </style>
 </head>
 <body>

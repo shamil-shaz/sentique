@@ -379,141 +379,254 @@
     </div>
   </div>
 
-<script>
-  let selectedImage = null;
+  <script>
 
-  // Modal Functions
-  function openModal() {
-    document.getElementById('categoryModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
+    /* ================= IMAGE PREVIEW LOGIC ================= */
+const imageInput = document.getElementById('categoryImage');
+const imagePreview = document.getElementById('imagePreview');
+const previewContainer = document.getElementById('previewContainer');
+const dropZone = document.getElementById('dropZone');
 
-  function closeModal() {
-    document.getElementById('categoryModal').classList.remove('show');
-    document.body.style.overflow = 'auto';
-    resetForm();
-  }
-
-  function viewDescription(desc) {
-    document.getElementById('descriptionContent').textContent = desc;
-    document.getElementById('descriptionModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeDescriptionModal() {
-    document.getElementById('descriptionModal').classList.remove('show');
-    document.body.style.overflow = 'auto';
-  }
-
-  window.onclick = function(e) {
-    if (e.target.classList.contains('modal-overlay')) {
-      e.target.classList.remove('show');
-      document.body.style.overflow = 'auto';
+// Triggered when admin selects a file
+imageInput?.addEventListener('change', function() {
+  const file = this.files[0];
+  
+  if (file) {
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      Swal.fire("Error", "Please select a valid image (JPG, PNG, WEBP)", "error");
+      this.value = ""; // Clear the selection
+      return;
     }
-  }
 
-  // Image Handling
-  const fileInput = document.getElementById('categoryImage');
-  fileInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if(file) {
-      selectedImage = file;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('imagePreview').src = e.target.result;
-        document.getElementById('dropZone').style.display = 'none';
-        document.getElementById('previewContainer').style.display = 'block';
-      };
-      reader.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      imagePreview.src = e.target.result;
+      previewContainer.style.display = 'block'; // Show preview
+      dropZone.style.display = 'none';         // Hide upload box
     }
+    reader.readAsDataURL(file);
+  }
+});
+
+/* ================= REMOVE IMAGE LOGIC ================= */
+function removeImage(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  
+  const imageInput = document.getElementById('categoryImage');
+  const previewContainer = document.getElementById('previewContainer');
+  const dropZone = document.getElementById('dropZone');
+  
+  imageInput.value = ""; // Clear file from input
+  previewContainer.style.display = 'none';
+  dropZone.style.display = 'block'; // Show upload box again
+}
+/* ================= OPEN / CLOSE ADD CATEGORY MODAL ================= */
+function openModal() {
+  document.getElementById("categoryModal").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+  document.getElementById("categoryModal").classList.remove("show");
+  document.body.style.overflow = "auto";
+}
+
+/* ================= ADD CATEGORY OFFER ================= */
+async function addOffer(categoryId) {
+  const { value: amount } = await Swal.fire({
+    title: "Enter offer percentage (0–99)",
+    input: "number",
+    inputAttributes: { min: 0, max: 99 },
+    showCancelButton: true
   });
 
-  function removeImage(e) {
-    if(e) e.stopPropagation();
-    selectedImage = null;
-    fileInput.value = '';
-    document.getElementById('previewContainer').style.display = 'none';
-    document.getElementById('dropZone').style.display = 'block';
-  }
+  if (amount === null) return;
 
-  function resetForm() {
-    document.getElementById('categoryForm').reset();
-    removeImage();
-    document.querySelectorAll('.text-danger').forEach(el => el.style.display = 'none');
-  }
-
-  // Form Submit
-  document.getElementById("categoryForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    // Simple Validation
-    const name = document.getElementById("categoryName").value.trim();
-    const desc = document.getElementById("categoryDesc").value.trim();
-    let isValid = true;
-
-    if(!name) { document.getElementById("name-error").textContent = "Name Required"; document.getElementById("name-error").style.display = "block"; isValid = false; }
-    if(!desc) { document.getElementById("description-error").textContent = "Desc Required"; document.getElementById("description-error").style.display = "block"; isValid = false; }
-
-    if(!isValid) return;
-
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('description', desc);
-    if(selectedImage) formData.append('image', selectedImage);
-
-    fetch('/admin/addCategory', { method: 'POST', body: formData })
+  fetch("/admin/addCategoryOffer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ categoryId, percentage: parseInt(amount) })
+  })
     .then(res => res.json())
     .then(data => {
-        Swal.fire({ icon: 'success', title: 'Success', timer: 1500, showConfirmButton: false }).then(() => location.reload());
+      if (!data.status) {
+        Swal.fire("Error", data.message, "error");
+        return;
+      }
+      Swal.fire("Success", "Offer added", "success")
+        .then(() => location.reload());
+    });
+}
+
+/* ================= REMOVE CATEGORY OFFER ================= */
+function removeOffer(categoryId) {
+  Swal.fire({
+    title: "Remove category offer?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes"
+  }).then(result => {
+    if (!result.isConfirmed) return;
+
+    fetch("/admin/removeCategoryOffer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ categoryId })
     })
-    .catch(err => console.error(err));
+      .then(res => res.json())
+      .then(data => {
+        if (!data.status) {
+          Swal.fire("Error", data.message, "error");
+          return;
+        }
+        Swal.fire("Removed", "Offer removed", "success")
+          .then(() => location.reload());
+      });
+  });
+}
+
+/* ================= LIST / UNLIST CATEGORY ================= */
+document.querySelectorAll(".list-toggle-btn").forEach(btn => {
+  btn.addEventListener("click", function () {
+    const form = this.closest("form");
+    const categoryId = form.querySelector("input").value;
+    const action = this.dataset.action;
+
+    const endpoint =
+      action === "list"
+        ? "/admin/listCategory"
+        : "/admin/unlistCategory";
+
+    fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ categoryId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.status) {
+          Swal.fire("Error", data.message, "error");
+          return;
+        }
+        Swal.fire("Success", `Category ${action}ed successfully`, "success")
+          .then(() => location.reload());
+      });
+  });
+});
+
+/* ================= VIEW DESCRIPTION ================= */
+function viewDescription(desc) {
+  document.getElementById("descriptionContent").textContent =
+    desc || "No description available";
+  document.getElementById("descriptionModal").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function closeDescriptionModal() {
+  document.getElementById("descriptionModal").classList.remove("show");
+  document.body.style.overflow = "auto";
+}
+
+/* ================= ADD CATEGORY FORM VALIDATION & SUBMISSION ================= */
+document.getElementById("categoryForm")?.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const nameInput = document.getElementById("categoryName");
+  const descInput = document.getElementById("categoryDesc");
+  const imageInput = document.getElementById("categoryImage");
+
+  const nameErr = document.getElementById("name-error");
+  const descErr = document.getElementById("description-error");
+  const imgErr = document.getElementById("image-error");
+
+  // Reset errors
+  [nameErr, descErr, imgErr].forEach(el => {
+    el.textContent = "";
+    el.style.display = "none";
   });
 
-  // Offer Logic (Existing)
-  async function addOffer(categoryId) {
-    const { value: amount } = await Swal.fire({ title: "Percentage (0-99)", input: "number", showCancelButton: true });
-    if (amount) {
-        fetch("/admin/addCategoryOffer", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ percentage: parseInt(amount), categoryId })
-        }).then(res => res.json()).then(data => {
-            if(data.status) Swal.fire("Success", "Offer Added", "success").then(() => location.reload());
-        });
+  let valid = true;
+  const name = nameInput.value.trim();
+  const desc = descInput.value.trim();
+
+  /* ---------- NAME VALIDATION (Alphabets only, 3-20) ---------- */
+  if (!name) {
+    nameErr.textContent = "Category name is required";
+    nameErr.style.display = "block";
+    valid = false;
+  } else if (!/^[A-Za-z\s]{3,20}$/.test(name)) {
+    nameErr.textContent = "Only alphabets allowed (3–20 characters)";
+    nameErr.style.display = "block";
+    valid = false;
+  }
+
+  /* ---------- DESCRIPTION VALIDATION (5-50) ---------- */
+  if (!desc) {
+    descErr.textContent = "Description is required";
+    descErr.style.display = "block";
+    valid = false;
+  } else if (desc.length < 5 || desc.length > 50) {
+    descErr.textContent = "Description must be between 5 and 50 characters";
+    descErr.style.display = "block";
+    valid = false;
+  }
+
+  /* ---------- IMAGE VALIDATION ---------- */
+  if (!imageInput.files.length) {
+    imgErr.textContent = "Image is required";
+    imgErr.style.display = "block";
+    valid = false;
+  } else {
+    const file = imageInput.files[0];
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      imgErr.textContent = "Only JPG, PNG, or WEBP images are allowed (No PDFs/Docs)";
+      imgErr.style.display = "block";
+      valid = false;
     }
   }
 
-  async function removeOffer(categoryId) {
-    Swal.fire({ title: "Remove?", icon: "warning", showCancelButton: true, confirmButtonText: "Yes" }).then((result) => {
-        if(result.isConfirmed) {
-            fetch("/admin/removeCategoryOffer", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ categoryId })
-            }).then(res => res.json()).then(data => {
-                if(data.status) Swal.fire("Removed", "Offer Removed", "success").then(() => location.reload());
-            });
-        }
+  if (!valid) return;
+
+  // Use FormData to send file and text
+  const formData = new FormData(this);
+
+  try {
+    const response = await fetch("/admin/addCategory", {
+      method: "POST",
+      body: formData // No headers needed, fetch sets Multipart Boundary automatically
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: data.message,
+      }).then(() => {
+        location.reload(); 
+      });
+    } else {
+      // Show server-side validation error (e.g., Duplicate Name)
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: data.error || "Something went wrong",
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: "Internal Server Error. Please try again.",
     });
   }
-
-  // List/Unlist
-  document.querySelectorAll('.list-toggle-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const form = this.closest('form');
-        const id = form.querySelector('input').value;
-        const action = this.dataset.action;
-        const endpoint = action === 'list' ? '/admin/listCategory' : '/admin/unlistCategory';
-        
-        fetch(endpoint, {
-            method: 'POST', 
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ categoryId: id })
-        }).then(res => res.json()).then(data => {
-            if(data.status) Swal.fire("Success", `Category ${action}ed`, "success").then(() => location.reload());
-        });
-    });
-  });
+});
 </script>
+
+
 </body>
 </html>

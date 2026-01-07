@@ -1,14 +1,16 @@
 <%- include("../partials/user/header.ejs") %>
 
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edit Profile - <%= user.name %></title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Profile - <%= user.name %></title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <style>
+    <style>
     /* =========================
        1. CSS VARIABLES (THEMING)
        ========================= */
@@ -451,139 +453,311 @@
         .avatar { width: 100px; height: 100px; font-size: 40px; }
         .avatar-name { font-size: 20px; }
     }
+
+    .error-text {
+  color: #dc2626;
+  font-size: 13px;
+  margin-top: 6px;
+  display: none;
+}
+
   </style>
-</head>
-<body>
-  <div class="container">
-    <div class="page-header">
-      <h1>✨ Edit Your Profile</h1>
-      <p>Update your personal information and preferences</p>
-    </div>
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <h1>✨ Edit Your Profile</h1>
+        <p>Update your personal information and preferences</p>
+      </div>
 
-    <div class="profile-card">
-      <form id="profileForm" enctype="multipart/form-data">
-        <div class="avatar-section">
-          <div class="avatar-wrapper">
-            <div class="avatar" id="avatarPreview" onclick="document.getElementById('profilePicture').click()">
-              <% if (user.image) { %>
+      <div class="profile-card">
+        <form id="profileForm" enctype="multipart/form-data">
+          <div class="avatar-section">
+            <div class="avatar-wrapper">
+              <div class="avatar" id="avatarPreview"
+                onclick="document.getElementById('profilePicture').click()">
+                <% if (user.image) { %>
                 <img src="<%= user.image %>" alt="Profile" />
-              <% } else { %>
-                <div class="avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
-              <% } %>
+                <% } else { %>
+                <div class="avatar-placeholder"><%=
+                  user.name.charAt(0).toUpperCase() %></div>
+                <% } %>
 
-              <div class="avatar-overlay">
-                <div class="avatar-overlay-text">Click to<br />Change Photo</div>
+                <div class="avatar-overlay">
+                  <div class="avatar-overlay-text">Click to<br />Change
+                    Photo</div>
+                </div>
+              </div>
+
+              <div class="camera-icon"
+                onclick="document.getElementById('profilePicture').click()">📷</div>
+            </div>
+
+            <!-- SINGLE FILE INPUT -->
+            <input type="file" id="profilePicture" name="image"
+              accept="image/*" />
+            <small class="error-text" id="imageError"></small>
+
+            <input type="file" id="profilePicture" name="image"
+              accept="image/*" />
+            <div class="avatar-name"><%= user.name %></div>
+            <div class="avatar-email"><%= user.email %></div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">Personal Information</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="icon">👤</span> Full Name
+                </label>
+                <input type="text" name="name" class="form-input"
+                  value="<%= user.name %>" placeholder="Enter your full name"
+                  required />
+                <small class="error-text" id="nameError"></small>
+
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="icon">📱</span> Phone Number
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  class="form-input"
+                  value="<%= user.phone || '' %>"
+                  placeholder="Enter phone number"
+                  id="phoneInput" />
+                <small class="error-text" id="phoneError"></small>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="form-label">
+                  <span class="icon">✉️</span> Email Address
+                </label>
+                <input type="email" name="email" class="form-input"
+                  value="<%= user.email %>" disabled />
               </div>
             </div>
-            <div class="camera-icon" onclick="document.getElementById('profilePicture').click()">📷</div>
           </div>
-          <input type="file" id="profilePicture" name="image" accept="image/*" />
-          <div class="avatar-name"><%= user.name %></div>
-          <div class="avatar-email"><%= user.email %></div>
-        </div>
 
-        <div class="form-section">
-          <h3 class="section-title">Personal Information</h3>
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">
-                <span class="icon">👤</span> Full Name
-              </label>
-              <input type="text" name="name" class="form-input" value="<%= user.name %>" placeholder="Enter your full name" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                <span class="icon">📱</span> Phone Number
-              </label>
-              <input type="tel" name="phone" class="form-input" value="<%= user.phone || '' %>" placeholder="Enter phone number" />
-            </div>
-
-            <div class="form-group full-width">
-              <label class="form-label">
-                <span class="icon">✉️</span> Email Address
-              </label>
-              <input type="email" name="email" class="form-input" value="<%= user.email %>" disabled />
-            </div>
+          <div class="button-group">
+            <button type="button" class="btn btn-secondary"
+              onclick="window.location.href='/profile'">
+              ← Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">💾 Save
+              Changes</button>
           </div>
-        </div>
-
-        <div class="button-group">
-          <button type="button" class="btn btn-secondary" onclick="window.location.href='/profile'">
-            ← Cancel
-          </button>
-          <button type="submit" class="btn btn-primary">💾 Save Changes</button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
-  </div>
 
-  <div class="success-animation" id="successAnimation">
-    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-      <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
-      <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-    </svg>
-    <h3 style="color: var(--text-primary); font-size: 24px; margin-bottom: 10px;">Profile Updated!</h3>
-    <p style="color: var(--text-secondary);">Your changes have been saved successfully.</p>
-  </div>
+    <div class="success-animation" id="successAnimation">
+      <svg class="checkmark" xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 52 52">
+        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+        <path class="checkmark-check" fill="none"
+          d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+      </svg>
+      <h3
+        style="color: var(--text-primary); font-size: 24px; margin-bottom: 10px;">Profile
+        Updated!</h3>
+      <p style="color: var(--text-secondary);">Your changes have been saved
+        successfully.</p>
+    </div>
 
-  <script>
-    // Profile Picture Preview
-    document.getElementById("profilePicture").addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
+    <script>
+ 
 
-      if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-        Swal.fire("Error", "Only JPG, JPEG, PNG allowed", "error");
-        return;
+function hasAscendingSequence(phone, length = 5) {
+  const digits = phone.split("").map(Number);
+
+  for (let i = 0; i <= digits.length - length; i++) {
+    let asc = true;
+
+    for (let j = 1; j < length; j++) {
+      if (digits[i + j] !== digits[i + j - 1] + 1) {
+        asc = false;
+        break;
       }
+    }
 
-      if (file.size > 2 * 1024 * 1024) {
-        Swal.fire("Error", "File too large. Max 2MB", "error");
-        return;
+    if (asc) return true;
+  }
+
+  return false;
+}
+
+
+  document.getElementById("profilePicture").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
+      Swal.fire("Error", "Only JPG, JPEG, PNG allowed", "error");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      Swal.fire("Error", "File too large. Max 2MB", "error");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      document.getElementById("avatarPreview").innerHTML = `
+        <img src="${event.target.result}" alt="Profile" />
+        <div class="avatar-overlay">
+          <div class="avatar-overlay-text">Click to<br />Change Photo</div>
+        </div>
+      `;
+    };
+    reader.readAsDataURL(file);
+  });
+
+ 
+  document.getElementById("profileForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+  
+    const name = document.querySelector('input[name="name"]').value.trim();
+    const phone = document.querySelector('input[name="phone"]').value.trim();
+
+const nameError = document.getElementById("nameError");
+const phoneError = document.getElementById("phoneError");
+const imageError = document.getElementById("imageError");
+
+[nameError, phoneError, imageError].forEach(err => {
+  if (err) {
+    err.textContent = "";
+    err.style.display = "none";
+  }
+});
+
+
+
+const imageInput = document.getElementById("profilePicture");
+const imageFile = imageInput.files[0];
+
+
+if (!name) {
+  nameError.textContent = "Name is required.";
+  nameError.style.display = "block";
+  return;
+}
+
+const nameRegex = /^[A-Za-z\s]+$/;
+
+if (!nameRegex.test(name)) {
+  nameError.textContent =
+    "Only alphabets and spaces are allowed.";
+  nameError.style.display = "block";
+  return;
+}
+
+if (name.length < 3 || name.length > 20) {
+  nameError.textContent =
+    "Name must be between 3 and 20 characters.";
+  nameError.style.display = "block";
+  return;
+}
+
+if (!phone) {
+  phoneError.textContent = "Phone number is required.";
+  phoneError.style.display = "block";
+  return;
+}
+
+if (!/^\d{10}$/.test(phone)) {
+  phoneError.textContent = "Phone number must be exactly 10 digits.";
+  phoneError.style.display = "block";
+  return;
+}
+
+
+if (/^(\d)\1{9}$/.test(phone)) {
+  phoneError.textContent =
+    "Phone number cannot contain all same digits.";
+  phoneError.style.display = "block";
+  return;
+}
+
+
+if (hasAscendingSequence(phone, 5)) {
+  phoneError.textContent =
+    "Ascending sequential numbers like 12345 are not allowed.";
+  phoneError.style.display = "block";
+  return;
+}
+
+
+const existingImage = "<%= user.image ? 'true' : '' %>";
+
+
+if (!imageFile && !existingImage) {
+  imageError.textContent = "Profile image is required.";
+  imageError.style.display = "block";
+  return;
+}
+
+
+if (imageFile) {
+  const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+
+  if (!allowedTypes.includes(imageFile.type)) {
+    imageError.textContent = "Only JPG, JPEG, PNG images are allowed.";
+    imageError.style.display = "block";
+    return;
+  }
+
+  if (imageFile.size > 2 * 1024 * 1024) {
+    imageError.textContent = "Image size must be less than 2MB.";
+    imageError.style.display = "block";
+    return;
+  }
+}
+  
+    const formData = new FormData(e.target);
+
+    try {
+      const res = await fetch("/update-profile", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        const successAnimation = document.getElementById("successAnimation");
+        successAnimation.classList.add("show");
+
+        setTimeout(() => {
+          successAnimation.classList.remove("show");
+          window.location.href = "/profile";
+        }, 2000);
+      } else {
+        Swal.fire("Error", data.message || "Something went wrong!", "error");
       }
+    } catch (err) {
+      Swal.fire("Error", "Failed to update profile", "error");
+    }
+  });
 
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const avatarPreview = document.getElementById("avatarPreview");
-        avatarPreview.innerHTML = `
-          <img src="${event.target.result}" alt="Profile" />
-          <div class="avatar-overlay">
-            <div class="avatar-overlay-text">Click to<br />Change Photo</div>
-          </div>
-        `;
-      };
-      reader.readAsDataURL(file);
-    });
 
-    // Form Submit (AJAX)
-    document.getElementById("profileForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      
-      try {
-        const res = await fetch("/update-profile", {
-          method: "POST",
-          body: formData,
-        });
+document.querySelector('input[name="name"]').addEventListener("input", function () {
+  this.value = this.value.replace(/[^A-Za-z\s]/g, "");
+});
 
-        const data = await res.json();
-        if (data.success) {
-          const successAnimation = document.getElementById("successAnimation");
-          successAnimation.classList.add("show");
-          setTimeout(() => {
-            successAnimation.classList.remove("show");
-            window.location.href = "/profile";
-          }, 2000);
-        } else {
-          Swal.fire("Error", data.message || "Something went wrong!", "error");
-        }
-      } catch (err) {
-        Swal.fire("Error", "Failed to update profile", "error");
-      }
-    });
-  </script>
-</body>
 
-<%- include("../partials/user/footer.ejs") %>
+document.querySelector('input[name="phone"]').addEventListener("input", function () {
+  this.value = this.value.replace(/\D/g, "");
+});
+
+</script>
+
+  </body>
+
+  <%- include("../partials/user/footer.ejs") %>
 </html>
