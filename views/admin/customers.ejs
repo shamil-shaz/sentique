@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin - Users Management</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Users Management</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet">
 
-  <style>
-    /* --- 1. CORE RESET & VARIABLES --- */
+    <style>
+   
     :root {
       --primary: #6366f1;
       --primary-hover: #4f46e5;
@@ -359,69 +363,79 @@
     }
   </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
 
-<%- include("../partials/admin/header.ejs") %>
+  <%- include("../partials/admin/header.ejs") %>
 
-<body>
+  <body>
 
-  <main class="main-content-wrapper">
-    
-    <header class="page-header">
-      <h1 class="page-title">Users Management</h1>
-      <div class="stats-group">
-        <div class="stat-badge">
-          Total: <strong id="totalUsers"><%= typeof totalUsers !== 'undefined' ? totalUsers : users.length %></strong>
+    <main class="main-content-wrapper">
+
+      <header class="page-header">
+        <h1 class="page-title">Users Management</h1>
+        <div class="stats-group">
+          <div class="stat-badge">
+            Total: <strong id="totalUsers"><%= typeof totalUsers !== 'undefined'
+              ? totalUsers : users.length %></strong>
+          </div>
+          <div class="stat-badge">
+            Active: <strong style="color: #166534;"><%= typeof activeUsersCount
+              !== 'undefined' ? activeUsersCount : users.filter(u =>
+              !u.isBlocked).length %></strong>
+          </div>
+          <div class="stat-badge">
+            Blocked: <strong style="color: #991b1b;"><%= typeof
+              blockedUsersCount !== 'undefined' ? blockedUsersCount :
+              users.filter(u => u.isBlocked).length %></strong>
+          </div>
         </div>
-        <div class="stat-badge">
-          Active: <strong style="color: #166534;"><%= typeof activeUsersCount !== 'undefined' ? activeUsersCount : users.filter(u => !u.isBlocked).length %></strong>
+      </header>
+
+      <section class="controls-bar">
+        <div class="search-group">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            class="search-input"
+            id="userSearch"
+            placeholder="Search by name, email or phone..."
+            autocomplete="off">
+          <button class="clear-search" id="clearSearch">✕</button>
         </div>
-        <div class="stat-badge">
-          Blocked: <strong style="color: #991b1b;"><%= typeof blockedUsersCount !== 'undefined' ? blockedUsersCount : users.filter(u => u.isBlocked).length %></strong>
+
+        <div class="filter-group">
+          <button
+            class="filter-btn <%= (!filterStatus || filterStatus === 'all') ? 'active' : '' %>"
+            data-filter="all">All</button>
+          <button
+            class="filter-btn <%= filterStatus === 'active' ? 'active' : '' %>"
+            data-filter="active">Active</button>
+          <button
+            class="filter-btn <%= filterStatus === 'blocked' ? 'active' : '' %>"
+            data-filter="blocked">Blocked</button>
         </div>
-      </div>
-    </header>
+      </section>
 
-    <section class="controls-bar">
-      <div class="search-group">
-        <span class="search-icon">🔍</span>
-        <input 
-          type="text" 
-          class="search-input" 
-          id="userSearch" 
-          placeholder="Search by name, email or phone..." 
-          autocomplete="off"
-        >
-        <button class="clear-search" id="clearSearch">✕</button>
-      </div>
+      <section class="table-card">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>User Info</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <% users.forEach((user, index) => { %>
+              <tr class="user-row"
+                data-name="<%= user.name.toLowerCase() %>"
+                data-email="<%= user.email.toLowerCase() %>"
+                data-phone="<%= user.phone %>"
+                data-status="<%= user.isBlocked ? 'blocked' : 'active' %>">
 
-      <div class="filter-group">
-        <button class="filter-btn <%= (!filterStatus || filterStatus === 'all') ? 'active' : '' %>" data-filter="all">All</button>
-        <button class="filter-btn <%= filterStatus === 'active' ? 'active' : '' %>" data-filter="active">Active</button>
-        <button class="filter-btn <%= filterStatus === 'blocked' ? 'active' : '' %>" data-filter="blocked">Blocked</button>
-      </div>
-    </section>
-
-    <section class="table-card">
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>User Info</th>
-              <th>Phone Number</th>
-              <th>Status</th>
-              <th style="text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="userTableBody">
-            <% users.forEach((user, index) => { %>
-              <tr class="user-row" 
-                  data-name="<%= user.name.toLowerCase() %>"
-                  data-email="<%= user.email.toLowerCase() %>"
-                  data-phone="<%= user.phone %>"
-                  data-status="<%= user.isBlocked ? 'blocked' : 'active' %>">
-                
                 <td>
                   <div class="user-flex">
                     <div class="avatar-circle" data-name="<%= user.name %>">
@@ -433,67 +447,71 @@
                     </div>
                   </div>
                 </td>
-                
+
                 <td style="font-family: monospace; color: var(--text-muted);">
                   <%= user.phone %>
                 </td>
 
                 <td>
                   <% if (!user.isBlocked) { %>
-                    <span class="status-pill status-active">Active</span>
+                  <span class="status-pill status-active">Active</span>
                   <% } else { %>
-                    <span class="status-pill status-blocked">Blocked</span>
+                  <span class="status-pill status-blocked">Blocked</span>
                   <% } %>
                 </td>
 
                 <td style="text-align: right;">
                   <% if (!user.isBlocked) { %>
-                    <button class="btn-action btn-block-user swal-btn" data-id="<%= user._id %>" data-action="block">
-                      Block
-                    </button>
+                  <button class="btn-action btn-block-user swal-btn"
+                    data-id="<%= user._id %>" data-action="block">
+                    Block
+                  </button>
                   <% } else { %>
-                    <button class="btn-action btn-unblock-user swal-btn" data-id="<%= user._id %>" data-action="unblock">
-                      Unblock
-                    </button>
+                  <button class="btn-action btn-unblock-user swal-btn"
+                    data-id="<%= user._id %>" data-action="unblock">
+                    Unblock
+                  </button>
                   <% } %>
                 </td>
               </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
 
-      <div id="noResults" class="no-results">
-        <p>No users found matching your search.</p>
-      </div>
-    </section>
+        <div id="noResults" class="no-results">
+          <p>No users found matching your search.</p>
+        </div>
+      </section>
 
-    <div class="pagination-wrapper" id="paginationContainer">
-      <nav>
-        <ul class="pagination">
-          <% for (let i = 1; i <= totalPages; i++) { %>
+      <div class="pagination-wrapper" id="paginationContainer">
+        <nav>
+          <ul class="pagination">
+            <% for (let i = 1; i <= totalPages; i++) { %>
             <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-              <a class="page-link" href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= filterStatus && filterStatus !== 'all' ? '&filter=' + filterStatus : '' %>"><%= i %></a>
+              <a class="page-link"
+                href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= filterStatus && filterStatus !== 'all' ? '&filter=' + filterStatus : '' %>"><%=
+                i %></a>
             </li>
-          <% } %>
-        </ul>
-      </nav>
-    </div>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
 
-    <% if (successMessage && successMessage.length > 0) { %>
+      <% if (successMessage && successMessage.length > 0) { %>
       <div class="alert alert-success" style="margin-top: 20px;">
         <%= successMessage %>
       </div>
-    <% } %>
-    <% if (errorMessage && errorMessage.length > 0) { %>
+      <% } %>
+      <% if (errorMessage && errorMessage.length > 0) { %>
       <div class="alert alert-danger" style="margin-top: 20px;">
         <%= errorMessage %>
       </div>
-    <% } %>
+      <% } %>
 
-  </main>
+    </main>
 
-  <script>
+    <script>
     // --- 1. Dynamic Avatar Colors ---
     document.querySelectorAll('.avatar-circle').forEach(av => {
       const name = av.getAttribute('data-name') || '';
@@ -599,5 +617,5 @@
       });
     });
   </script>
-</body>
+  </body>
 </html>

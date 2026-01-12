@@ -7,7 +7,6 @@ const Order = require("../../models/orderSchema");
 const Wallet = require("../../models/walletSchema");
 const Coupon = require("../../models/couponSchema");
 
-
 const getOrderSuccess = async (req, res) => {
   try {
     const user = req.session.user;
@@ -79,17 +78,17 @@ const getOrderSuccess = async (req, res) => {
     console.log("Formatted items:", formattedItems);
     const subtotalAmount = latestOrder.totalPrice || 0;
     const discountAmount = latestOrder.discount || 0;
-     const shippingAmount = latestOrder.shippingCharge || 49; 
+    const shippingAmount = latestOrder.shippingCharge || 49;
     const finalAmount = latestOrder.finalAmount || 0;
     const formattedSubtotal = `₹${subtotalAmount.toFixed(2)}`;
     const formattedDiscount =
       discountAmount > 0 ? `-₹${discountAmount.toFixed(2)}` : "₹0";
-      const formattedShipping = `₹${shippingAmount.toFixed(2)}`; 
+    const formattedShipping = `₹${shippingAmount.toFixed(2)}`;
     const formattedFinalAmount = `₹${finalAmount.toFixed(2)}`;
     console.log("Formatted amounts:", {
       subtotal: formattedSubtotal,
       discount: formattedDiscount,
-      shipping: formattedShipping, 
+      shipping: formattedShipping,
       final: formattedFinalAmount,
       paymentStatus: latestOrder.paymentStatus,
       orderStatus: latestOrder.status,
@@ -101,7 +100,7 @@ const getOrderSuccess = async (req, res) => {
       paymentMethod: latestOrder.paymentMethod || "Unknown",
       subtotal: formattedSubtotal,
       discount: formattedDiscount,
-      shipping: formattedShipping,  
+      shipping: formattedShipping,
       amount: formattedFinalAmount,
       deliveryDate: formattedDelivery,
       items: formattedItems,
@@ -139,7 +138,7 @@ const cancelAllOrder = async (req, res) => {
 
     let totalRefund = 0;
     let cancelledCount = 0;
-    const shippingCharge = Number(order.shippingCharge || 49); 
+    const shippingCharge = Number(order.shippingCharge || 49);
 
     order.orderItems.forEach((item) => {
       if (
@@ -176,10 +175,12 @@ const cancelAllOrder = async (req, res) => {
     );
 
     if (allItemsCancelled) {
-      totalRefund += shippingCharge;  
-      console.log(`✅ All items cancelled. Refunding shipping: ₹${shippingCharge}`);
+      totalRefund += shippingCharge;
+      console.log(
+        ` All items cancelled. Refunding shipping: ₹${shippingCharge}`
+      );
     } else {
-      console.log(`⚠️ Some items remain. NOT refunding shipping`);
+      console.log(` Some items remain. NOT refunding shipping`);
     }
 
     order.status = "Cancelled";
@@ -187,10 +188,12 @@ const cancelAllOrder = async (req, res) => {
     order.cancelDetails = details;
     order.cancelledAt = new Date();
 
-        if (allItemsCancelled) {
-      order.finalAmount = 0; 
+    if (allItemsCancelled) {
+      order.finalAmount = 0;
     } else {
-      order.finalAmount = Math.round((order.totalPrice - order.discount + shippingCharge) * 100) / 100;
+      order.finalAmount =
+        Math.round((order.totalPrice - order.discount + shippingCharge) * 100) /
+        100;
     }
 
     if (
@@ -224,7 +227,7 @@ const cancelAllOrder = async (req, res) => {
       success: true,
       message: `Order cancelled. Full refund: ₹${totalRefund.toFixed(2)}`,
       refundAmount: Math.round(totalRefund * 100) / 100,
-      shippingRefund: allItemsCancelled ? shippingCharge : 0, 
+      shippingRefund: allItemsCancelled ? shippingCharge : 0,
       cancelledCount,
     });
   } catch (error) {
@@ -242,12 +245,12 @@ const getOrderDetails = async (req, res) => {
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.redirect("/login");
     }
-    
+
     const orderId = req.params.orderId;
     const latestOrder = await Order.findOne({ orderId, user: userId })
       .populate("orderItems.product")
       .lean();
-      
+
     if (!latestOrder) {
       return res.redirect("/pageNotFound");
     }
@@ -450,23 +453,23 @@ const getOrderDetails = async (req, res) => {
         !item.returnRejected
     );
 
-    
-    const itemStatuses = formattedItems.map(item => item.status);
-   
-    const allCancelled = itemStatuses.every(s => s === "Cancelled");
-    const allReturned = itemStatuses.every(s => s === "Returned");
-    const allCancelledOrReturned = itemStatuses.every(s => 
-      s === "Cancelled" || s === "Returned"
+    const itemStatuses = formattedItems.map((item) => item.status);
+
+    const allCancelled = itemStatuses.every((s) => s === "Cancelled");
+    const allReturned = itemStatuses.every((s) => s === "Returned");
+    const allCancelledOrReturned = itemStatuses.every(
+      (s) => s === "Cancelled" || s === "Returned"
     );
-    const allReturnRequest = itemStatuses.every(s => s === "Return Request");
-    const someCancelled = itemStatuses.some(s => s === "Cancelled");
-    const someReturned = itemStatuses.some(s => s === "Returned" || s === "Return Request");
+    const allReturnRequest = itemStatuses.every((s) => s === "Return Request");
+    const someCancelled = itemStatuses.some((s) => s === "Cancelled");
+    const someReturned = itemStatuses.some(
+      (s) => s === "Returned" || s === "Return Request"
+    );
 
     let displayStatus = latestOrder.status || "Pending";
     let showRetryButton = false;
     let showPaymentFailedBadge = false;
 
-    
     if (
       latestOrder.paymentStatus === "Failed" ||
       latestOrder.status === "Payment Failed"
@@ -474,46 +477,32 @@ const getOrderDetails = async (req, res) => {
       displayStatus = "Payment Failed";
       showRetryButton = true;
       showPaymentFailedBadge = true;
-      console.log("⚠️ Showing payment failed badge and retry button");
-    } 
-    
-    else if (allCancelled) {
+      console.log(" Showing payment failed badge and retry button");
+    } else if (allCancelled) {
       displayStatus = "Cancelled";
-      console.log("✅ All items cancelled - Status: Cancelled");
-    }
-    
-    else if (allReturned) {
+      console.log(" All items cancelled - Status: Cancelled");
+    } else if (allReturned) {
       displayStatus = "Returned";
-      console.log("✅ All items returned - Status: Returned");
-    }
-    
-    else if (allCancelledOrReturned) {
+      console.log(" All items returned - Status: Returned");
+    } else if (allCancelledOrReturned) {
       displayStatus = someReturned ? "Returned" : "Cancelled";
-      console.log(`✅ Mix of cancelled/returned - Status: ${displayStatus}`);
-    }
-   
-    else if (allReturnRequest) {
+      console.log(` Mix of cancelled/returned - Status: ${displayStatus}`);
+    } else if (allReturnRequest) {
       displayStatus = "Return Request";
-      console.log("✅ All items return request - Status: Return Request");
-    }
-   
-    else if (someCancelled || someReturned) {
+      console.log(" All items return request - Status: Return Request");
+    } else if (someCancelled || someReturned) {
       displayStatus = "Partially Cancelled";
-      console.log("✅ Some items cancelled - Status: Partially Cancelled");
-    }
-    
-    else if (latestOrder.paymentStatus === "Completed") {
-      
+      console.log(" Some items cancelled - Status: Partially Cancelled");
+    } else if (latestOrder.paymentStatus === "Completed") {
       const activeStatuses = [
         ...new Set(
-          itemStatuses.filter(s => 
-            s !== "Cancelled" && 
-            s !== "Returned" && 
-            s !== "Return Request"
+          itemStatuses.filter(
+            (s) =>
+              s !== "Cancelled" && s !== "Returned" && s !== "Return Request"
           )
-        )
+        ),
       ];
-      
+
       const statusPriority = {
         Placed: 1,
         Confirmed: 2,
@@ -522,12 +511,10 @@ const getOrderDetails = async (req, res) => {
         OutForDelivery: 5,
         Delivered: 6,
       };
-      
-     
+
       activeStatuses.sort((a, b) => statusPriority[a] - statusPriority[b]);
-      displayStatus = activeStatuses.length > 0 
-        ? activeStatuses.join(", ") 
-        : "Processing";
+      displayStatus =
+        activeStatuses.length > 0 ? activeStatuses.join(", ") : "Processing";
       console.log(` Active items status: ${displayStatus}`);
     }
 
@@ -535,7 +522,7 @@ const getOrderDetails = async (req, res) => {
 
     res.render("orderDetails", {
       orderId: latestOrder.orderId || latestOrder._id,
-      status: displayStatus, 
+      status: displayStatus,
       paymentStatus: latestOrder.paymentStatus,
       showPaymentFailedBadge: showPaymentFailedBadge,
       showRetryButton: showRetryButton,
@@ -559,10 +546,8 @@ const getOrderDetails = async (req, res) => {
         isReturnEligible && latestOrder.paymentStatus === "Completed",
       isShippedOrOut,
       hasAnyRejectedReturn,
-      activeStatuses: itemStatuses.filter(s => 
-        s !== "Cancelled" && 
-        s !== "Returned" && 
-        s !== "Return Request"
+      activeStatuses: itemStatuses.filter(
+        (s) => s !== "Cancelled" && s !== "Returned" && s !== "Return Request"
       ),
       success: req.flash("success"),
     });
@@ -571,7 +556,6 @@ const getOrderDetails = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
-
 
 const returnAllOrder = async (req, res) => {
   try {
@@ -784,13 +768,33 @@ const updateItemStatus = async (
       hour12: true,
     }),
   });
-  if (!item.tracking.estimatedDeliveryDate && newStatus !== "Delivered") {
-    const deliveryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    item.tracking.estimatedDeliveryDate = deliveryDate.toLocaleDateString(
-      "en-IN",
-      { day: "2-digit", month: "short", year: "numeric" }
-    );
+ // Dynamic Estimated Delivery based on status
+if (["Placed", "Confirmed", "Processing", "Shipped", "OutForDelivery"].includes(newStatus)) {
+
+  let daysToAdd = 7; // default for Placed/Confirmed
+
+  switch (newStatus) {
+    case "Processing":
+      daysToAdd = 5;
+      break;
+    case "Shipped":
+      daysToAdd = 3;
+      break;
+    case "OutForDelivery":
+      daysToAdd = 1;
+      break;
   }
+
+  const estimated = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+  item.tracking.estimatedDeliveryDate = estimated.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+
   const statusTimestamps = [
     { status: "Placed", dateField: "placedDate", timeField: "placedTime" },
     {
@@ -879,14 +883,36 @@ const updateItemStatus = async (
       item.tracking.outForDeliveryLocation =
         outForDeliveryLocation || "Local Hub ABC";
       break;
-    case "Delivered":
-      if (!item.tracking.deliveredDate) {
-        const formatted = formatDateTime(now);
-        item.tracking.deliveredDate = formatted.date;
-        item.tracking.deliveredTime = formatted.time;
-      }
-      item.tracking.estimatedDeliveryDate = null;
-      break;
+  case "Delivered": {
+  const formatted = formatDateTime(now);
+
+  if (!item.tracking.deliveredDate) {
+    item.tracking.deliveredDate = formatted.date;
+    item.tracking.deliveredTime = formatted.time;
+  }
+
+ 
+  const backfillStages = [
+    { key: "OutForDelivery", dateField: "outForDeliveryDate", timeField: "outForDeliveryTime" },
+    { key: "Shipped", dateField: "shippedDate", timeField: "shippedTime" },
+    { key: "Processing", dateField: "processingDate", timeField: "processingTime" },
+    { key: "Confirmed", dateField: "confirmedDate", timeField: "confirmedTime" },
+    { key: "Placed", dateField: "placedDate", timeField: "placedTime" },
+  ];
+
+  backfillStages.forEach(({ key, dateField, timeField }, index) => {
+    const simulated = new Date(now.getTime() - ((index + 1) * 2 * 60 * 60 * 1000)); // subtract 2 hours per step
+    const f = formatDateTime(simulated);
+    if (!item.tracking[dateField]) {
+      item.tracking[dateField] = f.date;
+      item.tracking[timeField] = f.time;
+    }
+  });
+
+  item.tracking.estimatedDeliveryDate = null;
+  break;
+}
+
     case "Cancelled":
       item.cancelledAt = now;
       break;
@@ -1158,7 +1184,6 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
           ?.minimumPrice || 0
       : 0;
 
-   
     const shippingCharge = Number(order.shippingCharge || 49);
 
     const cancelledItemOriginalTotal = Number(item.total || 0);
@@ -1221,7 +1246,7 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
           Math.round((cancelledItemUserPaid - repaymentOnRemaining) * 100) / 100
         );
 
-        console.log("⚠️ Coupon Revocation on Cancellation:", {
+        console.log(" Coupon Revocation on Cancellation:", {
           cancelledItem: item.productName,
           cancelledItemOriginal: cancelledItemOriginalTotal,
           cancelledItemUserPaid: cancelledItemUserPaid,
@@ -1231,13 +1256,11 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
           refundAmount: refundAmount,
         });
 
-        
         order.couponApplied = false;
         order.couponRevoked = true;
         order.couponCode = null;
         order.discount = 0;
-        
-        
+
         remainingItems.forEach((remItem) => {
           const subItem = order.orderItems.find((oi) => oi._id === remItem._id);
           if (subItem) {
@@ -1245,15 +1268,15 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
           }
         });
 
-        
         const newTotalPrice = Math.round(remainingSubtotal * 100) / 100;
         order.totalPrice = newTotalPrice;
-        order.finalAmount = Math.round((newTotalPrice + shippingCharge) * 100) / 100;
-        
-        console.log(` Coupon Revoked - New Total: ₹${order.totalPrice} + Shipping: ₹${shippingCharge} = Final: ₹${order.finalAmount}`);
-        
+        order.finalAmount =
+          Math.round((newTotalPrice + shippingCharge) * 100) / 100;
+
+        console.log(
+          ` Coupon Revoked - New Total: ₹${order.totalPrice} + Shipping: ₹${shippingCharge} = Final: ₹${order.finalAmount}`
+        );
       } else {
-        
         const newOrderDiscount =
           Math.round((originalOrderDiscount - cancelledItemDiscount) * 100) /
           100;
@@ -1262,16 +1285,17 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
           Math.round((order.totalPrice - cancelledItemOriginalTotal) * 100) /
           100;
         order.finalAmount =
-          Math.round((order.totalPrice - order.discount + shippingCharge) * 100) / 100;
+          Math.round(
+            (order.totalPrice - order.discount + shippingCharge) * 100
+          ) / 100;
       }
     } else {
-      
       order.totalPrice =
         Math.round((order.totalPrice - cancelledItemOriginalTotal) * 100) / 100;
-      order.finalAmount = Math.round((order.totalPrice + shippingCharge) * 100) / 100;
+      order.finalAmount =
+        Math.round((order.totalPrice + shippingCharge) * 100) / 100;
     }
 
-   
     item.status = "Cancelled";
     item.cancelReason = reason || "";
     item.cancelDetails = details || "";
@@ -1279,7 +1303,6 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
     item.refundAmount = refundAmount;
     item.clawbackAmount = repaymentOnRemaining;
 
-    
     try {
       const productId = item.product?._id || item.product;
       if (mongoose.Types.ObjectId.isValid(productId)) {
@@ -1299,7 +1322,6 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
       console.warn("Stock restore failed:", err.message);
     }
 
-    
     if (
       refundAmount > 0 &&
       ["Online Payment", "Wallet", "Razorpay", "UPI"].includes(
@@ -1346,7 +1368,7 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
         : `Item cancelled. Refund: ₹${refundAmount.toFixed(2)}`,
     });
   } catch (error) {
-    console.error("❌ cancelSingleOrderWithCouponCheck error:", error);
+    console.error(" cancelSingleOrderWithCouponCheck error:", error);
     return res
       .status(500)
       .json({ success: false, error: error.message || "Server error" });

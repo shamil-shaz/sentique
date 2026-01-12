@@ -1,7 +1,7 @@
 <%- include("../partials/admin/header.ejs") %>
 
 <style>
-  /* 1. GLOBAL RESET & OVERFLOW FIX */
+  
   * {
     margin: 0;
     padding: 0;
@@ -11,20 +11,20 @@
   html, body {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden; /* Force hide horizontal scrollbar */
+    overflow-x: hidden; 
   }
 
-  /* 2. MAIN LAYOUT */
+ 
   .dashboard-main {
     margin-left: 240px;
-    padding: 100px 30px 50px; /* Reduced side padding slightly */
+    padding: 100px 30px 50px; 
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     min-height: 100vh;
-    width: auto; /* Allow auto width to respect margin */
+    width: auto;
     transition: all 0.3s ease;
   }
 
-  /* 3. HEADER & FILTERS */
+  
   .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -294,36 +294,38 @@
 </style>
 
 <main class="dashboard-main">
-  
+
   <!-- Dashboard Header -->
   <div class="dashboard-header">
     <h1 class="dashboard-title">📊 Dashboard</h1>
-    
+
     <!-- Filters -->
     <div class="filter-section">
       <% if (dateFilter === 'daily') { %>
-        <a href="?filter=daily" class="filter-btn active">📅 Daily</a>
+      <a href="?filter=daily" class="filter-btn active">📅 Daily</a>
       <% } else { %>
-        <a href="?filter=daily" class="filter-btn">📅 Daily</a>
+      <a href="?filter=daily" class="filter-btn">📅 Daily</a>
       <% } %>
 
       <% if (dateFilter === 'monthly') { %>
-        <a href="?filter=monthly" class="filter-btn active">📊 Monthly</a>
+      <a href="?filter=monthly" class="filter-btn active">📊 Monthly</a>
       <% } else { %>
-        <a href="?filter=monthly" class="filter-btn">📊 Monthly</a>
+      <a href="?filter=monthly" class="filter-btn">📊 Monthly</a>
       <% } %>
 
       <% if (dateFilter === 'yearly') { %>
-        <a href="?filter=yearly" class="filter-btn active">📈 Yearly</a>
+      <a href="?filter=yearly" class="filter-btn active">📈 Yearly</a>
       <% } else { %>
-        <a href="?filter=yearly" class="filter-btn">📈 Yearly</a>
+      <a href="?filter=yearly" class="filter-btn">📈 Yearly</a>
       <% } %>
-      
+
       <form method="GET" class="date-range-form" id="dateRangeForm">
         <input type="hidden" name="filter" value="custom">
-        <input type="date" name="startDate" id="startDate" class="date-input" value="<%= startDateFormatted %>" required>
+        <input type="date" name="startDate" id="startDate" class="date-input"
+          value="<%= startDateFormatted %>" required>
         <span style="color: #999; font-weight: 600;">to</span>
-        <input type="date" name="endDate" id="endDate" class="date-input" value="<%= endDateFormatted %>" required>
+        <input type="date" name="endDate" id="endDate" class="date-input"
+          value="<%= endDateFormatted %>" required>
         <button type="submit" class="apply-btn">Apply</button>
       </form>
     </div>
@@ -343,11 +345,12 @@
       <div class="kpi-content">
         <div class="kpi-label">📦 Total Orders</div>
         <div class="kpi-value"><%= totalOrders %></div>
-        <div class="kpi-growth <%= (ordersGrowth >= 0) ? 'positive' : 'negative' %>">
+        <div
+          class="kpi-growth <%= (ordersGrowth >= 0) ? 'positive' : 'negative' %>">
           <% if (ordersGrowth >= 0) { %>
-            ↑ <%= Math.abs(ordersGrowth) %>% vs period
+          ↑ <%= Math.abs(ordersGrowth) %>% vs period
           <% } else { %>
-            ↓ <%= Math.abs(ordersGrowth) %>% vs period
+          ↓ <%= Math.abs(ordersGrowth) %>% vs period
           <% } %>
         </div>
       </div>
@@ -357,11 +360,12 @@
       <div class="kpi-content">
         <div class="kpi-label">💰 Total Sales</div>
         <div class="kpi-value">₹<%= totalSales %></div>
-        <div class="kpi-growth <%= (salesGrowth >= 0) ? 'positive' : 'negative' %>">
+        <div
+          class="kpi-growth <%= (salesGrowth >= 0) ? 'positive' : 'negative' %>">
           <% if (salesGrowth >= 0) { %>
-            ↑ <%= Math.abs(salesGrowth) %>% vs period
+          ↑ <%= Math.abs(salesGrowth) %>% vs period
           <% } else { %>
-            ↓ <%= Math.abs(salesGrowth) %>% vs period
+          ↓ <%= Math.abs(salesGrowth) %>% vs period
           <% } %>
         </div>
       </div>
@@ -379,32 +383,38 @@
       <div class="kpi-content">
         <div class="kpi-label">✅ Delivered</div>
         <div class="kpi-value"><%= deliveredOrders %></div>
-        <div class="kpi-growth positive"><% if (totalOrders > 0) { %><%= ((deliveredOrders/totalOrders)*100).toFixed(1) %><% } else { %>0<% } %>% success</div>
+        <div class="kpi-growth positive"><% if (totalOrders > 0) { %><%=
+          ((deliveredOrders/totalOrders)*100).toFixed(1) %><% } else { %>0<% }
+          %>% success</div>
       </div>
     </div>
 
-   <div class="kpi-card">
-  <div class="kpi-content">
-    <div class="kpi-label">🔄 Returned Items</div>
-    <div class="kpi-value"><%= returnedOrders %></div> 
-    <div class="kpi-growth positive">Admin Approved</div>
-  </div>
-</div>
+    <div class="kpi-card">
+      <div class="kpi-content">
+        <div class="kpi-label">🔄 Returned Items</div>
+        <div class="kpi-value"><%= returnedOrders %></div>
+        <div class="kpi-growth positive">Admin Approved</div>
+      </div>
+    </div>
   </div>
 
   <!-- Charts & Stats -->
   <div class="content-grid">
     <div class="card">
       <div class="card-header">
-        <div class="card-title">📈 Sales Performance (<span id="chartPeriod">Monthly</span>)</div>
+        <div class="card-title">📈 Sales Performance (<span
+            id="chartPeriod">Monthly</span>)</div>
 
         <div style="display: flex; gap: 8px;">
-  <button class="chart-filter-btn active" onclick="updateChart('daily', this)">📅 Daily</button>
-  <button class="chart-filter-btn" onclick="updateChart('weekly', this)">📊 Weekly</button>
-  <button class="chart-filter-btn" onclick="updateChart('monthly', this)">📈 Monthly</button>
-  <button class="chart-filter-btn" onclick="updateChart('yearly', this)">📆 Yearly</button>
-</div>
-
+          <button class="chart-filter-btn active"
+            onclick="updateChart('daily', this)">📅 Daily</button>
+          <button class="chart-filter-btn"
+            onclick="updateChart('weekly', this)">📊 Weekly</button>
+          <button class="chart-filter-btn"
+            onclick="updateChart('monthly', this)">📈 Monthly</button>
+          <button class="chart-filter-btn"
+            onclick="updateChart('yearly', this)">📆 Yearly</button>
+        </div>
 
       </div>
       <div class="chart-container">
@@ -412,27 +422,30 @@
       </div>
     </div>
 
-   <div class="card">
-  <div class="card-header">
-    <div class="card-title">📊 Analytics</div>
-  </div>
-  <div>
-    <div class="stat-item">
-      <span class="stat-label">Pending Requests</span>
-      <span class="stat-value" style="color: #ed8936;"><%= returnRequests %> items</span>
-    </div>
-    
-    <div class="stat-item">
-      <span class="stat-label">Approved Returns</span>
-      <span class="stat-value" style="color: #48bb78;"><%= returnedOrders %> items</span>
-    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📊 Analytics</div>
+      </div>
+      <div>
+        <div class="stat-item">
+          <span class="stat-label">Pending Requests</span>
+          <span class="stat-value" style="color: #ed8936;"><%= returnRequests %>
+            items</span>
+        </div>
 
-    <div class="stat-item">
-      <span class="stat-label">Cancelled</span>
-      <span class="stat-value" style="color: #fc8181;"><%= cancelledOrders %> items</span>
+        <div class="stat-item">
+          <span class="stat-label">Approved Returns</span>
+          <span class="stat-value" style="color: #48bb78;"><%= returnedOrders %>
+            items</span>
+        </div>
+
+        <div class="stat-item">
+          <span class="stat-label">Cancelled</span>
+          <span class="stat-value" style="color: #fc8181;"><%= cancelledOrders
+            %> items</span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   </div>
 
   <!-- Recent Orders -->
@@ -454,24 +467,27 @@
         </thead>
         <tbody>
           <% if (recentOrders && recentOrders.length > 0) { %>
-            <% recentOrders.forEach(function(order) { %>
-              <tr>
-                <td><strong><%= order.orderId %></strong></td>
-                <td class="customer-cell"><%= order.customer %></td>
-                <td><strong><%= order.amount %></strong></td>
-                <td>
-                  <span class="status-badge <%= 'status-' + order.status.toLowerCase().replace(/\s+/g, '') %>">
-                    <%= order.status %>
-                  </span>
-                </td>
-                <td><%= order.itemsCount %> items</td>
-                <td><%= order.date %></td>
-              </tr>
-            <% }); %>
+          <% recentOrders.forEach(function(order) { %>
+          <tr>
+            <td><strong><%= order.orderId %></strong></td>
+            <td class="customer-cell"><%= order.customer %></td>
+            <td><strong><%= order.amount %></strong></td>
+            <td>
+              <span
+                class="status-badge <%= 'status-' + order.status.toLowerCase().replace(/\s+/g, '') %>">
+                <%= order.status %>
+              </span>
+            </td>
+            <td><%= order.itemsCount %> items</td>
+            <td><%= order.date %></td>
+          </tr>
+          <% }); %>
           <% } else { %>
-            <tr>
-              <td colspan="6" style="text-align: center; color: #7a8293; padding: 20px;">No orders in this period</td>
-            </tr>
+          <tr>
+            <td colspan="6"
+              style="text-align: center; color: #7a8293; padding: 20px;">No
+              orders in this period</td>
+          </tr>
           <% } %>
         </tbody>
       </table>
@@ -495,17 +511,18 @@
           </thead>
           <tbody>
             <% if (topProducts && topProducts.length > 0) { %>
-              <% topProducts.forEach(function(product) { %>
-                <tr>
-                  <td><strong><%= product.name %></strong></td>
-                  <td><%= product.sold %></td>
-                  <td><%= product.revenue %></td>
-                </tr>
-              <% }); %>
+            <% topProducts.forEach(function(product) { %>
+            <tr>
+              <td><strong><%= product.name %></strong></td>
+              <td><%= product.sold %></td>
+              <td><%= product.revenue %></td>
+            </tr>
+            <% }); %>
             <% } else { %>
-              <tr>
-                <td colspan="3" style="text-align: center; color: #7a8293;">No data</td>
-              </tr>
+            <tr>
+              <td colspan="3" style="text-align: center; color: #7a8293;">No
+                data</td>
+            </tr>
             <% } %>
           </tbody>
         </table>
@@ -527,17 +544,18 @@
           </thead>
           <tbody>
             <% if (topBrands && topBrands.length > 0) { %>
-              <% topBrands.forEach(function(brand) { %>
-                <tr>
-                  <td><strong><%= brand.name %></strong></td>
-                  <td><%= brand.count %></td>
-                  <td><%= brand.revenue %></td>
-                </tr>
-              <% }); %>
+            <% topBrands.forEach(function(brand) { %>
+            <tr>
+              <td><strong><%= brand.name %></strong></td>
+              <td><%= brand.count %></td>
+              <td><%= brand.revenue %></td>
+            </tr>
+            <% }); %>
             <% } else { %>
-              <tr>
-                <td colspan="3" style="text-align: center; color: #7a8293;">No data</td>
-              </tr>
+            <tr>
+              <td colspan="3" style="text-align: center; color: #7a8293;">No
+                data</td>
+            </tr>
             <% } %>
           </tbody>
         </table>
@@ -562,17 +580,18 @@
           </thead>
           <tbody>
             <% if (topCategories && topCategories.length > 0) { %>
-              <% topCategories.forEach(function(category) { %>
-                <tr>
-                  <td><strong><%= category.name %></strong></td>
-                  <td><%= category.count %></td>
-                  <td><%= category.revenue %></td>
-                </tr>
-              <% }); %>
+            <% topCategories.forEach(function(category) { %>
+            <tr>
+              <td><strong><%= category.name %></strong></td>
+              <td><%= category.count %></td>
+              <td><%= category.revenue %></td>
+            </tr>
+            <% }); %>
             <% } else { %>
-              <tr>
-                <td colspan="3" style="text-align: center; color: #7a8293;">No data</td>
-              </tr>
+            <tr>
+              <td colspan="3" style="text-align: center; color: #7a8293;">No
+                data</td>
+            </tr>
             <% } %>
           </tbody>
         </table>
@@ -594,17 +613,18 @@
           </thead>
           <tbody>
             <% if (paymentMethods && paymentMethods.length > 0) { %>
-              <% paymentMethods.forEach(function(method) { %>
-                <tr>
-                  <td><strong><%= method.method %></strong></td>
-                  <td><%= method.count %></td>
-                  <td><%= method.total %></td>
-                </tr>
-              <% }); %>
+            <% paymentMethods.forEach(function(method) { %>
+            <tr>
+              <td><strong><%= method.method %></strong></td>
+              <td><%= method.count %></td>
+              <td><%= method.total %></td>
+            </tr>
+            <% }); %>
             <% } else { %>
-              <tr>
-                <td colspan="3" style="text-align: center; color: #7a8293;">No data</td>
-              </tr>
+            <tr>
+              <td colspan="3" style="text-align: center; color: #7a8293;">No
+                data</td>
+            </tr>
             <% } %>
           </tbody>
         </table>
@@ -614,18 +634,19 @@
 
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   let salesChart = null;
 
-  // ✅ Function to safely render chart
+
   function renderChart(labels, data, label = "Sales (₹)") {
     const container = document.querySelector(".chart-container");
     let oldCanvas = document.getElementById("salesChart");
 
-    // 🔥 Completely remove and recreate the canvas element to prevent reuse errors
+
     if (oldCanvas) oldCanvas.remove();
     const newCanvas = document.createElement("canvas");
     newCanvas.id = "salesChart";
@@ -633,7 +654,7 @@
 
     const ctx = newCanvas.getContext("2d");
 
-    // ✅ Create fresh chart
+   
     salesChart = new Chart(ctx, {
       type: "line",
       data: {
@@ -711,7 +732,7 @@
     });
   }
 
-  // ✅ Initialize chart on page load
+ 
   document.addEventListener("DOMContentLoaded", function () {
     const chartLabels = <%- JSON.stringify(chartLabels) %>;
     const chartData = <%- JSON.stringify(chartData) %>;
@@ -721,16 +742,16 @@
     if (chartPeriodEl) chartPeriodEl.textContent = "Monthly";
   });
 
-  // ✅ Update chart dynamically (no reload)
+ 
   async function updateChart(period, el) {
     try {
-      // Toggle active buttons
+      
       document
         .querySelectorAll(".chart-filter-btn")
         .forEach(btn => btn.classList.remove("active"));
       el.classList.add("active");
 
-      // Show loading
+    
       Swal.fire({
         title: "Loading Chart...",
         html: "Fetching latest sales data...",
@@ -738,7 +759,6 @@
         didOpen: () => Swal.showLoading()
       });
 
-      // Fetch new data
       const response = await fetch(`/admin/dashboard-chart-data?period=${period}`);
       const data = await response.json();
       Swal.close();
@@ -747,8 +767,7 @@
         Swal.fire("Error", "Failed to load chart data", "error");
         return;
       }
-
-      // ✅ Recreate and re-render chart safely
+    
       renderChart(
         data.labels,
         data.sales,
@@ -766,7 +785,5 @@
     }
   }
 </script>
-
-
 
 <%- include("../partials/admin/scriptfooter.ejs") %>

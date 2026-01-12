@@ -103,7 +103,7 @@ const handleForgotPassword = async (req, res) => {
     const otp = generateOtp();
     req.session.forgotOtp = otp;
     req.session.forgotEmail = email;
-    req.session.forgotOtpTime = Date.now(); // start time
+    req.session.forgotOtpTime = Date.now(); 
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -184,12 +184,10 @@ const verifyForgotOtp = async (req, res) => {
     }
   } catch (error) {
     console.error("Error verifying OTP:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while verifying OTP.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while verifying OTP.",
+    });
   }
 };
 
@@ -211,21 +209,17 @@ const resendOtp = async (req, res) => {
         .status(200)
         .json({ success: true, message: "OTP resent successfully" });
     } else {
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to send email. Please try again.",
-        });
+      res.status(500).json({
+        success: false,
+        message: "Failed to send email. Please try again.",
+      });
     }
   } catch (error) {
     console.error("Error resending OTP:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error resending OTP. Please try again later.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error resending OTP. Please try again later.",
+    });
   }
 };
 
@@ -261,12 +255,10 @@ const sendForgotPasswordOtp = async (req, res) => {
     }
   } catch (error) {
     console.error("Error sending forgot password OTP:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error sending OTP. Please try again later.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error sending OTP. Please try again later.",
+    });
   }
 };
 
@@ -622,7 +614,6 @@ const updateProfile = async (req, res) => {
     name = name?.trim();
     phone = phone?.trim();
 
-
     if (!name) {
       return res
         .status(400)
@@ -636,7 +627,6 @@ const updateProfile = async (req, res) => {
       });
     }
 
-   
     const nameRegex = /^[A-Za-z\s]+$/;
     if (!nameRegex.test(name)) {
       return res.status(400).json({
@@ -646,9 +636,7 @@ const updateProfile = async (req, res) => {
       });
     }
 
-
     if (phone) {
-      
       if (!/^\d{10}$/.test(phone)) {
         return res.status(400).json({
           success: false,
@@ -665,11 +653,9 @@ const updateProfile = async (req, res) => {
 
       const digits = phone.split("").map(Number);
 
-      
       const ascending = digits.every(
         (d, i) => i === 0 || d === digits[i - 1] + 1
       );
-
 
       const descending = digits.every(
         (d, i) => i === 0 || d === digits[i - 1] - 1

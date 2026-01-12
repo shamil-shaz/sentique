@@ -1,416 +1,800 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sentique - Zodiac Signature Perfumes</title>
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-/* --- 1. GLOBAL VARIABLES (UPDATED) --- */
-    :root {
-      /* Colors */
-      --primary-gold: #d4af37;
-      --primary-gold-dim: rgba(212, 175, 55, 0.15);
-      --secondary-gold: #f3e5ab; /* NEW: Lighter gold for gradients */
-      
-      --bg-dark: #0a0a0a;
-      --card-bg: #1a1a1a;
-      --dark-purple: #1a0a2e;
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentique - Zodiac Signature Perfumes</title>
 
-      --text-light: #ffffff;
-      --text-muted: #a0a0a0;
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet">
 
-      /* NEW: Typography System */
-      --font-heading: 'Cinzel', serif;      /* Luxurious Title Font */
-      --font-body: 'Montserrat', sans-serif; /* Clean Reading Font */
-    }
+    <style>
+      :root {
+  color-scheme: dark;
+  --primary-gold: #d4af37;
+  --primary-gold-dim: rgba(212, 175, 55, 0.15);
+  --secondary-gold: #f3e5ab;
+  --bg-dark: #0a0a0a;
+  --card-bg: #1a1a1a;
+  --dark-purple: #1a0a2e;
+  --text-light: #ffffff;
+  --text-muted: #a0a0a0;
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'Montserrat', sans-serif;
+}
 
-    /* --- 2. RESET & BASE STYLES --- */
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      outline: none; 
-    }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
 
-    body {
-      font-family: var(--font-body); /* CHANGED: Used Montserrat */
-      color: var(--text-light);
-      background-color: var(--bg-dark);
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.6; /* ADDED: Better readability */
-    }
+body {
+  font-family: var(--font-body);
+  color: var(--text-light);
+  background-color: var(--bg-dark);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
 
-    /* NEW: Typography Defaults */
-    h1, h2, h3, h4, h5, h6, .brand-title {
-      font-family: var(--font-heading); /* CHANGED: Used Cinzel */
-      font-weight: 700;
-      margin: 0;
-      color: var(--text-light);
-    }
+h1, h2, h3, h4, h5, h6, .brand-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-light);
+}
 
-    /* --- 3. HEADER SECTION --- */
-    .header-section { 
-      position: relative; 
-      z-index: 1000; 
-      background: #ffffff; 
-      /* CHANGED: Softer, luxurious shadow */
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
-    }
+.header-section {
+  position: relative;
+  z-index: 1000;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
 
-    /* --- 4. HERO SECTION --- */
-    .hero-section {
-      position: relative;
-      min-height: 95vh;
-      /* CHANGED: Radial Gradient for a "Cosmic/Glow" effect */
-      background: radial-gradient(circle at center top, #1a0a2e 0%, #0f0517 60%, #000000 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
+.hero-section {
+  position: relative;
+  min-height: 95vh;
+  background: radial-gradient(circle at center top, #1a0a2e 0%, #0f0517 60%, #000000 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 
-    /* Keep your existing particles & animation classes below this... */
-    .particles-container { position: absolute; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-    .zodiac-particle { position: absolute; font-size: 22px; color: var(--primary-gold); opacity: 0; animation: floatParticle 18s infinite ease-in-out; }
-    @keyframes floatParticle {
-      0% { opacity: 0; transform: translateY(110vh) rotate(0deg) scale(.4); }
-      10% { opacity: .7; } 90% { opacity: .7; }
-      100% { opacity: 0; transform: translateY(-110vh) rotate(360deg) scale(1); }
-    }
+.particles-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
 
-    .constellation { position: absolute; width: 100%; height: 100%; opacity: .22; pointer-events: none; }
+.zodiac-particle {
+  position: absolute;
+  font-size: 22px;
+  color: var(--primary-gold);
+  opacity: 0;
+  animation: floatParticle 18s infinite ease-in-out;
+}
 
-    .carousel-wrapper { perspective: 1500px; width: 100%; max-width: 700px; height: 500px; position: relative; z-index: 10; margin: 0 auto; }
-    .carousel-3d { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: autoRotate 40s linear infinite; }
-    .carousel-3d:hover { animation-play-state: paused; }
-    @keyframes autoRotate { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
-    .carousel-item { position: absolute; width: 200px; height: 300px; left: 50%; top: 50%; transform-style: preserve-3d; transition: all .6s; }
-    .carousel-item:hover { transform: scale(1.15) translateZ(50px) !important; }
+@keyframes floatParticle {
+ 0% { opacity: 0; transform: translateY(110vh) rotate(0deg) scale(.4); }
+ 10% { opacity: .7; }
+ 90% { opacity: .7; }
+ 100% { opacity: 0; transform: translateY(-110vh) rotate(360deg) scale(1); }
+}
 
-    .perfume-card-3d {
-      width: 100%; height: 100%;
-      background: linear-gradient(145deg, rgba(40,40,40,.9), rgba(20,20,20,.9));
-      border-radius: 20px; border: 2px solid rgba(212,175,55,.3);
-      box-shadow: 0 20px 60px rgba(0,0,0,.7);
-      display: flex; align-items: center; justify-content: center; padding: 30px;
-      backdrop-filter: blur(8px);
-    }
-    .perfume-card-3d img { width: 100%; height: 100%; object-fit: cover; filter: drop-shadow(0 10px 30px rgba(212,175,55,.4)); }
+.constellation {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: .22;
+  pointer-events: none;
+}
 
-    .hero-content { position: absolute; bottom: 40px; text-align: center; z-index: 11; width: 100%; padding: 0 15px; }
-    .brand-title { font-size: 72px; font-weight: 300; letter-spacing: 12px; background: linear-gradient(135deg, #fff 0, #d4af37 50%, #fff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; text-transform: uppercase; }
-    .brand-tagline { font-size: 20px; font-style: italic; color: var(--primary-gold); letter-spacing: 4px; }
+.carousel-wrapper {
+  perspective: 1500px;
+  width: 100%;
+  max-width: 700px;
+  height: 500px;
+  position: relative;
+  z-index: 10;
+  margin: 0 auto;
+}
 
-    /* --- PRODUCTS SECTION --- */
-    .products-section { background: #0a0a0a; position: relative; z-index: 5; padding: 40px 20px 80px 20px; }
-    .section-header { text-align: center; padding: 20px; max-width: 1000px; margin: 0 auto 30px; }
-    .section-title { font-size: 40px; font-weight: 300; margin-bottom: 8px; letter-spacing: 2px; color: var(--text-light); }
-    .section-description { font-size: 15px; color: var(--text-muted); }
+.carousel-3d {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: autoRotate 40s linear infinite;
+}
 
-    .site-wrapper { max-width: 1400px; margin: 0 auto; padding: 0 15px; }
-    .layout { display: flex; gap: 30px; align-items: flex-start; }
+.carousel-3d:hover {
+  animation-play-state: paused;
+}
 
-    /* --- SEARCH BAR --- */
-    .shop-search-bar { margin: 0 auto 30px; display: flex; justify-content: center; width: 100%; }
-    .shop-search-form { width: 100%; max-width: 500px; position: relative; }
-    .shop-search-input {
-      width: 100%; padding: 14px 45px 14px 20px; border-radius: 50px;
-      border: 1px solid var(--primary-gold); font-size: 15px;
-      background: rgba(20,20,20,0.9); color: var(--text-light); transition: 0.3s;
-    }
-    .shop-search-input:focus { outline: none; box-shadow: 0 0 0 4px rgba(212,175,55,0.15); background: #000; }
-    .shop-search-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; color: var(--primary-gold); font-size: 18px; }
-    .shop-clear-btn { position: absolute; right: 45px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; color: var(--primary-gold); display: none; }
+@keyframes autoRotate {
+  from { transform: rotateY(0); }
+  to { transform: rotateY(360deg); }
+}
 
-    /* --- FILTERS SIDEBAR --- */
-    /* --- IMPROVED FILTER SECTION (Better Spacing & Alignment) --- */
-    .filters {
-      width: 280px; 
-      flex-shrink: 0; 
-      background: #111; /* Dark background */
-      border-radius: 12px; 
-      border: 1px solid rgba(212, 175, 55, 0.2); /* Subtle gold border */
-      position: sticky; 
-      top: 20px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
+.carousel-item {
+  position: absolute;
+  width: 200px;
+  height: 300px;
+  left: 50%;
+  top: 50%;
+  transform-style: preserve-3d;
+  transition: all .6s;
+}
 
-    .filter-header {
-      background: #161616; 
-      padding: 25px 30px; /* Increased padding */
-      border-bottom: 1px solid rgba(255,255,255,0.08); 
-      border-radius: 12px 12px 0 0; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center;
-    }
+.carousel-item:hover {
+  transform: scale(1.15) translateZ(50px) !important;
+}
 
-    .filter-header h4 { 
-      font-size: 16px; 
-      font-weight: 700; 
-      letter-spacing: 1.5px; 
-      color: #fff; 
-      margin: 0; 
-      text-transform: uppercase;
-    }
+.perfume-card-3d {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, rgba(40,40,40,.9), rgba(20,20,20,.9));
+  border-radius: 20px;
+  border: 2px solid rgba(212,175,55,.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  backdrop-filter: blur(8px);
+}
 
-    .filter-content { 
-      padding: 30px 25px; 
-      max-height: 70vh; 
-      overflow-y: auto; 
-    }
+.perfume-card-3d img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: drop-shadow(0 10px 30px rgba(212,175,55,.4));
+}
 
-    /* Custom Gold Scrollbar */
-    .filter-content::-webkit-scrollbar { width: 4px; }
-    .filter-content::-webkit-scrollbar-track { background: #1a1a1a; }
-    .filter-content::-webkit-scrollbar-thumb { background: var(--primary-gold); border-radius: 4px; }
+.hero-content {
+  position: absolute;
+  bottom: 40px;
+  text-align: center;
+  z-index: 11;
+  width: 100%;
+  padding: 0 15px;
+}
 
-    .filter-section { 
-      margin-bottom: 35px; /* More space between sections */
-      border-bottom: 1px solid rgba(255,255,255,0.05); /* Divider line */
-      padding-bottom: 20px;
-    }
-    .filter-section:last-child { 
-      margin-bottom: 0; 
-      border-bottom: none; 
-      padding-bottom: 0; 
-    }
+.brand-title {
+  font-size: 72px;
+  font-weight: 300;
+  letter-spacing: 12px;
+  background: linear-gradient(135deg, #fff 0, #d4af37 50%, #fff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
 
-    .filter-section h5 { 
-      font-size: 13px; 
-      font-weight: 700; 
-      color: var(--primary-gold); 
-      margin-bottom: 18px; 
-      text-transform: uppercase; 
-      letter-spacing: 1.2px; 
-    }
+.brand-tagline {
+  font-size: 20px;
+  font-style: italic;
+  color: var(--primary-gold);
+  letter-spacing: 4px;
+}
 
-    .filter-option { 
-      display: flex; 
-      align-items: center; 
-      margin-bottom: 14px; /* Increased spacing between options */
-      cursor: pointer; 
-      transition: 0.2s; 
-    }
-    
-    .filter-option label { 
-      display: flex; 
-      align-items: center; 
-      width: 100%; 
-      font-size: 14px; 
-      color: #bbbbbb; /* Softer text color */
-      cursor: pointer;
-      line-height: 1.5;
-      font-weight: 400;
-    }
-    .filter-option:hover label { color: #fff; }
+.products-section {
+  background: #020202;
+  position: relative;
+  z-index: 5;
+  padding: 40px 20px 80px 20px;
+}
 
-    /* Custom Inputs (Checkboxes & Radios) */
-    .filter-option input { 
-      appearance: none; 
-      -webkit-appearance: none;
-      width: 18px; 
-      height: 18px; 
-      border: 2px solid #444; 
-      border-radius: 4px; 
-      margin-right: 15px; 
-      background: transparent;
-      position: relative; 
-      cursor: pointer; 
-      transition: all 0.2s ease; 
-      flex-shrink: 0;
-    }
-    
-    .filter-option input[type="radio"] { border-radius: 50%; }
+.section-header {
+  text-align: center;
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto 30px;
+}
 
-    .filter-option input:checked { 
-      background: var(--primary-gold); 
-      border-color: var(--primary-gold); 
-    }
+.section-title {
+  font-size: 40px;
+  font-weight: 300;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  color: var(--text-light);
+}
 
-    /* Checkbox Tick */
-    .filter-option input[type="checkbox"]:checked::after {
-      content: '✓'; 
-      position: absolute; 
-      font-size: 12px; 
-      color: #000;
-      font-weight: bold;
-      top: 50%; left: 50%; 
-      transform: translate(-50%, -50%); 
-    }
-    
-    /* Radio Dot */
-    .filter-option input[type="radio"]:checked::after {
-      content: '';
-      width: 8px; height: 8px;
-      background: #000;
-      border-radius: 50%;
-      position: absolute;
-      top: 50%; left: 50%; 
-      transform: translate(-50%, -50%);
-    }
+.section-description {
+  font-size: 15px;
+  color: var(--text-muted);
+}
 
-    .filter-actions { 
-      padding: 25px; 
-      border-top: 1px solid rgba(255,255,255,0.08); 
-      background: #161616; 
-      display: flex; 
-      gap: 15px; 
-      border-radius: 0 0 12px 12px; 
-    }
-    .btn { padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; flex: 1; transition: 0.3s; }
-    .btn-primary { background: var(--primary-gold); color: #000; }
-    .btn-primary:hover { box-shadow: 0 0 15px rgba(212,175,55,0.4); }
-    .btn-secondary { background: transparent; color: var(--primary-gold); border: 1px solid var(--primary-gold); }
-    .btn-secondary:hover { background: rgba(212,175,55,0.1); }
+.site-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
 
-    /* --- MODERN PRODUCT CARD DESIGN --- */
-    .products-container { flex: 1; width: 100%; }
-    .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; }
+.layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
 
-    .product-card {
-      background: #111;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      overflow: hidden;
-      position: relative;
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      display: flex; flex-direction: column;
-      height: 100%;
-    }
+.shop-search-bar {
+  margin: 0 auto 30px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
 
-    .product-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-      border-color: var(--primary-gold);
-    }
+.shop-search-form {
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+}
 
-    .product-image-wrapper {
-      position: relative;
-      width: 100%;
-      padding-top: 110%;
-      background: radial-gradient(circle at center, #2a2a2a, #0f0f0f);
-      overflow: hidden;
-    }
+.shop-search-input {
+  width: 100%;
+  padding: 14px 45px 14px 20px;
+  border-radius: 50px;
+  border: 1px solid var(--primary-gold);
+  font-size: 15px;
+  background: rgba(20,20,20,0.9);
+  color: var(--text-light);
+  transition: 0.3s;
+}
 
-    .product-image-wrapper img {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      object-fit: cover; transition: transform 0.6s ease;
-    }
+.shop-search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(212,175,55,0.15);
+  background: #000;
+}
 
-    .product-card:hover .product-image-wrapper img { transform: scale(1.08); }
+.shop-search-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--primary-gold);
+  font-size: 18px;
+}
 
-    /* Modern Wishlist Button */
-    .product-actions { position: absolute; top: 12px; right: 12px; z-index: 5; }
-    .action-btn {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.3s ease;
-      color: #fff;
-    }
-    .action-btn:hover { background: var(--primary-gold); color: #000; border-color: var(--primary-gold); transform: scale(1.1); }
-    .action-btn.active { background: var(--primary-gold); color: #000; }
+.shop-clear-btn {
+  position: absolute;
+  right: 45px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--primary-gold);
+  display: none;
+}
 
-    /* Modern Offer Badge */
-    .offer-badge {
-      position: absolute; top: 12px; left: 12px;
-      background: rgba(0,0,0,0.8);
-      border: 1px solid var(--primary-gold);
-      color: var(--primary-gold);
-      padding: 4px 10px; border-radius: 30px;
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 0.5px; z-index: 5;
-      backdrop-filter: blur(4px);
-    }
+.filters {
+  width: 280px;
+  flex-shrink: 0;
+  background: #111;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
 
-    .product-info { padding: 18px; display: flex; flex-direction: column; flex: 1; gap: 5px; }
-    
-    .product-category { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #666; font-weight: 700; }
-    
-    .product-name {
-      font-size: 16px; color: #fff; margin-bottom: 8px; font-weight: 500;
-      line-height: 1.3;
-      transition: color 0.3s;
-    }
-    .product-card:hover .product-name { color: var(--primary-gold); }
+.filters,
+.filter-section,
+.filter-option label {
+  color: #fff !important;
+}
 
-    .product-pricing { margin-top: auto; display: flex; align-items: baseline; gap: 10px; }
-    .sale-price { font-size: 18px; font-weight: 700; color: var(--primary-gold); }
-    .regular-price { font-size: 13px; text-decoration: line-through; color: #555; }
+.filter-header {
+  background: #161616;
+  padding: 25px 30px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-    .empty-state { grid-column: 1/-1; text-align: center; padding: 60px; color: #666; }
+.filter-header h4 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #fff;
+  margin: 0;
+  text-transform: uppercase;
+}
 
-    /* --- MODERN TOAST NOTIFICATION CSS --- */
-    .custom-toast-container {
-      position: fixed; top: 20px; right: 20px; z-index: 99999;
-      display: flex; flex-direction: column; gap: 10px; pointer-events: none;
-    }
-    .custom-toast {
-      pointer-events: auto;
-      background: rgba(20, 20, 20, 0.95);
-      border: 1px solid var(--primary-gold);
-      color: #fff;
-      padding: 16px 20px;
-      border-radius: 12px;
-      min-width: 300px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      display: flex; align-items: center; gap: 15px;
-      transform: translateX(100%);
-      opacity: 0;
-      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-      backdrop-filter: blur(8px);
-    }
-    .custom-toast.show { transform: translateX(0); opacity: 1; }
-    .custom-toast-icon { 
-      width: 30px; height: 30px; border-radius: 50%; 
-      background: var(--primary-gold-dim); color: var(--primary-gold);
-      display: flex; align-items: center; justify-content: center; font-size: 14px;
-    }
-    .custom-toast-content h4 { margin: 0; font-size: 14px; font-weight: 700; color: var(--primary-gold); }
-    .custom-toast-content p { margin: 2px 0 0; font-size: 12px; color: #ccc; }
+.filter-content {
+  padding: 30px 25px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
 
-    /* --- RESPONSIVE --- */
-    .filters-toggle { display: none; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary-gold), #b89628); color: #000; font-weight: 700; border-radius: 8px; border: none; margin-bottom: 20px; cursor: pointer; text-transform: uppercase; }
-    .filter-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 998; backdrop-filter: blur(3px); }
+.filter-content::-webkit-scrollbar {
+  width: 4px;
+}
 
-    @media (max-width: 1280px) { .products-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 991px) {
-      .layout { flex-direction: column; }
-      .filters { position: fixed; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100vh; z-index: 1000; transition: left 0.3s; border-radius: 0; border-right: 1px solid var(--primary-gold); }
-      .filters.show { left: 0; }
-      .filters-toggle, .filter-overlay.show { display: block; }
-      #closeFilter { display: block !important; color: #fff; font-size: 20px; }
-      .products-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    }
-    @media (max-width: 768px) {
-      .hero-section { min-height: 70vh; }
-      .carousel-wrapper { height: 350px; perspective: 800px; }
-      .carousel-item { width: 140px; height: 220px; }
-      .brand-title { font-size: 42px; letter-spacing: 6px; }
-      .products-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-      .site-wrapper { padding: 0 10px; }
-    }
-    @media (max-width: 480px) {
-      .carousel-wrapper { height: 300px; }
-      .carousel-item { width: 110px; height: 180px; }
-      .brand-title { font-size: 32px; letter-spacing: 4px; }
-      .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .shop-search-input { font-size: 14px; padding-left: 15px; }
-    }
+.filter-content::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
 
+.filter-content::-webkit-scrollbar-thumb {
+  background: var(--primary-gold);
+  border-radius: 4px;
+}
 
-    /* PRODUCT RATING (SHOP + ZODIAC PAGE) */
+.filter-section {
+  margin-bottom: 35px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 20px;
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.filter-section h5 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-gold);
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.filter-option label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font-size: 14px;
+  color: #bbbbbb;
+  cursor: pointer;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.filter-option:hover label {
+  color: #fff;
+}
+
+.filter-option input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #444;
+  border-radius: 4px;
+  margin-right: 15px;
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.filter-option input[type="radio"] {
+  border-radius: 50%;
+}
+
+.filter-option input:checked {
+  background: var(--primary-gold);
+  border-color: var(--primary-gold);
+}
+
+.filter-option input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  font-size: 12px;
+  color: #000;
+  font-weight: bold;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.filter-option input[type="radio"]:checked::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #000;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.filter-actions {
+  padding: 25px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: #161616;
+  display: flex;
+  gap: 15px;
+  border-radius: 0 0 12px 12px;
+}
+
+.btn {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  flex: 1;
+  transition: 0.3s;
+}
+
+.btn-primary {
+  background: var(--primary-gold);
+  color: #000;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 15px rgba(212,175,55,0.4);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary-gold);
+  border: 1px solid var(--primary-gold);
+}
+
+.btn-secondary:hover {
+  background: rgba(212,175,55,0.1);
+}
+
+.products-container {
+  flex: 1;
+  width: 100%;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+}
+
+.product-card {
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  border-color: var(--primary-gold);
+}
+
+.product-image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 110%;
+  background: radial-gradient(circle at center, #2a2a2a, #0f0f0f);
+  overflow: hidden;
+}
+
+.product-image-wrapper img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.product-card:hover .product-image-wrapper img {
+  transform: scale(1.08);
+}
+
+.product-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+}
+
+.action-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.action-btn:hover {
+  background: var(--primary-gold);
+  color: #000;
+  border-color: var(--primary-gold);
+  transform: scale(1.1);
+}
+
+.action-btn.active {
+  background: var(--primary-gold);
+  color: #000;
+}
+
+.offer-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0,0,0,0.8);
+  border: 1px solid var(--primary-gold);
+  color: var(--primary-gold);
+  padding: 4px 10px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+}
+
+.product-info {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 5px;
+}
+
+.product-category {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #666;
+  font-weight: 700;
+}
+
+.product-name {
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 8px;
+  font-weight: 500;
+  line-height: 1.3;
+  transition: color 0.3s;
+}
+
+.product-card:hover .product-name {
+  color: var(--primary-gold);
+}
+
+.product-pricing {
+  margin-top: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.sale-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-gold);
+}
+
+.regular-price {
+  font-size: 13px;
+  text-decoration: line-through;
+  color: #555;
+}
+
+.empty-state {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px;
+  color: #666;
+}
+
+.custom-toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.custom-toast {
+  pointer-events: auto;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid var(--primary-gold);
+  color: #fff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  min-width: 300px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  backdrop-filter: blur(8px);
+}
+
+.custom-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.custom-toast-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--primary-gold-dim);
+  color: var(--primary-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.custom-toast-content h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-gold);
+}
+
+.custom-toast-content p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.filters-toggle {
+  display: none;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--primary-gold), #b89628);
+  color: #000;
+  font-weight: 700;
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 20px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.filter-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 998;
+  backdrop-filter: blur(3px);
+}
+
+@media (max-width: 1280px) {
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 991px) {
+  .layout {
+    flex-direction: column;
+  }
+  .filters {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s;
+    border-radius: 0;
+    border-right: 1px solid var(--primary-gold);
+  }
+  .filters.show {
+    left: 0;
+  }
+  .filters-toggle,
+  .filter-overlay.show {
+    display: block;
+  }
+  #closeFilter {
+    display: block !important;
+    color: #fff;
+    font-size: 20px;
+  }
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 70vh;
+  }
+  .carousel-wrapper {
+    height: 350px;
+    perspective: 800px;
+  }
+  .carousel-item {
+    width: 140px;
+    height: 220px;
+  }
+  .brand-title {
+    font-size: 42px;
+    letter-spacing: 6px;
+  }
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  .site-wrapper {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-wrapper {
+    height: 300px;
+  }
+  .carousel-item {
+    width: 110px;
+    height: 180px;
+  }
+  .brand-title {
+    font-size: 32px;
+    letter-spacing: 4px;
+  }
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .shop-search-input {
+    font-size: 14px;
+    padding-left: 15px;
+  }
+}
+
 .product-rating {
   display: flex;
   align-items: center;
@@ -437,154 +821,184 @@
 
     
   </style>
-</head>
-<body>
 
-  <div class="header-section">
-    <%- include("../partials/user/header.ejs") %>
-  </div>
+  </head>
+  <body>
 
-  <section class="hero-section">
-    <div class="particles-container" id="particlesContainer"></div>
-    <canvas class="constellation" id="constellation"></canvas>
-    
-    <div class="carousel-wrapper">
-      <div class="carousel-3d" id="carousel3d"></div>
+    <div class="header-section">
+      <%- include("../partials/user/header.ejs", { isZodiac }) %>
+
     </div>
 
-    <div class="hero-content">
-      <h1 class="brand-title">SENTIQUE</h1>
-      <p class="brand-tagline">Scent Your Signature</p>
-    </div>
-  </section>
+    <section class="hero-section">
+      <div class="particles-container" id="particlesContainer"></div>
+      <canvas class="constellation" id="constellation"></canvas>
 
-  <section class="products-section">
-    <div class="section-header">
-      <h2 class="section-title">Signature Collection</h2>
-      <p class="section-description">Discover fragrances crafted for your element.</p>
-    </div>
-
-    <div class="shop-search-bar">
-      <form class="shop-search-form">
-        <input type="text" id="searchInput" class="shop-search-input" placeholder="Search..." value="<%= search || '' %>">
-        <button type="button" id="clearSearchBtn" class="shop-clear-btn"><i class="fa fa-times"></i></button>
-        <button type="submit" class="shop-search-btn"><i class="fa fa-search"></i></button>
-      </form>
-    </div>
-
-    <div class="site-wrapper">
-      <button id="toggleFilters" class="filters-toggle"><i class="fa fa-filter"></i> Filters</button>
-      <div id="filterOverlay" class="filter-overlay"></div>
-
-      <div class="layout">
-        <aside id="filters" class="filters">
-          <div class="filter-header">
-            <h4>Filters</h4>
-            <i class="fa fa-times" id="closeFilter" style="display:none;"></i>
-          </div>
-          <div class="filter-content">
-            <form id="filterForm">
-              <div class="filter-section">
-                <h5>Category</h5>
-                <% if (categories && categories.length) { %>
-                  <% categories.forEach(cat => { %>
-                    <label class="filter-option"><input type="checkbox" name="category" value="<%= cat._id %>"> <%= cat.name %></label>
-                  <% }) %>
-                <% } %>
-              </div>
-              <div class="filter-section">
-                <h5>Price</h5>
-                <label class="filter-option"><input type="radio" name="price" value="0-2000"> Under ₹2,000</label>
-                <label class="filter-option"><input type="radio" name="price" value="2000-5000"> ₹2,000 - ₹5,000</label>
-                <label class="filter-option"><input type="radio" name="price" value="5000+"> Above ₹5,000</label>
-                <label class="filter-option"><input type="radio" name="price" value="" checked> All</label>
-              </div>
-              <div class="filter-section">
-                <h5>Sort</h5>
-                <label class="filter-option"><input type="radio" name="sort" value="newest" checked> Newest</label>
-                <label class="filter-option"><input type="radio" name="sort" value="price-low"> Price Low-High</label>
-                <label class="filter-option"><input type="radio" name="sort" value="price-high"> Price High-Low</label>
-              </div>
-            </form>
-          </div>
-          <div class="filter-actions">
-            <button class="btn btn-secondary" onclick="clearFilters()">Reset</button>
-            <button class="btn btn-primary" id="applyFiltersBtn">Apply</button>
-          </div>
-        </aside>
-
-        <main class="products-container">
-          <div id="productsGrid" class="products-grid">
-            <% if (products && products.length > 0) { %>
-              <% products.forEach(product => { %>
-                <%
-                  let salePrice = 0, regularPrice = 0, discount = 0;
-                  if (product.variants && product.variants.length > 0) {
-                    const cheapest = product.variants.reduce((min, curr) => (curr.salePrice || curr.regularPrice) < (min.salePrice || min.regularPrice) ? curr : min);
-                    salePrice = cheapest.salePrice || cheapest.regularPrice || 0;
-                    regularPrice = cheapest.regularPrice || salePrice;
-                  } else {
-                    salePrice = product.salePrice || product.price || 0;
-                    regularPrice = product.regularPrice || product.price || 0;
-                  }
-                  if (regularPrice > salePrice) discount = Math.round(((regularPrice - salePrice)/regularPrice)*100);
-                  const imgSrc = (product.images && product.images.length > 0) ? (typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url) : 'https://via.placeholder.com/400';
-                %>
-                <article class="product-card" data-id="<%= product._id %>">
-                  <div class="product-image-wrapper">
-                    <a href="/productDetails?id=<%= product._id %>"><img src="<%= imgSrc %>" alt="<%= product.productName %>"></a>
-                    <div class="product-actions"><button class="action-btn" onclick="toggleWishlist('<%= product._id %>')"><i class="fa fa-heart"></i></button></div>
-                    <% if(discount > 0){ %><div class="offer-badge"><%= discount %>% OFF</div><% } %>
-                  </div>
-                  <div class="product-info">
-                    <div class="product-category"><%= product.category ? product.category.name : 'Perfume' %></div>
-                    <div class="product-name"><%= product.productName %></div>
-                    <div class="product-pricing">
-                      <span class="sale-price">₹<%= salePrice.toLocaleString('en-IN') %></span>
-                      <% if(discount > 0){ %><span class="regular-price">₹<%= regularPrice.toLocaleString('en-IN') %></span><% } %>
-                    </div>
-                    <%
-  const rating = product.averageRating || 0;
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-%>
-
-<div class="product-rating">
-  <% for(let i = 0; i < fullStars; i++) { %>
-    <i class="fa fa-star"></i>
-  <% } %>
-
-  <% if(halfStar) { %>
-    <i class="fa fa-star-half-alt"></i>
-  <% } %>
-
-  <% for(let i = 0; i < emptyStars; i++) { %>
-    <i class="fa fa-star empty"></i>
-  <% } %>
-
-  <span class="rating-text">
-    (<%= product.totalReviews || 0 %> ratings) %> 
-  </span>
-</div>
-
-                  </div>
-                </article>
-              <% }) %>
-            <% } else { %>
-              <div class="empty-state"><h3>No products found</h3></div>
-            <% } %>
-          </div>
-        </main>
+      <div class="carousel-wrapper">
+        <div class="carousel-3d" id="carousel3d"></div>
       </div>
-    </div>
-  </section>
 
-  <div id="customToastContainer" class="custom-toast-container"></div>
+      <div class="hero-content">
+        <h1 class="brand-title">SENTIQUE</h1>
+        <p class="brand-tagline">Scent Your Signature</p>
+      </div>
+    </section>
 
-  <%- include("../partials/user/footer.ejs") %>
+    <section class="products-section">
+      <div class="section-header">
+        <h2 class="section-title">Signature Collection</h2>
+        <p class="section-description">Discover fragrances crafted for your
+          element.</p>
+      </div>
 
-<script>
+      <div class="shop-search-bar">
+        <form class="shop-search-form">
+          <input type="text" id="searchInput" class="shop-search-input"
+            placeholder="Search..." value="<%= search || '' %>">
+          <button type="button" id="clearSearchBtn" class="shop-clear-btn"><i
+              class="fa fa-times"></i></button>
+          <button type="submit" class="shop-search-btn"><i
+              class="fa fa-search"></i></button>
+        </form>
+      </div>
+
+      <div class="site-wrapper">
+        <button id="toggleFilters" class="filters-toggle"><i
+            class="fa fa-filter"></i> Filters</button>
+        <div id="filterOverlay" class="filter-overlay"></div>
+
+        <div class="layout">
+          <aside id="filters" class="filters">
+            <div class="filter-header">
+              <h4>Filters</h4>
+              <i class="fa fa-times" id="closeFilter" style="display:none;"></i>
+            </div>
+            <div class="filter-content">
+              <form id="filterForm">
+                <div class="filter-section">
+                  <h5>Category</h5>
+                  <% if (categories && categories.length) { %>
+                  <% categories.forEach(cat => { %>
+                  <label class="filter-option"><input type="checkbox"
+                      name="category" value="<%= cat._id %>"> <%= cat.name
+                    %></label>
+                  <% }) %>
+                  <% } %>
+                </div>
+                <div class="filter-section">
+                  <h5>Price</h5>
+                  <label class="filter-option"><input type="radio" name="price"
+                      value="0-2000"> Under ₹2,000</label>
+                  <label class="filter-option"><input type="radio" name="price"
+                      value="2000-5000"> ₹2,000 - ₹5,000</label>
+                  <label class="filter-option"><input type="radio" name="price"
+                      value="5000+"> Above ₹5,000</label>
+                  <label class="filter-option"><input type="radio" name="price"
+                      value checked> All</label>
+                </div>
+                <div class="filter-section">
+                  <h5>Sort</h5>
+                  <label class="filter-option"><input type="radio" name="sort"
+                      value="newest" checked> Newest</label>
+                  <label class="filter-option"><input type="radio" name="sort"
+                      value="price-low"> Price Low-High</label>
+                  <label class="filter-option"><input type="radio" name="sort"
+                      value="price-high"> Price High-Low</label>
+                </div>
+              </form>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-secondary"
+                onclick="clearFilters()">Reset</button>
+              <button class="btn btn-primary"
+                id="applyFiltersBtn">Apply</button>
+            </div>
+          </aside>
+
+          <main class="products-container">
+            <div id="productsGrid" class="products-grid">
+              <% if (products && products.length > 0) { %>
+              <% products.forEach(product => { %>
+              <%
+              let salePrice = 0, regularPrice = 0, discount = 0;
+              if (product.variants && product.variants.length > 0) {
+              const cheapest = product.variants.reduce((min, curr) =>
+              (curr.salePrice || curr.regularPrice) < (min.salePrice ||
+              min.regularPrice) ? curr : min);
+              salePrice = cheapest.salePrice || cheapest.regularPrice || 0;
+              regularPrice = cheapest.regularPrice || salePrice;
+              } else {
+              salePrice = product.salePrice || product.price || 0;
+              regularPrice = product.regularPrice || product.price || 0;
+              }
+              if (regularPrice > salePrice) discount = Math.round(((regularPrice
+              - salePrice)/regularPrice)*100);
+              const imgSrc = (product.images && product.images.length > 0) ?
+              (typeof product.images[0] === 'string' ? product.images[0] :
+              product.images[0].url) : 'https://via.placeholder.com/400';
+              %>
+              <article class="product-card" data-id="<%= product._id %>">
+                <div class="product-image-wrapper">
+                  <a href="/productDetails?id=<%= product._id %>"><img
+                      src="<%= imgSrc %>" alt="<%= product.productName %>"></a>
+                  <div class="product-actions"><button class="action-btn"
+                      onclick="toggleWishlist('<%= product._id %>')"><i
+                        class="fa fa-heart"></i></button></div>
+                  <% if(discount > 0){ %><div class="offer-badge"><%= discount
+                    %>% OFF</div><% } %>
+                </div>
+                <div class="product-info">
+                  <div class="product-category"><%= product.category ?
+                    product.category.name : 'Perfume' %></div>
+                  <div class="product-name"><%= product.productName %></div>
+                  <div class="product-pricing">
+                    <span class="sale-price">₹<%=
+                      salePrice.toLocaleString('en-IN') %></span>
+                    <% if(discount > 0){ %><span class="regular-price">₹<%=
+                      regularPrice.toLocaleString('en-IN') %></span><% } %>
+                  </div>
+                  <%
+                  const rating = product.averageRating || 0;
+                  const fullStars = Math.floor(rating);
+                  const halfStar = rating % 1 >= 0.5;
+                  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                  %>
+
+                  <div class="product-rating">
+                    <% for(let i = 0; i < fullStars; i++) { %>
+                    <i class="fa fa-star"></i>
+                    <% } %>
+
+                    <% if(halfStar) { %>
+                    <i class="fa fa-star-half-alt"></i>
+                    <% } %>
+
+                    <% for(let i = 0; i < emptyStars; i++) { %>
+                    <i class="fa fa-star empty"></i>
+                    <% } %>
+
+                    <span class="rating-text">
+                      (<%= product.totalReviews || 0 %> ratings) %>
+                    </span>
+                  </div>
+
+                </div>
+              </article>
+              <% }) %>
+              <% } else { %>
+              <div class="empty-state"><h3>No products found</h3></div>
+              <% } %>
+            </div>
+          </main>
+        </div>
+      </div>
+    </section>
+
+    <div id="customToastContainer" class="custom-toast-container"></div>
+
+    <%- include("../partials/user/footer.ejs") %>
+
+    <script>
     const initialProducts = <%- JSON.stringify(products || []) %>;
 
    
@@ -811,5 +1225,5 @@
       .catch(err => showModernToast('error', 'Error', 'Could not update wishlist'));
     };
 </script>
-</body>
+  </body>
 </html>

@@ -1,9 +1,8 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-/* =========================================
-   1. THEME ENGINE (CSS Variables)
-   ========================================= */
+
 :root {
     /* --- Light Mode (Default) --- */
     --bg-body: #ffffff;
@@ -19,7 +18,7 @@
     --icon-color: #000000;
     --hover-color: #f3f4f6;
     
-    /* Logo: Default (Black) */
+    
     --logo-filter: none;
     
     --shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -45,9 +44,7 @@ body.dark-mode {
     --shadow: 0 4px 15px rgba(0,0,0,0.6);
 }
 
-/* =========================================
-   2. GLOBAL STYLES
-   ========================================= */
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -60,7 +57,6 @@ body {
 
 a { text-decoration: none; color: var(--text-main); transition: 0.3s; }
 
-/* --- Top Bar --- */
 .top-bar {
     background-color: var(--bg-topbar);
     color: var(--text-topbar);
@@ -278,19 +274,16 @@ nav.nav-links a:hover, nav.nav-links a.active {
 
 </style>
 
-
-
 <header class="navbar">
 
-        <div class="hamburger" id="hamburger">
+    <div class="hamburger" id="hamburger">
         <i class="fa fa-bars"></i>
     </div>
 
     <div class="nav-logo">
-        <a href="/home"><img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo"></a>
+        <a href="/home"><img src="/photos/zodiac perfume/brand logo.png"
+                alt="Sentique Logo"></a>
     </div>
-
-
 
     <nav class="nav-links" id="navLinks">
         <a href="/home">Home</a>
@@ -300,10 +293,13 @@ nav.nav-links a:hover, nav.nav-links a.active {
     </nav>
 
     <div class="nav-icons">
-        
+
+        <% if (typeof isZodiac === 'undefined' || !isZodiac) { %>
+
         <button id="themeToggle" class="theme-toggle-btn">
             <i id="themeIcon" class="fas fa-moon"></i>
         </button>
+        <% } %>
 
         <a href="/wishlist" title="Wishlist" id="wishlistLink">
             <i class="fa fa-heart"></i>
@@ -320,7 +316,7 @@ nav.nav-links a:hover, nav.nav-links a.active {
             <button class="user-icon-btn" id="userIconBtn">
                 <i class="fa fa-user-circle"></i>
             </button>
-            
+
             <div class="dropdown-content" id="userDropdown">
                 <div class="user-name-box">
                     Hello, <%= user.name %>
@@ -331,8 +327,8 @@ nav.nav-links a:hover, nav.nav-links a.active {
             </div>
         </div>
         <% } else { %>
-            <a href="/login" style="font-size: 14px; font-weight: 600;">Login</a>
-            <a href="/signup" style="font-size: 14px; font-weight: 600;">Sign Up</a>
+        <a href="/login" style="font-size: 14px; font-weight: 600;">Login</a>
+        <a href="/signup" style="font-size: 14px; font-weight: 600;">Sign Up</a>
         <% } %>
 
     </div>
@@ -342,16 +338,16 @@ nav.nav-links a:hover, nav.nav-links a.active {
         <a href="/shopPage">Shop</a>
         <a href="/contact">Contact</a>
         <a href="/">About</a>
-        
+
         <hr style="border: 0; border-top: 1px solid var(--border-color);">
 
         <% if (!user) { %>
-            <a href="/login">Login</a>
-            <a href="/signup">Sign Up</a>
+        <a href="/login">Login</a>
+        <a href="/signup">Sign Up</a>
         <% } else { %>
-            <a href="/profile">My Profile</a>
-            <a href="/profile/order-list">My Orders</a>
-            <a href="/logout" style="color: #ef4444;">Logout</a>
+        <a href="/profile">My Profile</a>
+        <a href="/profile/order-list">My Orders</a>
+        <a href="/logout" style="color: #ef4444;">Logout</a>
         <% } %>
     </nav>
 
@@ -437,4 +433,10 @@ function updateBadges() {
 }
 
 document.addEventListener("DOMContentLoaded", updateBadges);
+
+if (<%= isZodiac ? 'true' : 'false' %>) {
+    document.body.classList.add("dark-mode");
+    document.getElementById("themeToggle")?.remove();
+}
+
 </script>

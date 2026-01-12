@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coupon Management System</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Coupon Management System</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>
         :root {
             --primary: #0f766e;
             --primary-light: #14b8a6;
@@ -704,167 +704,194 @@
             }
         }
     </style>
-</head>
+    </head>
 
+    <body>
+        <div class="sidebar">
+            <%- include("../partials/admin/header.ejs") %>
+        </div>
 
-<body>
-    <div class="sidebar">
-       <%- include("../partials/admin/header.ejs") %>
-    </div>
-
-    <div class="main-content">
-        <div class="container">
-            <div class="header">
-                <h1>🎟️ Coupon Management System</h1>
-                <p>Manage your promotional coupons efficiently</p>
-            </div>
-
-            <div class="action-bar">
-                <button class="add-btn" onclick="openAddModal()">+ Add New Coupon</button>
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Search coupon..." onkeyup="filterCoupons()">
+        <div class="main-content">
+            <div class="container">
+                <div class="header">
+                    <h1>🎟️ Coupon Management System</h1>
+                    <p>Manage your promotional coupons efficiently</p>
                 </div>
-            </div>
 
-            <div class="table-container">
-                <table id="couponsTable">
-                    <thead>
-                        <tr>
-                            <th>Coupon Code</th>
-                            <th>Coupon Name</th>
-                            <th>Details</th>
-                            <th>Offer</th>
-                            <th>Min Purchase</th>
-                            <th>Usage</th>
-                            <th>Status</th>
-                            <th>Action Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="couponsBody">
-                    </tbody>
-                </table>
-                <div id="emptyState" class="empty-state" style="display: none;">
-                    <h3>No Coupons Found</h3>
-                    <p>Start by adding your first coupon</p>
+                <div class="action-bar">
+                    <button class="add-btn" onclick="openAddModal()">+ Add New
+                        Coupon</button>
+                    <div class="search-bar">
+                        <input type="text" id="searchInput"
+                            placeholder="Search coupon..."
+                            onkeyup="filterCoupons()">
+                    </div>
                 </div>
-            </div>
 
-            <div class="pagination-container">
-                <button class="pagination-btn" onclick="previousPage()" id="prevBtn">← Previous</button>
-                <span class="pagination-info">
-                    Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
-                </span>
-                <button class="pagination-btn" onclick="nextPage()" id="nextBtn">Next →</button>
+                <div class="table-container">
+                    <table id="couponsTable">
+                        <thead>
+                            <tr>
+                                <th>Coupon Code</th>
+                                <th>Coupon Name</th>
+                                <th>Details</th>
+                                <th>Offer</th>
+                                <th>Min Purchase</th>
+                                <th>Usage</th>
+                                <th>Status</th>
+                                <th>Action Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="couponsBody">
+                        </tbody>
+                    </table>
+                    <div id="emptyState" class="empty-state"
+                        style="display: none;">
+                        <h3>No Coupons Found</h3>
+                        <p>Start by adding your first coupon</p>
+                    </div>
+                </div>
+
+                <div class="pagination-container">
+                    <button class="pagination-btn" onclick="previousPage()"
+                        id="prevBtn">← Previous</button>
+                    <span class="pagination-info">
+                        Page <span id="currentPage">1</span> of <span
+                            id="totalPages">1</span>
+                    </span>
+                    <button class="pagination-btn" onclick="nextPage()"
+                        id="nextBtn">Next →</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Add/Edit Modal -->
-    <div id="couponModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Add New Coupon</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+        <!-- Add/Edit Modal -->
+        <div id="couponModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Add New Coupon</h2>
+                    <button class="close-btn"
+                        onclick="closeModal()">&times;</button>
+                </div>
+
+                <form id="couponForm" onsubmit="saveCoupon(event)">
+                    <div class="form-group">
+                        <label for="couponCode">Coupon Code *</label>
+                        <input type="text" id="couponCode" required
+                            placeholder="e.g., SAVE20">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="couponName">Coupon Name *</label>
+                            <input type="text" id="couponName" required
+                                placeholder="e.g., Summer Sale">
+                        </div>
+                        <div class="form-group">
+                            <label for="usageLimit">Usage Limit *</label>
+                            <input type="number" id="usageLimit" required
+                                min="1" placeholder="e.g., 100">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Discount Type *</label>
+                        <div class="discount-type-group">
+                            <div class="discount-option">
+                                <input type="radio" id="discountPercent"
+                                    name="discountType" value="percent" checked
+                                    onchange="updateOfferLabel()">
+                                <label for="discountPercent">Percentage
+                                    (%)</label>
+                            </div>
+                            <div class="discount-option">
+                                <input type="radio" id="discountFixed"
+                                    name="discountType" value="fixed"
+                                    onchange="updateOfferLabel()">
+                                <label for="discountFixed">Fixed Amount
+                                    (₹)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Coupon Type *</label>
+                        <div class="discount-type-group">
+                            <div class="discount-option">
+                                <input type="radio" id="couponNormal"
+                                    name="couponType" value="normal" checked>
+                                <label for="couponNormal">Normal Coupon</label>
+                            </div>
+                            <div class="discount-option">
+                                <input type="radio" id="couponOneTime"
+                                    name="couponType" value="oneTime">
+                                <label for="couponOneTime">One-Time Use</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="offerAmount"><span id="offerLabel">Offer
+                                    Amount (%)</span> *</label>
+                            <input type="number" id="offerAmount" required
+                                min="0" placeholder="e.g., 20">
+                        </div>
+                        <div class="form-group">
+                            <label for="minPurchase">Minimum Purchase (₹)
+                                *</label>
+                            <input type="number" id="minPurchase" required
+                                min="0" placeholder="e.g., 500">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date *</label>
+                            <input type="date" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expireDate">Expiry Date *</label>
+                            <input type="date" id="expireDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-row full">
+                        <label for="description">Description</label>
+                        <textarea id="description"
+                            placeholder="Enter coupon description..."></textarea>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save
+                            Coupon</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <form id="couponForm" onsubmit="saveCoupon(event)">
-                <div class="form-group">
-                    <label for="couponCode">Coupon Code *</label>
-                    <input type="text" id="couponCode" required placeholder="e.g., SAVE20">
+        <!-- View Details Modal -->
+        <div id="detailsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Coupon Details</h2>
+                    <button class="close-btn"
+                        onclick="closeDetailsModal()">&times;</button>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="couponName">Coupon Name *</label>
-                        <input type="text" id="couponName" required placeholder="e.g., Summer Sale">
-                    </div>
-                    <div class="form-group">
-                        <label for="usageLimit">Usage Limit *</label>
-                        <input type="number" id="usageLimit" required min="1" placeholder="e.g., 100">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Discount Type *</label>
-                    <div class="discount-type-group">
-                        <div class="discount-option">
-                            <input type="radio" id="discountPercent" name="discountType" value="percent" checked onchange="updateOfferLabel()">
-                            <label for="discountPercent">Percentage (%)</label>
-                        </div>
-                        <div class="discount-option">
-                            <input type="radio" id="discountFixed" name="discountType" value="fixed" onchange="updateOfferLabel()">
-                            <label for="discountFixed">Fixed Amount (₹)</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Coupon Type *</label>
-                    <div class="discount-type-group">
-                        <div class="discount-option">
-                            <input type="radio" id="couponNormal" name="couponType" value="normal" checked>
-                            <label for="couponNormal">Normal Coupon</label>
-                        </div>
-                        <div class="discount-option">
-                            <input type="radio" id="couponOneTime" name="couponType" value="oneTime">
-                            <label for="couponOneTime">One-Time Use</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="offerAmount"><span id="offerLabel">Offer Amount (%)</span> *</label>
-                        <input type="number" id="offerAmount" required min="0" placeholder="e.g., 20">
-                    </div>
-                    <div class="form-group">
-                        <label for="minPurchase">Minimum Purchase (₹) *</label>
-                        <input type="number" id="minPurchase" required min="0" placeholder="e.g., 500">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="startDate">Start Date *</label>
-                        <input type="date" id="startDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="expireDate">Expiry Date *</label>
-                        <input type="date" id="expireDate" required>
-                    </div>
-                </div>
-
-                <div class="form-group form-row full">
-                    <label for="description">Description</label>
-                    <textarea id="description" placeholder="Enter coupon description..."></textarea>
-                </div>
+                <div id="detailsContent"></div>
 
                 <div class="modal-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Coupon</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeDetailsModal()">Close</button>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- View Details Modal -->
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Coupon Details</h2>
-                <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
-            </div>
-
-            <div id="detailsContent"></div>
-
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeDetailsModal()">Close</button>
             </div>
         </div>
-    </div>
 
-  <script>
+        <script>
 let coupons = [];
 let currentPage = 1;
 const itemsPerPage = 5;
@@ -1624,5 +1651,5 @@ window.onclick = function(event) {
 }
 </script>
 
-</body>
+    </body>
 </html>

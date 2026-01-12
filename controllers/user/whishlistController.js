@@ -27,11 +27,15 @@ const loadWishlist = async (req, res) => {
         ],
       })
       .exec();
+        const wishlistItems = wishlist ? wishlist.products : [];
 
-    const wishlistItems = wishlist ? wishlist.products : [];
-    const totalItems = wishlistItems.length;
+
+    const validItems = wishlistItems.filter(item => item.productId);
+    const totalItems = validItems.length;
+
     const totalPages = Math.ceil(totalItems / limit);
-    const paginatedItems = wishlistItems.slice(skip, skip + limit);
+    const paginatedItems = validItems.slice(skip, skip + limit);
+
 
     console.log("Wishlist Items:", JSON.stringify(paginatedItems, null, 2));
     console.log("Pagination:", { page, limit, totalItems, totalPages });
@@ -87,7 +91,11 @@ const addToWishlist = async (req, res) => {
       return res.json({ success: false, message: "Already in wishlist" });
     }
 
-    wishlist.products.push({ productId });
+   wishlist.products.push({
+  productId,
+  variantSize: req.body.variantSize || null
+});
+
     await wishlist.save();
     console.log("Wishlist updated:", JSON.stringify(wishlist, null, 2));
 
@@ -150,62 +158,70 @@ const moveAllToCart = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
     console.log("Move all to cart request for userId:", userId);
+
     if (!userId) {
-      console.log("No userId in session");
-      return res
-        .status(401)
-        .json({ success: false, message: "Login required" });
+      return res.status(401).json({ success: false, message: "Login required" });
     }
 
-    const wishlist = await Wishlist.findOne({ userId }).populate(
-      "products.productId"
-    );
+    const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
+
     if (!wishlist || wishlist.products.length === 0) {
-      console.log("Wishlist empty for userId:", userId);
       return res.json({ success: false, message: "Wishlist empty" });
     }
 
     let cart = await Cart.findOne({ userId });
     if (!cart) cart = new Cart({ userId, items: [] });
 
+    const variantsMap = req.body?.variantsMap || {};
+    console.log("UI Variant Map:", variantsMap);
+
     let skippedItems = 0;
+
     for (let wishlistItem of wishlist.products) {
       const product = wishlistItem.productId;
+      if (!product) continue;
 
-      if (!product || product.isBlocked || product.status !== "Available") {
-        console.log("Skipping: Product is blocked or unlisted:", product?._id);
+      if (
+        product.isBlocked ||
+        product.status !== "Available" ||
+        !product.variants ||
+        product.variants.length === 0
+      ) {
         skippedItems++;
         continue;
       }
 
-      if (!product.variants || product.variants.length === 0) {
-        console.log("Skipping: Product has no variants:", product._id);
-        skippedItems++;
-        continue;
-      }
-
-      let minPrice = Infinity;
       let selectedVariant = null;
-      product.variants.forEach((v) => {
-        const price = v.salePrice || v.regularPrice;
-        if (price && price < minPrice && v.size != null) {
-          minPrice = price;
-          selectedVariant = v;
-        }
-      });
+      const productIdStr = String(product._id);
+
+      // 1️⃣ UI selected variant (Highest priority)
+      if (variantsMap[productIdStr]) {
+        const uiSize = variantsMap[productIdStr];
+        selectedVariant = product.variants.find(v => String(v.size) === String(uiSize));
+      }
+
+      // 2️⃣ DB stored variant in wishlist
+      if (!selectedVariant && wishlistItem.variantSize) {
+        selectedVariant = product.variants.find(v => String(v.size) === String(wishlistItem.variantSize));
+      }
+
+      // 3️⃣ Fallback: cheapest variant
+      if (!selectedVariant) {
+        selectedVariant = product.variants.reduce((min, v) => {
+          const price = v.salePrice || v.regularPrice;
+          return !min || price < (min.salePrice || min.regularPrice) ? v : min;
+        }, null);
+      }
 
       if (!selectedVariant) {
-        console.log(
-          "Skipping: No valid variant found for product:",
-          product._id
-        );
         skippedItems++;
         continue;
       }
 
       const varSize = selectedVariant.size;
-      const price = minPrice;
+      const price = selectedVariant.salePrice || selectedVariant.regularPrice;
 
+      // Add to cart logic
       const existingItem = cart.items.find(
         (item) =>
           item.productId.toString() === product._id.toString() &&
@@ -225,45 +241,31 @@ const moveAllToCart = async (req, res) => {
       }
     }
 
-    if (cart.items.length > 0) {
-      await cart.save();
+    await cart.save();
 
-      const movedProductIds = wishlist.products
-        .filter(
-          (item) =>
-            item.productId &&
-            !item.productId.isBlocked &&
-            item.productId.status === "Available"
-        )
-        .map((item) => item.productId._id);
+    // Remove only valid moved items
+    const movedIds = wishlist.products
+      .filter((item) => item.productId && item.productId.status === "Available")
+      .map((item) => item.productId._id);
 
-      await Wishlist.updateOne(
-        { userId },
-        { $pull: { products: { productId: { $in: movedProductIds } } } }
-      );
-      console.log(
-        "All valid wishlist items moved to cart and wishlist cleared"
-      );
-      return res.json({
-        success: true,
-        message: `Moved ${
-          wishlist.products.length - skippedItems
-        } items to cart${
-          skippedItems > 0 ? `, skipped ${skippedItems} invalid items` : ""
-        }`,
-      });
-    } else {
-      console.log("No valid items to move to cart");
-      return res.json({
-        success: false,
-        message: "No valid items to move to cart",
-      });
-    }
+    await Wishlist.updateOne(
+      { userId },
+      { $pull: { products: { productId: { $in: movedIds } } } }
+    );
+
+    return res.json({
+      success: true,
+      message: `Moved ${movedIds.length} items to cart${
+        skippedItems > 0 ? `, skipped ${skippedItems}` : ""
+      }`,
+    });
+
   } catch (err) {
     console.error("Move all to cart error:", err.message, err.stack);
-    res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 const getWishlistCount = async (req, res) => {
   try {
@@ -274,8 +276,11 @@ const getWishlistCount = async (req, res) => {
       return res.json({ count: 0 });
     }
 
-    const wishlist = await Wishlist.findOne({ userId: userId });
-    const count = wishlist?.products?.length || 0;
+   
+
+
+    const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
+const count = wishlist?.products?.filter(p => p.productId).length || 0;
 
     return res.json({ count, success: true });
   } catch (err) {
@@ -284,10 +289,26 @@ const getWishlistCount = async (req, res) => {
   }
 };
 
+
+
+const updateVariant = async (req, res) => {
+  const userId = req.session.user._id;
+  const { productId, variantSize } = req.body;
+
+  await Wishlist.updateOne(
+     { userId, "products.productId": productId },
+     { $set: { "products.$.variantSize": variantSize } }
+  );
+
+  res.json({ success:true });
+};
+
+
 module.exports = {
   loadWishlist,
   addToWishlist,
   removeFromWishlist,
   moveAllToCart,
   getWishlistCount,
+  updateVariant
 };

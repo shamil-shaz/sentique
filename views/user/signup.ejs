@@ -6,24 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
+ <style>
     :root {
-      --primary-color: #2563eb;
-      --primary-hover: #1d4ed8;
-      --secondary-color: #64748b;
+      /* Dark Theme Colors */
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary-color: #94a3b8;
       --success-color: #10b981;
       --error-color: #ef4444;
       --warning-color: #f59e0b;
-      --background: #f8fafc;
-      --surface: #ffffff;
-      --text-primary: #1e293b;
-      --text-secondary: #64748b;
-      --border-color: #e2e8f0;
+      --background: #0f172a; /* Dark background */
+      --surface: #1e293b;    /* Dark surface */
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: #334155;
       --border-focus: #3b82f6;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5);
       --radius: 6px;
       --radius-lg: 12px;
     }
@@ -36,12 +37,13 @@
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, var(--background) 0%, #e2e8f0 100%);
+      /* Dark gradient */
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 5px 10px;
+      padding: 20px 10px;
       padding-bottom: 60px;
       line-height: 1.5;
       color: var(--text-primary);
@@ -62,8 +64,8 @@
     .signup-left {
       flex: 0.85;
       background: 
-        linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.85) 100%),
-        url('/photos/product_img/signup-cover\ image.png');
+        linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.85) 100%),
+        url('/photos/product_img/signup-cover image.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -85,8 +87,8 @@
       right: 0;
       bottom: 0;
       background: 
-        radial-gradient(circle at 25% 35%, rgba(37, 99, 235, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 75% 65%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 25% 35%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 65%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
       z-index: 1;
     }
 
@@ -145,7 +147,7 @@
     }
 
     .form-header {
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.5rem;
       text-align: center;
     }
 
@@ -154,7 +156,6 @@
       font-weight: 700;
       color: var(--text-primary);
       margin-bottom: 0.4rem;
-     
     }
 
     .form-header p {
@@ -200,7 +201,7 @@
       border-radius: var(--radius);
       font-size: 0.9rem;
       transition: all 0.2s ease;
-      background: var(--surface);
+      background: #0f172a; /* Darker input background */
       color: var(--text-primary);
     }
 
@@ -208,10 +209,11 @@
       outline: none;
       border-color: var(--border-focus);
       box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+      background: #1e293b;
     }
 
     .form-group input::placeholder {
-      color: var(--text-secondary);
+      color: #6a7585;
       font-size: 0.85rem;
     }
 
@@ -220,7 +222,7 @@
       left: 0.8rem;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--text-secondary);
+      color: #695347;
       font-size: 0.9rem;
       pointer-events: none;
       transition: color 0.2s ease;
@@ -239,7 +241,7 @@
       right: 0.8rem;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--text-secondary);
+      color: #475569;
       cursor: pointer;
       font-size: 0.9rem;
       transition: color 0.2s ease;
@@ -270,7 +272,7 @@
 
     .strength-bar {
       height: 2px;
-      background: var(--border-color);
+      background: #334155;
       border-radius: 1px;
       overflow: hidden;
       margin-bottom: 0.3rem;
@@ -342,7 +344,7 @@
       display: flex;
       align-items: center;
       margin: 1rem 0;
-      color: var(--text-secondary);
+      color: #475569;
       font-size: 0.8rem;
     }
 
@@ -351,7 +353,7 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: var(--border-color);
+      background: #334155;
     }
 
     .divider span {
@@ -367,7 +369,7 @@
       padding: 0.8rem;
       border: 2px solid var(--border-color);
       border-radius: var(--radius);
-      background: var(--surface);
+      background: #0f172a;
       color: var(--text-primary);
       text-decoration: none;
       font-weight: 500;
@@ -377,7 +379,7 @@
     }
 
     .google-btn:hover {
-      border-color: var(--text-secondary);
+      border-color: #64748b;
       box-shadow: var(--shadow-sm);
       transform: translateY(-1px);
     }
@@ -422,17 +424,15 @@
       color: var(--error-color);
     }
 
-    /* Responsive Design */
+    /* Original Responsive Design maintained */
     @media (max-width: 1024px) {
       .signup-container {
         max-width: 950px;
         height: 650px;
       }
-      
       .signup-right {
         padding: 30px 35px;
       }
-      
       .form-header h2 {
         font-size: 1.7rem;
       }
@@ -443,46 +443,37 @@
         padding: 10px;
         overflow: auto;
       }
-      
       .signup-container {
         flex-direction: column;
         height: auto;
         max-height: none;
       }
-      
       .signup-left {
         flex: none;
         padding: 25px 20px;
         min-height: 280px;
       }
-      
       .brand-logo {
         font-size: 2.2rem;
       }
-      
       .brand-tagline {
         font-size: 1.1rem;
       }
-      
       .signup-right {
         flex: none;
         padding: 30px 25px;
         overflow-y: visible;
       }
-      
       .form-header h2 {
         font-size: 1.6rem;
       }
-      
       .form-row {
         flex-direction: column;
         gap: 0;
       }
-      
       .form-group input {
         padding: 0.9rem 0.9rem 0.9rem 2.5rem;
       }
-      
       .input-icon {
         left: 0.9rem;
       }
@@ -492,34 +483,25 @@
       .signup-right {
         padding: 25px 20px;
       }
-      
       .form-header h2 {
         font-size: 1.4rem;
       }
-      
       .brand-logo {
         font-size: 2rem;
       }
     }
 
-    /* Custom scrollbar for right panel on mobile */
     .signup-right::-webkit-scrollbar {
       width: 4px;
     }
-
     .signup-right::-webkit-scrollbar-track {
       background: transparent;
     }
-
     .signup-right::-webkit-scrollbar-thumb {
-      background: var(--border-color);
+      background: #334155;
       border-radius: 2px;
     }
-
-    .signup-right::-webkit-scrollbar-thumb:hover {
-      background: var(--text-secondary);
-    }
-  </style>
+</style>
 </head>
 <body>
 

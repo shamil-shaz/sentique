@@ -1045,12 +1045,16 @@
                             const itemPriority = statusPriority[detail.key] ||
                             0;
                             let itemClass = 'pending';
-                            if (itemPriority < currentPriority && detail.date) {
-                            itemClass = 'completed';
-                            } else if (itemPriority === currentPriority &&
-                            detail.date) {
-                            itemClass = 'active';
-                            }
+                           if (detail.date && itemPriority < currentPriority) {
+  itemClass = 'completed';
+} else if (detail.date && itemPriority === currentPriority) {
+  itemClass = 'active';
+} else if (!detail.date && itemPriority === currentPriority) {
+  itemClass = 'active';
+} else {
+  itemClass = 'pending';
+}
+
                             %>
                             <div class="timeline-item <%= itemClass %>">
                                 <div class="timeline-icon-container"><%=
@@ -1072,8 +1076,14 @@
                                         <% if (!detail.date) { %>
                                         📅 Pending
                                         <% } else { %>
-                                        📅 <%= detail.date %> • <%= detail.time
-                                        || 'N/A' %>
+                                        <% if (!detail.date) { %>
+📅 Pending
+<% } else if (!detail.time) { %>
+📅 <%= detail.date %>
+<% } else { %>
+📅 <%= detail.date %> • <%= detail.time %>
+<% } %>
+
                                         <% } %>
                                     </div>
                                     <div class="timeline-description"><%=
@@ -1087,22 +1097,24 @@
                             </div>
                             <% }) %>
                         </div>
-                        <div class="estimated-delivery">
-                            <div class="estimated-delivery-label">
-                                <%= item.status === 'Delivered' ? 'Delivered on'
-                                : 'Estimated Delivery' %>
-                            </div>
-                            <div class="estimated-delivery-date">
-                                <% if (item.status === 'Delivered' &&
-                                item.tracking.deliveredDate) { %>
-                                <%= item.tracking.deliveredDate %> • <%=
-                                item.tracking.deliveredTime || 'N/A' %>
-                                <% } else { %>
-                                <%= item.tracking.estimatedDeliveryDate ||
-                                'Pending' %>
-                                <% } %>
-                            </div>
-                        </div>
+                       <% if (['Placed','Confirmed','Processing','Shipped','OutForDelivery'].includes(item.status)) { %>
+
+  <div class="estimated-delivery">
+      <div class="estimated-delivery-label">Estimated Delivery</div>
+      <div class="estimated-delivery-date">
+          <%= item.tracking.estimatedDeliveryDate %>
+
+      </div>
+  </div>
+<% } else { %>
+  <div class="estimated-delivery">
+      <div class="estimated-delivery-label">Delivered on</div>
+      <div class="estimated-delivery-date">
+          <%= item.tracking.deliveredDate %> • <%= item.tracking.deliveredTime %>
+      </div>
+  </div>
+<% } %>
+
                     </div>
                     <% } %>
                     <% }) %>

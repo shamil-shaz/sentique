@@ -379,6 +379,7 @@ const removeProductOffer = async (req, res) => {
   }
 };
 
+
 const updateProduct = async (req, res) => {
   try {
     const {
@@ -439,59 +440,40 @@ const updateProduct = async (req, res) => {
     product.category = category;
 
     const sizeArr = Array.isArray(variantSize) ? variantSize : [variantSize];
-    const stockArr = Array.isArray(variantStock)
-      ? variantStock
-      : [variantStock];
-    const rPriceArr = Array.isArray(variantRegularPrice)
-      ? variantRegularPrice
-      : [variantRegularPrice];
-    const sPriceArr = Array.isArray(variantSalePrice)
-      ? variantSalePrice
-      : [variantSalePrice];
+    const stockArr = Array.isArray(variantStock) ? variantStock : [variantStock];
+    const rPriceArr = Array.isArray(variantRegularPrice) ? variantRegularPrice : [variantRegularPrice];
 
     const newVariants = [];
 
     const categoryOfProduct = await Category.findById(category);
 
-    let categoryOffer = 0;
-    let productOff = 0;
+  
+    const categoryOffer = categoryOfProduct?.categoryOffer || 0;
+    const productOffer = product.productOffer || 0;
 
-    if (categoryOfProduct.categoryOffer === 0) {
-      categoryOffer = 0;
-    } else {
-      categoryOffer = 100 - categoryOfProduct.categoryOffer;
-    }
+ 
+    const effectiveOffer = Math.max(categoryOffer, productOffer);
 
-    if (product.productOffer === 0) {
-      productOff = 0;
-    } else {
-      productOff = 100 - product.productOffer;
-    }
-
-    console.log(categoryOffer);
-    console.log(productOff);
-
-    let offer = 0;
-
-    if (categoryOffer < productOff) {
-      offer = categoryOffer;
-    } else {
-      offer = productOff;
-    }
+    console.log(`Category Offer: ${categoryOffer}%, Product Offer: ${productOffer}%, Applied: ${effectiveOffer}%`);
 
     for (let i = 0; i < sizeArr.length; i++) {
       const sizeVal = Number(sizeArr[i]);
       let stockVal = Number(stockArr[i]) || 0;
       const rPriceVal = Number(rPriceArr[i]) || 1;
 
-      let sPriceVal = Number(Math.floor((rPriceVal * offer) / 100));
-
-      if (isNaN(sPriceVal)) sPriceVal = 0;
-      if (sizeVal <= 0) continue;
-      if (stockVal < 0) stockVal = 0;
-      if (sPriceVal > rPriceVal) {
+      
+      let sPriceVal;
+      if (effectiveOffer > 0) {
+        const discountAmount = Math.floor((rPriceVal * effectiveOffer) / 100);
+        sPriceVal = rPriceVal - discountAmount;
+      } else {
         sPriceVal = rPriceVal;
       }
+
+      if (isNaN(sPriceVal)) sPriceVal = rPriceVal;
+      if (sizeVal <= 0) continue;
+      if (stockVal < 0) stockVal = 0;
+      if (sPriceVal > rPriceVal) sPriceVal = rPriceVal;
 
       newVariants.push({
         size: sizeVal,
@@ -550,10 +532,12 @@ const updateProduct = async (req, res) => {
       }
     }
 
-    if (product.images.length < 1) {
-      req.flash("error", "At least one product image is required.");
-      return res.redirect(`/admin/edit-product/${productId}`);
-    }
+   
+if (product.images.length < 1) {
+  req.flash("error", "At least 1 product image is required.");
+  return res.redirect(`/admin/edit-product/${productId}`);
+}
+
     if (product.images.length > 4) {
       req.flash("error", "Maximum 4 images allowed.");
       return res.redirect(`/admin/edit-product/${productId}`);
@@ -580,6 +564,7 @@ const updateProduct = async (req, res) => {
     res.redirect(`/admin/edit-product/${req.params.id}`);
   }
 };
+
 
 const toggleProductStatus = async (req, res) => {
   try {

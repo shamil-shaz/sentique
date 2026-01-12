@@ -4,97 +4,140 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"
   rel="stylesheet" />
 <link
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
   rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<meta name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* --- RESET & BASE --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body { 
   font-family: 'Inter', sans-serif; 
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  background: linear-gradient(135deg, #d0e6f7 0%, #d5f9ef 100%);
   color: #2d3748;
   line-height: 1.6;
-  overflow-x: hidden; /* Prevents whole page horizontal scroll */
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
-/* --- MAIN LAYOUT RESPONSIVENESS --- */
+/* Main Content */
 .main-content { 
   margin-left: 240px; 
   margin-top: 60px; 
-  padding: 40px 30px; 
+  padding: 30px 20px 50px; 
   min-height: 100vh; 
-  transition: all 0.3s ease;
-  width: auto;
+  transition: margin-left 0.3s ease;
 }
 
 @media (max-width: 991px) {
   .main-content {
     margin-left: 0;
-    padding: 20px 15px; /* Less padding on mobile */
-    width: 100%;
+    padding: 20px 15px 40px;
   }
 }
 
 .page-header {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto 30px;
+  text-align: center;
 }
 
 .page-header h2 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1a202c;
+  font-size: 36px;
+  font-weight: 800;
+  color: #060606;
   margin-bottom: 8px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .page-header p {
-  color: #718096;
-  font-size: 15px;
+  color: rgba(29, 57, 57, 0.9);
+  font-size: 16px;
+  font-weight: 500;
 }
 
-/* --- CONTAINER & GRID SYSTEM --- */
+.alert-success, .alert-error { 
+  max-width: 1400px;
+  margin: 0 auto 20px;
+  padding: 16px 20px; 
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  backdrop-filter: blur(10px);
+}
+
+.alert-success {
+  background: rgba(72, 187, 120, 0.95); 
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.alert-success svg, .alert-error svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
 .container { 
-  max-width: 1200px; 
-  background: #fff; 
+  max-width: 1400px; 
+  background: rgba(255, 255, 255, 0.98); 
   padding: 0;
-  border-radius: 16px; 
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  border-radius: 24px; 
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   margin: auto; 
   overflow: hidden;
-  width: 100%;
+  backdrop-filter: blur(10px);
 }
 
+/* Form Layout */
 .form-wrapper { 
   display: grid;
-  /* Fixed width for image column, rest for form. Reduced to 400px to prevent squashing */
-  grid-template-columns: 400px 1fr; 
+  grid-template-columns: 420px 1fr;
   gap: 0;
+  min-height: 800px;
+}
+
+@media (max-width: 1200px) {
+  .form-wrapper {
+    grid-template-columns: 380px 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .form-wrapper {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
 }
 
 .left { 
-  background: #f8fafc;
+  background: linear-gradient(180deg, #f8fafc 0%, #e8ecf1 100%);
   padding: 40px 30px;
   border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
 }
 
 .right { 
   padding: 40px;
-  min-width: 0; /* Critical fix for grid overflow */
+  overflow-y: auto;
+  max-height: 90vh;
 }
 
-/* RESPONSIVE BREAKPOINT: STACK LAYOUT */
-@media (max-width: 1100px) {
-  .form-wrapper {
-    grid-template-columns: 1fr; /* Stack vertically on tablets/small laptops */
-  }
-  
+@media (max-width: 1024px) {
   .left {
     border-right: none;
     border-bottom: 1px solid #e2e8f0;
@@ -103,297 +146,878 @@ body {
   
   .right {
     padding: 30px;
+    max-height: none;
+    overflow-y: visible;
   }
 }
 
 @media (max-width: 576px) {
-  .left, .right { padding: 20px 15px; } /* Compact padding on phones */
-  .page-header h2 { font-size: 26px; }
+  .left, .right {
+    padding: 20px;
+  }
 }
 
-/* --- IMAGES SECTION --- */
 .section-title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1a202c;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.section-title i {
+  color: #667eea;
+  font-size: 20px;
 }
 
 .section-title::before {
   content: '';
   width: 4px;
-  height: 20px;
-  background: #4299e1;
-  border-radius: 2px;
+  height: 24px;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 4px;
 }
 
+/* Image Grid - Responsive */
 .images-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  margin-bottom: 30px;
 }
 
-/* Tablet: Show 4 in a row when stacked */
-@media (max-width: 1100px) {
-  .images-grid { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 1024px) {
+  .images-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-/* Mobile: Back to 2 columns */
 @media (max-width: 768px) {
-  .images-grid { grid-template-columns: 1fr 1fr; }
+  .images-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-/* Small Mobile: 1 Column */
-@media (max-width: 400px) {
-  .images-grid { grid-template-columns: 1fr; }
+@media (max-width: 480px) {
+  .images-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .image-box { 
   background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 16px;
   padding: 12px;
   transition: all 0.3s ease;
   position: relative;
+  overflow: hidden;
+}
+
+.image-box::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, #2b4e6c, #1b4e52);
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.image-box:hover::before {
+  opacity: 0.1;
 }
 
 .image-box:hover {
-  border-color: #4299e1;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.15);
+  border-color: #24404a;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
 }
 
-.image-box.has-image { border-color: #48bb78; }
-
-.image-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #718096;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.image-box.has-image {
+  border-style: solid;
+  border-color: #48bb78;
+  background: linear-gradient(135deg, rgba(72, 187, 120, 0.05), rgba(56, 161, 105, 0.05));
 }
 
 .image-preview-wrapper {
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  background: #f7fafc;
+  background: linear-gradient(135deg, #f7fafc, #edf2f7);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   position: relative;
-  border: 2px dashed #cbd5e0;
 }
 
-.image-preview-wrapper.has-content { border-style: solid; border-color: #48bb78; }
+.image-preview-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-.preview-img { width: 100%; height: 100%; object-fit: cover; }
+.image-placeholder {
+  text-align: center;
+  color: #a0aec0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.image-placeholder svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+  opacity: 0.4;
+}
+
 .product-image-input { display: none; }
 
 .upload-label {
-  display: block;
-  padding: 8px 12px;
-  background: #4299e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #254656, #133042);
   color: white;
   text-align: center;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
-  transition: all 0.2s;
-  margin-bottom: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 700;
+  transition: all 0.3s;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
-.upload-label:hover { background: #3182ce; transform: translateY(-1px); }
 
-.image-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
-.image-buttons button { flex: 1; min-width: 60px; }
+.upload-label:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.upload-label i {
+  font-size: 14px;
+}
+
+.image-buttons { 
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
 
 .save-btn, .cancel-btn, .delete-btn { 
-  padding: 7px 10px; 
-  font-size: 11px; 
-  border-radius: 6px; 
+  padding: 9px 10px; 
+  font-size: 12px; 
+  border-radius: 8px; 
   border: none; 
   cursor: pointer; 
-  font-weight: 600;
+  font-weight: 700;
   transition: all 0.2s;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
-.save-btn { background: #48bb78; color: white; }
-.cancel-btn { background: #718096; color: white; }
-.delete-btn { background: #fc8181; color: white; }
 
-/* --- FORMS --- */
-.form-section { margin-bottom: 32px; }
+.save-btn { 
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+.save-btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+}
+
+.cancel-btn { 
+  background: linear-gradient(135deg, #fc8181, #f56565);
+  color: white;
+  box-shadow: 0 4px 12px rgba(252, 129, 129, 0.3);
+}
+.cancel-btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(252, 129, 129, 0.4);
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #fc8181, #f56565);
+  color: white;
+  box-shadow: 0 4px 12px rgba(252, 129, 129, 0.3);
+}
+.delete-btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(252, 129, 129, 0.4);
+}
+
+/* Image Tips Card */
+.image-tips {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: auto;
+}
+
+.image-tips h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.image-tips h4 i {
+  color: #667eea;
+}
+
+.image-tips ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.image-tips li {
+  font-size: 13px;
+  color: #4a5568;
+  margin-bottom: 8px;
+  padding-left: 24px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.image-tips li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #48bb78;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.image-tips li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1024px) {
+  .image-tips {
+    margin-top: 20px;
+  }
+}
+
+.error-message { 
+  color: #f56565; 
+  font-size: 12px; 
+  font-weight: 600;
+  margin-top: 6px;
+  display: none;
+}
+
+.form-section { 
+  margin-bottom: 36px;
+  padding-bottom: 36px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.form-section:last-of-type { 
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
 .form-group { margin-bottom: 24px; }
 
-label { font-weight: 600; font-size: 14px; color: #2d3748; margin-bottom: 8px; display: block; }
-label .required { color: #f56565; margin-left: 2px; }
+label { 
+  font-weight: 700;
+  font-size: 14px;
+  color: #2d3748;
+  margin-bottom: 10px; 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+label i {
+  color: #667eea;
+  font-size: 16px;
+}
+
+label .required { 
+  color: #f56565; 
+  margin-left: 2px;
+  font-size: 16px;
+}
 
 input, textarea, select { 
   width: 100%; 
-  padding: 12px 16px; 
+  padding: 14px 18px; 
   border: 2px solid #e2e8f0; 
-  border-radius: 8px; 
+  border-radius: 10px; 
   font-size: 14px;
   font-family: 'Inter', sans-serif;
-  transition: all 0.2s;
+  transition: all 0.3s;
   background: white;
+  font-weight: 500;
 }
-input:focus, textarea:focus, select:focus { outline: none; border-color: #4299e1; box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1); }
-textarea { resize: vertical; min-height: 80px; }
 
-/* --- VARIANTS (RESPONSIVE TABLE FIX) --- */
-.variants-container {
-  background: #f8fafc;
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+textarea { 
+  resize: vertical; 
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+/* Variants Display */
+.variants-display {
+  background: linear-gradient(135deg, #f8fafc, #edf2f7);
+  border-radius: 16px;
   padding: 24px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+  min-height: 180px;
+  border: 2px solid #e2e8f0;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
-@media (max-width: 576px) {
-  .variants-container { padding: 15px; }
+.variant-empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: #94a3b8;
 }
 
-/* This wrapper prevents table from breaking layout on small screens */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  border: 1px solid #e2e8f0;
+.variant-empty-state i {
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.variants-table {
-  width: 100%;
-  min-width: 700px; /* Force minimum width so it scrolls instead of crushing */
-  border-collapse: collapse;
+.variant-empty-state p {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.variant-card {
   background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 14px;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
-.variants-table thead { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: white; }
-.variants-table th { padding: 16px; text-align: left; font-size: 13px; font-weight: 600; text-transform: uppercase; white-space: nowrap; }
-.variants-table td { padding: 16px; border-top: 1px solid #e2e8f0; font-size: 14px; white-space: nowrap; }
-.variants-table tbody tr:hover { background: #f8fafc; }
+.variant-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 14px 14px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
-.variant-size { font-weight: 600; color: #2d3748; }
-.variant-stock { color: #4299e1; font-weight: 500; }
-.variant-price { color: #2d3748; font-weight: 500; }
+.variant-card:hover::before {
+  opacity: 1;
+}
 
-.variant-actions { display: flex; gap: 8px; }
-.view-btn, .delete-variant-btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-.view-btn { background: #ebf8ff; color: #2c5aa0; border: 1.5px solid #4299e1; }
-.delete-variant-btn { background: #fed7d7; color: #c53030; border: 1.5px solid #fc8181; }
+.variant-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.variant-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.variant-size-badge {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 17px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.variant-actions { 
+  display: flex; 
+  gap: 10px;
+}
+
+.btn-variant-edit, .btn-variant-delete {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.btn-variant-edit { 
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+}
+.btn-variant-edit:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.btn-variant-delete { 
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+.btn-variant-delete:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.variant-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.variant-detail-item { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.variant-detail-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.variant-detail-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
 
 .add-variant-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px;
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: white; border: none; border-radius: 8px;
-  cursor: pointer; font-weight: 600; font-size: 15px; margin-top: 16px; transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  background: white;
+  color: #667eea;
+  border: 2px dashed #667eea;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-.variants-info { margin-top: 16px; padding: 12px 16px; background: #eff6ff; border-left: 3px solid #4299e1; border-radius: 4px; font-size: 13px; color: #2c5aa0; display: flex; align-items: center; gap: 8px; }
 
-/* --- MAIN ACTIONS --- */
-.button-row { display: flex; gap: 16px; margin-top: 40px; padding-top: 32px; border-top: 1px solid #e2e8f0; }
-.btn-green, .btn-red { padding: 14px 32px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.btn-green { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: white; }
-.btn-red { background: white; color: #718096; border: 2px solid #e2e8f0; }
+.add-variant-btn:hover { 
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-color: #764ba2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+}
+
+.add-variant-btn i {
+  font-size: 18px;
+}
+
+/* Buttons */
+.button-row { 
+  display: flex; 
+  gap: 16px; 
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 2px solid #f1f5f9;
+}
 
 @media (max-width: 576px) {
-  .button-row { flex-direction: column; }
-  .btn-green, .btn-red { width: 100%; }
+  .button-row {
+    flex-direction: column;
+  }
 }
 
-/* --- MODALS (FIXED FOR MOBILE) --- */
-.variant-modal {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.5); z-index: 9998; justify-content: center; align-items: center;
-  backdrop-filter: blur(4px); padding: 20px;
+.btn-green, .btn-red { 
+  padding: 16px 36px; 
+  border: none; 
+  border-radius: 12px; 
+  font-size: 16px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  flex: 1;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-.variant-modal.show { display: flex; }
+
+.btn-green { 
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white; 
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+}
+.btn-green:hover { 
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(72, 187, 120, 0.5);
+}
+
+.btn-red { 
+  background: white;
+  color: #718096;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.btn-red:hover { 
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  transform: translateY(-2px);
+}
+
+.btn-green i, .btn-red i {
+  font-size: 18px;
+}
+
+/* Cropper Modal */
+#cropper-modal { 
+  display: none; 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 9999; 
+  justify-content: center; 
+  align-items: center;
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+
+#cropper-modal .modal-content { 
+  background: #fff; 
+  padding: 40px; 
+  border-radius: 24px; 
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh; 
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+}
+
+#cropper-modal .modal-content h3 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  color: #1a202c;
+  text-align: center;
+}
+
+#cropper-modal .modal-content img { 
+  max-width: 100%; 
+  max-height: 60vh;
+  display: block;
+  margin: 0 auto 24px auto;
+  border-radius: 12px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+@media (max-width: 576px) {
+  .modal-buttons { flex-direction: column; }
+  #cropper-modal .modal-content {
+    padding: 24px;
+  }
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+/* Variant Modal */
+.variant-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .variant-modal-content {
-  background: white; padding: 0; /* Reset padding, managed by children */
-  border-radius: 16px; max-width: 500px; width: 100%;
-  max-height: 90vh; /* Prevents overflow off screen */
-  display: flex; flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  background: white;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .variant-modal-header {
-  font-size: 20px; font-weight: 700; color: #1a202c; padding: 20px 24px;
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  border-bottom: 1px solid #eee;
+  padding: 24px 28px;
+  border-bottom: 2px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-radius: 24px 24px 0 0;
+  flex-shrink: 0;
+}
+
+.variant-modal-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.variant-modal-header h3 i {
+  color: #667eea;
+  font-size: 24px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #64748b;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover { 
+  background: #fee2e2;
+  color: #dc2626;
+  transform: rotate(90deg);
 }
 
 .variant-modal-body {
-  padding: 24px;
-  overflow-y: auto; /* Internal scrolling */
+  padding: 28px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.modal-form-group { margin-bottom: 24px; }
+
+.modal-form-group label {
+  display: flex;
+  font-weight: 700;
+  font-size: 14px;
+  color: #0f172a;
+  margin-bottom: 10px;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-form-group label i { 
+  color: #667eea;
+  font-size: 16px;
+}
+
+.modal-form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.modal-form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.input-hint {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 8px;
+  font-style: italic;
+  font-weight: 500;
 }
 
 .variant-modal-footer {
-  padding: 20px 24px; border-top: 1px solid #eee; display: flex; gap: 12px; justify-content: flex-end;
-  background: #f9fafb; border-radius: 0 0 16px 16px;
+  padding: 24px 28px;
+  border-top: 2px solid #f1f5f9;
+  display: flex;
+  gap: 14px;
+  justify-content: flex-end;
+  background: #f8fafc;
+  border-radius: 0 0 24px 24px;
+  flex-shrink: 0;
 }
-
-.variant-form-group { margin-bottom: 20px; }
-.variant-form-group label { font-weight: 600; font-size: 14px; color: #2d3748; margin-bottom: 8px; display: block; }
-.variant-form-group input { width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
-
-.variant-modal-buttons button, .variant-save-btn, .variant-close-btn {
-  padding: 12px 24px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.variant-save-btn { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; }
-.variant-close-btn { background: white; color: #718096; border: 2px solid #e2e8f0; }
 
 @media (max-width: 576px) {
-  .variant-modal-footer { flex-direction: column; }
-  .variant-save-btn, .variant-close-btn { width: 100%; }
+  .variant-modal-footer {
+    flex-direction: column;
+  }
+  .btn-modal-cancel, .btn-modal-save {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-/* CROPPER MODAL */
-#cropper-modal { 
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.85); z-index: 9999; justify-content: center; align-items: center;
-  backdrop-filter: blur(4px); padding: 20px;
+.btn-modal-cancel, .btn-modal-save {
+  padding: 14px 28px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.modal-content { 
-  background: #fff; padding: 20px; border-radius: 16px; max-width: 800px; width: 100%;
-  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+.btn-modal-cancel { 
+  background: #e2e8f0;
+  color: #475569;
 }
-.modal-content img { max-width: 100%; margin-bottom: 20px; border-radius: 8px; display: block; margin: 0 auto 20px auto; max-height: 60vh;}
-.modal-buttons { display: flex; gap: 12px; margin-top: 20px; justify-content: center; }
-.modal-buttons button { padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 8px; }
+.btn-modal-cancel:hover { 
+  background: #cbd5e1;
+  transform: translateY(-2px);
+}
 
-/* ALERTS & ERRORS */
-.alert-success { max-width: 1200px; margin: 0 auto 20px; padding: 16px 20px; border-radius: 12px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.08); background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
-.validation-errors { background: #fff5f5; border: 2px solid #fc8181; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
-.validation-errors h3 { color: #c53030; font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.validation-errors ul { list-style: none; padding: 0; }
-.validation-errors li { color: #c53030; font-size: 13px; padding: 6px 0; padding-left: 24px; position: relative; }
-.validation-errors li::before { content: '•'; position: absolute; left: 8px; }
-.error-message { color: #c53030; font-size: 13px; margin-top: 6px; display: flex; align-items: center; gap: 6px; }
-.form-group.has-error input { border-color: #fc8181; background-color: #fff5f5; }
+.btn-modal-save {
+  background: linear-gradient(135deg, #20575e, #1f4552);
+  color: white;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+.btn-modal-save:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+}
+
+input::placeholder, textarea::placeholder { 
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+/* Scrollbar Styling */
+.right::-webkit-scrollbar,
+.variants-display::-webkit-scrollbar,
+.variant-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.right::-webkit-scrollbar-track,
+.variants-display::-webkit-scrollbar-track,
+.variant-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.right::-webkit-scrollbar-thumb,
+.variants-display::-webkit-scrollbar-thumb,
+.variant-modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 10px;
+}
+
+.right::-webkit-scrollbar-thumb:hover,
+.variants-display::-webkit-scrollbar-thumb:hover,
+.variant-modal-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #764ba2, #667eea);
+}
 </style>
 
 <div class="main-content">
   <div class="page-header">
-    <h2>Edit Product</h2>
+    <h2><i class="fas fa-edit"></i> Edit Product</h2>
     <p>Update product information, images, and variant details</p>
   </div>
 
   <% if (locals.success && locals.success.length > 0) { %>
-  <div class="alert alert-success">
+  <div class="alert-success">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M5 13l4 4L19 7"></path>
@@ -402,38 +1026,25 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
   <% } %>
 
-  <div id="validationErrorsContainer" class="validation-errors"
-    style="display:none;">
-    <div style="display:flex; justify-content:space-between;">
-      <h3>Please fix the following errors:</h3>
-      <button type="button" class="validation-close"
-        onclick="document.getElementById('validationErrorsContainer').style.display='none'"
-        style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
-    </div>
-    <ul id="validationErrorsList"></ul>
-  </div>
-
   <div class="container">
     <form id="editProductForm" action="/admin/edit-product/<%= product._id %>"
-      method="POST" onsubmit="return validateForm(event)">
+      method="POST">
+      <input type="hidden" name="_csrf" value="<%= locals.csrfToken || '' %>">
+      
       <div class="form-wrapper">
-
         <div class="left">
-          <div class="section-title">Product Images</div>
+          <div class="section-title">
+            <i class="fas fa-images"></i>
+            Product Images
+          </div>
           <div class="images-grid">
             <% for (let i = 0; i < 4; i++) {
-            const img = product.images && product.images[i] ? product.images[i]
-            : null;
+            const img = product.images && product.images[i] ? product.images[i] : null;
             let previewSrc = '/photos/default.jpg';
-            if (img) previewSrc = img.startsWith('http') ||
-            img.startsWith('data:') || img.startsWith('/') ? img : '/uploads/' +
-            img;
+            if (img) previewSrc = img.startsWith('http') || img.startsWith('data:') || img.startsWith('/') ? img : '/uploads/' + img;
             %>
-            <div class="image-box <%= img ? 'has-image' : '' %>"
-              id="image-box-<%= i %>">
-              <div class="image-label">Image <%= i + 1 %></div>
-              <div class="image-preview-wrapper <%= img ? 'has-content' : '' %>"
-                id="wrapper-<%= i %>">
+            <div class="image-box <%= img ? 'has-image' : '' %>" id="image-box-<%= i %>">
+              <div class="image-preview-wrapper <%= img ? 'has-content' : '' %>" id="wrapper-<%= i %>">
                 <img id="preview-image-<%= i %>"
                   src="<%= previewSrc %>"
                   data-original-name="<%= img || '' %>"
@@ -443,7 +1054,8 @@ textarea { resize: vertical; min-height: 80px; }
               </div>
 
               <label class="upload-label" for="file-input-<%= i %>">
-                <%= img ? 'Change Image' : 'Upload Image' %>
+                <i class="fas fa-cloud-upload-alt"></i>
+                <%= img ? 'Change' : 'Upload' %>
               </label>
               <input type="file"
                 id="file-input-<%= i %>"
@@ -452,255 +1064,245 @@ textarea { resize: vertical; min-height: 80px; }
                 data-slot="<%= i %>" />
 
               <div class="image-buttons">
-                <button type="button" class="cancel-btn"
-                  onclick="resetImage('<%= i %>')">Reset</button>
+                <button type="button" class="save-btn" onclick="triggerCrop('<%= i %>')">
+                  <i class="fas fa-crop"></i> Crop
+                </button>
                 <% if (img) { %>
-                <button type="button" class="delete-btn"
-                  onclick="markDeleteExisting('<%= i %>')">Delete</button>
+                <button type="button" class="delete-btn" onclick="markDeleteExisting('<%= i %>')">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+                <% } else { %>
+                <button type="button" class="cancel-btn" onclick="resetImage('<%= i %>')">
+                  <i class="fas fa-redo"></i> Reset
+                </button>
                 <% } %>
               </div>
+              <p class="error-message" id="productImage<%= i %>-error"></p>
             </div>
             <% } %>
           </div>
+
+          <div class="image-tips">
+            <h4><i class="fas fa-lightbulb"></i> Image Guidelines</h4>
+            <ul>
+              <li>Update at least 3 images (max 4)</li>
+              <li>Use high-quality images (min 800x800px)</li>
+              <li>Square aspect ratio works best</li>
+              <li>Only PNG, JPG, JPEG formats allowed</li>
+              <li>Crop each image after uploading</li>
+              <li>First image will be the main display</li>
+            </ul>
+          </div>
+
           <input type="hidden" name="deletedImages" id="deletedImages" value />
         </div>
 
         <div class="right">
           <div class="form-section">
-            <div class="section-title">Basic Information</div>
-
-            <div class="form-group">
-              <label>Product Name <span class="required">*</span></label>
-              <input type="text" name="productName"
-                value="<%= product.productName %>"
-                placeholder="Enter product name" required />
+            <div class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Basic Information
             </div>
 
             <div class="form-group">
-              <label>Brand <span class="required">*</span></label>
-              <select name="brand" required>
+              <label>
+                <i class="fas fa-tag"></i>
+                Product Name <span class="required">*</span>
+              </label>
+              <input type="text" name="productName" value="<%= product.productName %>" placeholder="Enter product name" />
+              <p class="error-message" id="productName-error"></p>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <i class="fas fa-bookmark"></i>
+                Brand <span class="required">*</span>
+              </label>
+              <select name="brand">
                 <option value>Select a brand</option>
                 <% brands.forEach(b => { %>
-                <option value="<%= b._id %>" <%=(product.brand &&
-                  (product.brand._id ? product.brand._id.toString() :
-                  product.brand.toString()) === b._id.toString()) ? 'selected' :
-                  '' %>><%= b.brandName || b.name %></option>
+                <option value="<%= b._id %>" <%=(product.brand && (product.brand._id ? product.brand._id.toString() : product.brand.toString()) === b._id.toString()) ? 'selected' : '' %>><%= b.brandName || b.name %></option>
                 <% }) %>
               </select>
+              <p class="error-message" id="brand-error"></p>
             </div>
 
             <div class="form-group">
-              <label>Category <span class="required">*</span></label>
-              <select name="category" required>
+              <label>
+                <i class="fas fa-list"></i>
+                Category <span class="required">*</span>
+              </label>
+              <select name="category">
                 <option value>Select a category</option>
                 <% cat.forEach(c => { %>
-                <option value="<%= c._id %>" <%=(product.category &&
-                  (product.category._id ? product.category._id.toString() :
-                  product.category.toString()) === c._id.toString()) ?
-                  'selected' : '' %>><%= c.name %></option>
+                <option value="<%= c._id %>" <%=(product.category && (product.category._id ? product.category._id.toString() : product.category.toString()) === c._id.toString()) ? 'selected' : '' %>><%= c.name %></option>
                 <% }) %>
               </select>
+              <p class="error-message" id="category-error"></p>
             </div>
           </div>
 
           <div class="form-section">
-            <div class="section-title">Description</div>
-            <div class="form-group">
-              <label>Short Description <span class="required">*</span></label>
-              <textarea name="description" rows="3"
-                placeholder="Brief product description"
-                required><%= product.description %></textarea>
+            <div class="section-title">
+              <i class="fas fa-align-left"></i>
+              Description
             </div>
 
             <div class="form-group">
-              <label>Long Description <span class="required">*</span></label>
-              <textarea name="longDescription" rows="4"
-                placeholder="Detailed product description"
-                required><%= product.longDescription || product.Longdescription || '' %></textarea>
+              <label>
+                <i class="fas fa-file-alt"></i>
+                Short Description <span class="required">*</span>
+              </label>
+              <textarea name="description" rows="3" placeholder="Brief product description"><%= product.description %></textarea>
+              <p class="error-message" id="description-error"></p>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <i class="fas fa-file-invoice"></i>
+                Long Description <span class="required">*</span>
+              </label>
+              <textarea name="longDescription" rows="4" placeholder="Detailed product description"><%= product.longDescription || product.Longdescription || '' %></textarea>
+              <p class="error-message" id="longDescription-error"></p>
             </div>
           </div>
 
           <div class="form-section">
-            <div class="section-title">Product Variants</div>
-            <div class="variants-container">
-              <div class="table-responsive">
-                <table class="variants-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th><i class="fas fa-ruler"></i> Size (ml)</th>
-                      <th><i class="fas fa-cubes"></i> Stock</th>
-                      <th><i class="fas fa-tag"></i> Regular Price</th>
-                      <th><i class="fas fa-badge-percent"></i> Sale Price</th>
-                      <th><i class="fas fa-cog"></i> Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="variants-tbody">
-                    <% if (product.variants && product.variants.length > 0) { %>
-                    <% product.variants.forEach((v, index) => { %>
-                    <tr class="variant-row-item">
-                      <td><strong><%= index + 1 %></strong></td>
-                      <td class="variant-size"><%= v.size %> ml</td>
-                      <td class="variant-stock"><%= v.stock %></td>
-                      <td class="variant-price">₹<%= v.regularPrice.toFixed(2)
-                        %></td>
-                      <td class="variant-price">₹<%= v.salePrice.toFixed(2)
-                        %></td>
-                      <td>
-                        <div class="variant-actions">
-                          <button type="button" class="view-btn"
-                            onclick="openVariantModal(<%= index %>)">
-                            <i class="fas fa-eye"></i> View
-                          </button>
-                          <button type="button" class="delete-variant-btn"
-                            onclick="deleteVariant(<%= index %>)">
-                            <i class="fas fa-trash"></i> Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    <% }) %>
-                    <% } else { %>
-                    <tr class="variant-row-item">
-                      <td colspan="6" style="text-align:center;">No variants
-                        found</td>
-                    </tr>
-                    <% } %>
-                  </tbody>
-                </table>
-              </div>
+            <div class="section-title">
+              <i class="fas fa-cubes"></i>
+              Product Variants
+            </div>
 
-              <button type="button" class="add-variant-btn"
-                onclick="addNewVariant()">
-                <i class="fas fa-plus-circle"></i> Add New Variant
-              </button>
-
-              <div class="variants-info">
-                <i class="fas fa-info-circle"></i>
-                <span>Click View to edit variant details. You can add multiple
-                  size/price combinations.</span>
+            <div class="variants-display" id="variantsDisplay">
+              <div class="variant-empty-state" id="emptyState" style="display:none;">
+                <i class="fas fa-box-open"></i>
+                <p>No variants available.</p>
               </div>
             </div>
-          </div>
 
-          <div id="variantsData" style="display:none;"></div>
+            <button type="button" class="add-variant-btn" onclick="addNewVariant()">
+              <i class="fas fa-plus-circle"></i>
+              Add New Variant
+            </button>
+
+            <p class="error-message" id="variant-error"></p>
+            <div id="variantsData" style="display:none;"></div>
+          </div>
 
           <div class="button-row">
             <button type="submit" class="btn-green">
-              <svg width="20" height="20" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
+              <i class="fas fa-check-circle"></i>
               Update Product
             </button>
-            <button type="button" class="btn-red"
-              onclick="window.location.href='/admin/products'">Cancel</button>
+            <button type="button" class="btn-red" onclick="window.location.href='/admin/products'">
+              <i class="fas fa-times-circle"></i>
+              Cancel
+            </button>
           </div>
         </div>
-
       </div>
     </form>
   </div>
 </div>
 
-<div id="variantModal" class="variant-modal">
+<div id="cropper-modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-crop"></i> Crop Image</h3>
+    <img id="cropper-image" />
+    <div class="modal-buttons">
+      <button type="button" class="save-btn" onclick="cropImage()">
+        <i class="fas fa-check"></i> Apply Crop
+      </button>
+      <button type="button" class="cancel-btn" onclick="closeModal()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="variant-modal" id="variantModal">
   <div class="variant-modal-content">
     <div class="variant-modal-header">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <i class="fas fa-boxes"></i> Edit Variant
-      </div>
-      <button onclick="closeVariantModal()"
-        style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
+      <h3><i class="fas fa-cubes"></i> <span id="modalTitle">Edit Product Variant</span></h3>
+      <button type="button" class="modal-close-btn" onclick="closeVariantModal()">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
     <div class="variant-modal-body">
-      <div class="variant-form-group">
-        <label>Size (ml) <span class="required">*</span></label>
-        <input type="number" id="modalSize" placeholder="e.g., 100, 250, 500"
-          required />
+      <div class="modal-form-group">
+        <label for="modalSize">
+          <i class="fas fa-ruler"></i> Size (ml)
+          <span class="required">*</span>
+        </label>
+        <input type="number" id="modalSize" placeholder="Enter size in ml" min="1" />
+        <small class="input-hint">Product size in milliliters</small>
       </div>
 
-      <div class="variant-form-group">
-        <label>Stock Quantity <span class="required">*</span></label>
-        <input type="number" id="modalStock" placeholder="e.g., 50" min="0"
-          required />
+      <div class="modal-form-group">
+        <label for="modalStock">
+          <i class="fas fa-warehouse"></i> Stock Quantity
+          <span class="required">*</span>
+        </label>
+        <input type="number" id="modalStock" placeholder="Enter available stock" min="0" />
+        <small class="input-hint">Number of units available</small>
       </div>
 
-      <div class="variant-form-group">
-        <label>Regular Price <span class="required">*</span></label>
-        <input type="number" id="modalRegularPrice" placeholder="e.g., 299.99"
-          step="0.01" required />
+      <div class="modal-form-group">
+        <label for="modalRegularPrice">
+          <i class="fas fa-tag"></i> Regular Price (₹)
+          <span class="required">*</span>
+        </label>
+        <input type="number" id="modalRegularPrice" placeholder="Enter regular price" min="0" step="0.01" />
+        <small class="input-hint">Original selling price</small>
       </div>
 
-      <div class="variant-form-group">
-        <label>Sale Price </label>
-        <input type="number" id="modalSalePrice" placeholder="e.g., 199.99"
-          step="0.01" disabled />
+      <div class="modal-form-group">
+        <label for="modalSalePrice">
+          <i class="fas fa-badge-percent"></i> Sale Price (₹) - Auto Calculated
+        </label>
+        <input type="number" id="modalSalePrice" placeholder="Auto calculated from category offer" min="0" step="0.01" disabled readonly />
+        <small class="input-hint">Automatically calculated based on category offer</small>
       </div>
     </div>
 
     <div class="variant-modal-footer">
-      <button type="button" class="variant-close-btn"
-        onclick="closeVariantModal()">
-        <i class="fas fa-times"></i> Close
+      <button type="button" class="btn-modal-cancel" onclick="closeVariantModal()">
+        <i class="fas fa-times"></i> Cancel
       </button>
-      <button type="button" class="variant-save-btn" onclick="saveVariant()">
-        <i class="fas fa-save"></i> Save Changes
+      <button type="button" class="btn-modal-save" onclick="saveVariant()">
+        <i class="fas fa-check"></i> <span id="saveButtonText">Save Variant</span>
       </button>
     </div>
   </div>
 </div>
 
-<div id="cropper-modal">
-  <div class="modal-content">
-    <h4>Crop Image</h4>
-    <img id="cropper-image" src />
-    <div class="modal-buttons">
-      <button type="button" class="save-btn" id="cropper-save">Apply
-        Crop</button>
-      <button type="button" class="cancel-btn"
-        id="cropper-cancel">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-let cropper = null, currentSlot = null;
+// Image Cropper Variables
+let cropper, currentImageIndex = null;
 const modal = document.getElementById('cropper-modal');
 const cropperImage = document.getElementById('cropper-image');
 const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
-const deletedIndexes = new Set();
-let currentEditingVariantIndex = null;
-let variants = [];
 
-// Initialize variants from existing data
+// Variant Variables
+let variants = [];
+let currentEditingVariantIndex = null;
+const deletedIndexes = new Set();
+
 function initializeVariants() {
-  const rows = document.querySelectorAll('.variant-row-item');
   variants = [];
-  rows.forEach((row, index) => {
-    const cells = row.querySelectorAll('td');
-    if (cells.length >= 5) {
-      const sizeText = cells[1].textContent.trim().replace(' ml', '');
-      const stockText = cells[2].textContent.trim();
-      const priceText = cells[3].textContent.trim().replace('₹', '');
-      const salePriceText = cells[4].textContent.trim().replace('₹', '');
-      
-      if (sizeText !== '-' && stockText !== '-') {
-        variants.push({
-          size: parseFloat(sizeText) || 0,
-          stock: parseInt(stockText) || 0,
-          regularPrice: parseFloat(priceText) || 0,
-          salePrice: parseFloat(salePriceText) || 0
-        });
-      }
-    }
-  });
-  console.log('Variants initialized:', variants);
+  <% if (product.variants && product.variants.length > 0) { %>
+    <% product.variants.forEach(v => { %>
+      variants.push({
+        size: <%= v.size %>,
+        stock: <%= v.stock %>,
+        regularPrice: <%= v.regularPrice %>,
+        salePrice: <%= v.salePrice %>
+      });
+    <% }) %>
+  <% } %>
+  renderVariants();
 }
 
 function updateDeletedHidden() {
@@ -709,111 +1311,172 @@ function updateDeletedHidden() {
 
 function markDeleteExisting(slot) {
   const preview = document.getElementById(`preview-image-${slot}`);
+  const wrapper = document.getElementById(`wrapper-${slot}`);
   deletedIndexes.add(Number(slot));
   updateDeletedHidden();
   preview.src = '/photos/default.jpg';
   preview.removeAttribute('data-original-name');
   preview.removeAttribute('data-original-index');
+  wrapper.classList.remove('has-content');
+  document.getElementById(`image-box-${slot}`).classList.remove('has-image');
   document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${slot}"]`).forEach(el => el.remove());
 }
 
 function resetImage(slot) {
   const preview = document.getElementById(`preview-image-${slot}`);
+  const wrapper = document.getElementById(`wrapper-${slot}`);
+  const input = document.getElementById(`file-input-${slot}`);
   const origName = preview.getAttribute('data-original-name');
+  
   if (origName) {
     preview.src = origName.startsWith('http') || origName.startsWith('data:') || origName.startsWith('/') ? origName : '/uploads/' + origName;
+    wrapper.classList.add('has-content');
+    document.getElementById(`image-box-${slot}`).classList.add('has-image');
     deletedIndexes.delete(Number(slot));
   } else {
     preview.src = '/photos/default.jpg';
-    deletedIndexes.delete(Number(slot));
+    wrapper.classList.remove('has-content');
+    document.getElementById(`image-box-${slot}`).classList.remove('has-image');
   }
+  input.value = '';
   document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${slot}"]`).forEach(el => el.remove());
   updateDeletedHidden();
 }
 
-// Auto-open cropper on image selection
+function triggerCrop(index) {
+  const input = document.getElementById(`file-input-${index}`);
+  const file = input.files[0];
+  if (!file) {
+    Swal.fire({
+      icon: 'error',
+      title: 'No Image',
+      text: 'Please select an image first.',
+      confirmButtonColor: '#dc3545'
+    });
+    return;
+  }
+  if (!allowedFormats.includes(file.type)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Image',
+      text: 'Only PNG/JPG/JPEG allowed',
+      confirmButtonColor: '#dc3545'
+    });
+    input.value = '';
+    return;
+  }
+  currentImageIndex = index;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    cropperImage.src = ev.target.result;
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      if (cropper) cropper.destroy();
+      cropper = new Cropper(cropperImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 1,
+        zoomable: true
+      });
+    }, 100);
+  };
+  reader.readAsDataURL(file);
+}
+
+function cropImage() {
+  const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
+  const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+  
+  const preview = document.getElementById(`preview-image-${currentImageIndex}`);
+  const wrapper = document.getElementById(`wrapper-${currentImageIndex}`);
+  preview.src = dataURL;
+  wrapper.classList.add('has-content');
+  document.getElementById(`image-box-${currentImageIndex}`).classList.add('has-image');
+
+  // Store the cropped image in a data attribute on the image element itself
+  preview.setAttribute('data-cropped', dataURL);
+  
+  updateDeletedHidden();
+  closeModal();
+}
+
+function closeModal() {
+  modal.style.display = 'none';
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+  // Reset file input after crop
+  if (currentImageIndex !== null) {
+    document.getElementById(`file-input-${currentImageIndex}`).value = '';
+  }
+}
+
+// File input change listener
 document.querySelectorAll('.product-image-input').forEach(input => {
-  input.addEventListener('change', e => {
-    const slot = Number(input.getAttribute('data-slot'));
-    if (!input.files[0]) return;
-    if (!allowedFormats.includes(input.files[0].type)) {
+  input.addEventListener('change', function() {
+    const slot = Number(this.dataset.slot);
+    if (!this.files[0]) return;
+    if (!allowedFormats.includes(this.files[0].type)) {
       Swal.fire({
         icon: 'error',
         title: 'Invalid Image',
         text: 'Only PNG/JPG/JPEG formats are allowed',
         confirmButtonColor: '#dc3545'
       });
-      input.value = '';
+      this.value = '';
       return;
     }
-    const reader = new FileReader();
-    reader.onload = ev => {
-      cropperImage.src = ev.target.result;
-      currentSlot = slot;
-      modal.style.display = 'flex';
-      setTimeout(() => {
-        if (cropper) cropper.destroy();
-        cropper = new Cropper(cropperImage, { aspectRatio: 1, viewMode: 1, autoCropArea: 1 });
-      }, 50);
-    };
-    reader.readAsDataURL(input.files[0]);
+    triggerCrop(slot);
   });
 });
 
-document.getElementById('cropper-save').addEventListener('click', () => {
-  if (!cropper) return;
-  const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-  const preview = document.getElementById(`preview-image-${currentSlot}`);
-  const origIdx = preview.getAttribute('data-original-index');
-  if (origIdx) deletedIndexes.add(Number(origIdx));
-  preview.src = dataUrl;
+// ==================== VARIANT MODAL HANDLING ====================
 
-  document.querySelectorAll(`input[name="productImagesBase64[]"][data-slot="${currentSlot}"]`).forEach(el => el.remove());
-
-  const hidden = document.createElement('input');
-  hidden.type = 'hidden';
-  hidden.name = 'productImagesBase64[]';
-  hidden.value = dataUrl;
-  hidden.setAttribute('data-slot', currentSlot);
-  document.getElementById('editProductForm').appendChild(hidden);
-  updateDeletedHidden();
-  closeCropper();
+// Auto-calculate sale price when regular price changes
+document.getElementById('modalRegularPrice').addEventListener('input', function() {
+  calculateSalePrice();
 });
 
-document.getElementById('cropper-cancel').addEventListener('click', closeCropper);
-
-function closeCropper() {
-  modal.style.display = 'none';
-  if (cropper) {
-    cropper.destroy();
-    cropper = null;
+function calculateSalePrice() {
+  const regularPrice = parseFloat(document.getElementById('modalRegularPrice').value) || 0;
+  const salePriceInput = document.getElementById('modalSalePrice');
+  
+  // For now, sale price = regular price (no discount applied)
+  // The backend will apply category offer when saving
+  if (regularPrice > 0) {
+    salePriceInput.value = regularPrice.toFixed(2);
+  } else {
+    salePriceInput.value = '';
   }
 }
 
-// ===== VARIANT MODAL FUNCTIONS =====
-
-function openVariantModal(index) {
+function openVariantModal(index = null) {
   currentEditingVariantIndex = index;
   
-  if (index < variants.length) {
+  if (index !== null && index < variants.length) {
     const variant = variants[index];
+    document.getElementById('modalTitle').textContent = 'Edit Product Variant';
+    document.getElementById('saveButtonText').textContent = 'Update Variant';
     document.getElementById('modalSize').value = variant.size;
     document.getElementById('modalStock').value = variant.stock;
     document.getElementById('modalRegularPrice').value = variant.regularPrice;
-    document.getElementById('modalSalePrice').value = variant.salePrice;
+    document.getElementById('modalSalePrice').value = variant.regularPrice; // Show regular price as sale price
   } else {
+    document.getElementById('modalTitle').textContent = 'Add Product Variant';
+    document.getElementById('saveButtonText').textContent = 'Add Variant';
     document.getElementById('modalSize').value = '';
     document.getElementById('modalStock').value = '';
     document.getElementById('modalRegularPrice').value = '';
     document.getElementById('modalSalePrice').value = '';
   }
   
-  document.getElementById('variantModal').classList.add('show');
+  document.getElementById('variantModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('modalSize').focus(), 100);
 }
 
 function closeVariantModal() {
-  document.getElementById('variantModal').classList.remove('show');
+  document.getElementById('variantModal').style.display = 'none';
   currentEditingVariantIndex = null;
 }
 
@@ -821,41 +1484,36 @@ function saveVariant() {
   const size = parseFloat(document.getElementById('modalSize').value);
   const stock = parseInt(document.getElementById('modalStock').value);
   const regularPrice = parseFloat(document.getElementById('modalRegularPrice').value);
-  const salePrice = parseFloat(document.getElementById('modalSalePrice').value);
-
-  // Validation
-  if (!size || size <= 0) {
-    Swal.fire({ icon: 'error', title: 'Invalid Size', text: 'Size must be a positive number', confirmButtonColor: '#dc3545' });
-    return;
-  }
-  if (isNaN(stock) || stock < 0) {
-    Swal.fire({ icon: 'error', title: 'Invalid Stock', text: 'Stock cannot be negative', confirmButtonColor: '#dc3545' });
-    return;
-  }
-  if (!regularPrice || regularPrice <= 0) {
-    Swal.fire({ icon: 'error', title: 'Invalid Regular Price', text: 'Regular price must be a positive number', confirmButtonColor: '#dc3545' });
-    return;
-  }
-  if (isNaN(salePrice) || salePrice < 0) {
-    Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price cannot be negative', confirmButtonColor: '#dc3545' });
-    return;
-  }
-  if (salePrice > regularPrice) {
-    Swal.fire({ icon: 'error', title: 'Invalid Price', text: 'Sale price must be ≤ regular price', confirmButtonColor: '#dc3545' });
-    return;
-  }
-
-  // Update or add variant
-  if (currentEditingVariantIndex < variants.length) {
-    variants[currentEditingVariantIndex] = { size, stock, regularPrice, salePrice };
-  } else {
-    variants.push({ size, stock, regularPrice, salePrice });
-  }
-
-  updateVariantsTable();
-  closeVariantModal();
+  // Sale price will be calculated by backend based on category offer
+  const salePrice = regularPrice; // Send regular price, backend will calculate actual sale price
   
-  Swal.fire({ icon: 'success', title: 'Success', text: 'Variant saved successfully', confirmButtonColor: '#4299e1', timer: 1500, showConfirmButton: false });
+  if (!size || size <= 0) {
+    Swal.fire({ icon: 'error', title: 'Invalid Size', text: 'Size must be greater than 0', confirmButtonColor: '#ef4444' });
+    return;
+  }
+  
+  if (isNaN(stock) || stock < 0) {
+    Swal.fire({ icon: 'error', title: 'Invalid Stock', text: 'Stock cannot be negative', confirmButtonColor: '#ef4444' });
+    return;
+  }
+  
+  if (!regularPrice || regularPrice <= 0) {
+    Swal.fire({ icon: 'error', title: 'Invalid Regular Price', text: 'Regular price must be greater than 0', confirmButtonColor: '#ef4444' });
+    return;
+  }
+  
+  const variant = { size, stock, regularPrice, salePrice };
+  
+  if (currentEditingVariantIndex !== null && currentEditingVariantIndex < variants.length) {
+    variants[currentEditingVariantIndex] = variant;
+    Swal.fire({ icon: 'success', title: 'Variant Updated!', timer: 1500, showConfirmButton: false });
+  } else {
+    variants.push(variant);
+    Swal.fire({ icon: 'success', title: 'Variant Added!', timer: 1500, showConfirmButton: false });
+  }
+  
+  renderVariants();
+  closeVariantModal();
 }
 
 function deleteVariant(index) {
@@ -865,18 +1523,19 @@ function deleteVariant(index) {
   }
 
   Swal.fire({
-    icon: 'warning',
     title: 'Delete Variant?',
-    text: 'This variant will be permanently deleted',
+    text: 'This action cannot be undone',
+    icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#dc3545',
-    cancelButtonColor: '#6B7280',
-    confirmButtonText: 'Delete'
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, Delete',
+    cancelButtonText: 'Cancel'
   }).then((result) => {
     if (result.isConfirmed) {
       variants.splice(index, 1);
-      updateVariantsTable();
-      Swal.fire({ icon: 'success', title: 'Deleted', text: 'Variant has been deleted', confirmButtonColor: '#4299e1', timer: 1500, showConfirmButton: false });
+      renderVariants();
+      Swal.fire({ icon: 'success', title: 'Variant Deleted!', timer: 1500, showConfirmButton: false });
     }
   });
 }
@@ -885,197 +1544,159 @@ function addNewVariant() {
   openVariantModal(variants.length);
 }
 
-function updateVariantsTable() {
-  const tbody = document.getElementById('variants-tbody');
-  tbody.innerHTML = '';
-
+function renderVariants() {
+  const display = document.getElementById('variantsDisplay');
+  const emptyState = document.getElementById('emptyState');
+  
+  display.querySelectorAll('.variant-card').forEach(card => card.remove());
+  
   if (variants.length === 0) {
-    tbody.innerHTML = `
-      <tr class="variant-row-item">
-        <td colspan="6" style="text-align:center;">No variants found</td>
-      </tr>
-    `;
+    emptyState.style.display = 'block';
     return;
   }
-
+  
+  emptyState.style.display = 'none';
+  
   variants.forEach((variant, index) => {
-    const row = document.createElement('tr');
-    row.className = 'variant-row-item';
-    row.innerHTML = `
-      <td><strong>${index + 1}</strong></td>
-      <td class="variant-size">${variant.size} ml</td>
-      <td class="variant-stock">${variant.stock}</td>
-      <td class="variant-price">₹${variant.regularPrice.toFixed(2)}</td>
-      <td class="variant-price">₹${variant.salePrice.toFixed(2)}</td>
-      <td>
+    const card = document.createElement('div');
+    card.className = 'variant-card';
+    card.innerHTML = `
+      <div class="variant-card-header">
+        <span class="variant-size-badge">
+          <i class="fas fa-box"></i> ${variant.size} ML
+        </span>
         <div class="variant-actions">
-          <button type="button" class="view-btn" onclick="openVariantModal(${index})">
-            <i class="fas fa-eye"></i> View
+          <button type="button" class="btn-variant-edit" onclick="openVariantModal(${index})">
+            <i class="fas fa-edit"></i> Edit
           </button>
-          <button type="button" class="delete-variant-btn" onclick="deleteVariant(${index})">
+          <button type="button" class="btn-variant-delete" onclick="deleteVariant(${index})">
             <i class="fas fa-trash"></i> Delete
           </button>
         </div>
-      </td>
+      </div>
+      <div class="variant-details">
+        <div class="variant-detail-item">
+          <span class="variant-detail-label"><i class="fas fa-warehouse"></i> Stock</span>
+          <span class="variant-detail-value">${variant.stock} Units</span>
+        </div>
+        <div class="variant-detail-item">
+          <span class="variant-detail-label"><i class="fas fa-tag"></i> Regular Price</span>
+          <span class="variant-detail-value">₹${variant.regularPrice.toFixed(2)}</span>
+        </div>
+        <div class="variant-detail-item">
+          <span class="variant-detail-label"><i class="fas fa-badge-percent"></i> Sale Price</span>
+          <span class="variant-detail-value">₹${variant.salePrice.toFixed(2)}</span>
+        </div>
+      </div>
     `;
-    tbody.appendChild(row);
+    display.appendChild(card);
   });
 }
 
-// Close modal when clicking outside
+// Modal background click handler
 document.getElementById('variantModal').addEventListener('click', (e) => {
   if (e.target.id === 'variantModal') {
     closeVariantModal();
   }
 });
 
-function clearValidationErrors() {
-  document.querySelectorAll('.form-group.has-error').forEach(el => {
-    el.classList.remove('has-error');
-    const errorMsg = el.querySelector('.error-message');
-    if (errorMsg) errorMsg.remove();
-  });
-  
-  document.querySelectorAll('.image-box.has-error').forEach(el => {
-    el.classList.remove('has-error');
-  });
-  
-  document.getElementById('validationErrorsContainer').style.display = 'none';
-  document.getElementById('validationErrorsList').innerHTML = '';
+// Escape key handler
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeVariantModal();
+    closeModal();
+  }
+});
+
+// ==================== FORM VALIDATION ====================
+
+function showError(id, msg) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.textContent = msg;
+    element.style.display = 'block';
+  }
 }
 
-function displayValidationErrors(errors, fieldErrors) {
-  clearValidationErrors();
-  
-  const container = document.getElementById('validationErrorsContainer');
-  const errorsList = document.getElementById('validationErrorsList');
-  
-  errorsList.innerHTML = '';
-  errors.forEach(error => {
-    const li = document.createElement('li');
-    li.textContent = error;
-    errorsList.appendChild(li);
-  });
-  
-  container.style.display = 'block';
-  container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  
-  Object.keys(fieldErrors).forEach(fieldName => {
-    if (fieldName.startsWith('image-')) {
-      const imageBox = document.getElementById(`image-box-${fieldName.split('-')[1]}`);
-      if (imageBox) imageBox.classList.add('has-error');
-    } else {
-      const field = document.getElementsByName(fieldName)[0];
-      if (field) {
-        const formGroup = field.closest('.form-group');
-        if (formGroup) {
-          formGroup.classList.add('has-error');
-          const errorMsg = document.createElement('div');
-          errorMsg.className = 'error-message';
-          errorMsg.textContent = fieldErrors[fieldName];
-          formGroup.appendChild(errorMsg);
-        }
-      }
-    }
+function clearErrors() {
+  document.querySelectorAll('.error-message').forEach(el => {
+    el.textContent = '';
+    el.style.display = 'none';
   });
 }
 
-function validateForm(event) {
-  let errors = [];
-  let fieldErrors = {};
+function validateForm(e) {
+  e.preventDefault();
+  clearErrors();
+  let valid = true;
 
-  // --- IMAGE VALIDATION: At least 3 required ---
-  let existingCount = 0;
+  // Image validation
+  let croppedCount = 0;
   for (let i = 0; i < 4; i++) {
     const preview = document.getElementById(`preview-image-${i}`);
-    if (preview.getAttribute('data-original-name') && !deletedIndexes.has(i)) {
-      existingCount++;
+    const origName = preview.getAttribute('data-original-name');
+    
+    if (origName && !deletedIndexes.has(i)) {
+      croppedCount++;
+    }
+    
+    const base64Input = document.querySelector(`input[name="productImagesBase64[]"][data-slot="${i}"]`);
+    if (base64Input) {
+      croppedCount++;
     }
   }
-  const newCount = document.querySelectorAll('input[name="productImagesBase64[]"]').length;
-  const totalImages = existingCount + newCount; // total actual images
 
-  if (totalImages < 3) {
-    errors.push('At least 3 images are required');
-    fieldErrors['image-0'] = 'At least 3 images are required';
-  }
-  if (totalImages > 4) {
-    errors.push('Maximum 4 images allowed');
+  if (croppedCount < 3) {
+    showError('productImage0-error', 'At least 3 images are required');
+    valid = false;
   }
 
-  // --- NAME VALIDATION: Strictly Alphabetic ---
+  // Form field validation
   const name = document.getElementsByName('productName')[0];
-  const nameValue = name ? name.value.trim() : "";
-  const alphaRegex = /^[a-zA-Z\s]+$/;
-
-  if (!nameValue) {
-    errors.push('Product name is required');
-    fieldErrors['productName'] = 'Product name is required';
-  } else if (!alphaRegex.test(nameValue)) {
-    errors.push('Product name must contain only letters and spaces');
-    fieldErrors['productName'] = 'Product name must contain only letters and spaces';
-  }
-  
-  // ... rest of the existing validation (Description, Category, etc.)
   const desc = document.getElementsByName('description')[0];
   const longDesc = document.getElementsByName('longDescription')[0];
   const brand = document.getElementsByName('brand')[0];
   const category = document.getElementsByName('category')[0];
 
-  if (!name || !name.value.trim()) {
-    errors.push('Product name is required');
-    fieldErrors['productName'] = 'Product name is required';
+  const nameValue = name.value.trim();
+  const alphaRegex = /^[a-zA-Z\s]+$/;
+
+  if (!nameValue) {
+    showError('productName-error', 'Product name is required');
+    valid = false;
+  } else if (!alphaRegex.test(nameValue)) {
+    showError('productName-error', 'Product name must contain only letters and spaces');
+    valid = false;
   }
-  if (!desc || !desc.value.trim()) {
-    errors.push('Short description is required');
-    fieldErrors['description'] = 'Short description is required';
+  
+  if (!desc.value.trim()) {
+    showError('description-error', 'Short description is required');
+    valid = false;
   }
-  if (!longDesc || !longDesc.value.trim()) {
-    errors.push('Long description is required');
-    fieldErrors['longDescription'] = 'Long description is required';
+  
+  if (!longDesc.value.trim()) {
+    showError('longDescription-error', 'Long description is required');
+    valid = false;
   }
-  if (!brand || !brand.value) {
-    errors.push('Please select a brand');
-    fieldErrors['brand'] = 'Please select a brand';
+  
+  if (!brand.value) {
+    showError('brand-error', 'Please select a brand');
+    valid = false;
   }
-  if (!category || !category.value) {
-    errors.push('Please select a category');
-    fieldErrors['category'] = 'Please select a category';
+  
+  if (!category.value) {
+    showError('category-error', 'Please select a category');
+    valid = false;
   }
 
-  // Validate variants
-  if (variants.length === 0) {
-    errors.push('At least one variant is required');
+  if (variants.length < 1) {
+    showError('variant-error', 'At least one variant is required');
+    valid = false;
   }
 
-  variants.forEach((variant, index) => {
-    if (!variant.size || variant.size <= 0) {
-      errors.push(`Variant ${index + 1}: Size must be positive`);
-    }
-    if (isNaN(variant.stock) || variant.stock < 0) {
-      errors.push(`Variant ${index + 1}: Stock cannot be negative`);
-    }
-    if (!variant.regularPrice || variant.regularPrice <= 0) {
-      errors.push(`Variant ${index + 1}: Regular price must be positive`);
-    }
-    if (isNaN(variant.salePrice) || variant.salePrice < 0) {
-      errors.push(`Variant ${index + 1}: Sale price cannot be negative`);
-    }
-    if (variant.salePrice > variant.regularPrice) {
-      errors.push(`Variant ${index + 1}: Sale price must be ≤ regular price`);
-    }
-  });
+  if (!valid) return false;
 
-  if (errors.length > 0) {
-    event.preventDefault();
-    displayValidationErrors(errors, fieldErrors);
-    return false;
-  }
-
-  // Clear errors if validation passes
-  clearValidationErrors();
-
-  // Save variants to hidden inputs INSIDE FORM
+  // Save variants to hidden inputs
   const variantsData = document.getElementById('variantsData');
   variantsData.innerHTML = '';
   
@@ -1089,9 +1710,96 @@ function validateForm(event) {
     });
   });
 
-  console.log('Form validated successfully. Variants:', variants);
   return true;
 }
+
+document.getElementById('editProductForm').addEventListener('submit', async function(event) {
+  event.preventDefault();
+  
+  if (!validateForm(event)) {
+    return;
+  }
+
+  try {
+    const formData = new FormData(this);
+    
+    // Clear any existing productImagesBase64 entries
+    formData.delete('productImagesBase64[]');
+    
+    // Collect all cropped images
+    const croppedImages = [];
+    for (let i = 0; i < 4; i++) {
+      const preview = document.getElementById(`preview-image-${i}`);
+      const croppedData = preview.getAttribute('data-cropped');
+      
+      if (croppedData) {
+        croppedImages.push(croppedData);
+      }
+    }
+    
+    // Add cropped images to formData
+    croppedImages.forEach((img) => {
+      formData.append('productImagesBase64[]', img);
+    });
+
+    console.log('Submitting form with:', {
+      deletedImages: formData.get('deletedImages'),
+      croppedImagesCount: croppedImages.length,
+      variantCount: formData.getAll('variantSize[]').length
+    });
+    
+    const response = await fetch(this.action, {
+      method: 'POST',
+      body: formData
+    });
+
+    const contentType = response.headers.get('content-type');
+    let data;
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Failed to update product');
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: data.message || 'Product updated successfully!',
+        confirmButtonColor: '#28a745',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
+        window.location.href = '/admin/products';
+      });
+    } else {
+      // Backend returned redirect or HTML response (success)
+      if (response.ok || response.status === 200 || response.redirected) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Product updated successfully!',
+          confirmButtonColor: '#28a745',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          window.location.href = '/admin/products';
+        });
+      } else {
+        throw new Error('Failed to update product');
+      }
+    }
+  } catch (error) {
+    console.error('Error updating product:', error.message);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'Failed to update product',
+      confirmButtonColor: '#dc3545'
+    });
+  }
+});
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {

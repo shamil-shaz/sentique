@@ -1,16 +1,13 @@
-
-const mongoose = require('mongoose');
-const Wallet = require('../../models/walletSchema');
-const User = require('../../models/userSchema');
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
-
+const mongoose = require("mongoose");
+const Wallet = require("../../models/walletSchema");
+const User = require("../../models/userSchema");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
-
 
 const generateShortReceipt = () => {
   const timestamp = Date.now().toString().slice(-8);
@@ -25,8 +22,8 @@ const getWalletPage = async (req, res) => {
     const userId = user?._id || user?.id;
 
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-      console.log('Invalid or missing user ID:', userId);
-      return res.redirect('/login');
+      console.log("Invalid or missing user ID:", userId);
+      return res.redirect("/login");
     }
 
     let wallet = await Wallet.findOne({ user: userId }).lean();
@@ -35,7 +32,7 @@ const getWalletPage = async (req, res) => {
     }
 
     const userData = await User.findById(userId).lean();
-  
+
     const page = parseInt(req.query.page) || 1;
     const limit = 8;
     const startIndex = (page - 1) * limit;
@@ -45,7 +42,7 @@ const getWalletPage = async (req, res) => {
     const totalPages = Math.ceil(totalTransactions / limit) || 1;
 
     const reversedTransactions = [...allTransactions].reverse();
-    
+
     const paginatedTransactions = reversedTransactions
       .slice(startIndex, startIndex + limit)
       .map((t, index) => ({
@@ -53,42 +50,52 @@ const getWalletPage = async (req, res) => {
         id: t._id.toString(),
         type: t.type,
         amount: parseFloat(t.amount).toFixed(2),
-        date: new Date(t.date).toLocaleDateString('en-IN', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
+        date: new Date(t.date).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
         }),
-        time: new Date(t.date).toLocaleTimeString('en-IN', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
+        time: new Date(t.date).toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
         }),
         description: t.description,
-        reason: t.reason || '',
-        details: t.details || '',
-        orderId: t.orderId || 'N/A',
-        productName: t.productName || '',
+        reason: t.reason || "",
+        details: t.details || "",
+        orderId: t.orderId || "N/A",
+        productName: t.productName || "",
       }));
 
     const walletData = {
       balance: parseFloat(wallet.balance || 0).toFixed(2),
-      totalCredits: allTransactions
-        .filter((t) => t.type === 'credit')
-        .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
-        .toFixed(2) || '0.00',
-      totalDebits: allTransactions
-        .filter((t) => t.type === 'debit')
-        .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
-        .toFixed(2) || '0.00',
-      monthlyTotal: allTransactions
-        .filter((t) => new Date(t.date).getMonth() === new Date().getMonth())
-        .reduce((a, t) => a + (t.type === 'credit' ? parseFloat(t.amount || 0) : -parseFloat(t.amount || 0)), 0)
-        .toFixed(2) || '0.00',
+      totalCredits:
+        allTransactions
+          .filter((t) => t.type === "credit")
+          .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
+          .toFixed(2) || "0.00",
+      totalDebits:
+        allTransactions
+          .filter((t) => t.type === "debit")
+          .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
+          .toFixed(2) || "0.00",
+      monthlyTotal:
+        allTransactions
+          .filter((t) => new Date(t.date).getMonth() === new Date().getMonth())
+          .reduce(
+            (a, t) =>
+              a +
+              (t.type === "credit"
+                ? parseFloat(t.amount || 0)
+                : -parseFloat(t.amount || 0)),
+            0
+          )
+          .toFixed(2) || "0.00",
       transactionCount: allTransactions.length,
     };
 
-    res.render('wallet', {
-      customerName: userData.name || 'Guest',
+    res.render("wallet", {
+      customerName: userData.name || "Guest",
       walletData,
       transactions: paginatedTransactions,
       currentPage: page,
@@ -97,8 +104,8 @@ const getWalletPage = async (req, res) => {
       razorpayKeyId: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
-    console.error('Error fetching wallet page:', error);
-    res.redirect('/pageNotFound');
+    console.error("Error fetching wallet page:", error);
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -107,7 +114,7 @@ const getWalletData = async (req, res) => {
     const userId = req.session.user?._id || req.session.user?.id;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     let wallet = await Wallet.findOne({ user: userId }).lean();
@@ -118,26 +125,36 @@ const getWalletData = async (req, res) => {
     const allTransactions = wallet.transactions || [];
     const walletData = {
       balance: parseFloat(wallet.balance || 0).toFixed(2),
-      totalCredits: allTransactions
-        .filter((t) => t.type === 'credit')
-        .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
-        .toFixed(2) || '0.00',
-      totalDebits: allTransactions
-        .filter((t) => t.type === 'debit')
-        .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
-        .toFixed(2) || '0.00',
-      monthlyTotal: allTransactions
-        .filter((t) => new Date(t.date).getMonth() === new Date().getMonth())
-        .reduce((a, t) => a + (t.type === 'credit' ? parseFloat(t.amount || 0) : -parseFloat(t.amount || 0)), 0)
-        .toFixed(2) || '0.00',
+      totalCredits:
+        allTransactions
+          .filter((t) => t.type === "credit")
+          .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
+          .toFixed(2) || "0.00",
+      totalDebits:
+        allTransactions
+          .filter((t) => t.type === "debit")
+          .reduce((a, t) => a + parseFloat(t.amount || 0), 0)
+          .toFixed(2) || "0.00",
+      monthlyTotal:
+        allTransactions
+          .filter((t) => new Date(t.date).getMonth() === new Date().getMonth())
+          .reduce(
+            (a, t) =>
+              a +
+              (t.type === "credit"
+                ? parseFloat(t.amount || 0)
+                : -parseFloat(t.amount || 0)),
+            0
+          )
+          .toFixed(2) || "0.00",
       transactionCount: allTransactions.length,
       totalPages: Math.ceil(allTransactions.length / 8) || 1,
     };
 
     res.json(walletData);
   } catch (error) {
-    console.error('Error fetching wallet data:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error fetching wallet data:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -145,21 +162,25 @@ const getPaginatedTransactions = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user?.id;
     const page = parseInt(req.query.page) || 1;
-    const filter = req.query.filter || 'all';
+    const filter = req.query.filter || "all";
     const limit = 8;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const wallet = await Wallet.findOne({ user: userId }).lean();
     if (!wallet) {
-      return res.json({ transactions: [], totalPages: 1, totalTransactions: 0 });
+      return res.json({
+        transactions: [],
+        totalPages: 1,
+        totalTransactions: 0,
+      });
     }
 
     let transactions = wallet.transactions || [];
-    
-    if (filter !== 'all') {
+
+    if (filter !== "all") {
       transactions = transactions.filter((t) => t.type === filter);
     }
 
@@ -168,7 +189,7 @@ const getPaginatedTransactions = async (req, res) => {
 
     const reversedTransactions = [...transactions].reverse();
     const startIndex = (page - 1) * limit;
-    
+
     const paginatedTransactions = reversedTransactions
       .slice(startIndex, startIndex + limit)
       .map((t, index) => ({
@@ -176,21 +197,21 @@ const getPaginatedTransactions = async (req, res) => {
         id: t._id.toString(),
         type: t.type,
         amount: parseFloat(t.amount).toFixed(2),
-        date: new Date(t.date).toLocaleDateString('en-IN', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
+        date: new Date(t.date).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
         }),
-        time: new Date(t.date).toLocaleTimeString('en-IN', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
+        time: new Date(t.date).toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
         }),
         description: t.description,
-        reason: t.reason || '',
-        details: t.details || '',
-        orderId: t.orderId || 'N/A',
-        productName: t.productName || '',
+        reason: t.reason || "",
+        details: t.details || "",
+        orderId: t.orderId || "N/A",
+        productName: t.productName || "",
       }));
 
     res.json({
@@ -200,8 +221,8 @@ const getPaginatedTransactions = async (req, res) => {
       currentFilter: filter,
     });
   } catch (error) {
-    console.error('Error fetching transactions:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -211,11 +232,13 @@ const createAddMoneyOrder = async (req, res) => {
     const { amount } = req.body;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: 'Invalid amount' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid amount" });
     }
 
     const amountInPaise = Math.round(parseFloat(amount) * 100);
@@ -223,28 +246,28 @@ const createAddMoneyOrder = async (req, res) => {
 
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
-      currency: 'INR',
+      currency: "INR",
       receipt: receipt,
       notes: {
         userId: userId.toString(),
-        type: 'wallet_topup'
-      }
+        type: "wallet_topup",
+      },
     });
 
-    console.log(' Razorpay order created:', razorpayOrder.id);
+    console.log(" Razorpay order created:", razorpayOrder.id);
 
     res.json({
       success: true,
       orderId: razorpayOrder.id,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
-      keyId: process.env.RAZORPAY_KEY_ID
+      keyId: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
-    console.error('Error creating order:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to create payment order'
+    console.error("Error creating order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create payment order",
     });
   }
 };
@@ -252,21 +275,27 @@ const createAddMoneyOrder = async (req, res) => {
 const verifyAddMoneyPayment = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user?.id;
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount } = req.body;
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      amount,
+    } = req.body;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    
-    const body = razorpay_order_id + '|' + razorpay_payment_id;
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body)
-      .digest('hex');
+      .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({ success: false, message: 'Invalid signature' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid signature" });
     }
 
     let wallet = await Wallet.findOne({ user: userId });
@@ -278,50 +307,52 @@ const verifyAddMoneyPayment = async (req, res) => {
     wallet.balance += numAmount;
 
     wallet.transactions.push({
-      type: 'credit',
+      type: "credit",
       amount: numAmount,
-      description: 'Add Money',
+      description: "Add Money",
       orderId: razorpay_payment_id,
       date: new Date(),
     });
 
     await wallet.save();
 
-    console.log(' Payment verified:', { amount: numAmount, balance: wallet.balance });
+    console.log(" Payment verified:", {
+      amount: numAmount,
+      balance: wallet.balance,
+    });
 
     res.json({
       success: true,
-      message: 'Money added successfully',
-      newBalance: wallet.balance.toFixed(2)
+      message: "Money added successfully",
+      newBalance: wallet.balance.toFixed(2),
     });
   } catch (error) {
-    console.error('Error verifying payment:', error);
-    res.status(500).json({ success: false, message: 'Verification failed' });
+    console.error("Error verifying payment:", error);
+    res.status(500).json({ success: false, message: "Verification failed" });
   }
 };
-
 
 const recordFailedPayment = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user?.id;
-    const { amount, orderId, paymentId, errorCode, errorDescription } = req.body;
+    const { amount, orderId, paymentId, errorCode, errorDescription } =
+      req.body;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    console.log('📝 Recording failed payment:', { userId, amount, errorCode });
+    console.log("📝 Recording failed payment:", { userId, amount, errorCode });
 
     let wallet = await Wallet.findOne({ user: userId });
     if (!wallet) {
       wallet = new Wallet({ user: userId });
     }
 
-  
     wallet.transactions.push({
-      type: 'failed', 
+      type: "failed",
       amount: parseFloat(amount),
-      description: 'Payment Failed',  
+      description: "Payment Failed",
       reason: errorDescription || errorCode,
       orderId: paymentId || orderId,
       date: new Date(),
@@ -329,15 +360,17 @@ const recordFailedPayment = async (req, res) => {
 
     await wallet.save();
 
-    console.log('Failed payment recorded');
+    console.log("Failed payment recorded");
 
     res.json({
       success: true,
-      message: 'Payment failure recorded'
+      message: "Payment failure recorded",
     });
   } catch (error) {
-    console.error('Error recording failed payment:', error);
-    res.status(500).json({ success: false, message: 'Failed to record payment' });
+    console.error("Error recording failed payment:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to record payment" });
   }
 };
 
@@ -346,20 +379,30 @@ const addTestTransaction = async (req, res) => {
   session.startTransaction();
   try {
     const userId = req.session.user?._id || req.session.user?.id;
-    const { type, amount, description, productName, orderId, reason } = req.body;
+    const { type, amount, description, productName, orderId, reason } =
+      req.body;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const wallet = await Wallet.findOne({ user: userId }).session(session);
     if (!wallet) {
-      return res.status(404).json({ error: 'Wallet not found' });
+      return res.status(404).json({ error: "Wallet not found" });
     }
 
-    const validDescriptions = ['Refund', 'Return', 'Referral', 'Add Money', 'Purchase', 'Order Cancellation', 'Cashback', 'Payment Failed'];
+    const validDescriptions = [
+      "Refund",
+      "Return",
+      "Referral",
+      "Add Money",
+      "Purchase",
+      "Order Cancellation",
+      "Cashback",
+      "Payment Failed",
+    ];
     if (!validDescriptions.includes(description)) {
-      return res.status(400).json({ error: 'Invalid description' });
+      return res.status(400).json({ error: "Invalid description" });
     }
 
     wallet.transactions.push({
@@ -367,27 +410,26 @@ const addTestTransaction = async (req, res) => {
       amount: parseFloat(amount),
       description,
       reason: reason || null,
-      orderId: orderId || 'N/A',
+      orderId: orderId || "N/A",
       productName: productName || null,
       date: new Date(),
     });
 
-    if (type === 'credit') {
+    if (type === "credit") {
       wallet.balance += parseFloat(amount);
-    } else if (type === 'debit') {
+    } else if (type === "debit") {
       wallet.balance -= parseFloat(amount);
     }
-  
 
     await wallet.save({ session });
     await session.commitTransaction();
     session.endSession();
-    res.json({ message: 'Transaction added' });
+    res.json({ message: "Transaction added" });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 

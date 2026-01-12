@@ -198,9 +198,11 @@
     <header class="chat-header">
       <div class="header-left">
         <a href="/admin/contact" class="back-btn">←</a>
-        <div class="avatar-circle"><%= user.name.charAt(0) %></div>
+        <div class="avatar-circle"><%= user?.name ? user.name.charAt(0).toUpperCase() : "U" %></div>
+
         <div class="user-meta">
-          <h4><%= user.name %></h4>
+         <h4><%= user?.name || "Unknown User" %></h4>
+
           <div class="status-indicator">Active</div>
         </div>
       </div>
@@ -232,15 +234,31 @@
       <% }) %>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="chat-footer">
-      <form action="/admin/contact/<%= user._id %>/send" method="POST">
-        <div class="input-wrapper">
-          <textarea name="message" placeholder="Write a reply…" required></textarea>
-          <button class="send-btn">Send</button>
-        </div>
-      </form>
-    </footer>
+<footer class="chat-footer">
+
+  <% if (canSend) { %>
+    <form action="/admin/contact/<%= user._id %>/send" method="POST">
+
+      <div class="input-wrapper">
+        <textarea name="message" placeholder="Write a message..." rows="1" required></textarea>
+        <button type="submit" class="send-btn">Send</button>
+      </div>
+    </form>
+  <% } else { %>
+    <div class="read-only-warning" style="
+      padding:12px 16px;
+      border-radius:10px;
+      background:#fef3c7;
+      color:#b45309;
+      font-size:14px;
+      font-weight:600;
+      text-align:center;">
+      User deleted or inactive — chat is read-only
+    </div>
+  <% } %>
+
+</footer>
+
 
   </div>
 </div>
@@ -248,4 +266,12 @@
 <script>
   const chatBody = document.getElementById("chatBody");
   chatBody.scrollTop = chatBody.scrollHeight;
+
+  const textarea = document.querySelector("textarea");
+  if(textarea) {
+    textarea.addEventListener("input", () => {
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+    });
+  }
 </script>

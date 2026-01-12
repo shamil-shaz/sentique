@@ -8,15 +8,13 @@ const Coupon = require("../../models/couponSchema");
 
 const getAdminOrderList = async (req, res) => {
   try {
+    const { orderId } = req.query;
 
-      const { orderId } = req.query; 
-
- 
     const query = {};
     if (orderId) {
       query.orderId = orderId;
     }
-     const orders = await Order.find(query)
+    const orders = await Order.find(query)
       .sort({ createdOn: -1 })
       .populate("user")
       .populate("orderItems.product")
@@ -85,26 +83,9 @@ const getAdminOrderList = async (req, res) => {
         ? `${order.deliveryAddress.houseName}, ${order.deliveryAddress.city}, ${order.deliveryAddress.state} - ${order.deliveryAddress.pincode}`
         : "N/A";
 
-      let dynamicTotal = 0;
-      order.orderItems.forEach((item) => {
-        const itemStatus = (
-          item.status ||
-          order.status ||
-          "Pending"
-        ).toLowerCase();
-        if (
-          itemStatus !== "cancelled" &&
-          itemStatus !== "returned" &&
-          itemStatus !== "return request"
-        ) {
-          const itemDiscountAmount = parseFloat(
-            item.discountApplied || item.couponDiscount || 0
-          );
-          const itemFinalAmount =
-            parseFloat(item.total || 0) - itemDiscountAmount;
-          dynamicTotal += itemFinalAmount;
-        }
-      });
+      const finalAmount = Number(order.finalAmount || 0);
+      const shippingCharge = Number(order.shippingCharge || 0);
+      const discount = Number(order.discount || 0);
 
       return {
         id: order.orderId || order._id.toString().slice(-5).toUpperCase(),
@@ -121,11 +102,14 @@ const getAdminOrderList = async (req, res) => {
         status: order.status,
         paymentMethod: order.paymentMethod || "N/A",
         paymentStatus: order.paymentStatus || "N/A",
-        totalAmount: dynamicTotal,
-        originalTotal: order.finalAmount || 0,
-        discount: order.discount || 0,
+
+        totalAmount: finalAmount,
+        originalTotal: order.totalPrice || 0,
+        shippingCharge,
+        discount,
         couponApplied: order.couponApplied || null,
         cancellationRequest: order.cancellationRequest || null,
+
         products: order.orderItems.map((item, index) => {
           let imagePath = "https://via.placeholder.com/80x80?text=No+Image";
           if (item.product) {
@@ -135,13 +119,6 @@ const getAdminOrderList = async (req, res) => {
               imagePath = firstImage.startsWith("http")
                 ? firstImage
                 : `/uploads/product-images/${firstImage}`;
-            } else {
-              console.log(
-                "No image found for product:",
-                item.productName,
-                "Product:",
-                item.product
-              );
             }
           }
 
@@ -152,9 +129,8 @@ const getAdminOrderList = async (req, res) => {
               item.productName ||
               (item.product ? item.product.productName : "Unknown Product"),
             variant: item.variantSize ? `${item.variantSize}ml` : "N/A",
-            variantSizeRaw: item.variantSize || null,
             quantity: item.quantity || 1,
-            price: (item.price || 0) * (item.quantity || 1),
+            price: item.total || item.price * item.quantity || 0,
             status: item.status || order.status,
             image: imagePath,
           };
@@ -235,20 +211,16 @@ const updateProductStatus = async (req, res) => {
       });
 
     if (item.status === "Cancelled")
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Cannot change status of a cancelled product",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Cannot change status of a cancelled product",
+      });
 
     if (item.status === "Return Request" || item.status === "Returned")
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `Cannot change status of item in return process`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `Cannot change status of item in return process`,
+      });
 
     const statusPriority = {
       Placed: 1,
@@ -636,12 +608,10 @@ const approveReturn = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ approveReturn error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        error: error.message || "Failed to approve return",
-      });
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Failed to approve return",
+    });
   }
 };
 
@@ -686,20 +656,16 @@ const rejectReturn = async (req, res) => {
 
       const item = order.orderItems[idx];
       if (Number(item.variantSize) !== Number(variantSize))
-        return res
-          .status(400)
-          .json({
-            success: false,
-            error: `Variant mismatch. Expected ${item.variantSize}ml.`,
-          });
+        return res.status(400).json({
+          success: false,
+          error: `Variant mismatch. Expected ${item.variantSize}ml.`,
+        });
 
       if (item.status !== "Return Request")
-        return res
-          .status(400)
-          .json({
-            success: false,
-            error: `Cannot reject return. Current status: ${item.status}`,
-          });
+        return res.status(400).json({
+          success: false,
+          error: `Cannot reject return. Current status: ${item.status}`,
+        });
 
       item.status = "Delivered";
       item.returnRejected = true;
@@ -714,12 +680,10 @@ const rejectReturn = async (req, res) => {
         (i) => i.status === "Return Request"
       );
       if (returnRequestedItems.length === 0)
-        return res
-          .status(400)
-          .json({
-            success: false,
-            error: "No items with Return Request status found",
-          });
+        return res.status(400).json({
+          success: false,
+          error: "No items with Return Request status found",
+        });
 
       returnRequestedItems.forEach((item) => {
         item.status = "Delivered";
@@ -760,12 +724,10 @@ const rejectReturn = async (req, res) => {
     });
   } catch (error) {
     console.error("Error rejecting return request:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: error.message || "Failed to reject return request",
-      });
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to reject return request",
+    });
   }
 };
 

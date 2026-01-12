@@ -1,5 +1,8 @@
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+  rel="stylesheet" />
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
@@ -28,12 +31,12 @@
   }
 
   .main-content {
-    margin-left: 260px; /* Adjusted for standard sidebars */
+    margin-left: 260px; 
     padding: 2rem;
     transition: all 0.3s ease;
   }
 
-  /* Header Section */
+ 
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -52,7 +55,7 @@
     font-size: 0.875rem;
   }
 
-  /* Modern Stats Grid */
+ 
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -193,7 +196,7 @@
     font-size: 0.95rem;
   }
 
-  /* Badges & Buttons */
+ 
   .badge {
     padding: 0.35rem 0.75rem;
     border-radius: 9999px;
@@ -308,154 +311,185 @@
 
 <body>
 
-<%- include("../partials/admin/header.ejs") %>
+  <%- include("../partials/admin/header.ejs") %>
 
-<div class="main-content">
-  <div class="page-header">
-    <div class="header-title">
-      <h2>Brand Management</h2>
-      <p>Manage and organize your product brands</p>
+  <div class="main-content">
+    <div class="page-header">
+      <div class="header-title">
+        <h2>Brand Management</h2>
+        <p>Manage and organize your product brands</p>
+      </div>
+      <button class="btn-primary"
+        onclick="window.location.href='/admin/addbrand'">
+        <i class="fas fa-plus"></i> Add New Brand
+      </button>
     </div>
-    <button class="btn-primary" onclick="window.location.href='/admin/addbrand'">
-      <i class="fas fa-plus"></i> Add New Brand
-    </button>
-  </div>
 
-  <div class="stats-grid">
-    <div class="stat-card" onclick="window.location.href='/admin/brands'">
-      <div style="display: flex; justify-content: space-between;">
-        <div>
-          <p style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Total Brands</p>
-          <h3 style="font-size: 1.8rem; margin-top: 0.5rem;"><%= totalBrands || data.length %></h3>
+    <div class="stats-grid">
+      <div class="stat-card" onclick="window.location.href='/admin/brands'">
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <p
+              style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Total
+              Brands</p>
+            <h3 style="font-size: 1.8rem; margin-top: 0.5rem;"><%= totalBrands
+              || data.length %></h3>
+          </div>
+          <div class="stat-icon"
+            style="background: rgba(79, 70, 229, 0.1); color: var(--primary);">
+            <i class="fas fa-boxes"></i>
+          </div>
         </div>
-        <div class="stat-icon" style="background: rgba(79, 70, 229, 0.1); color: var(--primary);">
-          <i class="fas fa-boxes"></i>
+      </div>
+
+      <div class="stat-card"
+        onclick="window.location.href='/admin/brands?status=listed'">
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <p
+              style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Listed</p>
+            <h3
+              style="font-size: 1.8rem; margin-top: 0.5rem; color: var(--success);"><%=
+              listedBrands || data.filter(b => !b.isBlocked).length %></h3>
+          </div>
+          <div class="stat-icon"
+            style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+            <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card"
+        onclick="window.location.href='/admin/brands?status=unlisted'">
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <p
+              style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Unlisted</p>
+            <h3
+              style="font-size: 1.8rem; margin-top: 0.5rem; color: var(--danger);"><%=
+              unlistedBrands || data.filter(b => b.isBlocked).length %></h3>
+          </div>
+          <div class="stat-icon"
+            style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+            <i class="fas fa-times-circle"></i>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="stat-card" onclick="window.location.href='/admin/brands?status=listed'">
-      <div style="display: flex; justify-content: space-between;">
-        <div>
-          <p style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Listed</p>
-          <h3 style="font-size: 1.8rem; margin-top: 0.5rem; color: var(--success);"><%= listedBrands || data.filter(b => !b.isBlocked).length %></h3>
-        </div>
-        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
-          <i class="fas fa-check-circle"></i>
-        </div>
+    <div class="toolbar">
+      <div class="filter-group">
+        <a href="/admin/brands"
+          class="filter-pill <%= (!status || status === '') ? 'active' : '' %>">All</a>
+        <a href="/admin/brands?status=listed"
+          class="filter-pill <%= status === 'listed' ? 'active' : '' %>">Listed</a>
+        <a href="/admin/brands?status=unlisted"
+          class="filter-pill <%= status === 'unlisted' ? 'active' : '' %>">Unlisted</a>
       </div>
-    </div>
 
-    <div class="stat-card" onclick="window.location.href='/admin/brands?status=unlisted'">
-      <div style="display: flex; justify-content: space-between;">
-        <div>
-          <p style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Unlisted</p>
-          <h3 style="font-size: 1.8rem; margin-top: 0.5rem; color: var(--danger);"><%= unlistedBrands || data.filter(b => b.isBlocked).length %></h3>
-        </div>
-        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
-          <i class="fas fa-times-circle"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toolbar">
-    <div class="filter-group">
-      <a href="/admin/brands" class="filter-pill <%= (!status || status === '') ? 'active' : '' %>">All</a>
-      <a href="/admin/brands?status=listed" class="filter-pill <%= status === 'listed' ? 'active' : '' %>">Listed</a>
-      <a href="/admin/brands?status=unlisted" class="filter-pill <%= status === 'unlisted' ? 'active' : '' %>">Unlisted</a>
-    </div>
-
-    <div class="search-wrapper">
-      <form action="/admin/brands" method="GET" class="search-form" id="searchForm">
-        <input 
-          type="text" 
-          name="search" 
-          placeholder="Search brands..." 
-          value="<%= search || '' %>"
-          id="searchInput"
-          class="search-input"
-        />
-        <% if (search && search.trim() !== '') { %>
-          <button type="button" class="cancel-search-btn" onclick="clearSearch(event)" style="background:none; border:none; padding: 0 10px; color: var(--text-muted); cursor:pointer;">
+      <div class="search-wrapper">
+        <form action="/admin/brands" method="GET" class="search-form"
+          id="searchForm">
+          <input
+            type="text"
+            name="search"
+            placeholder="Search brands..."
+            value="<%= search || '' %>"
+            id="searchInput"
+            class="search-input" />
+          <% if (search && search.trim() !== '') { %>
+          <button type="button" class="cancel-search-btn"
+            onclick="clearSearch(event)"
+            style="background:none; border:none; padding: 0 10px; color: var(--text-muted); cursor:pointer;">
             <i class="fas fa-times"></i>
           </button>
-        <% } %>
-        <button type="submit" class="search-btn">Search</button>
-      </form>
+          <% } %>
+          <button type="submit" class="search-btn">Search</button>
+        </form>
+      </div>
     </div>
-  </div>
 
-  <div class="table-card">
-    <table class="brand-table">
-      <thead>
-        <tr>
-          <th>Brand Details</th>
-          <th>Status</th>
-          <th style="text-align: right;">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (data && data.length > 0) { %>
-          <% data.forEach(brand => { %>
-            <tr>
-              <td data-label="Brand Details">
-                <div class="brand-info">
-                  <img src="<%= brand.brandImage[0] %>" alt="" class="brand-logo" />
-                  <span class="brand-name"><%= brand.brandName %></span>
-                </div>
-              </td>
-              <td data-label="Status">
-                <% if (brand.isBlocked) { %>
-                  <span class="badge badge-danger">Unlisted</span>
-                <% } else { %>
-                  <span class="badge badge-success">Listed</span>
-                <% } %>
-              </td>
-              <td data-label="Actions" style="text-align: right;">
-                <% if (!brand.isBlocked) { %>
-                  <a href="/admin/blockBrand?id=<%= brand._id %>" class="action-btn btn-outline-danger confirm-action" data-action="unlist">
-                    <i class="fas fa-ban"></i> Unlist
-                  </a>
-                <% } else { %>
-                  <a href="/admin/unblockBrand?id=<%= brand._id %>" class="action-btn btn-outline-success confirm-action" data-action="list">
-                    <i class="fas fa-check"></i> List
-                  </a>
-                <% } %>
-              </td>
-            </tr>
-          <% }) %>
-        <% } else { %>
+    <div class="table-card">
+      <table class="brand-table">
+        <thead>
           <tr>
-            <td colspan="3" style="text-align: center; padding: 4rem;">
-              <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem; display: block;"></i>
-              <h3 style="color: var(--text-muted);">No brands found</h3>
-              <p style="color: var(--text-muted); font-size: 0.9rem;">Try adjusting your filters or search terms.</p>
+            <th>Brand Details</th>
+            <th>Status</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (data && data.length > 0) { %>
+          <% data.forEach(brand => { %>
+          <tr>
+            <td data-label="Brand Details">
+              <div class="brand-info">
+                <img src="<%= brand.brandImage[0] %>" alt class="brand-logo" />
+                <span class="brand-name"><%= brand.brandName %></span>
+              </div>
+            </td>
+            <td data-label="Status">
+              <% if (brand.isBlocked) { %>
+              <span class="badge badge-danger">Unlisted</span>
+              <% } else { %>
+              <span class="badge badge-success">Listed</span>
+              <% } %>
+            </td>
+            <td data-label="Actions" style="text-align: right;">
+              <% if (!brand.isBlocked) { %>
+              <a href="/admin/blockBrand?id=<%= brand._id %>"
+                class="action-btn btn-outline-danger confirm-action"
+                data-action="unlist">
+                <i class="fas fa-ban"></i> Unlist
+              </a>
+              <% } else { %>
+              <a href="/admin/unblockBrand?id=<%= brand._id %>"
+                class="action-btn btn-outline-success confirm-action"
+                data-action="list">
+                <i class="fas fa-check"></i> List
+              </a>
+              <% } %>
             </td>
           </tr>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
+          <% }) %>
+          <% } else { %>
+          <tr>
+            <td colspan="3" style="text-align: center; padding: 4rem;">
+              <i class="fas fa-folder-open"
+                style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem; display: block;"></i>
+              <h3 style="color: var(--text-muted);">No brands found</h3>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Try
+                adjusting your filters or search terms.</p>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
 
-  <% if (totalPages > 1) { %>
-    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
+    <% if (totalPages > 1) { %>
+    <div
+      style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
       <% if(currentPage > 1) { %>
-        <a href="?search=<%= search %>&page=<%= currentPage - 1 %>" class="filter-pill active">Prev</a>
+      <a href="?search=<%= search %>&page=<%= currentPage - 1 %>"
+        class="filter-pill active">Prev</a>
       <% } %>
-      
+
       <% for(let i = 1; i <= totalPages; i++) { %>
-        <a href="?search=<%= search %>&page=<%= i %>" class="filter-pill <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+      <a href="?search=<%= search %>&page=<%= i %>"
+        class="filter-pill <%= i === currentPage ? 'active' : '' %>"><%= i
+        %></a>
       <% } %>
 
       <% if(currentPage < totalPages) { %>
-        <a href="?search=<%= search %>&page=<%= currentPage + 1 %>" class="filter-pill active">Next</a>
+      <a href="?search=<%= search %>&page=<%= currentPage + 1 %>"
+        class="filter-pill active">Next</a>
       <% } %>
     </div>
-  <% } %>
-</div>
+    <% } %>
+  </div>
 
-<script>
+  <script>
   function clearSearch(event) {
     event.preventDefault();
     document.getElementById('searchInput').value = '';

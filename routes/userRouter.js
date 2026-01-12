@@ -140,6 +140,7 @@ router.post("/wishlist/add", wishlistController.addToWishlist);
 router.delete("/wishlist/remove/:id", userAuth, wishlistController.removeFromWishlist);
 router.post("/wishlist/move-all-to-cart", userAuth, wishlistController.moveAllToCart);
 router.get('/wishlist/count', userAuth, wishlistController.getWishlistCount);
+router.post('/wishlist/update-variant', userAuth, wishlistController.updateVariant);
 
 
 //// -----cart-------

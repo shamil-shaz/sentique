@@ -807,6 +807,9 @@
         }
 
         const defaultSize = cheapestVariant ? cheapestVariant.size : '';
+
+        const selectedSize = item.variantSize || defaultSize;
+
         %>
 
         <article class="wishlist-card"
@@ -854,7 +857,8 @@
                     <% if (product.variants && product.variants.length > 0 && !isUnavailable) { %>
                         <select class="variant-select" data-product-id="<%= product._id %>">
                             <% product.variants.forEach(v => { %>
-                                <option value="<%= v.size %>" <%= v.size === defaultSize ? 'selected' : '' %>>
+                                <option value="<%= v.size %>" <%= v.size === selectedSize ? 'selected' : '' %>>
+
                                     <%= v.size %> ml - ₹<%= v.salePrice > 0 ? v.salePrice : v.regularPrice %>
                                 </option>
                             <% }) %>
@@ -871,7 +875,8 @@
                         <button
                             class="add-to-cart-btn <%= !defaultSize ? 'disabled' : '' %>"
                             data-id="<%= product._id %>"
-                            data-variant-id="<%= defaultSize %>"
+                           data-variant-id="<%= selectedSize %>"
+
                             <%= !defaultSize ? 'disabled' : '' %>>
                             <i class="fa fa-shopping-cart"></i> Add to Cart
                         </button>
@@ -908,16 +913,26 @@
 
     // Re-attach event listeners after dynamic content (pagination)
     function attachEventListeners() {
-        // Variant selection
-        document.querySelectorAll('.variant-select').forEach(select => {
-            select.addEventListener('change', function () {
-                const btn = this.closest('.wishlist-card').querySelector('.add-to-cart-btn');
-                const size = this.value;
-                btn.dataset.variantId = size;
-                btn.classList.toggle('disabled', !size);
-                btn.disabled = !size;
-            });
+       // Variant selection
+document.querySelectorAll('.variant-select').forEach(select => {
+    select.addEventListener('change', function () {
+        const productId = this.dataset.productId;
+        const btn = this.closest('.wishlist-card').querySelector('.add-to-cart-btn');
+        const size = this.value;
+
+        btn.dataset.variantId = size;
+        btn.classList.toggle('disabled', !size);
+        btn.disabled = !size;
+
+        //  🔴 IMPORTANT: Update wishlist stored variant
+        fetch('/wishlist/update-variant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, variantSize: size })
         });
+    });
+});
+
 
         // Remove button (×)
         document.querySelectorAll('.remove-wishlist-btn').forEach(btn => {
@@ -1055,32 +1070,53 @@
         if (moveBtn) moveBtn.style.display = 'none';
     }
 
-    // Move All to Cart
-    async function moveAllToBag() {
-        const result = await Swal.fire({
-            title: 'Move All to Cart?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#626362',
-            confirmButtonText: 'Yes, Move All'
+async function moveAllToBag() {
+
+    // 1️⃣ Save variants to DB first
+    const selects = document.querySelectorAll('.variant-select');
+    for (const s of selects) {
+        await fetch('/wishlist/update-variant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                productId: s.dataset.productId,
+                variantSize: s.value
+            })
         });
-
-        if (!result.isConfirmed) return;
-
-        try {
-            const res = await fetch('/wishlist/move-all-to-cart', { method: 'POST' });
-            const data = await res.json();
-
-            if (data.success) {
-                Toast.fire({ icon: 'success', title: 'All items moved to cart!' });
-                setTimeout(() => location.href = '/cart', 1500);
-            } else {
-                Toast.fire({ icon: 'error', title: data.message || 'Failed' });
-            }
-        } catch (err) {
-            Toast.fire({ icon: 'error', title: 'Network error' });
-        }
     }
+
+    // 2️⃣ UI Confirmation
+    const result = await Swal.fire({
+        title: 'Move all to cart?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+    });
+
+    if (!result.isConfirmed) return;
+
+    // 3️⃣ Send UI variant map to backend
+    const variantsMap = {};
+    selects.forEach(s => {
+        variantsMap[s.dataset.productId] = s.value;
+    });
+
+    const res = await fetch('/wishlist/move-all-to-cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ variantsMap })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        Toast.fire({ icon: 'success', title: 'All items moved to cart!' });
+        setTimeout(() => location.href = '/cart', 1500);
+    } else {
+        Toast.fire({ icon: 'error', title: data.message || 'Failed' });
+    }
+}
+
 </script>
 </body>
 

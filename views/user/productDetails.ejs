@@ -2,16 +2,22 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= product.productName %> - Sentique</title>
-  
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.productName %> - Sentique</title>
 
-  <style>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+      rel="stylesheet">
+
+    <style>
 :root {
   --bg-body: #ffffff; --bg-card: #ffffff; --bg-input: #f8f8f8;
   --text-main: #1a1a1a; --text-muted: #666666; --border: #e0e0e0;
@@ -205,213 +211,287 @@ body.dark-mode .mc-brand { color: var(--accent-color); }
   .wish-btn { width: 100%; margin-top: 10px; }
   .related-grid { grid-template-columns: 1fr; }
 }
+
+body.dark-mode #maxLimitMsg {
+  color:#f59e0b;
+}
+
+.limit-warning {
+  margin-top:8px;
+  font-size:13px;
+  font-weight:500;
+  color:#eab308;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+body.dark-mode .limit-warning {
+  color:#f59e0b;
+}
+
+
   </style>
-</head>
+  </head>
 
-<body>
-  
-  <div class="main-container">
-    <nav class="breadcrumb-nav">
-      <a href="/">Home</a> / <a href="/shopPage">Shop</a> / 
-      <% if(product.category) { %>
-        <a href="/shopPage?category=<%= product.category._id %>"><%= product.category.name %></a> / 
-      <% } %>
-      <strong><%= product.productName %></strong>
-    </nav>
-  </div>
+  <body>
 
-  <div class="main-container">
-    <div class="product-grid">
-      
-      <div class="gallery-section">
-        <div class="thumbnails">
-          <% product.images.forEach((img, i) => { %>
-            <div class="thumbnail <%= i === 0 ? 'active' : '' %>" onclick="changeImage(this, '<%= img %>')">
+    <div class="main-container">
+      <nav class="breadcrumb-nav">
+        <a href="/">Home</a> / <a href="/shopPage">Shop</a> /
+
+        <strong><%= product.productName %></strong>
+      </nav>
+    </div>
+
+    <div class="main-container">
+      <div class="product-grid">
+
+        <div class="gallery-section">
+          <div class="thumbnails">
+            <% product.images.forEach((img, i) => { %>
+            <div class="thumbnail <%= i === 0 ? 'active' : '' %>"
+              onclick="changeImage(this, '<%= img %>')">
               <img src="<%= img %>" alt="thumb">
             </div>
-          <% }) %>
+            <% }) %>
+          </div>
+          <div class="main-image" id="zoomBox">
+            <img id="mainImage" src="<%= product.images[0] %>"
+              alt="<%= product.productName %>">
+          </div>
         </div>
-        <div class="main-image" id="zoomBox">
-          <img id="mainImage" src="<%= product.images[0] %>" alt="<%= product.productName %>">
-        </div>
-      </div>
 
-      <div class="product-info">
-        <span class="brand-tag">
-          <% if(product.brand) { %><%= product.brand.brandName %><% } else { %>SENTIQUE<% } %>
-        </span>
-        
-        <h1 class="product-title"><%= product.productName %></h1>
-        
-        <div class="rating-wrap">
-          <div class="stars">
-            <% 
+        <div class="product-info">
+          <span class="brand-tag">
+            <% if(product.brand) { %><%= product.brand.brandName %><% } else {
+            %>SENTIQUE<% } %>
+          </span>
+
+          <h1 class="product-title"><%= product.productName %></h1>
+
+          <div class="rating-wrap">
+            <div class="stars">
+              <%
               const full = Math.floor(parseFloat(averageRating || 0));
               const half = (averageRating % 1) > 0;
-              for(let i=0; i<5; i++) { 
-                if(i < full) { %><i class="fas fa-star"></i><% } 
-                else if(i===full && half) { %><i class="fas fa-star-half-alt"></i><% } 
-                else { %><i class="far fa-star"></i><% } 
+              for(let i=0; i<5; i++) {
+              if(i < full) { %><i class="fas fa-star"></i><% }
+              else if(i===full && half) { %><i
+                class="fas fa-star-half-alt"></i><% }
+              else { %><i class="far fa-star"></i><% }
               }
-            %>
+              %>
+            </div>
+            <span><%= totalReviews > 0 ? `(${totalReviews} Reviews)` :
+              'No reviews yet' %></span>
           </div>
-          <span><%= totalReviews > 0 ? `(${totalReviews} Reviews)` : 'No reviews yet' %></span>
-        </div>
 
-        <div class="price-wrap">
-          <span class="current-price" id="currentPrice">
-            ₹<%= product.variants[0]?.salePrice.toFixed(2) || '0.00' %>
-          </span>
-          <% if(product.variants[0]?.regularPrice > product.variants[0]?.salePrice) { %>
-            <span class="old-price" id="regularPrice">₹<%= product.variants[0]?.regularPrice.toFixed(2) %></span>
-            <span class="discount-tag" id="discountTag">
-              <%= Math.round(((product.variants[0]?.regularPrice - product.variants[0]?.salePrice) / product.variants[0]?.regularPrice) * 100) %>% OFF
+          <div class="price-wrap">
+            <span class="current-price" id="currentPrice">
+              ₹<%= product.variants[0]?.salePrice.toFixed(2) || '0.00' %>
             </span>
-          <% } %>
-        </div>
+            <% if(product.variants[0]?.regularPrice >
+            product.variants[0]?.salePrice) { %>
+            <span class="old-price" id="regularPrice">₹<%=
+              product.variants[0]?.regularPrice.toFixed(2) %></span>
+            <span class="discount-tag" id="discountTag">
+              <%= Math.round(((product.variants[0]?.regularPrice -
+              product.variants[0]?.salePrice) /
+              product.variants[0]?.regularPrice) * 100) %>% OFF
+            </span>
+            <% } %>
+          </div>
 
-        <p class="description"><%= product.description %></p>
+          <p class="description"><%= product.description %></p>
 
-        <div style="margin-bottom: 25px;">
-          <label class="option-title">Select Volume</label>
-          <div class="options-grid">
-            <% product.variants.forEach((variant, i) => { %>
-              <button 
+          <div style="margin-bottom: 25px;">
+            <label class="option-title">Select Volume</label>
+            <div class="options-grid">
+              <% product.variants.forEach((variant, i) => { %>
+              <button
                 class="size-btn <%= i === 0 ? 'active' : '' %>"
                 data-size="<%= variant.size %>"
                 data-sale="<%= variant.salePrice %>"
                 data-regular="<%= variant.regularPrice %>"
                 data-stock="<%= variant.stock %>"
-                <%= variant.stock === 0 ? 'disabled' : '' %>
+                <%=variant.stock === 0 ? 'disabled' : '' %>
                 onclick="selectVariant(this)">
                 <%= variant.size %> ML
               </button>
-            <% }) %>
-          </div>
-          <div id="stockDisplay" class="stock-text"></div>
-        </div>
-
-        <div class="action-row">
-          <div class="qty-wrap">
-            <button class="qty-btn" type="button" onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
-            <input type="text" id="quantity" class="qty-input" value="1" readonly>
-            <button class="qty-btn" type="button" onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
-          </div>
-          
-          <button class="add-btn" id="addToCartBtn">Add to Cart</button>
-          
-          <button class="wish-btn" id="wishlistBtn">
-            <i class="far fa-heart"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-nav">
-      <button class="tab-link active" onclick="switchTab('desc', this)">Description</button>
-      <button class="tab-link" onclick="switchTab('rev', this)">Reviews (<%= totalReviews %>)</button>
-    </div>
-
-    <div id="desc" class="tab-content active">
-      <div style="color: var(--text-muted); font-size: 15px; max-width: 800px; line-height: 1.7;">
-        <%= product.longDescription || product.Longdescription || product.description %>
-      </div>
-    </div>
-
-    <div id="rev" class="tab-content">
-      <div class="review-split">
-        <div>
-          <% if(totalReviews > 0) { %>
-            <div class="rating-box">
-              <div class="total-score"><%= parseFloat(averageRating).toFixed(1) %></div>
-              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Average Rating</div>
-              <% [5,4,3,2,1].forEach(star => { %>
-                <div class="bar-line">
-                  <span style="width:10px;"><%= star %></span> <i class="fas fa-star" style="font-size:10px;"></i>
-                  <div class="progress-bg"><div class="progress-fill" style="width: <%= ratingPercentage[star] || 0 %>%;"></div></div>
-                  <span style="width:20px; text-align:right;"><%= ratingDistribution[star] || 0 %></span>
-                </div>
               <% }) %>
             </div>
-          <% } %>
-          
-          <% if(user && !userHasReviewed) { %>
+            <div id="stockDisplay" class="stock-text"></div>
+          </div>
+
+          <div class="action-row">
+            <div class="qty-wrap">
+
+              <button class="qty-btn" type="button" onclick="changeQty(-1)"><i
+                  class="fas fa-minus"></i></button>
+              <input type="text" id="quantity" class="qty-input" value="1"
+                readonly>
+              <button class="qty-btn" type="button" onclick="changeQty(1)"><i
+                  class="fas fa-plus"></i></button>
+            </div>
+
+            <button class="add-btn" id="addToCartBtn">Add to Cart</button>
+
+            <button class="wish-btn" id="wishlistBtn">
+              <i class="far fa-heart"></i>
+            </button>
+
+          </div>
+          <div id="maxLimitMsg" style="
+  display:none;
+  font-size:13px;
+  color:#eab308;
+  margin-top:8px;
+  font-weight:500;
+  
+  align-items:center;
+  gap:6px;
+">
+            <i class="fas fa-info-circle"></i>
+            Maximum 5 items per order
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-link active"
+          onclick="switchTab('desc', this)">Description</button>
+        <button class="tab-link" onclick="switchTab('rev', this)">Reviews (<%=
+          totalReviews %>)</button>
+      </div>
+
+      <div id="desc" class="tab-content active">
+        <div
+          style="color: var(--text-muted); font-size: 15px; max-width: 800px; line-height: 1.7;">
+          <%= product.longDescription || product.Longdescription ||
+          product.description %>
+        </div>
+      </div>
+
+      <div id="rev" class="tab-content">
+        <div class="review-split">
+          <div>
+            <% if(totalReviews > 0) { %>
+            <div class="rating-box">
+              <div class="total-score"><%= parseFloat(averageRating).toFixed(1)
+                %></div>
+              <div
+                style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Average
+                Rating</div>
+              <% [5,4,3,2,1].forEach(star => { %>
+              <div class="bar-line">
+                <span style="width:10px;"><%= star %></span> <i
+                  class="fas fa-star" style="font-size:10px;"></i>
+                <div class="progress-bg"><div class="progress-fill"
+                    style="width: <%= ratingPercentage[star] || 0 %>%;"></div></div>
+                <span style="width:20px; text-align:right;"><%=
+                  ratingDistribution[star] || 0 %></span>
+              </div>
+              <% }) %>
+            </div>
+            <% } %>
+
+            <% if(user && !userHasReviewed) { %>
             <div class="write-rev">
               <h5>Write a Review</h5>
               <form id="reviewForm">
                 <div class="stars-input">
-                  <input type="radio" id="s5" name="rating" value="5" class="s-inp" hidden required><label for="s5" class="s-lbl">★</label>
-                  <input type="radio" id="s4" name="rating" value="4" class="s-inp" hidden required><label for="s4" class="s-lbl">★</label>
-                  <input type="radio" id="s3" name="rating" value="3" class="s-inp" hidden required><label for="s3" class="s-lbl">★</label>
-                  <input type="radio" id="s2" name="rating" value="2" class="s-inp" hidden required><label for="s2" class="s-lbl">★</label>
-                  <input type="radio" id="s1" name="rating" value="1" class="s-inp" hidden required><label for="s1" class="s-lbl">★</label>
+                  <input type="radio" id="s5" name="rating" value="5"
+                    class="s-inp" hidden required><label for="s5"
+                    class="s-lbl">★</label>
+                  <input type="radio" id="s4" name="rating" value="4"
+                    class="s-inp" hidden required><label for="s4"
+                    class="s-lbl">★</label>
+                  <input type="radio" id="s3" name="rating" value="3"
+                    class="s-inp" hidden required><label for="s3"
+                    class="s-lbl">★</label>
+                  <input type="radio" id="s2" name="rating" value="2"
+                    class="s-inp" hidden required><label for="s2"
+                    class="s-lbl">★</label>
+                  <input type="radio" id="s1" name="rating" value="1"
+                    class="s-inp" hidden required><label for="s1"
+                    class="s-lbl">★</label>
                 </div>
-                <textarea id="reviewComment" class="rev-input" rows="4" placeholder="Share your thoughts..." required></textarea>
-                <button type="submit" class="add-btn" style="margin-top:10px;">Submit Review</button>
+                <textarea id="reviewComment" class="rev-input" rows="4"
+                  placeholder="Share your thoughts..." required></textarea>
+                <button type="submit" class="add-btn"
+                  style="margin-top:10px;">Submit Review</button>
               </form>
             </div>
-          <% } %>
-        </div>
+            <% } %>
+          </div>
 
-        <div>
-          <% if(reviews && reviews.length > 0) { %>
+          <div>
+            <% if(reviews && reviews.length > 0) { %>
             <% reviews.forEach(review => { %>
-              <div class="review-item">
-                <div class="rev-head">
-                  <div>
-                    <span class="rev-name"><%= review.userId.name %></span>
-                    <span class="rev-date"><%= new Date(review.createdAt).toLocaleDateString() %></span>
-                  </div>
-                  <div class="rev-stars">
-                    <% for(let i=0; i<5; i++) { %><%= i < review.rating ? '★' : '☆' %><% } %>
-                  </div>
+            <div class="review-item">
+              <div class="rev-head">
+                <div>
+                  <span class="rev-name"><%= review.userId.name %></span>
+                  <span class="rev-date"><%= new
+                    Date(review.createdAt).toLocaleDateString() %></span>
                 </div>
-                <div class="rev-text"><%= review.comment %></div>
+                <div class="rev-stars">
+                  <% for(let i=0; i<5; i++) { %><%= i < review.rating ? '★' :
+                  '☆' %><% } %>
+                </div>
               </div>
+              <div class="rev-text"><%= review.comment %></div>
+            </div>
             <% }) %>
-          <% } else { %>
-            <p style="color: var(--text-muted); font-style: italic;">No reviews yet. Be the first to review!</p>
-          <% } %>
+            <% } else { %>
+            <p style="color: var(--text-muted); font-style: italic;">No reviews
+              yet. Be the first to review!</p>
+            <% } %>
+          </div>
         </div>
+      </div>
+
+      <h2 class="section-head">You May Also Like</h2>
+      <div class="related-grid">
+        <% if(relatedProducts && relatedProducts.length > 0) { %>
+        <% relatedProducts.forEach(prod => {
+        const relSale = prod.variants[0]?.salePrice || 0;
+        const relReg = prod.variants[0]?.regularPrice || 0;
+        const hasDiscount = relReg > relSale && relSale > 0;
+        const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg)
+        * 100) : 0;
+        %>
+        <a href="/productDetails?id=<%= prod._id %>" class="mini-card">
+          <div class="mc-img-box">
+            <% if(hasDiscount) { %>
+            <div class="mc-discount-badge"><%= discount %>% OFF</div>
+            <% } %>
+            <img src="<%= prod.images[0] %>" class="mc-img"
+              alt="<%= prod.productName %>">
+          </div>
+          <div class="mc-details">
+            <div class="mc-brand"><%= prod.brand ? prod.brand.brandName :
+              'SENTIQUE' %></div>
+            <div class="mc-name"><%= prod.productName %></div>
+            <div class="mc-price-wrap">
+              <div class="mc-price">₹<%= relSale.toFixed(2) %></div>
+              <% if(hasDiscount) { %>
+              <div class="mc-old-price">₹<%= relReg.toFixed(2) %></div>
+              <% } %>
+            </div>
+          </div>
+        </a>
+        <% }) %>
+        <% } %>
       </div>
     </div>
 
-    <h2 class="section-head">You May Also Like</h2>
-    <div class="related-grid">
-      <% if(relatedProducts && relatedProducts.length > 0) { %>
-        <% relatedProducts.forEach(prod => { 
-          const relSale = prod.variants[0]?.salePrice || 0;
-          const relReg = prod.variants[0]?.regularPrice || 0;
-          const hasDiscount = relReg > relSale && relSale > 0;
-          const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg) * 100) : 0;
-        %>
-          <a href="/productDetails?id=<%= prod._id %>" class="mini-card">
-            <div class="mc-img-box">
-              <% if(hasDiscount) { %>
-                <div class="mc-discount-badge"><%= discount %>% OFF</div>
-              <% } %>
-              <img src="<%= prod.images[0] %>" class="mc-img" alt="<%= prod.productName %>">
-            </div>
-            <div class="mc-details">
-              <div class="mc-brand"><%= prod.brand ? prod.brand.brandName : 'SENTIQUE' %></div>
-              <div class="mc-name"><%= prod.productName %></div>
-              <div class="mc-price-wrap">
-                <div class="mc-price">₹<%= relSale.toFixed(2) %></div>
-                <% if(hasDiscount) { %>
-                  <div class="mc-old-price">₹<%= relReg.toFixed(2) %></div>
-                <% } %>
-              </div>
-            </div>
-          </a>
-        <% }) %>
-      <% } %>
-    </div>
-  </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
-
-  <script>
+    <script>
     const productId = '<%= product._id %>';
     let currentVariant = null;
     let cartItemQuantity = 0;
@@ -453,25 +533,34 @@ body.dark-mode .mc-brand { color: var(--accent-color); }
       }
       
       document.getElementById('quantity').value = 1;
+      document.getElementById('maxLimitMsg').style.display = 'none';
+
       checkCartQuantityForVariant(Number(size));
+updateQuantityButtonStates();
+
     }
 
-    // Check cart quantity for specific variant
-    async function checkCartQuantityForVariant(variantSize) {
-      try {
-        const response = await fetch('/cart/check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, variantSize })
-        });
-        const data = await response.json();
-        cartItemQuantity = data.quantity || 0;
-        updateQuantityButtonStates();
-      } catch (error) {
-        console.error('Error checking cart:', error);
-        cartItemQuantity = 0;
-      }
-    }
+
+   async function checkCartQuantityForVariant(variantSize) {
+  try {
+    const response = await fetch('/cart/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, variantSize })
+    });
+
+    const data = await response.json();
+    cartItemQuantity = data.quantity || 0;
+
+    updateQuantityButtonStates(); // <= only here!
+
+  } catch (error) {
+    console.error('Error checking cart:', error);
+    cartItemQuantity = 0;
+    updateQuantityButtonStates(); // <= still update UI
+  }
+}
+
 
     // Images
     function changeImage(thumb, src) {
@@ -499,118 +588,119 @@ body.dark-mode .mc-brand { color: var(--accent-color); }
       mainImage.style.transformOrigin = `${x}% ${y}%`;
     });
 
-    // Quantity Control
-    function changeQty(n) {
-      const el = document.getElementById('quantity');
-      let v = parseInt(el.value) + n;
-      const maxAllowed = Math.min(5, currentVariant.stock) - cartItemQuantity;
-      v = Math.max(1, Math.min(maxAllowed, v));
-      el.value = v;
-      updateQuantityButtonStates();
-    }
+   function changeQty(n) {
+  const el = document.getElementById('quantity');
+  let v = parseInt(el.value) + n;
+
+  const maxAllowed = Math.min(5, currentVariant.stock) - cartItemQuantity;
+
+  v = Math.max(1, Math.min(maxAllowed, v));
+  el.value = v;
+
+  updateQuantityButtonStates();
+}
+
 
     function updateQuantityButtonStates() {
-      const quantityInput = document.getElementById('quantity');
-      const currentValue = parseInt(quantityInput.value) || 1;
-      const qtyBtns = document.querySelectorAll('.qty-btn');
-      const addToCartBtn = document.getElementById('addToCartBtn');
-      
-      const maxAllowed = Math.min(5, currentVariant.stock) - cartItemQuantity;
-      
-      if (qtyBtns[0]) {
-        qtyBtns[0].disabled = currentValue <= 1;
-        qtyBtns[0].style.opacity = currentValue <= 1 ? '0.5' : '1';
-        qtyBtns[0].style.cursor = currentValue <= 1 ? 'not-allowed' : 'pointer';
-      }
-      
-      const canAddMore = currentValue < maxAllowed && currentValue < currentVariant.stock;
-      if (qtyBtns[1]) {
-        qtyBtns[1].disabled = !canAddMore;
-        qtyBtns[1].style.opacity = !canAddMore ? '0.5' : '1';
-        qtyBtns[1].style.cursor = !canAddMore ? 'not-allowed' : 'pointer';
-      }
-      
-      if (addToCartBtn) {
-        const canAddToCart = currentValue <= currentVariant.stock && currentValue <= maxAllowed && maxAllowed > 0;
-        addToCartBtn.disabled = !canAddToCart || currentVariant.stock === 0;
-        addToCartBtn.style.opacity = (!canAddToCart || currentVariant.stock === 0) ? '0.5' : '1';
-        addToCartBtn.style.cursor = (!canAddToCart || currentVariant.stock === 0) ? 'not-allowed' : 'pointer';
-      }
-    }
+  const quantityInput = document.getElementById('quantity');
+  const currentValue = parseInt(quantityInput.value) || 1;
+  const qtyBtns = document.querySelectorAll('.qty-btn');
+  const addToCartBtn = document.getElementById('addToCartBtn');
+  const maxLimitMsg = document.getElementById('maxLimitMsg');
+
+  const maxAllowed = Math.min(5, currentVariant.stock) - cartItemQuantity;
+
+  // Show limit msg
+  if (maxAllowed <= 0) {
+    maxLimitMsg.style.display = 'block';
+  } else {
+    maxLimitMsg.style.display = 'none';
+  }
+
+  // disable minus
+  qtyBtns[0].disabled = currentValue <= 1;
+
+  // disable plus
+  qtyBtns[1].disabled = currentValue >= maxAllowed || maxAllowed <= 0;
+
+  // disable add to cart
+  addToCartBtn.disabled = maxAllowed <= 0 || currentVariant.stock === 0;
+}
+
 
     // Cart
     document.getElementById('addToCartBtn').addEventListener('click', async () => {
-      if (!currentVariant || currentVariant.stock === 0) {
-        const Toast = Swal.mixin({
-          toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
-          background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#fff',
-          color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
-        });
-        Toast.fire({ icon: 'warning', title: 'Please select an available variant' });
-        return;
-      }
+  if (!currentVariant || currentVariant.stock === 0) {
+    showToast('warning', 'Please select an available variant');
+    return;
+  }
 
-      const quantity = parseInt(document.getElementById('quantity').value) || 1;
-      const totalQuantity = cartItemQuantity + quantity;
+  const quantity = parseInt(document.getElementById('quantity').value) || 1;
+  const totalQuantity = cartItemQuantity + quantity;
 
-      if (totalQuantity > 5) {
-        const Toast = Swal.mixin({
-          toast: true, position: 'top-end', showConfirmButton: false, timer: 4000, timerProgressBar: true,
-          background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#fff',
-          color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
-        });
-        Toast.fire({ icon: 'warning', title: `Maximum 5 items allowed. You have ${cartItemQuantity} in cart.` });
-        return;
-      }
+  // CLIENT-SIDE LIMIT CHECK (before backend)
+  if (cartItemQuantity >= 5) {
+    showToast('warning', `Maximum 5 items allowed. You already have 5 in cart.`);
+    return; // <-- stop here
+  }
 
-      try {
-        const response = await fetch('/cart/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, quantity, variantSize: currentVariant.size })
-        });
+  if (totalQuantity > 5) {
+    const remaining = 5 - cartItemQuantity;
+    showToast('warning', `You can add only ${remaining} more.`);
+    return; // <-- stop here
+  }
 
-        const data = await response.json();
-
-        if (response.status === 401) {
-          Swal.fire({
-            icon: 'warning', title: 'Login Required', text: 'Please login to add items to cart',
-            confirmButtonColor: '#e74c3c', confirmButtonText: 'Go to Login',
-            background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#fff',
-            color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
-          }).then((result) => {
-            if (result.isConfirmed) window.location.href = '/login';
-          });
-          return;
-        }
-
-        if (data.success) {
-          cartItemQuantity = data.currentQuantity || (cartItemQuantity + quantity);
-          updateQuantityButtonStates();
-          const Toast = Swal.mixin({
-            toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, timerProgressBar: true,
-            background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#fff',
-            color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
-          });
-          Toast.fire({ icon: 'success', title: `Added to cart! Total: ${cartItemQuantity}/5` });
-        } else {
-          const Toast = Swal.mixin({
-            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
-            background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#fff',
-            color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
-          });
-          Toast.fire({ icon: 'warning', title: data.message || 'Cannot add more items' });
-        }
-      } catch (error) {
-        console.error('Cart error:', error);
-        const Toast = Swal.mixin({
-          toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
-          background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#fff',
-          color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
-        });
-        Toast.fire({ icon: 'error', title: 'Failed to add to cart' });
-      }
+  try {
+    const response = await fetch('/cart/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, quantity, variantSize: currentVariant.size })
     });
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      loginRedirectAlert();
+      return;
+    }
+
+    if (data.success) {
+      cartItemQuantity = data.currentQuantity || (cartItemQuantity + quantity);
+      updateQuantityButtonStates();
+      showToast('success', `Added to cart! Total: ${cartItemQuantity}/5`);
+    } else {
+      showToast('warning', data.message || 'Cannot add more items');
+    }
+  } catch (error) {
+    showToast('error', 'Failed to add to cart');
+  }
+});
+
+function showToast(icon, title) {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 2500,
+    timerProgressBar: true,
+    background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#fff',
+    color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
+  });
+  Toast.fire({ icon, title });
+}
+
+function loginRedirectAlert() {
+  Swal.fire({
+    icon: 'warning',
+    title: 'Login Required',
+    text: 'Please login to add items to cart',
+    confirmButtonColor: '#e74c3c',
+    confirmButtonText: 'Go to Login'
+  }).then(r => {
+    if (r.isConfirmed) window.location.href = '/login';
+  });
+}
+
 
     // Wishlist
     document.getElementById('wishlistBtn').addEventListener('click', async function() {
@@ -767,5 +857,6 @@ body.dark-mode .mc-brand { color: var(--accent-color); }
       if(btn) selectVariant(btn);
     });
   </script>
-</body>
+
+  </body>
 </html>

@@ -1,16 +1,19 @@
 <%- include("../partials/admin/header.ejs") %>
 
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="csrf-token" content="<%= locals.csrfToken || '' %>">
-  <title>Categories Management</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= locals.csrfToken || '' %>">
+    <title>Categories Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <style>
+    <style>
     :root {
       --primary-color: #4f46e5;
       --bg-color: #f3f4f6;
@@ -199,187 +202,225 @@
       .search-wrapper, .btn-custom-add { width: 100%; }
     }
   </style>
-</head>
-<body>
+  </head>
+  <body>
 
-  <div class="main-content">
-    <div class="content-card">
-      
-      <div class="page-header">
-        <div>
-          <h2 class="fw-bold m-0">Categories</h2>
-          <p class="text-muted small m-0">Manage your product categories</p>
+    <div class="main-content">
+      <div class="content-card">
+
+        <div class="page-header">
+          <div>
+            <h2 class="fw-bold m-0">Categories</h2>
+            <p class="text-muted small m-0">Manage your product categories</p>
+          </div>
+
+          <div class="header-actions">
+            <form method="get" action="/admin/category"
+              class="search-wrapper m-0">
+              <input
+                type="text"
+                class="form-control"
+                name="search"
+                placeholder="Search categories..."
+                value="<%= typeof search !== 'undefined' ? search : '' %>">
+              <button type="submit"><i class="fas fa-search"></i></button>
+              <% if (search && search.trim() !== "") { %>
+              <a href="/admin/category" class="position-absolute"
+                style="right: 45px; top: 50%; transform: translateY(-50%); color: #ef4444;"><i
+                  class="fas fa-times"></i></a>
+              <% } %>
+            </form>
+
+            <button class="btn-custom-add" onclick="openModal()">
+              <i class="fas fa-plus me-2"></i>Add Category
+            </button>
+          </div>
         </div>
 
-        <div class="header-actions">
-          <form method="get" action="/admin/category" class="search-wrapper m-0">
-            <input 
-              type="text" 
-              class="form-control" 
-              name="search" 
-              placeholder="Search categories..." 
-              value="<%= typeof search !== 'undefined' ? search : '' %>"
-            >
-            <button type="submit"><i class="fas fa-search"></i></button>
-            <% if (search && search.trim() !== "") { %>
-              <a href="/admin/category" class="position-absolute" style="right: 45px; top: 50%; transform: translateY(-50%); color: #ef4444;"><i class="fas fa-times"></i></a>
-            <% } %>
-          </form>
-
-          <button class="btn-custom-add" onclick="openModal()">
-            <i class="fas fa-plus me-2"></i>Add Category
-          </button>
-        </div>
-      </div>
-
-      <% if (typeof message !== 'undefined' && message) { %>
+        <% if (typeof message !== 'undefined' && message) { %>
         <div class="alert alert-warning text-center" role="alert">
           <%= message %>
         </div>
-      <% } %>
+        <% } %>
 
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th scope="col" class="text-center" style="width: 50px;">#</th>
-              <th scope="col">Category</th>
-              <th scope="col">Description</th>
-              <th scope="col" class="text-center">Offer</th>
-              <th scope="col" class="text-center">Status</th>
-              <th scope="col" class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% cat.forEach((category, index) => { %>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
               <tr>
-                <td class="text-center"><%= (currentPage - 1) * 4 + index + 1 %></td>
+                <th scope="col" class="text-center" style="width: 50px;">#</th>
+                <th scope="col">Category</th>
+                <th scope="col">Description</th>
+                <th scope="col" class="text-center">Offer</th>
+                <th scope="col" class="text-center">Status</th>
+                <th scope="col" class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% cat.forEach((category, index) => { %>
+              <tr>
+                <td class="text-center"><%= (currentPage - 1) * 4 + index + 1
+                  %></td>
                 <td>
                   <div class="d-flex align-items-center">
                     <% if (category.image) { %>
-                      <img src="<%= category.image %>" alt="Img" class="category-img me-3">
+                    <img src="<%= category.image %>" alt="Img"
+                      class="category-img me-3">
                     <% } else { %>
-                      <div class="no-img-placeholder me-3">No Img</div>
+                    <div class="no-img-placeholder me-3">No Img</div>
                     <% } %>
                     <span class="fw-semibold"><%= category.name %></span>
                   </div>
                 </td>
                 <td>
-                  <button class="btn btn-sm btn-outline-secondary" onclick="viewDescription('<%= category.description %>')">
+                  <button class="btn btn-sm btn-outline-secondary"
+                    onclick="viewDescription('<%= category.description %>')">
                     <i class="fas fa-eye me-1"></i> View
                   </button>
                 </td>
                 <td class="text-center">
                   <div class="d-flex flex-column align-items-center gap-1">
-                    <span class="badge bg-secondary mb-1"><%= category.categoryOffer ? category.categoryOffer + "%" : "0%" %></span>
-                    <% if (category.categoryOffer === 0 || !category.categoryOffer) { %>
-                      <button onclick="addOffer('<%= category._id %>')" class="btn btn-xs btn-outline-success py-0 px-2" style="font-size: 0.75rem;">Add</button>
+                    <span class="badge bg-secondary mb-1"><%=
+                      category.categoryOffer ? category.categoryOffer + "%" :
+                      "0%" %></span>
+                    <% if (category.categoryOffer === 0 ||
+                    !category.categoryOffer) { %>
+                    <button onclick="addOffer('<%= category._id %>')"
+                      class="btn btn-xs btn-outline-success py-0 px-2"
+                      style="font-size: 0.75rem;">Add</button>
                     <% } else { %>
-                      <button onclick="removeOffer('<%= category._id %>')" class="btn btn-xs btn-outline-danger py-0 px-2" style="font-size: 0.75rem;">Remove</button>
+                    <button onclick="removeOffer('<%= category._id %>')"
+                      class="btn btn-xs btn-outline-danger py-0 px-2"
+                      style="font-size: 0.75rem;">Remove</button>
                     <% } %>
                   </div>
                 </td>
                 <td class="text-center">
                   <% if (category.isListed) { %>
-                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">Listed</span>
+                  <span
+                    class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">Listed</span>
                   <% } else { %>
-                    <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">Unlisted</span>
+                  <span
+                    class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">Unlisted</span>
                   <% } %>
                 </td>
                 <td class="text-center">
                   <div class="d-flex justify-content-center gap-2">
                     <form class="list-toggle-form m-0">
-                      <input type="hidden" name="categoryId" value="<%= category._id %>">
+                      <input type="hidden" name="categoryId"
+                        value="<%= category._id %>">
                       <% if (category.isListed) { %>
-                        <button type="button" class="btn btn-sm btn-outline-danger list-toggle-btn" data-action="unlist" title="Unlist">
-                          <i class="fas fa-ban"></i>
-                        </button>
+                      <button type="button"
+                        class="btn btn-sm btn-outline-danger list-toggle-btn"
+                        data-action="unlist" title="Unlist">
+                        <i class="fas fa-ban"></i>
+                      </button>
                       <% } else { %>
-                        <button type="button" class="btn btn-sm btn-outline-success list-toggle-btn" data-action="list" title="List">
-                          <i class="fas fa-check"></i>
-                        </button>
+                      <button type="button"
+                        class="btn btn-sm btn-outline-success list-toggle-btn"
+                        data-action="list" title="List">
+                        <i class="fas fa-check"></i>
+                      </button>
                       <% } %>
                     </form>
-                    <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-sm btn-outline-primary" title="Edit">
+                    <a href="/admin/editCategory?id=<%= category._id %>"
+                      class="btn btn-sm btn-outline-primary" title="Edit">
                       <i class="fas fa-edit"></i>
                     </a>
                   </div>
                 </td>
               </tr>
-            <% }); %>
-          </tbody>
-        </table>
-      </div>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
 
-      <% if (totalPages > 1) { %>
+        <% if (totalPages > 1) { %>
         <div class="mt-4 d-flex justify-content-center gap-2">
           <% if (currentPage > 1) { %>
-            <a href="?page=<%= currentPage - 1 %>" class="btn btn-sm btn-outline-secondary">&laquo; Prev</a>
+          <a href="?page=<%= currentPage - 1 %>"
+            class="btn btn-sm btn-outline-secondary">&laquo; Prev</a>
           <% } %>
-          
+
           <% for (let i = 1; i <= totalPages; i++) { %>
-            <a href="?page=<%= i %>" class="btn btn-sm <%= i === currentPage ? 'btn-primary' : 'btn-outline-secondary' %>"><%= i %></a>
+          <a href="?page=<%= i %>"
+            class="btn btn-sm <%= i === currentPage ? 'btn-primary' : 'btn-outline-secondary' %>"><%=
+            i %></a>
           <% } %>
 
           <% if (currentPage < totalPages) { %>
-            <a href="?page=<%= currentPage + 1 %>" class="btn btn-sm btn-outline-secondary">Next &raquo;</a>
+          <a href="?page=<%= currentPage + 1 %>"
+            class="btn btn-sm btn-outline-secondary">Next &raquo;</a>
           <% } %>
         </div>
-      <% } %>
+        <% } %>
 
+      </div>
     </div>
-  </div>
 
-  <div id="descriptionModal" class="modal-overlay">
-    <div class="custom-modal">
-      <span class="modal-close-btn" onclick="closeDescriptionModal()">&times;</span>
-      <h4 class="mb-4 text-center fw-bold">Description</h4>
-      <div id="descriptionContent" class="p-3 bg-light rounded border"></div>
+    <div id="descriptionModal" class="modal-overlay">
+      <div class="custom-modal">
+        <span class="modal-close-btn"
+          onclick="closeDescriptionModal()">&times;</span>
+        <h4 class="mb-4 text-center fw-bold">Description</h4>
+        <div id="descriptionContent" class="p-3 bg-light rounded border"></div>
+      </div>
     </div>
-  </div>
 
-  <div id="categoryModal" class="modal-overlay">
-    <div class="custom-modal">
-      <span class="modal-close-btn" onclick="closeModal()">&times;</span>
-      <h4 class="mb-4 text-center fw-bold">Add New Category</h4>
-      
-      <form id="categoryForm" enctype="multipart/form-data">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Category Name</label>
-          <input type="text" class="form-control" id="categoryName" name="name" placeholder="Name">
-          <div id="name-error" class="text-danger small mt-1" style="display:none;"></div>
-        </div>
+    <div id="categoryModal" class="modal-overlay">
+      <div class="custom-modal">
+        <span class="modal-close-btn" onclick="closeModal()">&times;</span>
+        <h4 class="mb-4 text-center fw-bold">Add New Category</h4>
 
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Description</label>
-          <textarea class="form-control" id="categoryDesc" name="description" rows="3" placeholder="Description"></textarea>
-          <div id="description-error" class="text-danger small mt-1" style="display:none;"></div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Image</label>
-          <div style="border: 2px dashed #d1d5db; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer;" id="dropZone" onclick="document.getElementById('categoryImage').click()">
-            <i class="fas fa-cloud-upload-alt text-primary mb-2"></i>
-            <p class="m-0 text-muted small">Click to upload</p>
-            <input type="file" id="categoryImage" name="image" accept="image/*" style="display: none;" />
+        <form id="categoryForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Category Name</label>
+            <input type="text" class="form-control" id="categoryName"
+              name="name" placeholder="Name">
+            <div id="name-error" class="text-danger small mt-1"
+              style="display:none;"></div>
           </div>
-          <div class="text-center mt-2" id="previewContainer" style="display: none;">
-            <img id="imagePreview" style="max-width: 100px; border-radius: 8px;" />
-            <br>
-            <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeImage(event)">Remove</button>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Description</label>
+            <textarea class="form-control" id="categoryDesc" name="description"
+              rows="3" placeholder="Description"></textarea>
+            <div id="description-error" class="text-danger small mt-1"
+              style="display:none;"></div>
           </div>
-          <div id="image-error" class="text-danger small mt-1" style="display:none;"></div>
-        </div>
 
-        <div class="d-grid gap-2">
-          <button type="submit" class="btn btn-success">Save</button>
-          <button type="button" class="btn btn-light" onclick="closeModal()">Cancel</button>
-        </div>
-      </form>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Image</label>
+            <div
+              style="border: 2px dashed #d1d5db; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer;"
+              id="dropZone"
+              onclick="document.getElementById('categoryImage').click()">
+              <i class="fas fa-cloud-upload-alt text-primary mb-2"></i>
+              <p class="m-0 text-muted small">Click to upload</p>
+              <input type="file" id="categoryImage" name="image"
+                accept="image/*" style="display: none;" />
+            </div>
+            <div class="text-center mt-2" id="previewContainer"
+              style="display: none;">
+              <img id="imagePreview"
+                style="max-width: 100px; border-radius: 8px;" />
+              <br>
+              <button type="button" class="btn btn-sm btn-danger mt-2"
+                onclick="removeImage(event)">Remove</button>
+            </div>
+            <div id="image-error" class="text-danger small mt-1"
+              style="display:none;"></div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-light"
+              onclick="closeModal()">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
 
-  <script>
+    <script>
 
     /* ================= IMAGE PREVIEW LOGIC ================= */
 const imageInput = document.getElementById('categoryImage');
@@ -529,7 +570,6 @@ function closeDescriptionModal() {
   document.body.style.overflow = "auto";
 }
 
-/* ================= ADD CATEGORY FORM VALIDATION & SUBMISSION ================= */
 document.getElementById("categoryForm")?.addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -541,7 +581,7 @@ document.getElementById("categoryForm")?.addEventListener("submit", async functi
   const descErr = document.getElementById("description-error");
   const imgErr = document.getElementById("image-error");
 
-  // Reset errors
+
   [nameErr, descErr, imgErr].forEach(el => {
     el.textContent = "";
     el.style.display = "none";
@@ -551,7 +591,7 @@ document.getElementById("categoryForm")?.addEventListener("submit", async functi
   const name = nameInput.value.trim();
   const desc = descInput.value.trim();
 
-  /* ---------- NAME VALIDATION (Alphabets only, 3-20) ---------- */
+
   if (!name) {
     nameErr.textContent = "Category name is required";
     nameErr.style.display = "block";
@@ -562,7 +602,7 @@ document.getElementById("categoryForm")?.addEventListener("submit", async functi
     valid = false;
   }
 
-  /* ---------- DESCRIPTION VALIDATION (5-50) ---------- */
+ 
   if (!desc) {
     descErr.textContent = "Description is required";
     descErr.style.display = "block";
@@ -573,7 +613,6 @@ document.getElementById("categoryForm")?.addEventListener("submit", async functi
     valid = false;
   }
 
-  /* ---------- IMAGE VALIDATION ---------- */
   if (!imageInput.files.length) {
     imgErr.textContent = "Image is required";
     imgErr.style.display = "block";
@@ -590,13 +629,13 @@ document.getElementById("categoryForm")?.addEventListener("submit", async functi
 
   if (!valid) return;
 
-  // Use FormData to send file and text
+
   const formData = new FormData(this);
 
   try {
     const response = await fetch("/admin/addCategory", {
       method: "POST",
-      body: formData // No headers needed, fetch sets Multipart Boundary automatically
+      body: formData 
     });
 
     const data = await response.json();
@@ -610,7 +649,7 @@ document.getElementById("categoryForm")?.addEventListener("submit", async functi
         location.reload(); 
       });
     } else {
-      // Show server-side validation error (e.g., Duplicate Name)
+      
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -627,6 +666,5 @@ document.getElementById("categoryForm")?.addEventListener("submit", async functi
 });
 </script>
 
-
-</body>
+  </body>
 </html>

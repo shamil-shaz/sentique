@@ -1,6 +1,7 @@
+
+
 const ContactMessage = require("../../models/contactSchema");
 const User = require("../../models/userSchema");
-
 
 const getContactInbox = async (req, res) => {
   try {
@@ -9,30 +10,37 @@ const getContactInbox = async (req, res) => {
         $group: {
           _id: "$userId",
           lastMessageAt: { $max: "$createdAt" },
-         
           unreadCount: {
             $sum: {
               $cond: [
-                { $and: [{ $eq: ["$sender", "user"] }, { $eq: ["$isRead", false] }] },
+                {
+                  $and: [
+                    { $eq: ["$sender", "user"] },
+                    { $eq: ["$isRead", false] },
+                  ],
+                },
                 1,
-                0
-              ]
-            }
-          }
-        }
+                0,
+              ],
+            },
+          },
+        },
       },
-      { $sort: { lastMessageAt: -1 } }
+      { $sort: { lastMessageAt: -1 } },
     ]);
 
-  
-    const users = await Promise.all(userGroups.map(async (group) => {
-      const details = await User.findById(group._id).lean();
-      return {
-        ...details,
-        unreadCount: group.unreadCount,
-        lastMessageAt: group.lastMessageAt
-      };
-    }));
+    const users = await Promise.all(
+      userGroups.map(async (group) => {
+        const details = await User.findById(group._id).lean();
+        return {
+          _id: group._id,
+          name: details?.name || "Unknown User",
+          email: details?.email || "No Email",
+          unreadCount: group.unreadCount,
+          lastMessageAt: group.lastMessageAt,
+        };
+      })
+    );
 
     res.render("contact-inbox", { users });
   } catch (error) {
@@ -40,7 +48,6 @@ const getContactInbox = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
-
 
 const getUserChat = async (req, res) => {
   try {
@@ -50,21 +57,27 @@ const getUserChat = async (req, res) => {
       { $set: { isRead: true } }
     );
 
-    const messages = await ContactMessage.find({ userId }).sort({ createdAt: 1 });
-    const user = await User.findById(userId);
-
-    res.render("contact-chat", { messages, user });
+    const messages = await ContactMessage.find({ userId }).sort({
+      createdAt: 1,
+    });
+    const user = await User.findById(userId).lean();
+    const canSend = !!user;
+    const safeUser = user || { name: "Unknown User", email: "No Email" };
+    res.render("contact-chat", { messages, user: safeUser, canSend });
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");
   }
 };
 
-
 const sendAdminMessage = async (req, res) => {
   try {
     const { message } = req.body;
     const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.redirect(`/admin/contact/${userId}`);
+    }
 
     if (!message || !message.trim()) return res.redirect("back");
 
@@ -72,7 +85,7 @@ const sendAdminMessage = async (req, res) => {
       userId,
       sender: "admin",
       message: message.trim(),
-      isRead: false 
+      isRead: false,
     });
 
     res.redirect(`/admin/contact/${userId}`);
@@ -85,5 +98,5 @@ const sendAdminMessage = async (req, res) => {
 module.exports = {
   getContactInbox,
   getUserChat,
-  sendAdminMessage
+  sendAdminMessage,
 };

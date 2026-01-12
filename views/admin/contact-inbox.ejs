@@ -176,6 +176,24 @@
       display: none;
     }
   }
+
+  .badge {
+  display: inline-block;
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 8px;
+}
+
+.user-row.unread {
+  background: #f0f4ff;
+  font-weight: 600;
+}
+
+
 </style>
 
 <div class="admin-content-wrapper">
@@ -210,17 +228,27 @@
 
 
     <div class="inbox-card" id="userList">
-      <% if (users.length > 0) { %>
+      <% if (users && users.length > 0) { %>
+
         <% users.forEach(user => { %>
-          <a href="/admin/contact/<%= user._id %>" class="user-row">
-            <div class="avatar"><%= user.name.charAt(0) %></div>
+          <a href="/admin/contact/<%= user._id %>" class="user-row <%= user.unreadCount > 0 ? 'unread' : '' %>">
+
+            <div class="avatar"><%= user?.name ? user.name.charAt(0).toUpperCase() : "U" %></div>
+
 
             <div class="user-details">
-              <h4><%= user.name %></h4>
-              <p><%= user.email %></p>
+            <h4><%= user?.name || "Unknown User" %></h4>
+<p><%= user?.email || "No Email" %></p>
+
             </div>
 
-            <span class="view-btn">Open Chat</span>
+            <span class="view-btn">
+  Open Chat
+  <% if (user.unreadCount > 0) { %>
+    <span class="badge"><%= user.unreadCount %></span>
+  <% } %>
+</span>
+
           </a>
         <% }) %>
       <% } else { %>

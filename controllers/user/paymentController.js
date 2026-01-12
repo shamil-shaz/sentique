@@ -16,7 +16,7 @@ const razorpay = new Razorpay({
 
 const placeOrder = async (req, res) => {
   try {
-    console.log("📋 placeOrder - Validating checkout data");
+    console.log(" placeOrder - Validating checkout data");
 
     const userId = req.session.user.id;
     const { addressId, couponCode, paymentMethod, notes } = req.body;
@@ -231,15 +231,18 @@ const placeOrder = async (req, res) => {
       });
     }
 
-   const SHIPPING_CHARGE = 49;
-const finalAmount = Math.max(0, totalAmount - discountAmount + SHIPPING_CHARGE);
+    const SHIPPING_CHARGE = 49;
+    const finalAmount = Math.max(
+      0,
+      totalAmount - discountAmount + SHIPPING_CHARGE
+    );
 
-console.log(" Final Price Breakdown:", {
-  subtotal: totalAmount,
-  discount: discountAmount,
-  shipping: SHIPPING_CHARGE,
-  final: finalAmount,
-});
+    console.log(" Final Price Breakdown:", {
+      subtotal: totalAmount,
+      discount: discountAmount,
+      shipping: SHIPPING_CHARGE,
+      final: finalAmount,
+    });
 
     if (finalAmount <= 0) {
       return res.status(400).json({
@@ -362,7 +365,6 @@ console.log(" Final Price Breakdown:", {
               );
             }
           } else {
-            
             const oldStock = product.stock;
             product.stock = Math.max((product.stock || 0) - item.quantity, 0);
             console.log(
@@ -650,7 +652,7 @@ const handlePaymentFailure = async (req, res) => {
 
       totalPrice: checkoutData?.totalAmount || 0,
       discount: checkoutData?.discountAmount || 0,
-      shippingCharge: checkoutData.shippingCharge || 49, 
+      shippingCharge: checkoutData.shippingCharge || 49,
       finalAmount: checkoutData?.finalAmount || 0,
       coupon: checkoutData?.appliedCouponId || null,
       couponApplied: !!checkoutData?.appliedCouponId,
@@ -810,34 +812,45 @@ const retryPaymentForFailedOrder = async (req, res) => {
   }
 };
 
-
 const getOrderList = async (req, res) => {
   try {
     const userId = req.session.user?.id || req.session.user?._id;
-    if (!userId) return res.redirect('/login');
+    if (!userId) return res.redirect("/login");
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 10; 
+    const limit = 10;
     const statusFilter = req.query.status || "";
     const timeFilter = req.query.time || "";
-  
-    const searchTerm = req.query.search || ""; 
+
+    const searchTerm = req.query.search || "";
 
     let query = { user: userId };
 
     if (statusFilter) {
-      query.$or = [{ status: statusFilter }, { "orderItems.status": statusFilter }];
+      query.$or = [
+        { status: statusFilter },
+        { "orderItems.status": statusFilter },
+      ];
     }
 
     if (timeFilter) {
       const now = new Date();
-      if (timeFilter === 'last30days') query.createdOn = { $gte: new Date(now.setDate(now.getDate() - 30)) };
-      else if (timeFilter === 'last6months') query.createdOn = { $gte: new Date(now.setMonth(now.getMonth() - 6)) };
+      if (timeFilter === "last30days")
+        query.createdOn = { $gte: new Date(now.setDate(now.getDate() - 30)) };
+      else if (timeFilter === "last6months")
+        query.createdOn = { $gte: new Date(now.setMonth(now.getMonth() - 6)) };
     }
 
     if (searchTerm) {
-      const searchRegex = new RegExp(searchTerm, 'i');
-      query.$and = [{ $or: [{ orderId: searchRegex }, { "orderItems.productName": searchRegex }] }];
+      const searchRegex = new RegExp(searchTerm, "i");
+      query.$and = [
+        {
+          $or: [
+            { orderId: searchRegex },
+            { "orderItems.productName": searchRegex },
+          ],
+        },
+      ];
     }
 
     const totalFilteredOrders = await Order.countDocuments(query);
@@ -851,22 +864,25 @@ const getOrderList = async (req, res) => {
       .limit(limit)
       .lean();
 
-    orders = orders.map(order => {
+    orders = orders.map((order) => {
       order.dynamicTotal = order.finalAmount || order.totalPrice || 0;
-      
+
       if (statusFilter && order.status !== statusFilter) {
-        const matchingItems = order.orderItems.filter(item => item.status === statusFilter);
+        const matchingItems = order.orderItems.filter(
+          (item) => item.status === statusFilter
+        );
         if (matchingItems.length > 0) order.orderItems = matchingItems;
       }
 
-      order.orderItems = order.orderItems.map(item => {
+      order.orderItems = order.orderItems.map((item) => {
         let img = item.product?.images?.[0] || "";
-        if (img && !img.startsWith('http') && !img.startsWith('/')) img = '/uploads/product-images/' + img;
+        if (img && !img.startsWith("http") && !img.startsWith("/"))
+          img = "/uploads/product-images/" + img;
         return {
           ...item,
-          productImage: img || '/images/product-placeholder.png',
+          productImage: img || "/images/product-placeholder.png",
           productName: item.productName || "Product",
-          displayStatus: item.status || order.status || "Placed"
+          displayStatus: item.status || order.status || "Placed",
         };
       });
       return order;
@@ -882,16 +898,24 @@ const getOrderList = async (req, res) => {
       currentStatus: statusFilter,
       currentTime: timeFilter,
       currentSearch: searchTerm,
-      success: true
+      success: true,
     });
-
   } catch (error) {
     console.error("Order Error:", error);
-    res.render("orderList", { orders: [], user: req.session.user, customerName: "User", currentPage: 1, totalPages: 0, currentStatus: "", currentTime: "", currentSearch: "", itemStats: {}, error: "Error loading orders" });
+    res.render("orderList", {
+      orders: [],
+      user: req.session.user,
+      customerName: "User",
+      currentPage: 1,
+      totalPages: 0,
+      currentStatus: "",
+      currentTime: "",
+      currentSearch: "",
+      itemStats: {},
+      error: "Error loading orders",
+    });
   }
 };
-
-
 
 const getOrderFailure = async (req, res) => {
   try {
@@ -1144,7 +1168,7 @@ const verifyRazorpayPayment = async (req, res) => {
     } = req.body;
     const userId = req.session.user?.id || req.session.user?._id;
 
-    console.log("🔐 verifyRazorpayPayment");
+    console.log(" verifyRazorpayPayment");
     console.log("   Razorpay Order:", razorpay_order_id);
     console.log("   Payment ID:", razorpay_payment_id);
     console.log("   Retry orderId:", orderId);
@@ -1348,7 +1372,7 @@ const verifyRazorpayPayment = async (req, res) => {
       orderItems: orderItemsWithDiscount,
       totalPrice: checkoutData.totalAmount,
       discount: checkoutData.discountAmount,
-      shippingCharge: checkoutData.shippingCharge || 49, 
+      shippingCharge: checkoutData.shippingCharge || 49,
       finalAmount: checkoutData.finalAmount,
       coupon: checkoutData.appliedCouponId || null,
       couponApplied: !!checkoutData.appliedCouponId,
@@ -1371,6 +1395,52 @@ const verifyRazorpayPayment = async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
+
+    savedOrder.orderItems.forEach((item) => {
+      if (!item.tracking) item.tracking = {};
+
+      const now = new Date();
+
+      const formatted = {
+        date: now.toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+        time: now.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }),
+      };
+
+      item.tracking.processingDate = formatted.date;
+      item.tracking.processingTime = formatted.time;
+
+      let daysToAdd = 7;
+
+      switch ("Processing") {
+        case "Processing":
+          daysToAdd = 5;
+          break;
+        case "Shipped":
+          daysToAdd = 3;
+          break;
+        case "OutForDelivery":
+          daysToAdd = 1;
+          break;
+      }
+
+      const eta = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+      item.tracking.estimatedDeliveryDate = eta.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    });
+
+    await savedOrder.save();
 
     if (checkoutData.appliedCouponId) {
       try {

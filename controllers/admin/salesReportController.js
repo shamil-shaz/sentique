@@ -109,8 +109,7 @@ const validateDateRange = (startDate, endDate = null) => {
     if (end > today) {
       return {
         valid: false,
-        error:
-          " End date cannot be in the future. Please select a valid date.",
+        error: " End date cannot be in the future. Please select a valid date.",
       };
     }
     if (start > end) {
@@ -138,11 +137,9 @@ const getSalesReport = async (req, res) => {
     try {
       if (filterType === "custom") {
         if (!startDate || !endDate) {
-          return res
-            .status(400)
-            .render("error", {
-              message: "Custom date range requires both start and end dates",
-            });
+          return res.status(400).render("error", {
+            message: "Custom date range requires both start and end dates",
+          });
         }
         const validation = validateDateRange(startDate, endDate);
         if (!validation.valid) {
@@ -304,11 +301,9 @@ const exportSalesReportToExcel = async (req, res) => {
     try {
       if (filterType === "custom") {
         if (!startDate || !endDate)
-          return res
-            .status(400)
-            .json({
-              error: "Custom date range requires both start and end dates",
-            });
+          return res.status(400).json({
+            error: "Custom date range requires both start and end dates",
+          });
         const validation = validateDateRange(startDate, endDate);
         if (!validation.valid)
           return res.status(400).json({ error: validation.error });
@@ -499,11 +494,9 @@ const exportSalesReportToPDF = async (req, res) => {
     try {
       if (filterType === "custom") {
         if (!startDate || !endDate)
-          return res
-            .status(400)
-            .json({
-              error: "Custom date range requires both start and end dates",
-            });
+          return res.status(400).json({
+            error: "Custom date range requires both start and end dates",
+          });
         const validation = validateDateRange(startDate, endDate);
         if (!validation.valid)
           return res.status(400).json({ error: validation.error });

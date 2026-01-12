@@ -64,21 +64,18 @@
       padding-bottom: 40px;
     }
 
-    .wallet-wrapper {
+    .wallet-container {
       max-width: 1280px;
       margin: 0 auto;
       padding: 30px 20px;
-      display: grid;
-      grid-template-columns: 270px 1fr; /* Desktop Sidebar Width */
-      gap: 30px;
-      align-items: start;
     }
 
-    /* Mobile/Tablet Stack */
-    @media (max-width: 1024px) {
-      .wallet-wrapper { grid-template-columns: 1fr; padding: 20px 15px; gap: 20px; }
-      .sidebar-section { display: none; /* Or handle sidebar as needed */ }
-      /* Assuming sidebar might be a drawer on mobile, hiding strictly for this layout logic */
+    /* Use main-content class to match sidebar expectations */
+    .main-content {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 30px;
+      align-items: start;
     }
 
     /* =========================================
@@ -303,71 +300,90 @@
     .btn-close { background: var(--bg-body); color: var(--text-muted); border: 1px solid var(--border-color); }
     .btn-pay { background: var(--gold-gradient); color: #000; border: none; }
 
+    /* =========================================
+       RESPONSIVE - Adjust for Tablet
+       ========================================= */
+    @media (max-width: 1024px) {
+      .main-content { 
+        grid-template-columns: 240px 1fr; 
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .btn-gold { width: 100%; justify-content: center; }
+    }
   </style>
 </head>
 
 <body>
   <%- include('../../views/partials/user/header') %>
 
-  <div class="wallet-wrapper">
-    <div class="sidebar-section">
-      <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'wallet' }) %>
-    </div>
-
-    <div class="content-section">
+  <div class="wallet-container">
+    
+    <!-- Use main-content class that sidebar expects -->
+    <div class="main-content">
       
-      <div class="page-header">
-        <div class="header-text">
-          <div class="breadcrumb">Home / Wallet</div>
-          <h1>My Wallet</h1>
-        </div>
-        <button class="btn-gold" onclick="openAddMoneyModal()">+ Add Money</button>
-      </div>
+      <!-- Your sidebar partial (includes its own toggle button and script) -->
+      <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'wallet' }) %>
 
-      <div class="stats-grid">
-        <div class="stat-card dark">
-          <div class="stat-label">Available Balance</div>
-          <div class="stat-value" id="walletBalance">₹0.00</div>
+      <!-- MAIN CONTENT -->
+      <div class="content-section">
+        
+        <div class="page-header">
+          <div class="header-text">
+            <div class="breadcrumb">Home / Wallet</div>
+            <h1>My Wallet</h1>
+          </div>
+          <button class="btn-gold" onclick="openAddMoneyModal()">+ Add Money</button>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Total Credits</div>
-          <div class="stat-value" style="color:#16a34a" id="totalCredits">₹0.00</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Total Debits</div>
-          <div class="stat-value" style="color:#dc2626" id="totalDebits">₹0.00</div>
-        </div>
-      </div>
 
-      <div class="transactions-box">
-        <div class="box-header">
-          <h2 style="font-size:18px; font-weight:700;">Transactions</h2>
-          <div class="filter-group">
-            <button class="filter-btn active" onclick="filterTransactions('all', event)">All</button>
-            <button class="filter-btn" onclick="filterTransactions('credit', event)">In</button>
-            <button class="filter-btn" onclick="filterTransactions('debit', event)">Out</button>
+        <div class="stats-grid">
+          <div class="stat-card dark">
+            <div class="stat-label">Available Balance</div>
+            <div class="stat-value" id="walletBalance">₹0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Credits</div>
+            <div class="stat-value" style="color:#16a34a" id="totalCredits">₹0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Debits</div>
+            <div class="stat-value" style="color:#dc2626" id="totalDebits">₹0.00</div>
           </div>
         </div>
 
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 50px;">#</th>
-                <th style="width: 80px;">Type</th>
-                <th>Description</th>
-                <th style="width: 150px;">Date</th>
-                <th style="width: 120px;">Amount</th>
-                <th style="width: 100px;">Status</th>
-              </tr>
-            </thead>
-            <tbody id="transactionBody">
-              <tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted)">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="transactions-box">
+          <div class="box-header">
+            <h2 style="font-size:18px; font-weight:700;">Transactions</h2>
+            <div class="filter-group">
+              <button class="filter-btn active" onclick="filterTransactions('all', event)">All</button>
+              <button class="filter-btn" onclick="filterTransactions('credit', event)">In</button>
+              <button class="filter-btn" onclick="filterTransactions('debit', event)">Out</button>
+            </div>
+          </div>
 
-        <div class="pagination" id="paginationContainer"></div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th style="width: 80px;">Type</th>
+                  <th>Description</th>
+                  <th style="width: 150px;">Date</th>
+                  <th style="width: 120px;">Amount</th>
+                  <th style="width: 100px;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="transactionBody">
+                <tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted)">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination" id="paginationContainer"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -440,14 +456,12 @@
       }
       
       tbody.innerHTML = transactions.map(t => {
-        // Classes
         const isCredit = t.type === 'credit';
         const isFailed = t.type === 'failed';
         const amtClass = isCredit ? 'amt-credit' : isFailed ? 'amt-failed' : 'amt-debit';
         const badgeClass = isCredit ? 'credit' : isFailed ? 'failed' : 'debit';
         const sign = isCredit ? '+' : isFailed ? '' : '-';
         
-        // Text Cleanup
         let desc = t.description;
         if(desc === "Add Money") desc = "Wallet Top-up";
         if(desc === "Purchase") desc = "Purchase";
@@ -487,7 +501,6 @@
       if(currentPage < totalPages) div.innerHTML += btn(currentPage+1, "→", false);
     }
 
-    // Modal Logic
     function openAddMoneyModal() { document.getElementById("addMoneyModal").classList.add("show"); document.body.style.overflow="hidden"; }
     function closeAddMoneyModal() { 
         document.getElementById("addMoneyModal").classList.remove("show"); document.body.style.overflow=""; 
@@ -500,7 +513,6 @@
         if(e) e.target.classList.add("active");
     }
 
-    // Payment Logic (Preserved)
     async function proceedToPayment() {
       const amount = parseFloat(document.getElementById("amountInput").value);
       if(!amount || amount < 10) return Swal.fire("Error", "Min Amount ₹10", "error");

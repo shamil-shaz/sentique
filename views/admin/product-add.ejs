@@ -4,7 +4,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"
   rel="stylesheet" />
 <link
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
   rel="stylesheet">
 <link rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,47 +16,51 @@
 
 body { 
   font-family: 'Inter', sans-serif; 
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  background: linear-gradient(135deg, #d0e6f7 0%, #d5f9ef 100%);
   color: #2d3748;
   line-height: 1.6;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
-/* --- Responsive Main Content --- */
+/* Main Content */
 .main-content { 
   margin-left: 240px; 
   margin-top: 60px; 
-  padding: 40px 20px; 
+  padding: 30px 20px 50px; 
   min-height: 100vh; 
-  transition: margin-left 0.3s ease, padding 0.3s ease;
+  transition: margin-left 0.3s ease;
 }
 
 @media (max-width: 991px) {
   .main-content {
     margin-left: 0;
-    padding: 20px 15px;
+    padding: 20px 15px 40px;
   }
 }
 
 .page-header {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto 30px;
+  text-align: center;
 }
 
 .page-header h2 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1a202c;
+  font-size: 36px;
+  font-weight: 800;
+  color: #060606;
   margin-bottom: 8px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .page-header p {
-  color: #718096;
-  font-size: 15px;
+  color: rgba(29, 57, 57, 0.9);
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .alert-success, .alert-error { 
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto 20px;
   padding: 16px 20px; 
   border-radius: 12px;
@@ -64,61 +68,76 @@ body {
   align-items: center;
   gap: 12px;
   font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  backdrop-filter: blur(10px);
 }
 
 .alert-success {
-  background: #d4edda; 
-  color: #155724;
-  border-left: 4px solid #28a745;
+  background: rgba(72, 187, 120, 0.95); 
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
 }
 
 .alert-error {
-  background: #f8d7da;
-  color: #721c24;
-  border-left: 4px solid #dc3545;
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
 }
 
 .alert-success svg, .alert-error svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
 }
 
 .container { 
-  max-width: 1200px; 
-  background: #fff; 
+  max-width: 1400px; 
+  background: rgba(255, 255, 255, 0.98); 
   padding: 0;
-  border-radius: 16px; 
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  border-radius: 24px; 
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   margin: auto; 
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
-/* --- Responsive Form Layout --- */
+/* Form Layout */
 .form-wrapper { 
   display: grid;
-  grid-template-columns: 400px 1fr; /* Adjusted width for better fit */
+  grid-template-columns: 420px 1fr;
   gap: 0;
+  min-height: 800px;
+}
+
+@media (max-width: 1200px) {
+  .form-wrapper {
+    grid-template-columns: 380px 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .form-wrapper {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
 }
 
 .left { 
-  background: #f8fafc;
+  background: linear-gradient(180deg, #f8fafc 0%, #e8ecf1 100%);
   padding: 40px 30px;
   border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
 }
 
 .right { 
   padding: 40px;
+  overflow-y: auto;
+  max-height: 90vh;
 }
 
-/* Tablet & Mobile Layout Changes */
 @media (max-width: 1024px) {
-  .form-wrapper {
-    grid-template-columns: 1fr; /* Stack vertically */
-  }
-  
   .left {
     border-right: none;
     border-bottom: 1px solid #e2e8f0;
@@ -127,42 +146,54 @@ body {
   
   .right {
     padding: 30px;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+@media (max-width: 576px) {
+  .left, .right {
+    padding: 20px;
   }
 }
 
 .section-title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1a202c;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.section-title i {
+  color: #667eea;
+  font-size: 20px;
 }
 
 .section-title::before {
   content: '';
   width: 4px;
-  height: 20px;
-  background: #4299e1;
-  border-radius: 2px;
+  height: 24px;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 4px;
 }
 
-/* --- Responsive Image Grid --- */
+/* Image Grid - Responsive */
 .images-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  margin-bottom: 30px;
 }
 
-/* When stacked on tablet, show images in a row */
 @media (max-width: 1024px) {
   .images-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
-/* Mobile Image Grid */
 @media (max-width: 768px) {
   .images-grid {
     grid-template-columns: 1fr 1fr;
@@ -171,39 +202,59 @@ body {
 
 @media (max-width: 480px) {
   .images-grid {
-    grid-template-columns: 1fr; /* 1 column on very small screens */
+    grid-template-columns: 1fr;
   }
 }
 
 .image-box { 
   background: white;
   border: 2px dashed #cbd5e0;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 12px;
   transition: all 0.3s ease;
   position: relative;
+  overflow: hidden;
+}
+
+.image-box::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, #2b4e6c, #1b4e52);
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.image-box:hover::before {
+  opacity: 0.1;
 }
 
 .image-box:hover {
-  border-color: #4299e1;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.15);
+  border-color: #24404a;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
 }
 
 .image-box.has-image {
   border-style: solid;
   border-color: #48bb78;
+  background: linear-gradient(135deg, rgba(72, 187, 120, 0.05), rgba(56, 161, 105, 0.05));
 }
 
 .image-preview-wrapper {
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  background: #f7fafc;
+  background: linear-gradient(135deg, #f7fafc, #edf2f7);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   position: relative;
 }
 
@@ -217,202 +268,361 @@ body {
   text-align: center;
   color: #a0aec0;
   font-size: 13px;
+  font-weight: 600;
 }
 
 .image-placeholder svg {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 8px;
-  opacity: 0.5;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+  opacity: 0.4;
 }
 
 .product-image-input { display: none; }
 
 .upload-label {
-  display: block;
-  padding: 8px 12px;
-  background: #4299e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #254656, #133042);
   color: white;
   text-align: center;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
-  transition: all 0.2s;
-  margin-bottom: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 700;
+  transition: all 0.3s;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .upload-label:hover {
-  background: #3182ce;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.upload-label i {
+  font-size: 14px;
 }
 
 .image-buttons { 
-  display: flex; 
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
 .save-btn, .cancel-btn { 
-  padding: 8px 12px; 
+  padding: 9px 10px; 
   font-size: 12px; 
-  border-radius: 6px; 
+  border-radius: 8px; 
   border: none; 
   cursor: pointer; 
-  font-weight: 600;
-  flex: 1;
+  font-weight: 700;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.save-btn { background: #48bb78; color: white; }
-.save-btn:hover { background: #38a169; transform: translateY(-1px); }
+.save-btn { 
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+.save-btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+}
 
-.cancel-btn { background: #fc8181; color: white; }
-.cancel-btn:hover { background: #f56565; transform: translateY(-1px); }
+.cancel-btn { 
+  background: linear-gradient(135deg, #fc8181, #f56565);
+  color: white;
+  box-shadow: 0 4px 12px rgba(252, 129, 129, 0.3);
+}
+.cancel-btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(252, 129, 129, 0.4);
+}
+
+/* Image Tips Card */
+.image-tips {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: auto;
+}
+
+.image-tips h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.image-tips h4 i {
+  color: #667eea;
+}
+
+.image-tips ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.image-tips li {
+  font-size: 13px;
+  color: #4a5568;
+  margin-bottom: 8px;
+  padding-left: 24px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.image-tips li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #48bb78;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.image-tips li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1024px) {
+  .image-tips {
+    margin-top: 20px;
+  }
+}
 
 .error-message { 
   color: #f56565; 
   font-size: 12px; 
+  font-weight: 600;
   margin-top: 6px;
   display: none;
 }
 
-.form-section { margin-bottom: 32px; }
-.form-section:last-of-type { margin-bottom: 0; }
+.form-section { 
+  margin-bottom: 36px;
+  padding-bottom: 36px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.form-section:last-of-type { 
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
 
 .form-group { margin-bottom: 24px; }
 
 label { 
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
   color: #2d3748;
-  margin-bottom: 8px; 
-  display: block;
+  margin-bottom: 10px; 
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-label .required { color: #f56565; margin-left: 2px; }
+label i {
+  color: #667eea;
+  font-size: 16px;
+}
+
+label .required { 
+  color: #f56565; 
+  margin-left: 2px;
+  font-size: 16px;
+}
 
 input, textarea, select { 
   width: 100%; 
-  padding: 12px 16px; 
+  padding: 14px 18px; 
   border: 2px solid #e2e8f0; 
-  border-radius: 8px; 
+  border-radius: 10px; 
   font-size: 14px;
   font-family: 'Inter', sans-serif;
-  transition: all 0.2s;
+  transition: all 0.3s;
   background: white;
+  font-weight: 500;
 }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
 }
 
-textarea { resize: vertical; min-height: 80px; }
+textarea { 
+  resize: vertical; 
+  min-height: 100px;
+  line-height: 1.6;
+}
 
 /* Variants Display */
 .variants-display {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 15px;
-  min-height: 150px;
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc, #edf2f7);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  min-height: 180px;
+  border: 2px solid #e2e8f0;
 }
 
 .variant-empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 50px 20px;
   color: #94a3b8;
 }
 
 .variant-empty-state i {
-  font-size: 48px;
-  margin-bottom: 12px;
-  opacity: 0.5;
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.variant-empty-state p {
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .variant-card {
   background: white;
   border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 12px;
-  transition: all 0.2s ease;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 14px;
+  transition: all 0.3s ease;
   position: relative;
 }
 
+.variant-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 14px 14px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.variant-card:hover::before {
+  opacity: 1;
+}
+
 .variant-card:hover {
-  border-color: #4299e1;
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
 }
 
 .variant-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  flex-wrap: wrap; /* Allow wrapping on tiny screens */
-  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .variant-size-badge {
-  background: linear-gradient(135deg, #4299e1, #3182ce);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 17px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.variant-actions { display: flex; gap: 8px; }
+.variant-actions { 
+  display: flex; 
+  gap: 10px;
+}
 
 .btn-variant-edit, .btn-variant-delete {
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
   border: none;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.btn-variant-edit { background: #8b5cf6; color: white; }
-.btn-variant-edit:hover { background: #7c3aed; transform: translateY(-1px); }
-.btn-variant-delete { background: #ef4444; color: white; }
-.btn-variant-delete:hover { background: #dc2626; transform: translateY(-1px); }
+.btn-variant-edit { 
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+}
+.btn-variant-edit:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.btn-variant-delete { 
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+.btn-variant-delete:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
 
 .variant-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
 }
 
-.variant-detail-item { display: flex; flex-direction: column; gap: 4px; }
+.variant-detail-item { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  padding: 12px;
+  border-radius: 10px;
+}
 
 .variant-detail-label {
   font-size: 11px;
   text-transform: uppercase;
   color: #64748b;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .variant-detail-value {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
   color: #0f172a;
 }
 
@@ -420,68 +630,88 @@ textarea { resize: vertical; min-height: 80px; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 12px;
+  padding: 16px;
   background: white;
-  color: #4299e1;
-  border: 2px dashed #4299e1;
-  border-radius: 8px;
+  color: #667eea;
+  border: 2px dashed #667eea;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 700;
+  font-size: 15px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.add-variant-btn:hover { background: #ebf8ff; border-color: #3182ce; }
+.add-variant-btn:hover { 
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-color: #764ba2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+}
 
-/* --- Responsive Buttons --- */
+.add-variant-btn i {
+  font-size: 18px;
+}
+
+/* Buttons */
 .button-row { 
   display: flex; 
   gap: 16px; 
   margin-top: 40px;
-  padding-top: 32px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.btn-green, .btn-red { 
-  padding: 14px 32px; 
-  border: none; 
-  border-radius: 8px; 
-  font-size: 16px; 
-  font-weight: 600; 
-  cursor: pointer; 
-  flex: 1;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  padding-top: 40px;
+  border-top: 2px solid #f1f5f9;
 }
 
 @media (max-width: 576px) {
   .button-row {
     flex-direction: column;
   }
-  .btn-green, .btn-red {
-    width: 100%;
-  }
+}
+
+.btn-green, .btn-red { 
+  padding: 16px 36px; 
+  border: none; 
+  border-radius: 12px; 
+  font-size: 16px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  flex: 1;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .btn-green { 
   background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
   color: white; 
-  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
 }
-.btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4); }
+.btn-green:hover { 
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(72, 187, 120, 0.5);
+}
 
 .btn-red { 
   background: white;
   color: #718096;
   border: 2px solid #e2e8f0;
-  box-shadow: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-.btn-red:hover { background: #f7fafc; border-color: #cbd5e0; }
+.btn-red:hover { 
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  transform: translateY(-2px);
+}
+
+.btn-green i, .btn-red i {
+  font-size: 18px;
+}
 
 /* Cropper Modal */
 #cropper-modal { 
@@ -491,51 +721,66 @@ textarea { resize: vertical; min-height: 80px; }
   left: 0; 
   width: 100%; 
   height: 100%; 
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 9999; 
   justify-content: center; 
   align-items: center;
-  backdrop-filter: blur(4px);
-  padding: 20px; /* Padding for mobile */
+  backdrop-filter: blur(8px);
+  padding: 20px;
 }
 
 #cropper-modal .modal-content { 
   background: #fff; 
-  padding: 30px; 
-  border-radius: 16px; 
+  padding: 40px; 
+  border-radius: 24px; 
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
   max-height: 90vh; 
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+}
+
+#cropper-modal .modal-content h3 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  color: #1a202c;
+  text-align: center;
 }
 
 #cropper-modal .modal-content img { 
   max-width: 100%; 
   max-height: 60vh;
   display: block;
-  margin: 0 auto 20px auto;
-  border-radius: 8px;
+  margin: 0 auto 24px auto;
+  border-radius: 12px;
 }
 
 .modal-buttons {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 16px;
+  margin-top: 24px;
 }
 
 @media (max-width: 576px) {
   .modal-buttons { flex-direction: column; }
+  #cropper-modal .modal-content {
+    padding: 24px;
+  }
 }
 
 .modal-buttons button {
   flex: 1;
-  padding: 12px 24px;
+  padding: 14px 28px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-
+/* Variant Modal */
 .variant-modal {
   display: none;
   position: fixed;
@@ -543,10 +788,10 @@ textarea { resize: vertical; min-height: 80px; }
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
   z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -557,40 +802,45 @@ textarea { resize: vertical; min-height: 80px; }
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  border-radius: 16px;
+  border-radius: 24px;
   width: 90%;
-  max-width: 550px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.3s ease;
+  max-width: 600px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.4s ease;
   display: flex;
   flex-direction: column;
-  max-height: 90vh; /* Prevent overflow on small screens */
+  max-height: 90vh;
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translate(-50%, -45%); }
+  from { opacity: 0; transform: translate(-50%, -40%); }
   to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
 .variant-modal-header {
-  padding: 20px 24px;
-  border-bottom: 2px solid #e2e8f0;
+  padding: 24px 28px;
+  border-bottom: 2px solid #f1f5f9;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border-radius: 16px 16px 0 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-radius: 24px 24px 0 0;
   flex-shrink: 0;
 }
 
 .variant-modal-header h3 {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: #0f172a;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.variant-modal-header h3 i {
+  color: #667eea;
+  font-size: 24px;
 }
 
 .modal-close-btn {
@@ -599,116 +849,160 @@ textarea { resize: vertical; min-height: 80px; }
   font-size: 24px;
   color: #64748b;
   cursor: pointer;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.2s ease;
 }
 
-.modal-close-btn:hover { background: #fee2e2; color: #dc2626; }
+.modal-close-btn:hover { 
+  background: #fee2e2;
+  color: #dc2626;
+  transform: rotate(90deg);
+}
 
 .variant-modal-body {
-  padding: 24px;
+  padding: 28px;
   overflow-y: auto;
   flex-grow: 1;
 }
 
-.modal-form-group { margin-bottom: 20px; }
+.modal-form-group { margin-bottom: 24px; }
 
 .modal-form-group label {
   display: flex;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
   color: #0f172a;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
-.modal-form-group label i { color: #4299e1; font-size: 16px; }
+.modal-form-group label i { 
+  color: #667eea;
+  font-size: 16px;
+}
 
 .modal-form-group input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  transition: all 0.3s ease;
   font-family: inherit;
 }
 
 .modal-form-group input:focus {
   outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
 }
 
 .input-hint {
   display: block;
   font-size: 12px;
   color: #64748b;
-  margin-top: 6px;
+  margin-top: 8px;
   font-style: italic;
+  font-weight: 500;
 }
 
 .variant-modal-footer {
-  padding: 20px 24px;
-  border-top: 2px solid #e2e8f0;
+  padding: 24px 28px;
+  border-top: 2px solid #f1f5f9;
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: flex-end;
   background: #f8fafc;
-  border-radius: 0 0 16px 16px;
+  border-radius: 0 0 24px 24px;
   flex-shrink: 0;
 }
 
 @media (max-width: 576px) {
-    .variant-modal-footer {
-        flex-direction: column;
-    }
-    .btn-modal-cancel, .btn-modal-save {
-        width: 100%;
-        justify-content: center;
-    }
+  .variant-modal-footer {
+    flex-direction: column;
+  }
+  .btn-modal-cancel, .btn-modal-save {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .btn-modal-cancel, .btn-modal-save {
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 14px 28px;
+  border-radius: 10px;
   border: none;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.btn-modal-cancel { background: #e2e8f0; color: #475569; }
-.btn-modal-cancel:hover { background: #cbd5e1; }
+.btn-modal-cancel { 
+  background: #e2e8f0;
+  color: #475569;
+}
+.btn-modal-cancel:hover { 
+  background: #cbd5e1;
+  transform: translateY(-2px);
+}
 
 .btn-modal-save {
-  background: linear-gradient(135deg, #4299e1, #3182ce);
+  background: linear-gradient(135deg, #20575e, #1f4552);
   color: white;
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
-.btn-modal-save:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4); }
+.btn-modal-save:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+}
 
-input::placeholder, textarea::placeholder { color: #a0aec0; }
+input::placeholder, textarea::placeholder { 
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+/* Scrollbar Styling */
+.right::-webkit-scrollbar,
+.variant-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.right::-webkit-scrollbar-track,
+.variant-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.right::-webkit-scrollbar-thumb,
+.variant-modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 10px;
+}
+
+.right::-webkit-scrollbar-thumb:hover,
+.variant-modal-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #764ba2, #667eea);
+}
 </style>
 
 <div class="main-content">
   <div class="page-header">
-    <h2>Add New Product</h2>
+    <h2><i class="fas fa-box-open"></i> Add New Product</h2>
     <p>Create a new product with images, details, and variant options</p>
   </div>
 
-  <% if (locals.flash && locals.flash.error && locals.flash.error.length > 0) {
-  %>
+  <% if (locals.flash && locals.flash.error && locals.flash.error.length > 0) { %>
   <div class="alert-error">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -717,8 +1011,7 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
     <%= locals.flash.error[0] %>
   </div>
   <% } %>
-  <% if (locals.flash && locals.flash.success && locals.flash.success.length >
-  0) { %>
+  <% if (locals.flash && locals.flash.success && locals.flash.success.length > 0) { %>
   <div class="alert-success">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -733,56 +1026,79 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
       <input type="hidden" name="_csrf" value="<%= locals.csrfToken || '' %>">
       <div class="form-wrapper">
         <div class="left">
-          <div class="section-title">Product Images (At least 2 required)</div>
+          <div class="section-title">
+            <i class="fas fa-images"></i>
+            Product Images
+          </div>
           <div class="images-grid">
             <% for(let i=1; i<=4; i++){ %>
             <div class="image-box" id="image-box-<%=i%>">
               <div class="image-preview-wrapper">
-                <img id="preview-image<%=i%>" alt="Image <%=i%>"
-                  style="display:none;" />
+                <img id="preview-image<%=i%>" alt="Image <%=i%>" style="display:none;" />
                 <div class="image-placeholder" id="placeholder-<%=i%>">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
                   <div>Image <%=i%></div>
                 </div>
               </div>
 
-              <label class="upload-label" for="file-input-<%=i%>">Choose
-                Image</label>
-              <input type="file" id="file-input-<%=i%>"
-                class="product-image-input" data-index="<%=i%>"
-                accept="image/*" />
-              <input type="hidden" id="cropped-image<%=i%>"
-                name="croppedImages[]" />
+              <label class="upload-label" for="file-input-<%=i%>">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Choose Image
+              </label>
+              <input type="file" id="file-input-<%=i%>" class="product-image-input" 
+                data-index="<%=i%>" accept="image/*" />
+              <input type="hidden" id="cropped-image<%=i%>" name="croppedImages[]" />
 
               <div class="image-buttons">
-                <button type="button" class="save-btn"
-                  onclick="triggerCrop('<%=i%>')">Crop</button>
-                <button type="button" class="cancel-btn"
-                  onclick="resetImage('<%=i%>')">Reset</button>
+                <button type="button" class="save-btn" onclick="triggerCrop('<%=i%>')">
+                  <i class="fas fa-crop"></i> Crop
+                </button>
+                <button type="button" class="cancel-btn" onclick="resetImage('<%=i%>')">
+                  <i class="fas fa-redo"></i> Reset
+                </button>
               </div>
               <p class="error-message" id="productImage<%=i%>-error"></p>
             </div>
             <% } %>
           </div>
+
+          <div class="image-tips">
+            <h4><i class="fas fa-lightbulb"></i> Image Guidelines</h4>
+            <ul>
+              <li>Upload at least 2 images (max 4)</li>
+              <li>Use high-quality images (min 800x800px)</li>
+              <li>Square aspect ratio works best</li>
+              <li>Only PNG, JPG, JPEG formats allowed</li>
+              <li>Crop each image after uploading</li>
+              <li>First image will be the main display</li>
+            </ul>
+          </div>
         </div>
 
         <div class="right">
           <div class="form-section">
-            <div class="section-title">Basic Information</div>
+            <div class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Basic Information
+            </div>
 
             <div class="form-group">
-              <label>Product Name <span class="required">*</span></label>
-              <input type="text" name="productName"
-                placeholder="Enter product name" />
+              <label>
+                <i class="fas fa-tag"></i>
+                Product Name <span class="required">*</span>
+              </label>
+              <input type="text" name="productName" placeholder="Enter product name" />
               <p class="error-message" id="productName-error"></p>
             </div>
 
             <div class="form-group">
-              <label>Brand <span class="required">*</span></label>
+              <label>
+                <i class="fas fa-bookmark"></i>
+                Brand <span class="required">*</span>
+              </label>
               <select name="brand">
                 <option value>Select a brand</option>
                 <% brand.forEach(b => { %>
@@ -793,7 +1109,10 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
             </div>
 
             <div class="form-group">
-              <label>Category <span class="required">*</span></label>
+              <label>
+                <i class="fas fa-list"></i>
+                Category <span class="required">*</span>
+              </label>
               <select name="category">
                 <option value>Select a category</option>
                 <% category.forEach(c => { %>
@@ -805,17 +1124,26 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
           </div>
 
           <div class="form-section">
-            <div class="section-title">Description</div>
+            <div class="section-title">
+              <i class="fas fa-align-left"></i>
+              Description
+            </div>
 
             <div class="form-group">
-              <label>Short Description <span class="required">*</span></label>
+              <label>
+                <i class="fas fa-file-alt"></i>
+                Short Description <span class="required">*</span>
+              </label>
               <textarea name="description" rows="3"
                 placeholder="Brief product description (min 3 characters)"></textarea>
               <p class="error-message" id="description-error"></p>
             </div>
 
             <div class="form-group">
-              <label>Long Description <span class="required">*</span></label>
+              <label>
+                <i class="fas fa-file-invoice"></i>
+                Long Description <span class="required">*</span>
+              </label>
               <textarea name="longDescription" rows="4"
                 placeholder="Detailed product description (min 10 characters)"></textarea>
               <p class="error-message" id="longDescription-error"></p>
@@ -823,43 +1151,37 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
           </div>
 
           <div class="form-section">
-            <div class="section-title">Product Variants (At least 1
-              required)</div>
+            <div class="section-title">
+              <i class="fas fa-cubes"></i>
+              Product Variants
+            </div>
 
             <div class="variants-display" id="variantsDisplay">
               <div class="variant-empty-state" id="emptyState">
                 <i class="fas fa-box-open"></i>
-                <p>No variants added yet. Click "Add Variant" to get
-                  started.</p>
+                <p>No variants added yet. Click "Add Variant" to get started.</p>
               </div>
             </div>
 
-            <button type="button" class="add-variant-btn"
-              onclick="openVariantModal()">
-              <svg width="20" height="20" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
+            <button type="button" class="add-variant-btn" onclick="openVariantModal()">
+              <i class="fas fa-plus-circle"></i>
               Add Variant
             </button>
 
             <p class="error-message" id="variant-error"></p>
-
             <div id="hiddenVariantsContainer"></div>
           </div>
 
           <div class="button-row">
             <button type="submit" class="btn-green">
-              <svg width="20" height="20" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
+              <i class="fas fa-check-circle"></i>
               Add Product
             </button>
             <button type="button" class="btn-red"
-              onclick="window.location.href='/admin/products'">Cancel</button>
+              onclick="window.location.href='/admin/products'">
+              <i class="fas fa-times-circle"></i>
+              Cancel
+            </button>
           </div>
         </div>
       </div>
@@ -869,13 +1191,15 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
 
 <div id="cropper-modal">
   <div class="modal-content">
-    <h3>Crop Image</h3>
+    <h3><i class="fas fa-crop"></i> Crop Image</h3>
     <img id="cropper-image" />
     <div class="modal-buttons">
-      <button type="button" class="save-btn" onclick="cropImage()">Apply
-        Crop</button>
-      <button type="button" class="cancel-btn"
-        onclick="closeModal()">Cancel</button>
+      <button type="button" class="save-btn" onclick="cropImage()">
+        <i class="fas fa-check"></i> Apply Crop
+      </button>
+      <button type="button" class="cancel-btn" onclick="closeModal()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
     </div>
   </div>
 </div>
@@ -883,10 +1207,8 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
 <div class="variant-modal" id="variantModal">
   <div class="variant-modal-content">
     <div class="variant-modal-header">
-      <h3><i class="fas fa-cubes"></i> <span id="modalTitle">Add Product
-          Variant</span></h3>
-      <button type="button" class="modal-close-btn"
-        onclick="closeVariantModal()">
+      <h3><i class="fas fa-cubes"></i> <span id="modalTitle">Add Product Variant</span></h3>
+      <button type="button" class="modal-close-btn" onclick="closeVariantModal()">
         <i class="fas fa-times"></i>
       </button>
     </div>
@@ -897,8 +1219,7 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
           <i class="fas fa-ruler"></i> Size (ml)
           <span class="required">*</span>
         </label>
-        <input type="number" id="modalSize"
-          placeholder="Enter size in ml (e.g., 50, 100)" min="1" />
+        <input type="number" id="modalSize" placeholder="Enter size in ml (e.g., 50, 100)" min="1" />
         <small class="input-hint">Product size in milliliters</small>
       </div>
 
@@ -907,8 +1228,7 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
           <i class="fas fa-warehouse"></i> Stock Quantity
           <span class="required">*</span>
         </label>
-        <input type="number" id="modalStock" placeholder="Enter available stock"
-          min="0" />
+        <input type="number" id="modalStock" placeholder="Enter available stock" min="0" />
         <small class="input-hint">Number of units available</small>
       </div>
 
@@ -917,36 +1237,23 @@ input::placeholder, textarea::placeholder { color: #a0aec0; }
           <i class="fas fa-tag"></i> Regular Price (₹)
           <span class="required">*</span>
         </label>
-        <input type="number" id="modalRegularPrice"
-          placeholder="Enter regular price" min="0" step="0.01" />
+        <input type="number" id="modalRegularPrice" placeholder="Enter regular price" min="0" step="0.01" />
         <small class="input-hint">Original selling price</small>
       </div>
-
-      <!-- <div class="modal-form-group">
-        <label for="modalSalePrice">
-          <i class="fas fa-tags"></i> Sale Price (₹)
-          <span class="required">*</span>
-        </label>
-        <input type="number" id="modalSalePrice" placeholder="Enter sale price" min="0" step="0.01" />
-        <small class="input-hint">Discounted price (must be ≤ regular price)</small>
-      </div> -->
     </div>
 
     <div class="variant-modal-footer">
-      <button type="button" class="btn-modal-cancel"
-        onclick="closeVariantModal()">
+      <button type="button" class="btn-modal-cancel" onclick="closeVariantModal()">
         <i class="fas fa-times"></i> Cancel
       </button>
       <button type="button" class="btn-modal-save" onclick="saveVariant()">
-        <i class="fas fa-check"></i> <span id="saveButtonText">Add
-          Variant</span>
+        <i class="fas fa-check"></i> <span id="saveButtonText">Add Variant</span>
       </button>
     </div>
   </div>
 </div>
 
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
 // Image Cropper Variables
 let cropper, currentImageIndex = null;
@@ -1091,22 +1398,18 @@ function openVariantModal(index = null) {
   const variantModalElement = document.getElementById('variantModal');
   
   if (index !== null) {
-    // Edit mode
     const variant = variants[index];
     document.getElementById('modalTitle').textContent = 'Edit Product Variant';
     document.getElementById('saveButtonText').textContent = 'Update Variant';
     document.getElementById('modalSize').value = variant.size;
     document.getElementById('modalStock').value = variant.stock;
     document.getElementById('modalRegularPrice').value = variant.regularPrice;
-    //document.getElementById('modalSalePrice').value = variant.salePrice;
   } else {
-    // Add mode
     document.getElementById('modalTitle').textContent = 'Add Product Variant';
     document.getElementById('saveButtonText').textContent = 'Add Variant';
     document.getElementById('modalSize').value = '';
     document.getElementById('modalStock').value = '';
     document.getElementById('modalRegularPrice').value = '';
-   // document.getElementById('modalSalePrice').value = '';
   }
   
   variantModalElement.style.display = 'block';
@@ -1122,9 +1425,7 @@ function saveVariant() {
   const size = parseFloat(document.getElementById('modalSize').value);
   const stock = parseInt(document.getElementById('modalStock').value);
   const regularPrice = parseFloat(document.getElementById('modalRegularPrice').value);
-  //const salePrice = parseFloat(document.getElementById('modalSalePrice').value);
   
-  // Validation
   if (!size || size <= 0) {
     Swal.fire({ icon: 'error', title: 'Invalid Size', text: 'Size must be greater than 0', confirmButtonColor: '#ef4444' });
     return;
@@ -1140,24 +1441,12 @@ function saveVariant() {
     return;
   }
   
- // if (isNaN(salePrice) || salePrice < 0) {
- //   Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price cannot be negative', confirmButtonColor: '#ef4444' });
-  //  return;
-  //}
-  
-  //if (salePrice > regularPrice) {
-   // Swal.fire({ icon: 'error', title: 'Invalid Sale Price', text: 'Sale price must be less than or equal to regular price', confirmButtonColor: '#ef4444' });
-   // return;
-  //}
-  
   const variant = { size, stock, regularPrice };
   
   if (editingIndex !== null) {
-    // Update existing variant
     variants[editingIndex] = variant;
     Swal.fire({ icon: 'success', title: 'Variant Updated!', timer: 1500, showConfirmButton: false });
   } else {
-    // Add new variant
     variants.push(variant);
     Swal.fire({ icon: 'success', title: 'Variant Added!', timer: 1500, showConfirmButton: false });
   }
@@ -1190,7 +1479,6 @@ function renderVariants() {
   const emptyState = document.getElementById('emptyState');
   const hiddenContainer = document.getElementById('hiddenVariantsContainer');
   
-  // Clear hidden inputs
   hiddenContainer.innerHTML = '';
   
   if (variants.length === 0) {
@@ -1203,7 +1491,6 @@ function renderVariants() {
   display.querySelectorAll('.variant-card').forEach(card => card.remove());
   
   variants.forEach((variant, index) => {
-    // Create visible card
     const card = document.createElement('div');
     card.className = 'variant-card';
     card.innerHTML = `
@@ -1229,12 +1516,10 @@ function renderVariants() {
           <span class="variant-detail-label"><i class="fas fa-tag"></i> Regular Price</span>
           <span class="variant-detail-value">₹${variant.regularPrice.toFixed(2)}</span>
         </div>
-        
       </div>
     `;
     display.appendChild(card);
     
-    // Create hidden inputs for form submission
     hiddenContainer.innerHTML += `
       <input type="hidden" name="variantSize[]" value="${variant.size}">
       <input type="hidden" name="variantStock[]" value="${variant.stock}">
@@ -1243,7 +1528,6 @@ function renderVariants() {
   });
 }
 
-// Close modal when clicking outside
 document.addEventListener('click', function(event) {
   const variantModalElement = document.getElementById('variantModal');
   if (event.target === variantModalElement) {
@@ -1251,7 +1535,6 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// Close modal with Escape key
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
     closeVariantModal();
@@ -1278,33 +1561,27 @@ function validateForm() {
   clearErrors();
   let valid = true;
 
-  // Image validation variables
   let croppedCount = 0;
   let uncroppedFound = false;
   const totalSlots = 4;
 
-  // Single loop to handle all image logic
   for (let i = 1; i <= totalSlots; i++) {
     const fileInput = document.getElementById(`file-input-${i}`);
     const croppedInput = document.getElementById(`cropped-image${i}`);
     const imageBox = document.getElementById(`image-box-${i}`);
 
-    // Reset previous error highlights
     imageBox.style.borderColor = "#e2e8f0";
 
-    // 1. Check if user selected a file but didn't click "Apply Crop"
     if (fileInput.files.length > 0 && !croppedInput.value) {
       uncroppedFound = true;
-      imageBox.style.borderColor = "#f56565"; // Highlight specific uncropped box in red
+      imageBox.style.borderColor = "#f56565";
     }
 
-    // 2. Count images that have been successfully cropped
     if (croppedInput.value) {
       croppedCount++;
     }
   }
 
-  // Error 1: Uncropped images exist
   if (uncroppedFound) {
     Swal.fire({
       icon: 'warning',
@@ -1312,10 +1589,9 @@ function validateForm() {
       text: 'Please crop all selected images before saving. Boxes in red need attention.',
       confirmButtonColor: '#4299e1'
     });
-    return false; // Exit immediately so they fix the images first
+    return false;
   }
 
-  // Error 2: Total count checks
   if (croppedCount < 2) {
     showError('productImage1-error', 'At least 2 cropped images are required');
     valid = false;
@@ -1324,15 +1600,14 @@ function validateForm() {
     valid = false;
   }
 
-  // Basic info validation
   const name = document.getElementsByName('productName')[0];
   const desc = document.getElementsByName('description')[0];
   const longDesc = document.getElementsByName('longDescription')[0];
   const brand = document.getElementsByName('brand')[0];
   const category = document.getElementsByName('category')[0];
 
-const nameValue = name.value.trim();
-  const alphaRegex = /^[a-zA-Z\s]+$/; // Letters and spaces only
+  const nameValue = name.value.trim();
+  const alphaRegex = /^[a-zA-Z\s]+$/;
 
   if (!nameValue) {
     showError('productName-error', 'Product name is required');
@@ -1344,6 +1619,7 @@ const nameValue = name.value.trim();
     showError('productName-error', 'Product name must contain only alphabetic characters');
     valid = false;
   }
+  
   if (!longDesc.value.trim()) {
     showError('longDescription-error', 'Long description is required');
     valid = false;
@@ -1351,16 +1627,17 @@ const nameValue = name.value.trim();
     showError('longDescription-error', 'Long description must be at least 10 characters');
     valid = false;
   }
+  
   if (!brand.value) {
     showError('brand-error', 'Please select a brand');
     valid = false;
   }
+  
   if (!category.value) {
     showError('category-error', 'Please select a category');
     valid = false;
   }
 
-  // Variant validation
   if (variants.length < 1) {
     showError('variant-error', 'At least one variant is required');
     valid = false;
@@ -1376,15 +1653,6 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
   if (!validateForm()) return;
 
   const formData = new FormData(this);
-  console.log('Submitting product:', {
-    productName: formData.get('productName'),
-    brand: formData.get('brand'),
-    category: formData.get('category'),
-    description: formData.get('description'),
-    longDescription: formData.get('longDescription'),
-    imageCount: formData.getAll('croppedImages[]').filter(img => img).length,
-    variantCount: formData.getAll('variantSize[]').length
-  });
 
   try {
     const response = await fetch('/admin/addProducts', {
@@ -1396,7 +1664,6 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
       body: formData
     });
 
-    console.log('Response status:', response.status);
     const data = await response.json();
 
     if (!response.ok) {
@@ -1424,7 +1691,6 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
   }
 });
 
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
   renderVariants();
 });

@@ -492,17 +492,17 @@
           </div>
 
           <div class="action-buttons">
-            <% if (isOutOfStock && !isBlocked) { %>
             <button class="wishlist-button"
               onclick="moveToWishlist('<%= item.productId._id %>', '<%= item.variant.size %>')">
               <i class="fas fa-heart"></i> Wishlist
             </button>
-            <% } %>
+
             <button class="remove-button"
               onclick="removeFromCart('<%= item.productId._id %>', '<%= item.variant.size %>')">
               <i class="fas fa-trash"></i> Remove
             </button>
           </div>
+
         </div>
       </div>
       <% }); %>
