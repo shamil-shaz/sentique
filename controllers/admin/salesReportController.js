@@ -3,6 +3,9 @@ const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
 const PDFDocument = require("pdfkit");
 const ExcelJS = require("exceljs");
+const path = require("path");
+const fs = require("fs");
+
 
 const normalizeDate = (date) => {
   const d = new Date(date);
@@ -154,9 +157,13 @@ const getSalesReport = async (req, res) => {
       return res.status(400).render("error", { message: error.message });
     }
     const skip = (page - 1) * limit;
-    const dateFilter = {
-      createdOn: { $gte: queryStartDate, $lt: queryEndDate },
-    };
+const dateFilter = {
+  createdOn: { $gte: queryStartDate, $lt: queryEndDate },
+  status: { $nin: ["Cancelled", "Returned"] },
+  paymentStatus: { $ne: "Failed" }
+};
+
+
     const totalOrders = await Order.countDocuments(dateFilter);
     const totalPages = Math.ceil(totalOrders / limit) || 1;
     let orders = [];
@@ -315,9 +322,13 @@ const exportSalesReportToExcel = async (req, res) => {
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
-    const dateFilter = {
-      createdOn: { $gte: queryStartDate, $lt: queryEndDate },
-    };
+  const dateFilter = {
+  createdOn: { $gte: queryStartDate, $lt: queryEndDate },
+  status: { $nin: ["Cancelled", "Returned"] },
+  paymentStatus: { $ne: "Failed" }
+};
+
+
     const orders = await Order.find(dateFilter)
       .populate({ path: "user", select: "name email phone" })
       .sort({ createdOn: -1 })
@@ -490,17 +501,21 @@ const exportSalesReportToPDF = async (req, res) => {
       startDate = null,
       endDate = null,
     } = req.query;
+
     let queryStartDate, queryEndDate, displayLabel;
+
     try {
       if (filterType === "custom") {
         if (!startDate || !endDate)
           return res.status(400).json({
             error: "Custom date range requires both start and end dates",
           });
+
         const validation = validateDateRange(startDate, endDate);
         if (!validation.valid)
           return res.status(400).json({ error: validation.error });
       }
+
       const dateRangeResult = getDateRange(filterType, startDate, endDate);
       queryStartDate = dateRangeResult.startDate;
       queryEndDate = dateRangeResult.endDate;
@@ -508,15 +523,21 @@ const exportSalesReportToPDF = async (req, res) => {
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
+
     const dateFilter = {
       createdOn: { $gte: queryStartDate, $lt: queryEndDate },
+      status: { $nin: ["Cancelled", "Returned"] },
+      paymentStatus: { $ne: "Failed" }
     };
+
     const orders = await Order.find(dateFilter)
       .populate({ path: "user", select: "name email phone" })
       .sort({ createdOn: -1 })
       .lean();
+
     if (orders.length === 0)
       return res.status(400).json({ error: "No data available for export." });
+
     const totalRevenue = orders.reduce(
       (sum, order) => sum + (order.finalAmount || 0),
       0
@@ -526,155 +547,163 @@ const exportSalesReportToPDF = async (req, res) => {
       0
     );
     const totalCouponsApplied = orders.filter((o) => o.couponApplied).length;
+
     const averageOrderValue = (totalRevenue / (orders.length || 1)).toFixed(2);
+
     const doc = new PDFDocument({
       margin: 30,
       size: "A4",
       layout: "landscape",
     });
+
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=sales-report-${
-        new Date().toISOString().split("T")[0]
-      }.pdf`
+      `attachment; filename=sales-report-${new Date().toISOString().split("T")[0]}.pdf`
     );
+
     doc.pipe(res);
-    doc
-      .fontSize(18)
-      .font("Helvetica-Bold")
+
+   const logoPath = path.join(__dirname, "../../public/photos/zodiac perfume/brand logo white and black.png");
+
+
+ 
+
+ 
+      doc.image(logoPath, 30, 20, { width: 80 });
+    
+
+ 
+
+    doc.moveDown(3);
+
+   
+    doc.fontSize(14).font("Helvetica-Bold").fillColor("#0f172a")
       .text("SALES REPORT", { align: "center" });
-    doc.moveDown(0.2);
-    doc
-      .fontSize(12)
-      .font("Helvetica-Bold")
+
+    doc.fontSize(10).font("Helvetica").fillColor("#334155")
       .text(displayLabel, { align: "center" });
-    doc.moveDown(0.1);
-    doc
-      .fontSize(10)
-      .font("Helvetica")
-      .text(
-        `Period: ${queryStartDate.toLocaleDateString("en-IN")} to ${new Date(
-          queryEndDate.getTime() - 1
-        ).toLocaleDateString("en-IN")}`,
-        { align: "center" }
-      );
-    doc
-      .fontSize(9)
-      .font("Helvetica-Oblique")
-      .text(`Generated on: ${new Date().toLocaleString("en-IN")}`, {
-        align: "center",
-      });
+
     doc.moveDown(0.3);
-    doc.moveTo(30, doc.y).lineTo(810, doc.y).stroke();
-    doc.moveDown(0.3);
-    doc
-      .fontSize(11)
-      .font("Helvetica-Bold")
-      .text("SUMMARY STATISTICS", { underline: true });
-    doc.moveDown(0.2);
-    doc.fontSize(9).font("Helvetica");
-    doc.text(`Total Orders: ${orders.length}`, 40);
-    doc.text(
-      `Total Sales Amount: ₹${totalRevenue.toLocaleString("en-IN")}`,
-      40
-    );
-    doc.text(`Total Discount: ₹${totalDiscount.toLocaleString("en-IN")}`, 40);
-    doc.text(`Coupons Applied: ${totalCouponsApplied}`, 40);
-    doc.text(`Average Order Value: ₹${averageOrderValue}`, 40);
-    doc.moveDown(0.3);
-    doc.moveTo(30, doc.y).lineTo(810, doc.y).stroke();
-    doc.moveDown(0.3);
-    doc
-      .fontSize(11)
-      .font("Helvetica-Bold")
-      .text("ORDER DETAILS", { underline: true });
-    doc.moveDown(0.2);
-    const tableTop = doc.y;
-    const col1 = 40,
-      col2 = 110,
-      col3 = 200,
-      col4 = 400,
-      col5 = 450,
-      col6 = 530,
-      col7 = 610,
-      col8 = 710;
-    doc.fontSize(8).font("Helvetica-Bold");
-    doc.text("Order ID", col1, tableTop);
-    doc.text("Customer", col2, tableTop);
-    doc.text("Products", col3, tableTop);
-    doc.text("Items", col4, tableTop);
-    doc.text("Amount", col5, tableTop);
-    doc.text("Discount", col6, tableTop);
-    doc.text("Payment", col7, tableTop);
-    doc.text("Status", col8, tableTop);
-    doc
-      .moveTo(30, tableTop + 12)
-      .lineTo(810, tableTop + 12)
-      .stroke();
-    doc.fontSize(7).font("Helvetica");
+    doc.strokeColor("#cbd5e1").moveTo(30, doc.y).lineTo(810, doc.y).stroke();
+    doc.moveDown(0.8);
+
+    
+    const cardY = doc.y;
+    const cardW = 180;
+    const cardH = 45;
+
+    const cards = [
+      { label: "Total Orders", value: orders.length },
+      { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}` },
+      { label: "Total Discount", value: `₹${totalDiscount.toLocaleString("en-IN")}` },
+      { label: "Avg Order Value", value: `₹${averageOrderValue}` },
+    ];
+
+    cards.forEach((card, i) => {
+      const x = 30 + i * (cardW + 10);
+
+      doc.roundedRect(x, cardY, cardW, cardH, 6)
+        .strokeColor("#94a3b8")
+        .lineWidth(0.8)
+        .stroke();
+
+      doc.fontSize(9).font("Helvetica").fillColor("#475569")
+        .text(card.label, x + 10, cardY + 6);
+
+      doc.fontSize(11).font("Helvetica-Bold").fillColor("#0f172a")
+        .text(card.value, x + 10, cardY + 22);
+    });
+
+    doc.moveDown(3);
+    doc.strokeColor("#cbd5e1").moveTo(30, doc.y).lineTo(810, doc.y).stroke();
+    doc.moveDown(0.8);
+
+  
+    doc.fillColor("#ffffff");
+    doc.rect(30, doc.y, 750, 20).fill("#1e293b");
+
+    const tableTop = doc.y + 4;
+    const columns = {
+      orderId: 40,
+      customer: 110,
+      products: 230,
+      items: 460,
+      amount: 520,
+      discount: 590,
+      payment: 660,
+      status: 735,
+    };
+
+    doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(8);
+    doc.text("Order ID", columns.orderId, tableTop);
+    doc.text("Customer", columns.customer, tableTop);
+    doc.text("Products", columns.products, tableTop);
+    doc.text("Items", columns.items, tableTop);
+    doc.text("Amount", columns.amount, tableTop, { width: 60, align: "right" });
+    doc.text("Discount", columns.discount, tableTop, { width: 60, align: "right" });
+    doc.text("Payment", columns.payment, tableTop);
+    doc.text("Status", columns.status, tableTop);
+
+    doc.moveDown();
+    doc.fillColor("#000000");
     let yPosition = tableTop + 18;
     const pageHeight = doc.page.height;
-    const bottomMargin = 40;
-    orders.forEach((order) => {
-      if (yPosition > pageHeight - bottomMargin - 30) {
+    const bottomMargin = 60;
+
+    orders.forEach((order, index) => {
+      const userData = order.user?.name || order.deliveryAddress?.name || "Guest User";
+
+      const productsText =
+        order.orderItems
+          ?.map((item) => `• ${item.productName.substring(0, 25)} (${item.quantity})`)
+          .join("\n") || "N/A";
+
+      const items =
+        order.orderItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
+      let paymentMethod = order.paymentMethod || "N/A";
+      paymentMethod = paymentMethod.toUpperCase().slice(0, 8);
+
+      const rowHeight = Math.max(doc.heightOfString(productsText, { width: 210 }), 16);
+
+      if (yPosition + rowHeight > pageHeight - bottomMargin) {
         doc.addPage();
         yPosition = 50;
       }
-      const userData =
-        order.user?.name || order.deliveryAddress?.name || "Guest User";
-      const productsText =
-        order.orderItems
-          ?.map((item) => {
-            let str = `${item.productName.substring(0, 25)} (${item.quantity})`;
-            if (item.variant) str += ` - ${item.variant.substring(0, 10)}`;
-            return str;
-          })
-          .join(", ") || "N/A";
-      const items =
-        order.orderItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-      let paymentMethod = "N/A";
-      if (order.paymentMethod) {
-        switch (order.paymentMethod.toLowerCase()) {
-          case "cod":
-            paymentMethod = "COD";
-            break;
-          case "wallet":
-            paymentMethod = "Wallet";
-            break;
-          case "razorpay":
-          case "online":
-            paymentMethod = "Online";
-            break;
-          default:
-            paymentMethod = order.paymentMethod.substring(0, 8);
-        }
+
+      if (index % 2 === 0) {
+        doc.rect(30, yPosition - 2, 750, rowHeight + 4)
+          .fill("#f8fafc")
+          .fillColor("#000");
       }
-      doc.text(order.orderId.slice(-6), col1, yPosition, { width: 60 });
-      doc.text(userData.substring(0, 12), col2, yPosition, { width: 80 });
-      doc.text(productsText.substring(0, 50), col3, yPosition, { width: 190 });
-      doc.text(items.toString(), col4, yPosition, {
-        width: 40,
-        align: "center",
-      });
-      doc.text(`₹${order.finalAmount.toFixed(2)}`, col5, yPosition, {
-        width: 70,
-        align: "right",
-      });
-      doc.text(`₹${order.discount.toFixed(2)}`, col6, yPosition, {
-        width: 70,
-        align: "right",
-      });
-      doc.text(paymentMethod, col7, yPosition, { width: 90 });
-      doc.text(order.status, col8, yPosition, { width: 70 });
-      yPosition += 16;
+
+      doc.fontSize(7).font("Helvetica").fillColor("#0f172a");
+
+      doc.text(order.orderId.slice(-6), columns.orderId, yPosition, { width: 60 });
+      doc.text(userData.substring(0, 15), columns.customer, yPosition, { width: 100 });
+      doc.text(productsText, columns.products, yPosition, { width: 210 });
+      doc.text(String(items), columns.items, yPosition, { width: 30, align: "center" });
+      doc.text(`₹${order.finalAmount.toFixed(2)}`, columns.amount, yPosition, { width: 60, align: "right" });
+      doc.text(`₹${order.discount.toFixed(2)}`, columns.discount, yPosition, { width: 60, align: "right" });
+      doc.text(paymentMethod, columns.payment, yPosition, { width: 60 });
+      doc.text(order.status, columns.status, yPosition, { width: 60 });
+
+      yPosition += rowHeight + 6;
     });
+
+   
+    doc.fontSize(8).fillColor("#64748b");
+    doc.text(`Generated on: ${new Date().toLocaleString("en-IN")}`, 30, pageHeight - 35);
+    doc.text(`© Sentique | Sales Reporting System`, 650, pageHeight - 35);
+
     doc.end();
   } catch (error) {
     console.error("Error exporting to PDF:", error);
     res.status(500).json({ error: "Error exporting report" });
   }
 };
+
 
 module.exports = {
   getSalesReport,

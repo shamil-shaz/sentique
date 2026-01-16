@@ -10,7 +10,8 @@ const getAdminOrderList = async (req, res) => {
   try {
     const { orderId } = req.query;
 
-    const query = {};
+    const query = { paymentStatus: { $ne: "Failed" } };
+
     if (orderId) {
       query.orderId = orderId;
     }

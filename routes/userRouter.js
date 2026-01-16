@@ -17,6 +17,8 @@ const paymentController=require('../controllers/user/paymentController.js')
 const couponController=require('../controllers/user/couponController.js')
 const referralController=require('../controllers/user/referralController')
 const contactController=require('../controllers/user/contactController.js')
+const userPageController=require('../controllers/user/userPageController.js')
+const zodiacPageController = require("../controllers/user/zodiacPageController.js");
 
 const multer = require("multer");
 
@@ -33,7 +35,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-const userProductController = require("../controllers/user/userProductsController");
+
 
 router.get('/pageNotFound', userController.pageNotFound);
 
@@ -100,15 +102,15 @@ router.get('/login', userController.loadLogin);
 router.post('/login', userController.login);
 router.get('/logout', checkBlockedUser, userAuth, userController.logout);
 
-router.get('/', userController.loadLandingPage);
-router.get("/home", checkBlockedUser, userController.loadHomepage);
-router.get("/shopPage", checkBlockedUser,  userController.loadShopingPage);
-router.get("/api/search", userController.searchProductsApi);
-router.get("/productDetails", checkBlockedUser, userController.loadProductDetails);
-router.get('/zodiac', checkBlockedUser,  userProductController.loadZodiacPage);
-router.get('/api/zodiac-products', checkBlockedUser,  userProductController.getZodiacProducts);
-router.post("/product/review", userAuth, userController.addReview);
-router.get("/product/:productId/rating", userController.getProductRating);
+router.get('/', userPageController.loadLandingPage);
+router.get("/home", checkBlockedUser, userPageController.loadHomepage);
+router.get("/shopPage", checkBlockedUser,   userPageController.loadShopingPage);
+router.get("/api/search",  userPageController.searchProductsApi);
+router.get("/productDetails", checkBlockedUser,  userPageController.loadProductDetails);
+router.get('/zodiac', checkBlockedUser, zodiacPageController.loadZodiacPage);
+router.get('/api/zodiac-products', checkBlockedUser,  zodiacPageController.getZodiacProducts);
+router.post("/product/review", userAuth, userPageController.addReview);
+router.get("/product/:productId/rating",  userPageController.getProductRating);
 
 
 // -----Profile Routes----------

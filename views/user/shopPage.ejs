@@ -525,202 +525,270 @@
 
 <body>
 
-<div class="shop-search-bar">
-  <div class="search-container">
-    <form method="GET" action="/shopPage" class="shop-search-form" autocomplete="off">
-      <input type="text" name="search" placeholder="Search products..." value="<%= search || '' %>" class="shop-search-input" id="liveSearchInput">
-      <button type="submit" class="shop-search-btn"><i class="fa fa-search"></i></button>
-      <% if (search && search.trim()) { %>
-        <button type="button" class="shop-reset-btn" onclick="window.location.href='/shopPage'"><i class="fa fa-times"></i></button>
-      <% } %>
-    </form>
-    <div id="searchResults" class="search-results-dropdown"></div>
+  <div class="shop-search-bar">
+    <div class="search-container">
+      <form method="GET" action="/shopPage" class="shop-search-form"
+        autocomplete="off">
+
+        <!-- SEARCH -->
+        <input type="text" name="search" placeholder="Search products..."
+          value="<%= search || '' %>" class="shop-search-input"
+          id="liveSearchInput">
+
+        <!-- PRESERVE CATEGORY -->
+        <% if(selectedCategories) selectedCategories.forEach(c => { %>
+        <input type="hidden" name="categorys" value="<%= c %>">
+        <% }) %>
+
+        <!-- PRESERVE BRANDS -->
+        <% if(selectedBrands) selectedBrands.forEach(b => { %>
+        <input type="hidden" name="brands" value="<%= b %>">
+        <% }) %>
+
+        <!-- PRESERVE PRICE -->
+        <% if(priceRange) { %>
+        <input type="hidden" name="priceRange" value="<%= priceRange %>">
+        <% } %>
+
+        <% if(sort) { %>
+        <input type="hidden" name="sort" value="<%= sort %>">
+        <% } %>
+
+        <button type="submit" class="shop-search-btn"><i
+            class="fa fa-search"></i></button>
+
+      </form>
+
+      <div id="searchResults" class="search-results-dropdown"></div>
+    </div>
   </div>
-</div>
 
-<div class="site-wrapper">
-  <button id="toggleFilters" class="filters-toggle"><i class="fa fa-filter"></i> Show Filters</button>
-  <div id="filterOverlay" class="filter-overlay"></div>
+  <div class="site-wrapper">
+    <button id="toggleFilters" class="filters-toggle"><i
+        class="fa fa-filter"></i> Show Filters</button>
+    <div id="filterOverlay" class="filter-overlay"></div>
 
-  <div class="layout">
-    <aside id="filters" class="filters">
-      <div class="filter-header">
-        <h4><i class="fa fa-filter"></i> Filters</h4>
-        <i class="fa fa-times" id="closeFilter" style="margin-left:auto; cursor:pointer; display:none;"></i>
-      </div>
-      <div class="filter-content">
-        <form id="filterForm" method="GET">
+    <div class="layout">
+      <aside id="filters" class="filters">
+        <div class="filter-header">
+          <h4><i class="fa fa-filter"></i> Filters</h4>
+          <i class="fa fa-times" id="closeFilter"
+            style="margin-left:auto; cursor:pointer; display:none;"></i>
+        </div>
+        <div class="filter-content">
+          <form id="filterForm" method="GET">
             <div class="filter-section">
-                <h5>Category</h5>
-                <div class="filter-options">
+              <h5>Category</h5>
+              <div class="filter-options">
                 <% categories.forEach(cat => { %>
-                    <div class="filter-option">
-                    <label>
-                        <input type="checkbox" name="categorys" value="<%= cat._id %>" <%= selectedCategories.includes(cat._id.toString()) ? "checked" : "" %>>
-                        <%= cat.name %>
-                    </label>
-                    </div>
-                <% }) %>
+                <div class="filter-option">
+                  <label>
+                    <input type="checkbox" name="categorys"
+                      value="<%= cat._id %>"
+                      <%=selectedCategories.includes(cat._id.toString()) ?
+                      "checked" : "" %>>
+                    <%= cat.name %>
+                  </label>
                 </div>
+                <% }) %>
+              </div>
             </div>
             <div class="filter-section">
-                <h5>Brands</h5>
-                <div class="filter-options">
+              <h5>Brands</h5>
+              <div class="filter-options">
                 <% brands.forEach(brand => { %>
-                    <div class="filter-option">
-                    <label>
-                        <input type="checkbox" name="brands" value="<%= brand._id %>" <%= selectedBrands && selectedBrands.includes(brand._id.toString()) ? "checked" : "" %>>
-                        <%= brand.brandName %>
-                    </label>
-                    </div>
-                <% }) %>
+                <div class="filter-option">
+                  <label>
+                    <input type="checkbox" name="brands"
+                      value="<%= brand._id %>" <%=selectedBrands &&
+                      selectedBrands.includes(brand._id.toString()) ? "checked"
+                      : "" %>>
+                    <%= brand.brandName %>
+                  </label>
                 </div>
+                <% }) %>
+              </div>
             </div>
             <div class="filter-section">
-                <h5>Price Range</h5>
-                <div class="price-range-section">
-                    <div class="filter-option"><label><input type="radio" name="priceRange" value="below1000" <%= priceRange==='below1000'?'checked':'' %>> Below ₹1,000</label></div>
-                    <div class="filter-option"><label><input type="radio" name="priceRange" value="1000-2000" <%= priceRange==='1000-2000'?'checked':'' %>> ₹1,000 - ₹2,000</label></div>
-                    <div class="filter-option"><label><input type="radio" name="priceRange" value="2000-3000" <%= priceRange==='2000-3000'?'checked':'' %>> ₹2,000 - ₹3,000</label></div>
-                    <div class="filter-option"><label><input type="radio" name="priceRange" value="above5000" <%= priceRange==='above5000'?'checked':'' %>> Above ₹5,000</label></div>
-                    <div class="filter-option"><label><input type="radio" name="priceRange" value="" <%= !priceRange?'checked':'' %>> All Prices</label></div>
-                </div>
+              <h5>Price Range</h5>
+              <div class="price-range-section">
+                <div class="filter-option"><label><input type="radio"
+                      name="priceRange" value="below1000"
+                      <%=priceRange==='below1000'?'checked':'' %>> Below
+                    ₹1,000</label></div>
+                <div class="filter-option"><label><input type="radio"
+                      name="priceRange" value="1000-2000"
+                      <%=priceRange==='1000-2000'?'checked':'' %>> ₹1,000 -
+                    ₹2,000</label></div>
+                <div class="filter-option"><label><input type="radio"
+                      name="priceRange" value="2000-3000"
+                      <%=priceRange==='2000-3000'?'checked':'' %>> ₹2,000 -
+                    ₹3,000</label></div>
+                <div class="filter-option"><label><input type="radio"
+                      name="priceRange" value="above5000"
+                      <%=priceRange==='above5000'?'checked':'' %>> Above
+                    ₹5,000</label></div>
+                <div class="filter-option"><label><input type="radio"
+                      name="priceRange" value <%=!priceRange?'checked':'' %>>
+                    All Prices</label></div>
+              </div>
             </div>
-        </form>
-      </div>
-      <div class="filter-actions">
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='/shopPage'">Clear</button>
-        <button type="submit" form="filterForm" class="btn btn-primary">Apply</button>
-      </div>
-    </aside>
+          </form>
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="btn btn-secondary"
+            onclick="window.location.href='/shopPage'">Clear</button>
+          <button type="submit" form="filterForm"
+            class="btn btn-primary">Apply</button>
+        </div>
+      </aside>
 
-    <main class="products">
-      <div class="sort-bar">
-        <form method="GET">
-           <% if(selectedCategories) selectedCategories.forEach(c => { %><input type="hidden" name="categorys" value="<%= c %>"><% }) %>
-           <% if(selectedBrands) selectedBrands.forEach(b => { %><input type="hidden" name="brands" value="<%= b %>"><% }) %>
-           <% if(priceRange) { %><input type="hidden" name="priceRange" value="<%= priceRange %>"><% } %>
-           <% if(search) { %><input type="hidden" name="search" value="<%= search %>"><% } %>
-           <select name="sort" onchange="this.form.submit()">
-             <option value="">Sort By</option>
-             <option value="newest" <%= sort==='newest'?'selected':'' %>>Newest</option>
-             <option value="priceLow" <%= sort==='priceLow'?'selected':'' %>>Price: Low to High</option>
-             <option value="priceHigh" <%= sort==='priceHigh'?'selected':'' %>>Price: High to Low</option>
-             <option value="nameAZ" <%= sort==='nameAZ'?'selected':'' %>>Name: A - Z</option>
-             <option value="nameZA" <%= sort==='nameZA'?'selected':'' %>>Name: Z - A</option>
-           </select>
-        </form>
-      </div>
+      <main class="products">
+        <div class="sort-bar">
+          <form method="GET">
+            <% if(selectedCategories) selectedCategories.forEach(c => { %><input
+              type="hidden" name="categorys" value="<%= c %>"><% }) %>
+            <% if(selectedBrands) selectedBrands.forEach(b => { %><input
+              type="hidden" name="brands" value="<%= b %>"><% }) %>
+            <% if(priceRange) { %><input type="hidden" name="priceRange"
+              value="<%= priceRange %>"><% } %>
+            <% if(search) { %><input type="hidden" name="search"
+              value="<%= search %>"><% } %>
+            <select name="sort" onchange="this.form.submit()">
+              <option value>Sort By</option>
+              <option value="newest" <%=sort==='newest'?'selected':''
+                %>>Newest</option>
+              <option value="priceLow" <%=sort==='priceLow'?'selected':''
+                %>>Price: Low to High</option>
+              <option value="priceHigh" <%=sort==='priceHigh'?'selected':''
+                %>>Price: High to Low</option>
+              <option value="nameAZ" <%=sort==='nameAZ'?'selected':'' %>>Name: A
+                - Z</option>
+              <option value="nameZA" <%=sort==='nameZA'?'selected':'' %>>Name: Z
+                - A</option>
+            </select>
+          </form>
+        </div>
 
-      <section class="product-grid">
-        <% if (products && products.length > 0) { %>
+        <section class="product-grid">
+          <% if (products && products.length > 0) { %>
           <% products.forEach(product => { %>
-            <article class="product-card">
-              <div class="image-wrap">
-                <a href="/productDetails?id=<%= product._id %>">
-                  <img src="<%= (product.images && product.images.length > 0) ? product.images[0] : '/images/placeholder.jpg' %>" alt="<%= product.productName %>" class="primary-img">
-                  <img src="<%= (product.images && product.images.length > 1) ? product.images[1] : product.images[0] %>" alt="<%= product.productName %>" class="secondary-img">
-                </a>
-              </div>
+          <article class="product-card">
+            <div class="image-wrap">
+              <a href="/productDetails?id=<%= product._id %>">
+                <img
+                  src="<%= (product.images && product.images.length > 0) ? product.images[0] : '/images/placeholder.jpg' %>"
+                  alt="<%= product.productName %>" class="primary-img">
+                <img
+                  src="<%= (product.images && product.images.length > 1) ? product.images[1] : product.images[0] %>"
+                  alt="<%= product.productName %>" class="secondary-img">
+              </a>
+            </div>
 
-              <div class="product-icons">
-                <div class="wishlist-icon" data-id="<%= product._id %>">
-                  <i class="fa fa-heart"></i>
+            <div class="product-icons">
+              <div class="wishlist-icon" data-id="<%= product._id %>">
+                <i class="fa fa-heart"></i>
+              </div>
+            </div>
+
+            <%
+            let discount = 0;
+            if (product.regularPrice > product.salePrice) {
+            discount = Math.round(((product.regularPrice - product.salePrice) /
+            product.regularPrice) * 100);
+            }
+            %>
+            <% if (discount > 0) { %>
+            <div class="offer-badge"><%= discount %>% OFF</div>
+            <% } %>
+
+            <div class="product-body">
+              <h5><%= product.productName %></h5>
+              <div class="product-meta">
+                <div><strong>Brand:</strong> <%= product.brand ?
+                  product.brand.brandName : "N/A" %></div>
+                <div><strong>Category:</strong> <%= product.category ?
+                  product.category.name : "N/A" %></div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+
+                  <!-- PRICE (UNCHANGED LOGIC) -->
+                  <div>
+                    <span class="price">₹<%= product.salePrice %></span>
+                    <% if(product.regularPrice > product.salePrice){ %>
+                    <span class="old-price">₹<%= product.regularPrice %></span>
+                    <% } %>
+                  </div>
+
+                  <!-- ⭐ PRODUCT RATING -->
+                  <div class="rating">
+                    <%
+                    let rating = product.averageRating || 0;
+                    let fullStars = Math.floor(rating);
+                    let halfStar = rating % 1 >= 0.5;
+                    let emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                    %>
+
+                    <% for(let i = 0; i < fullStars; i++) { %>
+                    <i class="fa fa-star"></i>
+                    <% } %>
+
+                    <% if(halfStar) { %>
+                    <i class="fa fa-star-half-alt"></i>
+                    <% } %>
+
+                    <% for(let i = 0; i < emptyStars; i++) { %>
+                    <i class="fa fa-star empty"></i>
+                    <% } %>
+
+                    <span class="rating-count">
+                      (<%= product.totalReviews || 0 %>)
+                    </span>
+                  </div>
+
                 </div>
+
               </div>
-
-              <% 
-                let discount = 0;
-                if (product.regularPrice > product.salePrice) {
-                  discount = Math.round(((product.regularPrice - product.salePrice) / product.regularPrice) * 100);
-                }
-              %>
-              <% if (discount > 0) { %>
-                <div class="offer-badge"><%= discount %>% OFF</div>
-              <% } %>
-
-              <div class="product-body">
-                <h5><%= product.productName %></h5>
-                <div class="product-meta">
-                  <div><strong>Brand:</strong> <%= product.brand ? product.brand.brandName : "N/A" %></div>
-                  <div><strong>Category:</strong> <%= product.category ? product.category.name : "N/A" %></div>
-                  <div style="display:flex; flex-direction:column; gap:6px;">
-
-  <!-- PRICE (UNCHANGED LOGIC) -->
-  <div>
-    <span class="price">₹<%= product.salePrice %></span>
-    <% if(product.regularPrice > product.salePrice){ %>
-      <span class="old-price">₹<%= product.regularPrice %></span>
-    <% } %>
-  </div>
-
-  <!-- ⭐ PRODUCT RATING -->
-  <div class="rating">
-    <% 
-      let rating = product.averageRating || 0;
-      let fullStars = Math.floor(rating);
-      let halfStar = rating % 1 >= 0.5;
-      let emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-    %>
-
-    <% for(let i = 0; i < fullStars; i++) { %>
-      <i class="fa fa-star"></i>
-    <% } %>
-
-    <% if(halfStar) { %>
-      <i class="fa fa-star-half-alt"></i>
-    <% } %>
-
-    <% for(let i = 0; i < emptyStars; i++) { %>
-      <i class="fa fa-star empty"></i>
-    <% } %>
-
-    <span class="rating-count">
-      (<%= product.totalReviews || 0 %>)
-    </span>
-  </div>
-
-</div>
-
-                </div>
-              </div>
-            </article>
+            </div>
+          </article>
           <% }) %>
-        <% } else { %>
+          <% } else { %>
           <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
             <h3>No Products Found</h3>
           </div>
-        <% } %>
-      </section>
+          <% } %>
+        </section>
 
-      <nav>
-        <ul class="pagination">
-          <% if (currentPage > 1) { %>
+        <nav>
+          <ul class="pagination">
+            <% if (currentPage > 1) { %>
             <li class="page-item">
-              <a class="page-link" href="?page=<%= currentPage-1 %>&sort=<%= sort %>">
+              <a class="page-link"
+                href="?page=<%= currentPage-1 %>&sort=<%= sort %>">
                 <i class="fa fa-chevron-left" style="font-size:12px;"></i>
               </a>
             </li>
-          <% } %>
-          <% for (let i=1; i<=totalPages; i++) { %>
+            <% } %>
+            <% for (let i=1; i<=totalPages; i++) { %>
             <li class="page-item <%= i===currentPage?'active':'' %>">
-              <a class="page-link" href="?page=<%= i %>&sort=<%= sort %>"><%= i %></a>
+              <a class="page-link" href="?page=<%= i %>&sort=<%= sort %>"><%= i
+                %></a>
             </li>
-          <% } %>
-          <% if (currentPage < totalPages) { %>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
             <li class="page-item">
-              <a class="page-link" href="?page=<%= currentPage+1 %>&sort=<%= sort %>">
+              <a class="page-link"
+                href="?page=<%= currentPage+1 %>&sort=<%= sort %>">
                 <i class="fa fa-chevron-right" style="font-size:12px;"></i>
               </a>
             </li>
-          <% } %>
-        </ul>
-      </nav>
-    </main>
+            <% } %>
+          </ul>
+        </nav>
+      </main>
+    </div>
   </div>
-</div>
 
-<script>
+  <script>
   const searchInput = document.getElementById('liveSearchInput');
   const resultsContainer = document.getElementById('searchResults');
 
@@ -811,4 +879,4 @@
   });
 </script>
 
-<%- include("../partials/user/footer.ejs") %>
+  <%- include("../partials/user/footer.ejs") %>

@@ -27,15 +27,26 @@ const loadWishlist = async (req, res) => {
         ],
       })
       .exec();
-        const wishlistItems = wishlist ? wishlist.products : [];
+    const wishlistItems = wishlist ? wishlist.products : [];
 
+   const validItems = wishlistItems.filter(item => {
+  const p = item.productId;
+  if (!p) return false;
+  const outOfStock = p.variants && p.variants.every(v => v.stock <= 0);
+  const unavailable =
+    p.isBlocked ||
+    p.status !== "Available" ||
+    (p.category && p.category.isListed === false) ||
+    (p.brand && p.brand.isBlocked === true) ||
+    outOfStock;
 
-    const validItems = wishlistItems.filter(item => item.productId);
+  return true; // keep all in wishlist but we handle UI differently
+});
+
     const totalItems = validItems.length;
 
     const totalPages = Math.ceil(totalItems / limit);
     const paginatedItems = validItems.slice(skip, skip + limit);
-
 
     console.log("Wishlist Items:", JSON.stringify(paginatedItems, null, 2));
     console.log("Pagination:", { page, limit, totalItems, totalPages });
@@ -91,10 +102,10 @@ const addToWishlist = async (req, res) => {
       return res.json({ success: false, message: "Already in wishlist" });
     }
 
-   wishlist.products.push({
-  productId,
-  variantSize: req.body.variantSize || null
-});
+    wishlist.products.push({
+      productId,
+      variantSize: req.body.variantSize || null,
+    });
 
     await wishlist.save();
     console.log("Wishlist updated:", JSON.stringify(wishlist, null, 2));
@@ -160,10 +171,14 @@ const moveAllToCart = async (req, res) => {
     console.log("Move all to cart request for userId:", userId);
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: "Login required" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Login required" });
     }
 
-    const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
+    const wishlist = await Wishlist.findOne({ userId }).populate(
+      "products.productId"
+    );
 
     if (!wishlist || wishlist.products.length === 0) {
       return res.json({ success: false, message: "Wishlist empty" });
@@ -181,15 +196,17 @@ const moveAllToCart = async (req, res) => {
       const product = wishlistItem.productId;
       if (!product) continue;
 
-      if (
-        product.isBlocked ||
-        product.status !== "Available" ||
-        !product.variants ||
-        product.variants.length === 0
-      ) {
-        skippedItems++;
-        continue;
-      }
+    if (
+  product.isBlocked ||
+  product.status !== "Available" ||
+  !product.variants ||
+  product.variants.length === 0 ||
+  product.variants.every(v => v.stock <= 0)
+) {
+  skippedItems++;
+  continue;
+}
+
 
       let selectedVariant = null;
       const productIdStr = String(product._id);
@@ -197,12 +214,16 @@ const moveAllToCart = async (req, res) => {
       // 1️⃣ UI selected variant (Highest priority)
       if (variantsMap[productIdStr]) {
         const uiSize = variantsMap[productIdStr];
-        selectedVariant = product.variants.find(v => String(v.size) === String(uiSize));
+        selectedVariant = product.variants.find(
+          (v) => String(v.size) === String(uiSize)
+        );
       }
 
       // 2️⃣ DB stored variant in wishlist
       if (!selectedVariant && wishlistItem.variantSize) {
-        selectedVariant = product.variants.find(v => String(v.size) === String(wishlistItem.variantSize));
+        selectedVariant = product.variants.find(
+          (v) => String(v.size) === String(wishlistItem.variantSize)
+        );
       }
 
       // 3️⃣ Fallback: cheapest variant
@@ -213,10 +234,11 @@ const moveAllToCart = async (req, res) => {
         }, null);
       }
 
-      if (!selectedVariant) {
-        skippedItems++;
-        continue;
-      }
+    if (!selectedVariant || selectedVariant.stock <= 0) {
+  skippedItems++;
+  continue;
+}
+
 
       const varSize = selectedVariant.size;
       const price = selectedVariant.salePrice || selectedVariant.regularPrice;
@@ -243,10 +265,22 @@ const moveAllToCart = async (req, res) => {
 
     await cart.save();
 
-    // Remove only valid moved items
-    const movedIds = wishlist.products
-      .filter((item) => item.productId && item.productId.status === "Available")
-      .map((item) => item.productId._id);
+const movedIds = wishlist.products.filter(item => {
+  const p = item.productId;
+  if (!p) return false;
+
+  const outOfStock = p.variants && p.variants.every(v => v.stock <= 0);
+  const unavailable =
+    p.isBlocked ||
+    p.status !== "Available" ||
+    (p.category && p.category.isListed === false) ||
+    (p.brand && p.brand.isBlocked === true) ||
+    outOfStock;
+
+  return !unavailable;
+}).map(item => item.productId._id);
+
+
 
     await Wishlist.updateOne(
       { userId },
@@ -259,13 +293,11 @@ const moveAllToCart = async (req, res) => {
         skippedItems > 0 ? `, skipped ${skippedItems}` : ""
       }`,
     });
-
   } catch (err) {
     console.error("Move all to cart error:", err.message, err.stack);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 
 const getWishlistCount = async (req, res) => {
   try {
@@ -276,11 +308,10 @@ const getWishlistCount = async (req, res) => {
       return res.json({ count: 0 });
     }
 
-   
-
-
-    const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
-const count = wishlist?.products?.filter(p => p.productId).length || 0;
+    const wishlist = await Wishlist.findOne({ userId }).populate(
+      "products.productId"
+    );
+    const count = wishlist?.products?.filter((p) => p.productId).length || 0;
 
     return res.json({ count, success: true });
   } catch (err) {
@@ -289,20 +320,17 @@ const count = wishlist?.products?.filter(p => p.productId).length || 0;
   }
 };
 
-
-
 const updateVariant = async (req, res) => {
   const userId = req.session.user._id;
   const { productId, variantSize } = req.body;
 
   await Wishlist.updateOne(
-     { userId, "products.productId": productId },
-     { $set: { "products.$.variantSize": variantSize } }
+    { userId, "products.productId": productId },
+    { $set: { "products.$.variantSize": variantSize } }
   );
 
-  res.json({ success:true });
+  res.json({ success: true });
 };
-
 
 module.exports = {
   loadWishlist,
@@ -310,5 +338,5 @@ module.exports = {
   removeFromWishlist,
   moveAllToCart,
   getWishlistCount,
-  updateVariant
+  updateVariant,
 };
