@@ -1,226 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f5f5f5;
-      display: flex;
-      min-height: 100vh;
-    }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 240px;
-      height: 100vh;
-      background-color: #ffffff;
-      border-right: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 0;
-      z-index: 1000;
-      transform: translateX(0);
-      transition: transform 0.3s ease-in-out;
-      overflow-y: auto;
-    }
+body {
+  font-family: "Inter", sans-serif;
+  background: #f5f5f5;
+  display: flex;
+  min-height: 100vh;
+}
 
-    .sidebar__logo {
-      width: 120px;
-      margin: 20px auto;
-      display: block;
-    }
+/* -------- SIDEBAR (desktop default visible) -------- */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background: rgba(255,255,255,0.95);
+  border-right: 1px solid #ddd;
+  box-shadow: 2px 0 20px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0;
+  overflow-y: auto;
+  transform: translateX(0);
+  transition: transform 0.32s cubic-bezier(.4,0,.2,1);
+  z-index: 1000;
+}
 
-    .sidebar__nav {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 0 20px;
-    }
+/* Close btn inside sidebar */
+.sidebar-close-btn {
+  display: none;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity .25s ease, transform .25s ease;
+}
 
-    .nav__item {
-      text-decoration: none;
-      color: #333;
-      padding: 10px 15px;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
+/* Mobile show close btn */
+.sidebar.active .sidebar-close-btn {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
 
-    .nav__item:hover,
-    .nav__item.active {
-      background-color: #eee;
-      font-weight: bold;
-    }
+.sidebar__logo {
+  width: 120px;
+  display: block;
+  margin: 20px auto;
+}
 
-    .sidebar__bottom {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 0 20px 20px;
-    }
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 20px;
+}
 
-    .btn {
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 6px;
-      text-align: center;
-      cursor: pointer;
-      text-decoration: none;
-    }
+.nav__item {
+  padding: 10px 15px;
+  color: #333;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
 
-    .btn--outline {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      color: #333;
-    }
+/* Hover + Active highlight (shows current page) */
+.nav__item:hover {
+  background: #d1f9e7;
+}
 
-    .btn--danger {
-      background-color: #d65948;
-      border: none;
-      color: white;
-    }
+.nav__item.active {
+  background: #ddfaf4;
+  font-weight: 600;
+  border-left: 3px solid #216968;
+  color: #125047;
+}
 
-    /* Header */
-    .admin-header {
-      position: fixed;
-      top: 0;
-      left: 240px;
-      right: 0;
-      height: 60px;
-      background-color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      border-bottom: 1px solid #ddd;
-      z-index: 900;
-      transition: left 0.3s;
-    }
+.sidebar__bottom {
+  padding: 20px;
+}
 
-    .menu-btn {
-      font-size: 24px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: none;
-    }
+.btn {
+  padding: 10px;
+  display: block;
+  text-align: center;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
 
-    .search-container {
-      position: relative;
-      width: 280px;
-    }
+.btn--danger {
+  background: #dc2626;
+  color: white;
+}
 
-    .search-bar {
-      width: 100%;
-      padding: 8px 12px 8px 36px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      height: 40px;
-    }
+/* -------- HEADER -------- */
+.admin-header {
+  position: fixed;
+  top: 0;
+  left: 240px;
+  right: 0;
+  height: 60px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 900;
+}
 
-    .search-icon {
-      position: absolute;
-      top: 50%;
-      left: 12px;
-      transform: translateY(-50%);
-      font-size: 16px;
-      color: #666;
-      pointer-events: none;
-    }
+.menu-btn {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
 
-    /* Main content */
-    .main-content {
-      margin-left: 240px;
-      margin-top: 60px;
-      padding: 20px;
-      width: 100%;
-    }
+/* -------- CONTENT -------- */
+.main-content {
+  margin-left: 240px;
+  margin-top: 60px;
+  width: calc(100% - 240px);
+  padding: 20px;
+}
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-        position: fixed;
-      }
+/* -------- OVERLAY (mobile) -------- */
+.sidebar-overlay {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  transition: opacity .25s;
+  z-index: 900;
+}
 
-      .sidebar.active {
-        transform: translateX(0);
-      }
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
 
-      .admin-header {
-        left: 0;
-      }
+/* -------- MOBILE BEHAVIOR -------- */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
 
-      .menu-btn {
-        display: block;
-        margin-right: 15px;
-      }
+  .sidebar.active {
+    transform: translateX(0);
+  }
 
-      .main-content {
-        margin-left: 0;
-      }
+  .menu-btn {
+    display: block;
+  }
 
-      .search-container {
-        width: 100%;
-        margin-left: 10px;
-      }
-    }
-  </style>
+  .admin-header {
+    left: 0;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Hide scrollbar (Chrome / Edge / Safari) */
+.sidebar::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Hide scrollbar (Firefox) */
+.sidebar {
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar (Internet Explorer) */
+.sidebar {
+  -ms-overflow-style: none;
+}
+
+</style>
 </head>
+
 <body>
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <a href="/admin/dashboard">
-      <img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo" class="sidebar__logo" />
-    </a>
-   
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
+<aside class="sidebar">
+  <button class="sidebar-close-btn" onclick="toggleSidebar()">✖</button>
 
-    <nav class="sidebar__nav">
+  <img src="/photos/zodiac perfume/brand logo.png" class="sidebar__logo">
+
+<nav class="sidebar__nav">
   <a href="/admin/dashboard" class="nav__item <%= activePage === 'dashboard' ? 'active' : '' %>">Dashboard</a>
   <a href="/admin/customers" class="nav__item <%= activePage === 'customers' ? 'active' : '' %>">Users</a>
   <a href="/admin/category" class="nav__item <%= activePage === 'category' ? 'active' : '' %>">Category</a>
   <a href="/admin/addProducts" class="nav__item <%= activePage === 'addProducts' ? 'active' : '' %>">Add Products</a>
-  <a href="/admin/products" class="nav__item <%= activePage === 'products' ? 'active' : '' %>">Products</a>  
+  <a href="/admin/products" class="nav__item <%= activePage === 'products' ? 'active' : '' %>">Products</a>
   <a href="/admin/brands" class="nav__item <%= activePage === 'brands' ? 'active' : '' %>">Brands</a>
   <a href="/admin/orders" class="nav__item <%= activePage === 'orders' ? 'active' : '' %>">Order Lists</a>
   <a href="/admin/salesReport" class="nav__item <%= activePage === 'sales' ? 'active' : '' %>">Sales</a>
   <a href="/admin/couponsManaging" class="nav__item <%= activePage === 'coupons' ? 'active' : '' %>">Coupons</a>
- <a href="/admin/contact" class="nav__item <%= activePage === 'contact' ? 'active' : '' %>">
-  Contact & Support
-</a>
-
+  <a href="/admin/contact" class="nav__item <%= activePage === 'contact' ? 'active' : '' %>">Contact & Support</a>
 </nav>
 
 
-    <div class="sidebar__bottom">
-    
-      <a href="/admin/logout" class="btn btn--danger">Logout</a>
-    </div>
-  </aside>
+  <div class="sidebar__bottom">
+    <a href="/admin/logout" class="btn btn--danger">Logout</a>
+  </div>
+</aside>
 
-  <!-- Header -->
-  <header class="admin-header">
-    <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('active')">☰</button>
-    <div class="search-container">
-      
-    </div>
-  </header>
+<header class="admin-header">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+</header>
+
+
+
+<script>
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('active');
+  document.querySelector('.sidebar-overlay').classList.toggle('active');
+}
+</script>
 
 </body>
 </html>

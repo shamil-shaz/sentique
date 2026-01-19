@@ -525,24 +525,13 @@ const approveReturn = async (req, res) => {
       itemDiscount = Number(
         item.originalCouponDiscount || item.couponDiscount || 0
       );
-      console.log(
-        ` Coupon Active: Refunding discounted amount ₹${
-          itemOriginalTotal - itemDiscount
-        } for ${item.productName}`
-      );
+    
     }
 
     const itemRefundAmount =
       Math.round((itemOriginalTotal - itemDiscount) * 100) / 100;
 
-    console.log(`Return Approval Details:`, {
-      productName: item.productName,
-      itemOriginalTotal,
-      itemDiscount,
-      itemRefundAmount,
-      couponRevoked: order.couponRevoked,
-      couponApplied: order.couponApplied,
-    });
+  
 
     item.status = "Returned";
     item.returnedAt = new Date();

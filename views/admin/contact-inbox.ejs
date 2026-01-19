@@ -9,37 +9,49 @@
     --bg-page: #f8fafc;
     --white: #ffffff;
     --border: #e2e8f0;
+    --sidebar-width: 280px;
   }
 
   body {
     background-color: var(--bg-page);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
   }
 
-  /* 🔥 FIX FOR HEADER + SIDEBAR */
+  /* --- RESPONSIVE LAYOUT ENGINE --- */
   .admin-content-wrapper {
-    margin-left: 280px;   /* Sidebar width */
-    padding-top: 80px;    /* Header height */
+    transition: margin-left 0.3s ease;
     min-height: 100vh;
+    padding-top: 70px; /* Header height */
+  }
+
+  /* Desktop View */
+  @media (min-width: 1025px) {
+    .admin-content-wrapper {
+      margin-left: var(--sidebar-width);
+    }
   }
 
   .inbox-container {
+    width: 100%;
     max-width: 1000px;
-    margin: 40px auto;
-    padding: 0 20px;
+    margin: 0 auto;
+    padding: 20px;
   }
 
-  /* Header */
+  /* --- HEADER AREA --- */
   .page-title-area {
     margin-bottom: 24px;
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
+    gap: 15px;
   }
 
   .page-title-area h2 {
     margin: 0;
-    font-size: 24px;
+    font-size: clamp(20px, 4vw, 24px); /* Fluid typography */
     font-weight: 700;
     color: var(--text-main);
   }
@@ -47,13 +59,14 @@
   .stats-badge {
     background: var(--primary-light);
     color: var(--primary-color);
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
+    white-space: nowrap;
   }
 
-  /* Search */
+  /* --- SEARCH BAR --- */
   .search-wrapper {
     position: relative;
     margin-bottom: 20px;
@@ -61,64 +74,58 @@
 
   .search-input {
     width: 100%;
-    padding: 14px 20px 14px 45px;
+    padding: 14px 45px;
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: 12px;
     outline: none;
     font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
 
-  .search-icon {
+  .search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .search-icon, .clear-icon {
     position: absolute;
-    left: 16px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
   }
 
-  .clear-icon {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: var(--text-muted);
-  cursor: pointer;
-  display: none; /* hidden by default */
-}
+  .search-icon { left: 16px; }
+  .clear-icon { right: 16px; cursor: pointer; display: none; padding: 5px; }
 
-.clear-icon:hover {
-  color: var(--primary-color);
-}
-
-
-  /* List */
+  /* --- INBOX CARD & ROWS --- */
   .inbox-card {
     background: var(--white);
     border-radius: 16px;
     border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     overflow: hidden;
   }
 
   .user-row {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 20px;
-    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
     text-decoration: none;
     color: inherit;
-    transition: 0.2s;
+    transition: background 0.2s;
   }
 
-  .user-row:hover {
-    background: #fcfdfe;
-  }
+  .user-row:last-child { border-bottom: none; }
+  .user-row:hover { background: #f8fafc; }
+  .user-row.unread { background: #f0f4ff; }
 
   .avatar {
-    width: 52px;
-    height: 52px;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     background: linear-gradient(135deg, var(--primary-color), #818cf8);
     color: #fff;
@@ -129,15 +136,32 @@
     font-size: 18px;
   }
 
+  .user-details {
+    flex-grow: 1;
+    min-width: 0; /* Important for text truncation */
+  }
+
   .user-details h4 {
-    margin: 0 0 4px;
-    font-size: 16px;
+    margin: 0 0 2px;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .user-details p {
     margin: 0;
     font-size: 13px;
     color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .action-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .view-btn {
@@ -147,6 +171,8 @@
     border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
+    white-space: nowrap;
+    transition: 0.2s;
   }
 
   .user-row:hover .view-btn {
@@ -154,56 +180,63 @@
     color: #fff;
   }
 
-  /* Empty */
-  .empty-state {
-    padding: 80px 20px;
-    text-align: center;
-    color: var(--text-muted);
+  .unread-badge {
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    padding: 0 6px;
   }
 
-  /* 📱 Mobile */
-  @media (max-width: 768px) {
-    .admin-content-wrapper {
-      margin-left: 0;
-      padding-top: 70px;
+  /* --- SCREEN SPECIFIC TWEAKS --- */
+
+  /* Tablet (Medium) */
+  @media (max-width: 992px) {
+    .inbox-container { padding: 15px; }
+  }
+
+  /* Mobile (Small) */
+  @media (max-width: 600px) {
+    .page-title-area {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .user-row {
+        padding: 12px 15px;
+        gap: 12px;
     }
 
-    .user-row {
-      grid-template-columns: auto 1fr;
+    .avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
     }
 
     .view-btn {
-      display: none;
+        display: none; /* Hide text button on mobile to save space */
+    }
+
+    .admin-content-wrapper {
+        padding-top: 60px;
     }
   }
-
-  .badge {
-  display: inline-block;
-  background: #ef4444;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 10px;
-  margin-left: 8px;
-}
-
-.user-row.unread {
-  background: #f0f4ff;
-  font-weight: 600;
-}
-
-
 </style>
 
 <div class="admin-content-wrapper">
-
   <div class="inbox-container">
-
+    
     <div class="page-title-area">
       <div>
         <h2>Customer Support</h2>
-        <p style="font-size:14px;color:var(--text-muted);">
+        <p style="font-size:13px; color:var(--text-muted); margin: 4px 0 0 0;">
           Manage and respond to user inquiries
         </p>
       </div>
@@ -211,48 +244,44 @@
         <%= users.length %> Conversations
       </div>
     </div>
-<div class="search-wrapper">
-  <span class="search-icon">🔍</span>
 
-  <input
-    type="text"
-    id="searchInput"
-    class="search-input"
-    placeholder="Search by name or email..."
-    onkeyup="filterUsers()"
-  />
-
-  <!-- ❌ Clear Icon -->
-  <span id="clearSearch" class="clear-icon" onclick="clearSearch()">✕</span>
-</div>
-
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="Search by name or email..."
+        onkeyup="filterUsers()"
+      />
+      <span id="clearSearch" class="clear-icon" onclick="clearSearch()">✕</span>
+    </div>
 
     <div class="inbox-card" id="userList">
       <% if (users && users.length > 0) { %>
-
         <% users.forEach(user => { %>
           <a href="/admin/contact/<%= user._id %>" class="user-row <%= user.unreadCount > 0 ? 'unread' : '' %>">
-
-            <div class="avatar"><%= user?.name ? user.name.charAt(0).toUpperCase() : "U" %></div>
-
-
-            <div class="user-details">
-            <h4><%= user?.name || "Unknown User" %></h4>
-<p><%= user?.email || "No Email" %></p>
-
+            
+            <div class="avatar">
+              <%= user?.name ? user.name.charAt(0).toUpperCase() : "U" %>
             </div>
 
-            <span class="view-btn">
-  Open Chat
-  <% if (user.unreadCount > 0) { %>
-    <span class="badge"><%= user.unreadCount %></span>
-  <% } %>
-</span>
+            <div class="user-details">
+              <h4><%= user?.name || "Unknown User" %></h4>
+              <p><%= user?.email || "No Email" %></p>
+            </div>
 
+            <div class="action-area">
+              <% if (user.unreadCount > 0) { %>
+                <span class="unread-badge"><%= user.unreadCount %></span>
+              <% } %>
+              <span class="view-btn">Open Chat</span>
+            </div>
           </a>
         <% }) %>
       <% } else { %>
         <div class="empty-state">
+          <div style="font-size: 40px; margin-bottom: 15px;">📨</div>
           <h3>No messages yet</h3>
           <p>When users contact you, they appear here.</p>
         </div>
@@ -270,24 +299,27 @@
     const filter = searchInput.value.toLowerCase();
     const rows = document.querySelectorAll(".user-row");
 
-    // Show / hide clear icon
     clearIcon.style.display = filter ? "block" : "none";
 
     rows.forEach(row => {
-      const text = row.innerText.toLowerCase();
-      row.style.display = text.includes(filter) ? "" : "none";
+      // Search in both name and email
+      const name = row.querySelector("h4").innerText.toLowerCase();
+      const email = row.querySelector("p").innerText.toLowerCase();
+      
+      if (name.includes(filter) || email.includes(filter)) {
+        row.style.display = "flex";
+      } else {
+        row.style.display = "none";
+      }
     });
   }
 
   function clearSearch() {
     searchInput.value = "";
     clearIcon.style.display = "none";
-
     document.querySelectorAll(".user-row").forEach(row => {
-      row.style.display = "";
+      row.style.display = "flex";
     });
-
     searchInput.focus();
   }
 </script>
-

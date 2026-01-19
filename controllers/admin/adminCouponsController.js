@@ -92,23 +92,26 @@ const formatCouponWithUsage = (coupon, lifecycleStatus) => {
 
 const getCoupons = async (req, res) => {
   try {
-    res.render("couponsManaging");
+    res.render("couponsManaging", {
+      activePage: "coupons"
+    });
   } catch (error) {
     console.error("Error in getCoupons:", error);
     res.redirect("/pageNotFound");
   }
 };
 
+
 const getAllCoupons = async (req, res) => {
   try {
-    console.log(" Fetching all coupons with fresh data...");
+   
 
     const coupons = await Coupon.find()
     .sort({ createdAt: -1 })
     .populate("appliedUsers.userId", "email name")  
     .populate("appliedUsers.orderId", "_id");
 
-    console.log(` Found ${coupons.length} coupons`);
+   
 
     const couponsWithStatus = coupons.map((coupon) => {
       const lifecycleStatus = calculateCouponStatus(
@@ -123,7 +126,6 @@ const getAllCoupons = async (req, res) => {
       const usagePercentage = limitNum > 0 ? Math.round((usedCount / limitNum) * 100) : 0;
       const remainingUses = Math.max(0, limitNum - usedCount);
 
-      console.log(`Coupon ${coupon.couponCode}: used=${usedCount}, limit=${limitNum}`);
 
       return {
         _id: coupon._id,
@@ -147,7 +149,7 @@ const getAllCoupons = async (req, res) => {
       };
     });
 
-    console.log(" Response being sent to frontend");
+    
 
     res.json({
       success: true,
@@ -214,8 +216,7 @@ const getCouponUsageDetails = async (req, res) => {
 
 const createCoupon = async (req, res) => {
   try {
-    console.log("=== CREATE COUPON REQUEST ===");
-    console.log("Body:", req.body);
+  
 
     let {
       couponName,
@@ -452,9 +453,7 @@ const updateCoupon = async (req, res) => {
       isListed = true,
     } = req.body;
 
-    console.log("=== UPDATE COUPON REQUEST ===");
-    console.log("Coupon ID:", id);
-    console.log("Request body:", req.body);
+    
 
     if (
       !couponName ||
@@ -504,7 +503,7 @@ const updateCoupon = async (req, res) => {
     const limitNum = Number(limit);
     const maxDiscount = Number(maxDiscountAmount);
 
-    console.log("Parsed values:", { discount, minimum, limitNum, maxDiscount });
+    
 
     if (isNaN(minimum)) {
       return res.status(400).json({
@@ -557,14 +556,12 @@ const updateCoupon = async (req, res) => {
       });
     }
 
-    console.log("Existing coupon expireDate:", coupon.expireDate);
+  
 
     const today = normalizeDateForComparison(new Date());
     const currentExpireDate = normalizeDateForComparison(coupon.expireDate);
 
-    console.log("Today for comparison:", today);
-    console.log("Current expire normalized:", currentExpireDate);
-    console.log("Is expired?", currentExpireDate < today);
+
 
     if (currentExpireDate < today) {
       return res.status(400).json({
@@ -660,7 +657,7 @@ const updateCoupon = async (req, res) => {
 
     const updatedWithStatus = formatCouponWithUsage(updatedCoupon, lifecycleStatus);
 
-    console.log(" Coupon updated:", updatedCoupon._id);
+    
 
     res.json({
       success: true,
@@ -696,7 +693,7 @@ const updateCoupon = async (req, res) => {
 const deleteCoupon = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(" Deleting coupon:", id);
+   
 
     const deletedCoupon = await Coupon.findByIdAndDelete(id);
 
@@ -707,7 +704,7 @@ const deleteCoupon = async (req, res) => {
       });
     }
 
-    console.log(" Coupon deleted:", id);
+    
 
     res.json({
       success: true,
@@ -726,7 +723,7 @@ const deleteCoupon = async (req, res) => {
 const toggleCouponListing = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(" Toggling coupon listing for ID:", id);
+  
 
     const coupon = await Coupon.findById(id)
       .populate("appliedUsers.userId", "email name")
@@ -751,7 +748,7 @@ const toggleCouponListing = async (req, res) => {
 
     const toggledWithStatus = formatCouponWithUsage(coupon, lifecycleStatus);
 
-    console.log(" Coupon", coupon.isListed ? "listed" : "unlisted", ":", id);
+   
 
     res.json({
       success: true,

@@ -288,6 +288,7 @@ const dateFilter = {
       reportGeneratedAt: new Date().toLocaleString("en-IN"),
       errorMessage: validationError,
       showError: !!validationError,
+      activePage: "sales",
     });
   } catch (error) {
     console.error("Error in getSalesReport:", error);
