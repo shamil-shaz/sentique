@@ -1,5 +1,4 @@
 
-
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userSchema');
@@ -11,7 +10,8 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/callback",
+      callbackURL: "https://sentique.site/auth/google/callback",
+
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log("Google Profile:", profile);

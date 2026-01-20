@@ -191,7 +191,7 @@ const getAvailableCouponsHTML = async (req, res) => {
       user = req.session.user || null;
     }
 
-    res.render('Coupons', {
+    res.render('coupons', {
       coupons: formattedCoupons,
       currentPage: page,
       totalPages: totalPages,

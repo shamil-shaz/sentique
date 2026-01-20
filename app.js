@@ -17,6 +17,8 @@ const adminRouter = require("./routes/adminRouter");
     await db();
     const app = express();
 
+    app.set("trust proxy", 1);
+
     // --------------- MIDDLEWARE ---------------
 
     app.use((req, res, next) => {
@@ -26,7 +28,7 @@ const adminRouter = require("./routes/adminRouter");
 
     app.use(
       cors({
-        origin: "http://localhost:5173",
+         origin: ["https://sentique.site", "http://localhost:5173"],
         credentials: true,
       })
     );
@@ -65,7 +67,7 @@ const adminRouter = require("./routes/adminRouter");
           maxAge: 1000 * 60 * 60 * 24 * 7,
           httpOnly: true,
           sameSite: "none",
-          secure: false,
+          secure: true,
         },
       })
     );
@@ -83,6 +85,7 @@ const adminRouter = require("./routes/adminRouter");
           maxAge: 1000 * 60 * 60 * 24 * 7,
           httpOnly: true,
           sameSite: "lax",
+          secure: true,
         },
       })
     );
