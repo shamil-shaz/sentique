@@ -19,6 +19,13 @@ const adminRouter = require("./routes/adminRouter");
 
     app.set("trust proxy", 1);
 
+    app.use((req, res, next) => {
+      if (req.headers["x-forwarded-proto"] === "http") {
+        return res.redirect("https://sentique.site" + req.url);
+      }
+      next();
+    });
+
     // --------------- MIDDLEWARE ---------------
 
     app.use((req, res, next) => {
@@ -28,7 +35,7 @@ const adminRouter = require("./routes/adminRouter");
 
     app.use(
       cors({
-         origin: ["https://sentique.site", "http://localhost:5173"],
+        origin: ["https://sentique.site", "http://localhost:5173"],
         credentials: true,
       })
     );
