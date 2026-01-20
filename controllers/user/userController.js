@@ -27,7 +27,8 @@ const pageNotFound = async (req, res) => {
 
 const loadSignup = async (req, res) => {
   try {
-    if (!req.session.user) {
+    if (!req.user && !req.session?.user)
+{
       return res.render("signup", { message: "" });
     } else {
       res.redirect("/");
@@ -439,7 +440,8 @@ const resendOtp = async (req, res) => {
 
 const loadLogin = async (req, res) => {
   try {
-    if (!req.session.user) {
+    if (!req.user && !req.session?.user)
+{
       return res.render("login", { message: "" });
     } else {
       res.redirect("/");
@@ -491,21 +493,23 @@ const login = async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
 
-    req.session.user = {
-      id: findUser._id.toString(),
-      name: findUser.name,
-      email: findUser.email,
-      role: "user",
-    };
+ req.login(findUser, async (err) => {
+  if (err) {
+    console.error("Passport login error:", err);
+    return res.status(500).json({ success: false, message: "Login failed" });
+  }
 
-    findUser.lastLogin = new Date();
-    await findUser.save();
+  findUser.lastLogin = new Date();
+  await findUser.save();
 
-    return res.json({
-      success: true,
-      message: "Login successful",
-      redirectUrl: "/",
-    });
+  return res.json({
+    success: true,
+    message: "Login successful",
+    redirectUrl: "/",
+  });
+});
+
+   
   } catch (error) {
     console.error("Login error:", error);
     return res
@@ -519,11 +523,12 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    if (req.session.user) {
-      delete req.session.user;
-    }
+   req.logout(() => {
+  req.session.destroy(() => {
+    res.redirect("/login");
+  });
+});
 
-    return res.redirect("/login");
   } catch (error) {
     console.log("Logout error:", error);
     return res.redirect("/pageNotFound");

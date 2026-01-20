@@ -19,12 +19,12 @@ const adminRouter = require("./routes/adminRouter");
 
     app.set("trust proxy", 1);
 
-    app.use((req, res, next) => {
-      if (req.headers["x-forwarded-proto"] === "http") {
-        return res.redirect(`https://${req.headers.host}${req.url}`);
-      }
-      next();
-    });
+   app.use((req, res, next) => {
+  if (req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect('https://' + req.headers.host + req.url);
+  }
+  next();
+});
     
 
     // ------- CORS ----------
@@ -78,22 +78,23 @@ const adminRouter = require("./routes/adminRouter");
     console.log("Session store initialized successfully");
 
     // --------------- USER SESSION ---------------
-    app.use(
-      session({
-        name: "userSession",
-        secret: process.env.SESSION_SECRET || "super_secret_sentique_key",
-        resave: false,
-        saveUninitialized: true,
-        store: sessionStore,
-        cookie: {
-          maxAge: 1000 * 60 * 60 * 24 * 7,
-          domain: ".sentique.site",
-          httpOnly: true,
-          sameSite: "none",
-          secure: true,
-        },
-      })
-    );
+    
+ app.use(session({
+  name: "userSession",
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  proxy: true,                
+  store: sessionStore,
+  cookie: {
+    maxAge: 1000*60*60*24*7,
+    domain: ".sentique.site",
+    httpOnly: true,
+    sameSite: "none",
+    secure: true
+  }
+}))
+
 
     // --------------- ADMIN SESSION ---------------
     app.use(
@@ -131,7 +132,7 @@ const adminRouter = require("./routes/adminRouter");
     });
 
     // --------------- ROUTES ---------------
-    
+
     app.use((req, res, next) => {
       if (req.path.includes("/user/payment")) {
         console.log("\n  INCOMING REQUEST:");

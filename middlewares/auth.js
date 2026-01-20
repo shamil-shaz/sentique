@@ -25,12 +25,12 @@ const clearAdminSession = (req) => {
 
 const userAuth = async (req, res, next) => {
   try {
-    if (!req.session.user) return res.redirect('/login');
+    if (!req.user) return res.redirect('/login');
 
-    const user = await User.findById(req.session.user.id);
+    const user = await User.findById(req.user._id);
     if (!user || user.isBlocked) {
-      await clearUserSession(req);
-      return res.redirect('/login');
+      req.logout(() => {}); // Passport logout
+      return res.redirect('/login?error=blocked');
     }
 
     res.locals.user = user;
@@ -40,6 +40,7 @@ const userAuth = async (req, res, next) => {
     return res.status(500).send("Internal Server Error");
   }
 };
+
 
 const adminAuth = async (req, res, next) => {
   try {
@@ -61,10 +62,10 @@ const adminAuth = async (req, res, next) => {
 
 const checkBlockedUser = async (req, res, next) => {
   try {
-    if (req.session && req.session.user) {
-      const user = await User.findById(req.session.user.id);
+    if (req.user) {
+      const user = await User.findById(req.user._id);
       if (user && user.isBlocked) {
-        await clearUserSession(req);
+        req.logout(() => {});
         return res.redirect('/login?error=blocked');
       }
     }
@@ -74,6 +75,7 @@ const checkBlockedUser = async (req, res, next) => {
     next();
   }
 };
+
 
 module.exports = {
   userAuth,
