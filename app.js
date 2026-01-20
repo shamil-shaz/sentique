@@ -25,18 +25,22 @@ const adminRouter = require("./routes/adminRouter");
       }
       next();
     });
+    
 
-    // === CORS ===
+    // ------- CORS ----------
     app.use(
       cors({
         origin: ["https://sentique.site", "http://localhost:5173"],
         credentials: true,
+        exposedHeaders: ["Set-Cookie"],
         methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
+        optionsSuccessStatus: 200,
       })
     );
 
-    // === HEADERS ===
+    // ----- HEADERS -----
+
     app.use((req, res, next) => {
       res.header("Access-Control-Allow-Credentials", "true");
       res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -79,7 +83,7 @@ const adminRouter = require("./routes/adminRouter");
         name: "userSession",
         secret: process.env.SESSION_SECRET || "super_secret_sentique_key",
         resave: false,
-        saveUninitialized: false,
+        saveUninitialized: true,
         store: sessionStore,
         cookie: {
           maxAge: 1000 * 60 * 60 * 24 * 7,
@@ -110,6 +114,11 @@ const adminRouter = require("./routes/adminRouter");
       })
     );
 
+    // --------------- PASSPORT ---------------
+
+    app.use(passport.initialize());
+    app.use(passport.session());
+
     // --------------- FLASH & NOCACHE ---------------
     app.use(flash());
     app.use(nocache());
@@ -117,15 +126,12 @@ const adminRouter = require("./routes/adminRouter");
     app.use((req, res, next) => {
       res.locals.success_msg = req.flash("success") || [];
       res.locals.error_msg = req.flash("error") || [];
-      res.locals.user = req.session.user || null;
+      res.locals.user = req.user || null;
       next();
     });
 
-    // --------------- PASSPORT ---------------
-    app.use(passport.initialize());
-    app.use(passport.session());
-
     // --------------- ROUTES ---------------
+    
     app.use((req, res, next) => {
       if (req.path.includes("/user/payment")) {
         console.log("\n  INCOMING REQUEST:");

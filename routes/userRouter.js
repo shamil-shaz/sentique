@@ -98,26 +98,20 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
-  async (req, res) => {
-    
-    // New user referral
+  async (req, res, next) => {
+
     if (!req.user.refferalCode) {
       const referralCode = await userController.generateUniqueReferralCode(req.user.name);
       req.user.refferalCode = referralCode;
       await req.user.save();
     }
+    req.login(req.user, err => {
+      if (err) return next(err);
 
-    // Set session
-    req.session.user = {
-      id: req.user._id.toString(),
-      name: req.user.name,
-      email: req.user.email,
-      role: "user",
-    };
+      console.log("Google authenticated → session user:", req.user);
 
-    console.log("User Login OK:", req.session.user);
-
-    res.redirect("/");
+      res.redirect("/");
+    });
   }
 );
 
@@ -125,6 +119,7 @@ router.get(
 router.get('/auth/google/failure', (req, res) => {
   res.redirect('/signup?error=google');
 });
+
 
 router.get('/login', userController.loadLogin);
 router.post('/login', userController.login);
