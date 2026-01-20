@@ -525,25 +525,27 @@ const loadProductDetails = async (req, res) => {
       .limit(4)
       .lean();
 
-    const reviews = await Review.find({ productId: product._id })
-      .populate({
-        path: "userId",
-        select: "name email",
-      })
-      .sort({ createdAt: -1 })
-      .lean();
+   const reviews = (await Review.find({ productId: product._id })
+  .populate({
+    path: "userId",
+    select: "name email",
+  })
+  .sort({ createdAt: -1 })
+  .lean()) || [];
+const validReviews = reviews.filter(r => r.userId);
 
     let averageRating = 0;
     const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
-    if (reviews.length > 0) {
-      const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
-      averageRating = (totalRating / reviews.length).toFixed(1);
+  if (validReviews.length > 0) {
+  const totalRating = validReviews.reduce((sum, r) => sum + r.rating, 0);
+  averageRating = (totalRating / validReviews.length).toFixed(1);
 
-      reviews.forEach((review) => {
-        ratingDistribution[review.rating]++;
-      });
-    }
+  validReviews.forEach(review => {
+    ratingDistribution[review.rating]++;
+  });
+}
+
 
     let userHasReviewed = false;
     let userReview = null;
@@ -570,9 +572,9 @@ const loadProductDetails = async (req, res) => {
     res.render("productDetails", {
       product,
       relatedProducts,
-      reviews,
+      reviews: validReviews,
       averageRating: parseFloat(averageRating),
-      totalReviews: reviews.length,
+      totalReviews: validReviews.length,
       ratingDistribution,
       ratingPercentage,
       userHasReviewed,

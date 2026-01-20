@@ -431,7 +431,8 @@ body.dark-mode .limit-warning {
             <div class="review-item">
               <div class="rev-head">
                 <div>
-                  <span class="rev-name"><%= review.userId.name %></span>
+                  <span class="rev-name"><%= review.userId?.name || "Customer" %>
+</span>
                   <span class="rev-date"><%= new
                     Date(review.createdAt).toLocaleDateString() %></span>
                 </div>
