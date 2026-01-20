@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy & Security</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Privacy & Security</title>
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>
         /* =========================================
            1. THEME VARIABLES
            ========================================= */
@@ -454,111 +455,228 @@
             .button-group { flex-direction: column; }
             .cancel-btn, .update-btn { width: 100%; text-align: center; }
         }
+
+        /* Password Toggle Styling */
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper .form-input {
+    width: 100%;
+    padding-right: 45px; /* Space for the icon */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+    z-index: 10;
+}
+
+.toggle-password:hover {
+    color: var(--primary);
+}
+
+/* Ensure eye icon adjusts in dark mode */
+body.dark-mode .toggle-password:hover {
+    color: var(--primary); /* This will be your gold color */
+}
     </style>
-</head>
-<body>
-    <%- include("../partials/user/header.ejs") %>
+    </head>
+    <body>
+        <%- include("../partials/user/header.ejs") %>
 
-    <section class="profile-page">
-        <div class="container">
-            <div class="main-content">
-                <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'security' }) %>
+        <section class="profile-page">
+            <div class="container">
+                <div class="main-content">
+                    <%- include("../partials/user/profile-sidebar.ejs", { user:
+                    user, activePage: 'security' }) %>
 
-                <main class="content">
-                    <div class="page-header">
-                        <h1 class="page-title">🔒 Privacy & Security</h1>
-                        <p class="page-subtitle">Manage your account security settings and change your password or email address</p>
-                    </div>
+                    <main class="content">
+                        <div class="page-header">
+                            <h1 class="page-title">🔒 Privacy & Security</h1>
+                            <p class="page-subtitle">Manage your account
+                                security settings and change your password or
+                                email address</p>
+                        </div>
 
-                    <% const isGoogleOAuthUser = user && (user.authProvider === 'google' || user.googleId); %>
-                    
-                    <% if (isGoogleOAuthUser) { %>
+                        <% const isGoogleOAuthUser = user && (user.authProvider
+                        === 'google' || user.googleId); %>
+
+                        <% if (isGoogleOAuthUser) { %>
                         <div class="security-section">
                             <div class="alert-info">
                                 <div class="alert-info-icon">🔒</div>
-                                <div class="alert-info-title">Google Account Linked</div>
+                                <div class="alert-info-title">Google Account
+                                    Linked</div>
                                 <div class="alert-info-message">
-                                    Your account is connected to your Google account. For security reasons, <strong>you cannot change your password and email address through this portal</strong>. 
+                                    Your account is connected to your Google
+                                    account. For security reasons, <strong>you
+                                        cannot change your password and email
+                                        address through this portal</strong>.
                                     <br><br>
-                                    All security settings including password and email changes must be managed through your <strong>Google Account settings</strong>.
+                                    All security settings including password and
+                                    email changes must be managed through your
+                                    <strong>Google Account settings</strong>.
                                 </div>
-                                <a href="https://myaccount.google.com/security" target="_blank">🔐 Go to Google Account Security</a>
+                                <a href="https://myaccount.google.com/security"
+                                    target="_blank">🔐 Go to Google Account
+                                    Security</a>
                             </div>
                         </div>
-                    <% } else { %>
+                        <% } else { %>
                         <div class="security-section">
                             <h3 class="section-subtitle">Change Password</h3>
-                            <p class="section-description">Create a strong password to keep your account secure</p>
+                            <p class="section-description">Create a strong
+                                password to keep your account secure</p>
                             <form id="passwordForm">
                                 <div class="form-grid">
                                     <div class="form-group full-width">
-                                        <label class="form-label">🔑 Current Password</label>
-                                        <input type="password" name="currentPassword" class="form-input" placeholder="Enter your current password" required>
-                                        <div class="error-message" id="currentPasswordError"></div>
+                                        <label class="form-label">🔑 Current
+                                            Password</label>
+                                        <div class="password-input-wrapper">
+                                            <input type="password"
+                                                name="currentPassword"
+                                                class="form-input"
+                                                placeholder="Enter your current password"
+                                                required>
+                                            <i
+                                                class="fas fa-eye toggle-password"></i>
+                                        </div>
+                                        <div class="error-message"
+                                            id="currentPasswordError"></div>
                                     </div>
+
                                     <div class="form-group">
-                                        <label class="form-label">✨ New Password</label>
-                                        <input type="password" name="newPassword" id="newPassword" class="form-input" placeholder="Create a new password" required>
-                                        <div class="error-message" id="newPasswordError"></div>
-                                        <div class="password-strength" id="passwordStrength">
+                                        <label class="form-label">✨ New
+                                            Password</label>
+                                        <div class="password-input-wrapper">
+                                            <input type="password"
+                                                name="newPassword"
+                                                id="newPassword"
+                                                class="form-input"
+                                                placeholder="Create a new password"
+                                                required>
+                                            <i
+                                                class="fas fa-eye toggle-password"></i>
+                                        </div>
+                                        <div class="error-message"
+                                            id="newPasswordError"></div>
+
+                                        <div class="password-strength"
+                                            id="passwordStrength">
                                             <div id="strengthText"></div>
                                             <div class="requirement-list">
-                                                <div class="requirement unmet" id="req-length"><span class="requirement-dot"></span><span>6+ chars</span></div>
-                                                <div class="requirement unmet" id="req-uppercase"><span class="requirement-dot"></span><span>Uppercase</span></div>
-                                                <div class="requirement unmet" id="req-lowercase"><span class="requirement-dot"></span><span>Lowercase</span></div>
-                                                <div class="requirement unmet" id="req-number"><span class="requirement-dot"></span><span>Number</span></div>
-                                                <div class="requirement unmet" id="req-special"><span class="requirement-dot"></span><span>Special char</span></div>
+                                                <div class="requirement unmet"
+                                                    id="req-length"><span
+                                                        class="requirement-dot"></span><span>6+
+                                                        chars</span></div>
+                                                <div class="requirement unmet"
+                                                    id="req-uppercase"><span
+                                                        class="requirement-dot"></span><span>Uppercase</span></div>
+                                                <div class="requirement unmet"
+                                                    id="req-lowercase"><span
+                                                        class="requirement-dot"></span><span>Lowercase</span></div>
+                                                <div class="requirement unmet"
+                                                    id="req-number"><span
+                                                        class="requirement-dot"></span><span>Number</span></div>
+                                                <div class="requirement unmet"
+                                                    id="req-special"><span
+                                                        class="requirement-dot"></span><span>Special
+                                                        char</span></div>
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="form-group">
-                                        <label class="form-label">✓ Confirm Password</label>
-                                        <input type="password" name="confirmPassword" id="confirmPassword" class="form-input" placeholder="Confirm your new password" required>
-                                        <div class="error-message" id="confirmPasswordError"></div>
+                                        <label class="form-label">✓ Confirm
+                                            Password</label>
+                                        <div class="password-input-wrapper">
+                                            <input type="password"
+                                                name="confirmPassword"
+                                                id="confirmPassword"
+                                                class="form-input"
+                                                placeholder="Confirm your new password"
+                                                required>
+                                            <i
+                                                class="fas fa-eye toggle-password"></i>
+                                        </div>
+                                        <div class="error-message"
+                                            id="confirmPasswordError"></div>
                                     </div>
                                 </div>
-
                                 <div class="button-group">
-                                    <button type="button" class="cancel-btn" onclick="resetPasswordForm()">Cancel</button>
-                                    <button type="submit" class="update-btn">Update Password</button>
+                                    <button type="button" class="cancel-btn"
+                                        onclick="resetPasswordForm()">Cancel</button>
+                                    <button type="submit"
+                                        class="update-btn">Update
+                                        Password</button>
                                 </div>
                             </form>
                         </div>
 
                         <div class="security-section">
-                            <h3 class="section-subtitle">Change Email Address</h3>
-                            <p class="section-description">Update your email address for account recovery and notifications</p>
+                            <h3 class="section-subtitle">Change Email
+                                Address</h3>
+                            <p class="section-description">Update your email
+                                address for account recovery and
+                                notifications</p>
                             <form id="emailForm">
                                 <div class="form-grid">
                                     <div class="form-group full-width">
-                                        <label class="form-label">📧 Current Email</label>
-                                        <input type="email" class="form-input" value="<%= user.email %>" disabled>
+                                        <label class="form-label">📧 Current
+                                            Email</label>
+                                        <input type="email" class="form-input"
+                                            value="<%= user.email %>" disabled>
                                     </div>
                                     <div class="form-group full-width">
-                                        <label class="form-label">📮 New Email Address</label>
-                                        <input type="email" name="newEmail" id="newEmail" class="form-input" placeholder="Enter your new email address" required>
-                                        <div class="error-message" id="newEmailError"></div>
+                                        <label class="form-label">📮 New Email
+                                            Address</label>
+                                        <input type="email" name="newEmail"
+                                            id="newEmail" class="form-input"
+                                            placeholder="Enter your new email address"
+                                            required>
+                                        <div class="error-message"
+                                            id="newEmailError"></div>
                                     </div>
                                     <div class="form-group full-width">
-                                        <label class="form-label">🔑 Confirm Password</label>
-                                        <input type="password" name="password" id="emailPassword" class="form-input" placeholder="Enter your password for verification" required>
-                                        <div class="error-message" id="emailPasswordError"></div>
+                                        <label class="form-label">🔑 Confirm
+                                            Password</label>
+                                        <div class="password-input-wrapper">
+                                            <input type="password"
+                                                name="password"
+                                                id="emailPassword"
+                                                class="form-input"
+                                                placeholder="Enter your password for verification"
+                                                required>
+                                            <i
+                                                class="fas fa-eye toggle-password"></i>
+                                        </div>
+                                        <div class="error-message"
+                                            id="emailPasswordError"></div>
                                     </div>
                                 </div>
 
                                 <div class="button-group">
-                                    <button type="button" class="cancel-btn" onclick="resetEmailForm()">Cancel</button>
-                                    <button type="button" id="sendOtpBtn" class="update-btn">Send Verification Code</button>
+                                    <button type="button" class="cancel-btn"
+                                        onclick="resetEmailForm()">Cancel</button>
+                                    <button type="button" id="sendOtpBtn"
+                                        class="update-btn">Send Verification
+                                        Code</button>
                                 </div>
                             </form>
                         </div>
-                    <% } %>
-                </main>
+                        <% } %>
+                    </main>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <script>
+        <script>
         // --- HELPER FUNCTIONS ---
         function clearPasswordErrors() {
             document.querySelectorAll('#passwordForm .error-message').forEach(el => {
@@ -788,8 +906,27 @@
                 Swal.fire({ icon: "error", title: "Error", text: err.message });
             }
         });
+
+        // --- PASSWORD VISIBILITY TOGGLE LOGIC ---
+document.querySelectorAll('.toggle-password').forEach(button => {
+    button.addEventListener('click', function() {
+        // Find the input relative to the clicked eye icon
+        const input = this.parentElement.querySelector('input');
+        
+        // Toggle the type attribute
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        
+        // Toggle the eye icon class (font-awesome)
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+        
+        // Optional: brief focus back to input for better UX
+        input.focus();
+    });
+});
     </script>
 
-    <%- include("../partials/user/footer.ejs") %>
-</body>
+        <%- include("../partials/user/footer.ejs") %>
+    </body>
 </html>
