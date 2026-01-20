@@ -56,43 +56,71 @@ router.post('/reset-password', profileController.resetPassword);
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 
-router.get("/auth/google/callback", checkBlockedUser, (req, res, next) => {
-  passport.authenticate("google", async (err, user, info) => {
-    if (err) {
-      console.error("Google login error:", err);
-      return res.render("signup", { errorMessage: "Something went wrong. Please try again." });
-    }
+// router.get("/auth/google/callback", checkBlockedUser, (req, res, next) => {
+//   passport.authenticate("google", async (err, user, info) => {
+//     if (err) {
+//       console.error("Google login error:", err);
+//       return res.render("signup", { errorMessage: "Something went wrong. Please try again." });
+//     }
 
-    if (!user) {
-      console.log("Google login blocked or failed:", info?.message);
-      return res.redirect("/signup?googleError=" + encodeURIComponent(info?.message || "Google login failed."));
-    }
+//     if (!user) {
+//       console.log("Google login blocked or failed:", info?.message);
+//       return res.redirect("/signup?googleError=" + encodeURIComponent(info?.message || "Google login failed."));
+//     }
 
-    try {
+//     try {
       
       
-      if (!user.refferalCode) {
-        const referralCode = await userController.generateUniqueReferralCode(user.name);
-        user.refferalCode = referralCode;
-        await user.save();
-        console.log(`Generated referral code for Google user: ${referralCode}`);
-      }
+//       if (!user.refferalCode) {
+//         const referralCode = await userController.generateUniqueReferralCode(user.name);
+//         user.refferalCode = referralCode;
+//         await user.save();
+//         console.log(`Generated referral code for Google user: ${referralCode}`);
+//       }
 
-      req.session.user = {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        role: "user",
-      };
+//       req.session.user = {
+//         id: user._id.toString(),
+//         name: user.name,
+//         email: user.email,
+//         role: "user",
+//       };
 
-        console.log("Google user logged in with referral code:", user.refferalCode);
-      return res.redirect("/");
-    } catch (err) {
-      console.error("Session creation error:", err);
-      return res.render("signup", { errorMessage: "Login failed. Please try again." });
+//         console.log("Google user logged in with referral code:", user.refferalCode);
+//       return res.redirect("/");
+//     } catch (err) {
+//       console.error("Session creation error:", err);
+//       return res.render("signup", { errorMessage: "Login failed. Please try again." });
+//     }
+//   })(req, res, next);
+// });
+
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  async (req, res) => {
+    
+    // New user referral
+    if (!req.user.refferalCode) {
+      const referralCode = await userController.generateUniqueReferralCode(req.user.name);
+      req.user.refferalCode = referralCode;
+      await req.user.save();
     }
-  })(req, res, next);
-});
+
+    // Set session
+    req.session.user = {
+      id: req.user._id.toString(),
+      name: req.user.name,
+      email: req.user.email,
+      role: "user",
+    };
+
+    console.log("User Login OK:", req.session.user);
+
+    res.redirect("/");
+  }
+);
+
 
 router.get('/auth/google/failure', (req, res) => {
   res.redirect('/signup?error=google');

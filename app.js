@@ -83,7 +83,7 @@ const adminRouter = require("./routes/adminRouter");
         store: sessionStore,
         cookie: {
           maxAge: 1000 * 60 * 60 * 24 * 7,
-          domain: "sentique.site",
+          domain: ".sentique.site",
           httpOnly: true,
           sameSite: "none",
           secure: true,
@@ -102,7 +102,7 @@ const adminRouter = require("./routes/adminRouter");
         store: sessionStore,
         cookie: {
           maxAge: 7 * 24 * 60 * 60 * 1000,
-          domain: "sentique.site",
+          domain: ".sentique.site",
           httpOnly: true,
           sameSite: "none",
           secure: true,
