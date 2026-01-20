@@ -21,8 +21,26 @@ const adminRouter = require("./routes/adminRouter");
 
     app.use((req, res, next) => {
       if (req.headers["x-forwarded-proto"] === "http") {
-        return res.redirect("https://sentique.site" + req.url);
+        return res.redirect(`https://${req.headers.host}${req.url}`);
       }
+      next();
+    });
+
+    // === CORS ===
+    app.use(
+      cors({
+        origin: ["https://sentique.site", "http://localhost:5173"],
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      })
+    );
+
+    // === HEADERS ===
+    app.use((req, res, next) => {
+      res.header("Access-Control-Allow-Credentials", "true");
+      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
       next();
     });
 
@@ -32,13 +50,6 @@ const adminRouter = require("./routes/adminRouter");
       res.locals.isZodiac = false;
       next();
     });
-
-    app.use(
-      cors({
-        origin: ["https://sentique.site", "http://localhost:5173"],
-        credentials: true,
-      })
-    );
 
     app.use(express.static(path.join(__dirname, "public")));
     app.use(express.json({ limit: "50mb" }));
@@ -72,6 +83,7 @@ const adminRouter = require("./routes/adminRouter");
         store: sessionStore,
         cookie: {
           maxAge: 1000 * 60 * 60 * 24 * 7,
+          domain: "sentique.site",
           httpOnly: true,
           sameSite: "none",
           secure: true,
@@ -89,9 +101,10 @@ const adminRouter = require("./routes/adminRouter");
         saveUninitialized: false,
         store: sessionStore,
         cookie: {
-          maxAge: 1000 * 60 * 60 * 24 * 7,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          domain: "sentique.site",
           httpOnly: true,
-          sameSite: "lax",
+          sameSite: "none",
           secure: true,
         },
       })
