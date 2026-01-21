@@ -478,13 +478,14 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
       <div class="related-grid">
         <% if(relatedProducts && relatedProducts.length > 0) { %>
      <% relatedProducts.forEach(prod => { 
-    // SAFETY CHECK: If product or variants are missing, skip this card
+    
     if (!prod || !prod.variants || prod.variants.length === 0) return;
 
+  
     const bestVariant = prod.variants.find(v => v.stock > 0) || prod.variants[0];
     
     
-    if (!bestVariant) return;
+    if (!bestVariant) return; 
 
     const relSale = bestVariant.salePrice || 0;
     const relReg = bestVariant.regularPrice || 0;
