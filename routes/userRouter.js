@@ -99,16 +99,29 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   async (req, res) => {
-    
-    if (!req.user.refferalCode) {
-      const referralCode = await userController.generateUniqueReferralCode(req.user.name);
-      req.user.refferalCode = referralCode;
-      await req.user.save();
-    }
+    try {
+      // 1. Handle Referral Logic
+      if (!req.user.refferalCode) {
+        const referralCode = await userController.generateUniqueReferralCode(req.user.name);
+        req.user.refferalCode = referralCode;
+        await req.user.save();
+      }
 
-  
-    console.log("Google Auth Success for:", req.user.email);
-    res.redirect("/");
+      console.log("Google Auth Success for:", req.user.email);
+
+      // 2. FORCE SESSION SAVE BEFORE REDIRECT
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.redirect("/login");
+        }
+        res.redirect("/");
+      });
+
+    } catch (error) {
+      console.error("Callback Error:", error);
+      res.redirect("/login");
+    }
   }
 );
 

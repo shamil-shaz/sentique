@@ -81,7 +81,7 @@ const securePassword = async (password) => {
 
 const loadForgotPassword = async (req, res) => {
   try {
-    res.render("forgot-Password");
+    res.render("forgot-Password", { user: null });
   } catch (error) {
     res.redirect("/pageNotFound");
   }
@@ -144,7 +144,7 @@ const loadForgotPageOtp = async (req, res) => {
     if (!req.session.forgotOtp || !req.session.forgotEmail) {
       return res.redirect("/forgot-password");
     }
-    res.render("forgotPassword-otp", { message: "" });
+    res.render("forgotPassword-otp", { message: "", user: null });
   } catch (err) {
     console.error("Error loading forgotPassword-otp:", err);
     res.status(500).send("Server Error");
@@ -264,7 +264,7 @@ const sendForgotPasswordOtp = async (req, res) => {
 
 const loadResetPasswordPage = async (req, res) => {
   try {
-    res.render("reset-password");
+    res.render("reset-password", { user: null });
   } catch (error) {
     res.redirect("/pageNotFound");
   }
