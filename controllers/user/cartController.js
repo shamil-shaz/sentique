@@ -201,7 +201,7 @@ const addToCart = async (req, res) => {
     const existingItem = cart.items.find(
       (item) =>
         item.productId.toString() === productId &&
-        item.variantSize === Number(variantSize)
+        Number(item.variantSize) === Number(variantSize) 
     );
 
     if (existingItem) {
@@ -617,7 +617,7 @@ const validateCheckoutItems = async (req, res) => {
       if (!product) continue;
 
       const variant = product.variants?.find(
-        (v) => v.size === item.variantSize
+        (v) => Number(v.size) === Number(item.variantSize)
       );
       const availableStock = variant ? variant.stock || 0 : product.stock || 0;
 
