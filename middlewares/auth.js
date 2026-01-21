@@ -52,30 +52,29 @@ const clearAdminSession = (req) => {
 
 
 const userAuth = async (req, res, next) => {
-  try {
-    
-    const userId = req.user?._id || req.session?.user?.id || req.session?.user?._id;
+    try {
+        // Passport uses req.user, manual login uses req.session.user
+        const user = req.user || req.session?.user;
 
-    if (!userId) {
-      return res.redirect('/login');
+        if (!user) {
+            return res.redirect('/login');
+        }
+
+        const dbUser = await User.findById(user._id || user.id);
+        
+        if (!dbUser || dbUser.isBlocked) {
+            if (req.logout) req.logout(() => {});
+            delete req.session.user;
+            return res.redirect('/login?error=blocked');
+        }
+
+        // IMPORTANT: Attach to both res.locals (for EJS) and req.user (for routes)
+        res.locals.user = dbUser;
+        next();
+    } catch (error) {
+        console.error("Auth Middleware Error:", error);
+        res.status(500).send("Internal Server Error");
     }
-
-    const user = await User.findById(userId);
-    
-    if (!user || user.isBlocked) {
-      
-      if (req.user) req.logout(() => {});
-      if (req.session.user) delete req.session.user;
-      
-      return res.redirect('/login?error=blocked');
-    }
-
-    res.locals.user = user;
-    next();
-  } catch (error) {
-    console.error("Auth Middleware Error:", error);
-    res.status(500).send("Internal Server Error");
-  }
 };
 
 const adminAuth = async (req, res, next) => {

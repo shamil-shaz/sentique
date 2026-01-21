@@ -521,17 +521,17 @@ const login = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-  try {
-   req.logout(() => {
-  req.session.destroy(() => {
-    res.redirect("/login");
-  });
-});
-
-  } catch (error) {
-    console.log("Logout error:", error);
-    return res.redirect("/pageNotFound");
-  }
+    try {
+        req.logout((err) => {
+            req.session.destroy((err) => {
+                res.clearCookie('userSession', { domain: '.sentique.site' });
+                res.redirect("/login");
+            });
+        });
+    } catch (error) {
+        console.log("Logout error:", error);
+        res.redirect("/pageNotFound");
+    }
 };
 
 

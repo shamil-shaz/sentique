@@ -156,7 +156,24 @@ const adminRouter = require("./routes/adminRouter");
       next();
     });
 
-    app.use("/", userRouter);
+   // Force session to save before proceeding to routes
+app.use((req, res, next) => {
+    if (req.session) {
+        const oldRedirect = res.redirect;
+        res.redirect = function (...args) {
+            if (req.session.save) {
+                req.session.save(() => {
+                    oldRedirect.apply(this, args);
+                });
+            } else {
+                oldRedirect.apply(this, args);
+            }
+        };
+    }
+    next();
+});
+
+app.use("/", userRouter);
     app.use("/admin", adminRouter);
 
     app.use((req, res, next) => {
