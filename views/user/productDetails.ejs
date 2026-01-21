@@ -477,15 +477,21 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
       <h2 class="section-head">You May Also Like</h2>
       <div class="related-grid">
         <% if(relatedProducts && relatedProducts.length > 0) { %>
-        <% relatedProducts.forEach(prod => {
-       const bestVariant = prod.variants.find(v => v.stock > 0) || prod.variants[0];
-const relSale = bestVariant.salePrice || 0;
-const relReg = bestVariant.regularPrice || 0;
+     <% relatedProducts.forEach(prod => { 
+    // SAFETY CHECK: If product or variants are missing, skip this card
+    if (!prod || !prod.variants || prod.variants.length === 0) return;
 
-        const hasDiscount = relReg > relSale && relSale > 0;
-        const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg)
-        * 100) : 0;
-        %>
+    const bestVariant = prod.variants.find(v => v.stock > 0) || prod.variants[0];
+    
+    
+    if (!bestVariant) return;
+
+    const relSale = bestVariant.salePrice || 0;
+    const relReg = bestVariant.regularPrice || 0;
+
+    const hasDiscount = relReg > relSale && relSale > 0;
+    const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg) * 100) : 0;
+%>
         <a href="/productDetails?id=<%= prod._id %>" class="mini-card">
           <div class="mc-img-box">
             <% if(hasDiscount) { %>
@@ -495,8 +501,9 @@ const relReg = bestVariant.regularPrice || 0;
               alt="<%= prod.productName %>">
           </div>
           <div class="mc-details">
-            <div class="mc-brand"><%= prod.brand ? prod.brand.brandName :
-              'SENTIQUE' %></div>
+           <div class="mc-brand">
+    <%= (prod.brand && prod.brand.brandName) ? prod.brand.brandName : 'SENTIQUE' %>
+</div>
             <div class="mc-name"><%= prod.productName %></div>
             <div class="mc-price-wrap">
               <div class="mc-price">₹<%= relSale.toFixed(2) %></div>

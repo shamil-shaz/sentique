@@ -605,15 +605,15 @@ const loadProductDetails = async (req, res) => {
 
     if (!product) return res.redirect("/shopPage");
 
-    const relatedProducts = await Product.find({
-      category: product.category._id,
-      _id: { $ne: product._id },
-      isBlocked: false,
-      status: "Available",
-    })
-      .populate("brand", "brandName")
-      .limit(4)
-      .lean();
+  const relatedProducts = await Product.find({
+  category: product.category._id,
+  _id: { $ne: product._id },
+  isBlocked: false,
+  "variants.0": { $exists: true } 
+})
+  .populate("brand", "brandName")
+  .limit(4)
+  .lean();
 
     let reviews = await Review.find({ productId: product._id })
       .populate("userId", "name email")
