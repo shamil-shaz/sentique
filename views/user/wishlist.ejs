@@ -1238,7 +1238,7 @@ footer {
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <script>
+      <script>
     const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -1257,40 +1257,36 @@ footer {
     });
 
     function attachEventListeners() {
+        // 1. Dropdown Change Listener
         document.querySelectorAll('.variant-select').forEach(select => {
-           select.addEventListener('change', function () {
-    const card = this.closest('.wishlist-card');
-    const button = card.querySelector('.add-to-cart-btn');
-    const variants = JSON.parse(this.dataset.variants || '[]');
-    const selected = variants.find(v => String(v.size) === String(this.value));
+            select.addEventListener('change', function () {
+                const card = this.closest('.wishlist-card');
+                const button = card.querySelector('.add-to-cart-btn');
+                const variants = JSON.parse(this.dataset.variants || '[]');
+                const selected = variants.find(v => String(v.size) === String(this.value));
 
-    // Clear previous warnings
-    card.querySelector('.image-overlay')?.remove();
-    card.querySelector('.image-stock-warning')?.remove();
+                card.querySelector('.image-overlay')?.remove();
+                card.querySelector('.image-stock-warning')?.remove();
 
-    if (!selected || selected.stock <= 0) {
-        button.disabled = true;
-        button.classList.add('disabled');
-        button.innerHTML = '<i class="fa fa-ban"></i> Variant Out of Stock';
-        
-        // Add the visual "Out of Stock" overlay
-        card.querySelector('.image-wrap').insertAdjacentHTML(
-            'beforeend',
-            `<div class="image-overlay"></div><div class="image-stock-warning">VARIANT OUT OF STOCK</div>`
-        );
-    } else {
-        // ENABLE logic: If the user picks a good size, this specific button works!
-        button.disabled = false;
-        button.classList.remove('disabled');
-        button.innerHTML = '<i class="fa fa-shopping-cart"></i> Add to Cart';
-        button.setAttribute('data-variant-id', this.value);
-    }
-
-   
-    updateMoveAllButton(); 
-});
+                if (!selected || selected.stock <= 0) {
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                    button.innerHTML = '<i class="fa fa-ban"></i> Variant Out of Stock';
+                    card.querySelector('.image-wrap').insertAdjacentHTML(
+                        'beforeend',
+                        `<div class="image-overlay"></div><div class="image-stock-warning">VARIANT OUT OF STOCK</div>`
+                    );
+                } else {
+                    button.disabled = false;
+                    button.classList.remove('disabled');
+                    button.innerHTML = '<i class="fa fa-shopping-cart"></i> Add to Cart';
+                    button.setAttribute('data-variant-id', this.value);
+                }
+                updateMoveAllButton(); 
+            });
         });
 
+        // 2. Remove Button Listener
         document.querySelectorAll('.remove-wishlist-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const productId = this.dataset.id;
@@ -1301,104 +1297,72 @@ footer {
                     showCancelButton: true,
                     confirmButtonColor: '#e85105',
                     cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Yes, Remove',
-                    cancelButtonText: 'Cancel'
+                    confirmButtonText: 'Yes, Remove'
                 });
-
                 if (confirmed.isConfirmed) {
                     await removeFromWishlistWithSuccessPopup(productId);
                 }
             });
         });
 
- document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-    btn.addEventListener('click', async function (event) {
-        // 1. Use event.currentTarget to always grab the <button> element
-        // even if the user clicks the <i> icon inside it.
-        const button = event.currentTarget; 
-        
-        // 2. Extract the ID using getAttribute (the most reliable way)
-        const productId = button.getAttribute('data-id'); 
-        
-        // 3. Find the card and the dropdown for that specific product
-        const card = button.closest('.wishlist-card');
-        const select = card.querySelector('.variant-select');
-        
-        // 4. Get the live value from the dropdown
-        const currentVariantSize = select ? select.value : button.getAttribute('data-variant-id');
+        // 3. Add to Cart Button Listener
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', async function (event) {
+                const button = event.currentTarget; 
+                const productId = button.getAttribute('data-id'); 
+                const card = button.closest('.wishlist-card');
+                const select = card.querySelector('.variant-select');
+                const currentVariantSize = select ? select.value : button.getAttribute('data-variant-id');
 
-        // DEBUG: Check your browser console (F12) to see these values
-        console.log("Button Clicked - Product ID:", productId, "Variant Size:", currentVariantSize);
+                if (!productId || productId === 'undefined' || productId === 'null') {
+                    Toast.fire({ icon: 'error', title: 'Product information is missing' });
+                    return;
+                }
 
-        // 5. Check if we actually have a valid ID
-        if (!productId || productId === 'undefined' || productId === 'null') {
-            Toast.fire({ icon: 'error', title: 'Product information is missing' });
-            return;
-        }
+                const actualButton = this.closest('.add-to-cart-btn') || this;
+                await addToCartWithToastOnly(productId, currentVariantSize, actualButton);
+            });
+        });
+    } // End attachEventListeners
 
-        // 6. Call the add function
-        await addToCartWithToastOnly(productId, currentVariantSize, button);
-    });
-});
-    }
-
+    // Helper functions outside the main listener function
     async function removeFromWishlistWithSuccessPopup(productId) {
         try {
             const res = await fetch(`/wishlist/remove/${productId}`, { method: 'DELETE' });
             const data = await res.json();
-
             if (data.success) {
                 removeCardAndUpdateUI(productId);
-
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Removed!',
-                    text: 'Item removed from your wishlist',
-                    confirmButtonColor: '#10b981',
-                    timer: 1400,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
-            } else {
-                Toast.fire({ icon: 'error', title: data.message || 'Failed to remove' });
+                Toast.fire({ icon: 'success', title: 'Removed from wishlist' });
             }
         } catch (err) {
             Toast.fire({ icon: 'error', title: 'Network error' });
         }
     }
 
-   async function addToCartWithToastOnly(productId, variantSize, button) {
-    const originalContent = button.innerHTML;
-    button.disabled = true; // Prevent double clicks
-    button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding...';
-
-    try {
-        const res = await fetch('/cart/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                productId, 
-                variantSize: Number(variantSize), // Double check type safety here
-                quantity: 1 
-            })
-        });
-        const data = await res.json();
-
-        if (data.success) {
-            Toast.fire({ icon: 'success', title: 'Added to cart!' });
-            removeCardAndUpdateUI(productId); // Remove from wishlist since it's now in cart
-        } else {
-            Toast.fire({ icon: 'error', title: data.message || 'Failed to add' });
+    async function addToCartWithToastOnly(productId, variantSize, button) {
+        const originalContent = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding...';
+        try {
+            const res = await fetch('/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, variantSize: Number(variantSize), quantity: 1 })
+            });
+            const data = await res.json();
+            if (data.success) {
+                Toast.fire({ icon: 'success', title: 'Added to cart!' });
+                removeCardAndUpdateUI(productId);
+            } else {
+                Toast.fire({ icon: 'error', title: data.message || 'Failed to add' });
+                button.disabled = false;
+                button.innerHTML = originalContent;
+            }
+        } catch (err) {
             button.disabled = false;
             button.innerHTML = originalContent;
         }
-    } catch (err) {
-        Toast.fire({ icon: 'error', title: 'Connection error' });
-        button.disabled = false;
-        button.innerHTML = originalContent;
     }
-}
-    
 
     function removeCardAndUpdateUI(productId) {
         const card = document.querySelector(`.wishlist-card[data-product-id="${productId}"]`);
@@ -1406,65 +1370,24 @@ footer {
             card.style.animation = 'fadeOut 0.4s ease';
             setTimeout(() => {
                 card.remove();
-
                 const remaining = document.querySelectorAll('.wishlist-card').length;
                 document.getElementById('wishlistCount').textContent = remaining;
-
-                if (remaining === 0) {
-                    showEmptyWishlist();
-                }
-
+                if (remaining === 0) showEmptyWishlist();
                 updateMoveAllButton();
             }, 400);
-        } else {
-            updateMoveAllButton();
         }
     }
 
     function showEmptyWishlist() {
         const grid = document.getElementById('wishlistGrid');
         if (grid) {
-            grid.innerHTML = `
-                <div class="empty-wishlist">
-                    <div class="empty-icon"><i class="fa fa-heart"></i></div>
-                    <h3>Your Wishlist is Empty</h3>
-                    <p>Save your favorite items here and never lose track of them!</p>
-                    <a href="/shopPage" class="browse-btn">
-                        <i class="fa fa-search"></i> Start Shopping
-                    </a>
-                </div>
-            `;
+            grid.innerHTML = `<div class="empty-wishlist"><h3>Your Wishlist is Empty</h3><a href="/shopPage" class="browse-btn">Start Shopping</a></div>`;
         }
-
         const moveBtn = document.querySelector('.move-all-btn');
         if (moveBtn) moveBtn.style.display = 'none';
     }
 
     async function moveAllToBag() {
-        const selects = document.querySelectorAll('.variant-select');
-
-        for (const s of selects) {
-            try {
-                await fetch('/wishlist/update-variant', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        productId: s.dataset.productId,
-                        variantSize: s.value
-                    })
-                });
-            } catch (e) { }
-        }
-
-        const result = await Swal.fire({
-            title: 'Move all to cart?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes',
-        });
-
-        if (!result.isConfirmed) return;
-
         const variantsMap = {};
         document.querySelectorAll('.variant-select').forEach(s => {
             variantsMap[s.dataset.productId] = s.value;
@@ -1477,40 +1400,27 @@ footer {
                 body: JSON.stringify({ variantsMap })
             });
             const data = await res.json();
-
             if (data.success) {
                 Toast.fire({ icon: 'success', title: 'All items moved to cart!' });
-                setTimeout(() => location.href = '/cart', 1200);
-            } else {
-                Toast.fire({ icon: 'error', title: data.message || 'Failed' });
+                setTimeout(() => location.href = '/cart', 1000);
             }
-        } catch (e) {
-            Toast.fire({ icon: 'error', title: 'Network error' });
-        }
+        } catch (e) { }
     }
 
     function updateMoveAllButton() {
-    const cards = document.querySelectorAll('.wishlist-card');
-    const moveBtn = document.querySelector('.move-all-btn');
-    if (!moveBtn) return;
-
-    let shouldDisableMoveAll = false;
-
-    cards.forEach(card => {
-        const btn = card.querySelector('.add-to-cart-btn');
-        const select = card.querySelector('.variant-select');
-        
-        // If the current button is disabled (because of selected size or blocking)
-        // then we must disable the "Move All" button
-        if (!btn || btn.disabled || btn.classList.contains('disabled')) {
-            shouldDisableMoveAll = true;
-        }
-    });
-
-    moveBtn.disabled = shouldDisableMoveAll;
-}
-
-        </script>
+        const cards = document.querySelectorAll('.wishlist-card');
+        const moveBtn = document.querySelector('.move-all-btn');
+        if (!moveBtn) return;
+        let shouldDisableMoveAll = false;
+        cards.forEach(card => {
+            const btn = card.querySelector('.add-to-cart-btn');
+            if (!btn || btn.disabled || btn.classList.contains('disabled')) {
+                shouldDisableMoveAll = true;
+            }
+        });
+        moveBtn.disabled = shouldDisableMoveAll;
+    }
+</script>
 
     </body>
 
