@@ -1311,24 +1311,25 @@ footer {
             });
         });
 
-       document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+  document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', async function () {
-        const productId = this.dataset.id;
+        // Ensure the button has data-id="<%= product._id %>" in the HTML
+        const productId = this.getAttribute('data-id'); 
         
-        // Find the specific card this button belongs to
         const card = this.closest('.wishlist-card');
         const select = card.querySelector('.variant-select');
         
-        // Grab the CURRENT value from the dropdown, not the old button attribute
-        const currentVariantSize = select ? select.value : '';
+        const currentVariantSize = select ? select.value : this.getAttribute('data-variant-id');
 
-        if (!currentVariantSize) {
-            Toast.fire({ icon: 'warning', title: 'Please select a size' });
+        console.log("DEBUG FRONTEND:", productId, currentVariantSize); // Add this to check your console
+
+        if (!productId || productId === 'undefined') {
+            Toast.fire({ icon: 'error', title: 'Product ID missing' });
             return;
         }
 
-        // Send currentVariantSize to the backend
-        await addToCartWithToastOnly(productId, currentVariantSize, this);
+        const actualButton = this.closest('.add-to-cart-btn') || this;
+await addToCartWithToastOnly(productId, currentVariantSize, actualButton);
     });
 });
     }

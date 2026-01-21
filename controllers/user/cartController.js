@@ -134,6 +134,9 @@ const addToCart = async (req, res) => {
   try {
     const userId = req.userId;
     const { productId, variantSize, quantity } = req.body;
+if (!productId) {
+    return res.status(400).json({ success: false, message: "Product ID is required" });
+}
 
     console.log("Add to cart request:", {
       userId,
