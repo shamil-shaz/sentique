@@ -288,7 +288,23 @@ body.dark-mode .limit-warning {
 
           <div class="price-wrap">
             <span class="current-price" id="currentPrice">
-              ₹<%= product.variants[0]?.salePrice.toFixed(2) || '0.00' %>
+             <%
+const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
+%>
+
+<span class="current-price" id="currentPrice">
+  ₹<%= firstAvailableVariant.salePrice.toFixed(2) %>
+</span>
+
+<% if(firstAvailableVariant.regularPrice > firstAvailableVariant.salePrice) { %>
+<span class="old-price" id="regularPrice">
+  ₹<%= firstAvailableVariant.regularPrice.toFixed(2) %>
+</span>
+<span class="discount-tag" id="discountTag">
+  <%= Math.round(((firstAvailableVariant.regularPrice - firstAvailableVariant.salePrice) / firstAvailableVariant.regularPrice) * 100) %>% OFF
+</span>
+<% } %>
+
             </span>
             <% if(product.variants[0]?.regularPrice >
             product.variants[0]?.salePrice) { %>
@@ -305,21 +321,24 @@ body.dark-mode .limit-warning {
           <p class="description"><%= product.description %></p>
 
           <div style="margin-bottom: 25px;">
-            <label class="option-title">Select Volume</label>
-            <div class="options-grid">
-              <% product.variants.forEach((variant, i) => { %>
-              <button
-                class="size-btn <%= i === 0 ? 'active' : '' %>"
-                data-size="<%= variant.size %>"
-                data-sale="<%= variant.salePrice %>"
-                data-regular="<%= variant.regularPrice %>"
-                data-stock="<%= variant.stock %>"
-                <%=variant.stock === 0 ? 'disabled' : '' %>
-                onclick="selectVariant(this)">
-                <%= variant.size %> ML
-              </button>
-              <% }) %>
-            </div>
+           <label class="option-title">Select Volume</label>
+<div class="options-grid">
+<% product.variants.forEach((variant, i) => { %>
+
+  <button
+    class="size-btn <%= i === 0 ? 'active' : '' %>"
+    data-size="<%= variant.size %>"
+    data-sale="<%= variant.salePrice %>"
+    data-regular="<%= variant.regularPrice %>"
+    data-stock="<%= variant.stock %>"
+    <%= variant.stock === 0 ? 'disabled' : '' %>
+    onclick="selectVariant(this)">
+    <%= variant.size %> ML
+  </button>
+
+<% }) %>
+</div>
+
             <div id="stockDisplay" class="stock-text"></div>
           </div>
 
@@ -431,8 +450,8 @@ body.dark-mode .limit-warning {
             <div class="review-item">
               <div class="rev-head">
                 <div>
-                  <span class="rev-name"><%= review.userId?.name || "Customer" %>
-</span>
+    <span class="rev-name"><%= review.userId?.name || "Customer" %></span>
+
                   <span class="rev-date"><%= new
                     Date(review.createdAt).toLocaleDateString() %></span>
                 </div>
@@ -456,8 +475,10 @@ body.dark-mode .limit-warning {
       <div class="related-grid">
         <% if(relatedProducts && relatedProducts.length > 0) { %>
         <% relatedProducts.forEach(prod => {
-        const relSale = prod.variants[0]?.salePrice || 0;
-        const relReg = prod.variants[0]?.regularPrice || 0;
+       const bestVariant = prod.variants.find(v => v.stock > 0) || prod.variants[0];
+const relSale = bestVariant.salePrice || 0;
+const relReg = bestVariant.regularPrice || 0;
+
         const hasDiscount = relReg > relSale && relSale > 0;
         const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg)
         * 100) : 0;

@@ -25,11 +25,19 @@ const clearAdminSession = (req) => {
 
 const userAuth = async (req, res, next) => {
   try {
-    if (!req.user) return res.redirect('/login');
+    const sessionUser = req.session.user;
+    const passportUser = req.user;
 
-    const user = await User.findById(req.user._id);
+    if (!sessionUser && !passportUser) {
+      return res.redirect('/login');
+    }
+
+    const userId = passportUser?._id || sessionUser.id;
+
+    const user = await User.findById(userId);
     if (!user || user.isBlocked) {
-      req.logout(() => {}); // Passport logout
+      if (passportUser) req.logout(() => {});
+      if (sessionUser) await clearUserSession(req);
       return res.redirect('/login?error=blocked');
     }
 

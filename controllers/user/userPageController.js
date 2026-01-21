@@ -553,20 +553,22 @@ const validReviews = reviews.filter(r => r.userId);
     if (req.user?._id || req.session?.user?.id) {
       const userId = req.user?._id || req.session.user?.id;
 
-      userReview = reviews.find((r) => {
-        const uid = r.userId?._id || r.userId;
-        return uid?.toString() === userId.toString();
-      });
+     userReview = validReviews.find((r) => {
+  const uid = r.userId?._id || r.userId;
+  return uid?.toString() === userId.toString();
+});
+
 
       userHasReviewed = !!userReview;
     }
 
     const ratingPercentage = {};
     Object.keys(ratingDistribution).forEach((star) => {
-      ratingPercentage[star] =
-        reviews.length > 0
-          ? Math.round((ratingDistribution[star] / reviews.length) * 100)
-          : 0;
+    ratingPercentage[star] =
+  validReviews.length > 0
+    ? Math.round((ratingDistribution[star] / validReviews.length) * 100)
+    : 0;
+
     });
 
     res.render("productDetails", {
@@ -603,27 +605,32 @@ const getProductRating = async (req, res) => {
     let averageRating = 0;
     const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
-    if (reviews.length > 0) {
-      const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
-      averageRating = (totalRating / reviews.length).toFixed(1);
+ const validReviews = reviews.filter(r => r.userId);
 
-      reviews.forEach((review) => {
-        ratingDistribution[review.rating]++;
-      });
-    }
+if (validReviews.length > 0) {
+  const totalRating = validReviews.reduce((sum, r) => sum + r.rating, 0);
+  averageRating = (totalRating / validReviews.length).toFixed(1);
+
+  validReviews.forEach((review) => {
+    ratingDistribution[review.rating]++;
+  });
+}
+
 
     const ratingPercentage = {};
     Object.keys(ratingDistribution).forEach((star) => {
       ratingPercentage[star] =
-        reviews.length > 0
-          ? Math.round((ratingDistribution[star] / reviews.length) * 100)
+       validReviews.length > 0
+    ? Math.round((ratingDistribution[star] / validReviews.length) * 100)
+
           : 0;
     });
 
     return res.status(200).json({
       success: true,
       averageRating: parseFloat(averageRating),
-      totalReviews: reviews.length,
+      totalReviews: validReviews.length,
+
       ratingDistribution,
       ratingPercentage,
     });
