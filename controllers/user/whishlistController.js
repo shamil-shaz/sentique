@@ -30,26 +30,19 @@ const userId = req.userId;
       .exec();
     const wishlistItems = wishlist ? wishlist.products : [];
 
-    const validItems = wishlistItems.map((item) => {
+    const validItems = wishlistItems.filter((item) => {
       const p = item.productId;
-      if (!p) return null; 
-
+      if (!p) return false;
       const outOfStock = p.variants && p.variants.every((v) => v.stock <= 0);
-      
-      
-      const isCurrentlyBuyable = 
-        !p.isBlocked && 
-        p.status === "Available" && 
-        p.category?.isListed !== false && 
-        p.brand?.isBlocked !== true &&
-        !outOfStock;
+      const unavailable =
+        p.isBlocked ||
+        p.status !== "Available" ||
+        (p.category && p.category.isListed === false) ||
+        (p.brand && p.brand.isBlocked === true) ||
+        outOfStock;
 
-      
-      return {
-        ...item.toObject(),
-        isCurrentlyBuyable
-      };
-    }).filter(item => item !== null);
+      return true;
+    });
 
     const totalItems = validItems.length;
 
