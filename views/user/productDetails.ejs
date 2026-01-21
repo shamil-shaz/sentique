@@ -476,35 +476,34 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
 
       <h2 class="section-head">You May Also Like</h2>
       <div class="related-grid">
-        <% if(relatedProducts && relatedProducts.length > 0) { %>
-     <% relatedProducts.forEach(prod => { 
-    
-    if (!prod || !prod.variants || prod.variants.length === 0) return;
+       <% if(relatedProducts && relatedProducts.length > 0) { %>
+    <% relatedProducts.forEach(prod => { 
+        // 1. Skip if product data is missing or has no variants array
+        if (!prod || !prod.variants || prod.variants.length === 0) return;
 
-  
-    const bestVariant = prod.variants.find(v => v.stock > 0) || prod.variants[0];
-    
-    
-    if (!bestVariant) return; 
+        // 2. Safely find the variant
+        const bestVariant = prod.variants.find(v => v.stock > 0) || prod.variants[0];
+        
+        // 3. CRITICAL: If no variant found at all, skip this product card to prevent crash
+        if (!bestVariant) return;
 
-    const relSale = bestVariant.salePrice || 0;
-    const relReg = bestVariant.regularPrice || 0;
+        const relSale = bestVariant.salePrice || 0;
+        const relReg = bestVariant.regularPrice || 0;
 
-    const hasDiscount = relReg > relSale && relSale > 0;
-    const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg) * 100) : 0;
-%>
+        const hasDiscount = relReg > relSale && relSale > 0;
+        const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg) * 100) : 0;
+    %>
         <a href="/productDetails?id=<%= prod._id %>" class="mini-card">
           <div class="mc-img-box">
             <% if(hasDiscount) { %>
             <div class="mc-discount-badge"><%= discount %>% OFF</div>
             <% } %>
-            <img src="<%= prod.images[0] %>" class="mc-img"
-              alt="<%= prod.productName %>">
+            <img src="<%= prod.images && prod.images[0] ? prod.images[0] : '/images/placeholder.jpg' %>" class="mc-img" alt="<%= prod.productName %>">
           </div>
           <div class="mc-details">
-           <div class="mc-brand">
-    <%= (prod.brand && prod.brand.brandName) ? prod.brand.brandName : 'SENTIQUE' %>
-</div>
+            <div class="mc-brand">
+                <%= (prod.brand && prod.brand.brandName) ? prod.brand.brandName : 'SENTIQUE' %>
+            </div>
             <div class="mc-name"><%= prod.productName %></div>
             <div class="mc-price-wrap">
               <div class="mc-price">₹<%= relSale.toFixed(2) %></div>
@@ -514,8 +513,8 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
             </div>
           </div>
         </a>
-        <% }) %>
-        <% } %>
+    <% }) %>
+<% } %>                                        
       </div>
     </div>
 
