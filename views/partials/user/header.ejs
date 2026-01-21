@@ -308,25 +308,34 @@ nav.nav-links a:hover, nav.nav-links a.active {
             <span class="notification-badge hide" id="cartBadge">0</span>
         </a>
 
-        <% if (user) { %>
-        <div class="dropdown">
-            <button class="user-icon-btn" id="userIconBtn">
-                <i class="fa fa-user-circle"></i>
-            </button>
+       <% if (locals.user) { %>
+<div class="dropdown">
+    <button class="user-icon-btn" id="userIconBtn">
+        <i class="fa fa-user-circle"></i>
+    </button>
 
-            <div class="dropdown-content" id="userDropdown">
-                <div class="user-name-box">
-                    Hello, <%= user.name %>
-                </div>
-                <a href="/profile">My Profile</a>
-                <a href="/profile/order-list">My Orders</a>
-                <a href="/logout" style="color: #ef4444 !important;">Logout</a>
-            </div>
+    <div class="dropdown-content" id="userDropdown">
+        <div class="user-name-box">
+            Hello, <%= user.name %>
         </div>
-        <% } else { %>
-        <a href="/login" style="font-size: 14px; font-weight: 600;">Login</a>
-        <a href="/signup" style="font-size: 14px; font-weight: 600;">Sign Up</a>
-        <% } %>
+        <a href="/profile">My Profile</a>
+        <a href="/profile/order-list">My Orders</a>
+        <a href="/logout" style="color: #ef4444 !important;">Logout</a>
+    </div>
+</div>
+<% } else { %>
+<a href="/login" style="font-size: 14px; font-weight: 600;">Login</a>
+<a href="/signup" style="font-size: 14px; font-weight: 600;">Sign Up</a>
+<% } %>
+
+<% if (!locals.user) { %>
+<a href="/login">Login</a>
+<a href="/signup">Sign Up</a>
+<% } else { %>
+<a href="/profile">My Profile</a>
+<a href="/profile/order-list">My Orders</a>
+<a href="/logout" style="color: #ef4444;">Logout</a>
+<% } %>
 
     </div>
 
