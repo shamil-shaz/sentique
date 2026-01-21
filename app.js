@@ -19,9 +19,10 @@ const adminRouter = require("./routes/adminRouter");
 
     app.set("trust proxy", 1);
 
-   app.use((req, res, next) => {
-  if (req.headers['x-forwarded-proto'] !== 'https') {
-    return res.redirect('https://' + req.headers.host + req.url);
+app.use((req, res, next) => {
+  
+  if (req.protocol === 'http' && req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect(301, 'https://' + req.headers.host + req.url);
   }
   next();
 });
@@ -78,7 +79,7 @@ const adminRouter = require("./routes/adminRouter");
     console.log("Session store initialized successfully");
 
     // --------------- USER SESSION ---------------
-    
+
  app.use(session({
   name: "userSession",
   secret: process.env.SESSION_SECRET,
