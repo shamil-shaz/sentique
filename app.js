@@ -19,17 +19,15 @@ const adminRouter = require("./routes/adminRouter");
 
     app.set("trust proxy", 1);
 
-app.use((req, res, next) => {
+    app.use((req, res, next) => {
+      const isHttp = req.protocol === "http";
+      const isProxyHttps = req.headers["x-forwarded-proto"] === "https";
 
-  const isHttp = req.protocol === 'http';
-  const isProxyHttps = req.headers['x-forwarded-proto'] === 'https';
-
-  if (isHttp && !isProxyHttps) {
-    return res.redirect(301, 'https://' + req.headers.host + req.url);
-  }
-  next();
-});
-    
+      if (isHttp && !isProxyHttps) {
+        return res.redirect(301, "https://" + req.headers.host + req.url);
+      }
+      next();
+    });
 
     // ------- CORS ----------
     app.use(
@@ -83,38 +81,23 @@ app.use((req, res, next) => {
 
     // --------------- USER SESSION ---------------
 
-//  app.use(session({
-//   name: "userSession",
-//   secret: process.env.SESSION_SECRET,
-//   resave: false,
-//   saveUninitialized: true,
-//   proxy: true,                
-//   store: sessionStore,
-//   cookie: {
-//     maxAge: 1000*60*60*24*7,
-//     domain: ".sentique.site",
-//     httpOnly: true,
-//     sameSite: "none",
-//     secure: true
-//   }
-// }))
-
-app.use(session({
-  name: "userSession",
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false, 
-  proxy: true,                
-  store: sessionStore,
-  cookie: {
-    maxAge: 1000*60*60*24*7,
-    domain: ".sentique.site",
-    httpOnly: true,
-    sameSite: "lax", 
-    secure: true     
-  }
-}));
-
+    app.use(
+      session({
+        name: "userSession",
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        proxy: true,
+        store: sessionStore,
+        cookie: {
+          maxAge: 1000 * 60 * 60 * 24 * 7,
+          domain: ".sentique.site",
+          httpOnly: true,
+          sameSite: "lax",
+          secure: true,
+        },
+      })
+    );
 
     // --------------- ADMIN SESSION ---------------
     app.use(
@@ -144,13 +127,6 @@ app.use(session({
     app.use(flash());
     app.use(nocache());
 
-    app.use((req, res, next) => {
-      res.locals.success_msg = req.flash("success") || [];
-      res.locals.error_msg = req.flash("error") || [];
-      res.locals.user = req.user || null;
-      next();
-    });
-
     // --------------- ROUTES ---------------
 
     app.use((req, res, next) => {
@@ -169,6 +145,14 @@ app.use(session({
           cookie: !!req.headers.cookie,
         });
       }
+      next();
+    });
+
+    app.use((req, res, next) => {
+      res.locals.success_msg = req.flash("success") || [];
+      res.locals.error_msg = req.flash("error") || [];
+      res.locals.user = req.user || req.session.user || null;
+
       next();
     });
 

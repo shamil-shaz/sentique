@@ -300,26 +300,25 @@ const verifyOtp = async (req, res) => {
         );
       }
 
-      req.session.user = {
-        _id: newUser._id,
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        phone: newUser.phone,
-      };
+    req.login(newUser, (err) => {
+        if (err) {
+          console.error("Error during req.login after signup:", err);
+          return res.status(500).json({ 
+            success: false, 
+            message: "Signup successful, but session could not be established." 
+          });
+        }
+        
+        req.session.userOtp = null;
+        req.session.userData = null;
+        req.session.otpExpirationTime = null;
 
-      req.session.userOtp = null;
-      req.session.userData = null;
-      req.session.otpExpirationTime = null;
+        console.log("User logged in via Passport after OTP verification:", newUser.email);
 
-      console.log(
-        " OTP verified successfully - User created with referral code:",
-        referralCode
-      );
-
-      return res.status(200).json({
-        success: true,
-        redirectUrl: "/",
+        return res.status(200).json({
+          success: true,
+          redirectUrl: "/",
+        });
       });
     } else {
       return res.status(400).json({
