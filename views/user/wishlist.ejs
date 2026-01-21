@@ -1313,7 +1313,7 @@ footer {
 
   document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', async function () {
-        // Ensure the button has data-id="<%= product._id %>" in the HTML
+       
         const productId = this.getAttribute('data-id'); 
         
         const card = this.closest('.wishlist-card');
