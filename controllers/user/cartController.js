@@ -5,7 +5,7 @@ const Wishlist = require("../../models/wishlistSchema");
 
 const getCartPage = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
+    const userId = req.userId;
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       populate: [
@@ -21,6 +21,7 @@ const getCartPage = async (req, res) => {
         outOfStockCount: 0,
         blockedCount: 0,
         blockedProducts: [],
+        user: req.user || req.session.user || null
       });
     }
 
@@ -128,7 +129,7 @@ const getCartPage = async (req, res) => {
 
 const addToCart = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
     const { productId, variantSize, quantity } = req.body;
 
     console.log("Add to cart request:", {
@@ -253,7 +254,7 @@ const addToCart = async (req, res) => {
 
 const removeFromCart = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
     const { productId } = req.params;
     const { variantSize } = req.query;
 
@@ -326,7 +327,7 @@ const removeFromCart = async (req, res) => {
 
 const updateCart = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+const userId = req.userId;
     const { productId, variantSize, quantity } = req.body;
 
     if (!userId) {
@@ -392,8 +393,7 @@ const updateCart = async (req, res) => {
 
 const checkoutBlockedItems = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
-
+const userId = req.userId;
     if (!userId) {
       return res
         .status(401)
@@ -463,7 +463,7 @@ const checkoutBlockedItems = async (req, res) => {
 
 const checkCartQuantity = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+const userId = req.userId;
     const { productId } = req.body;
 
     if (!userId) {
@@ -503,10 +503,10 @@ const checkCartQuantity = async (req, res) => {
 
 const getCartCount = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
 
     if (!userId) {
-      console.log("[Cart Count] No user ID found");
+      
       return res.json({ count: 0 });
     }
 
@@ -589,8 +589,7 @@ const checkProductStock = async (req, res) => {
 
 const validateCheckoutItems = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
-
+const userId = req.userId;
     if (!userId) {
       return res
         .status(401)
