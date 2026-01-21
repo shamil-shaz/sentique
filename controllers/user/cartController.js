@@ -52,9 +52,9 @@ const getCartPage = async (req, res) => {
         blockReason = `Brand "${product.brand?.brandName}" has been temporarily blocked by admin`;
       }
 
-      const variant = product.variants?.find(
-        (v) => v.size === item.variantSize
-      );
+     const variant = product.variants?.find(
+  (v) => Number(v.size) === Number(item.variantSize)
+);
       const variantStock = variant ? variant.stock : 0;
       const productStock = product.stock || 0;
       const actualStock =
@@ -297,13 +297,13 @@ const removeFromCart = async (req, res) => {
     }
 
     const initialLength = cart.items.length;
-    cart.items = cart.items.filter(
-      (item) =>
-        !(
-          item.productId.toString() === productId &&
-          item.variantSize === Number(variantSize)
-        )
-    );
+   cart.items = cart.items.filter(
+  (item) =>
+    !(
+      item.productId.toString() === productId &&
+      Number(item.variantSize) === Number(variantSize)
+    )
+);
 
     if (cart.items.length === initialLength) {
       console.log("Item not found in cart:", { productId, variantSize });
@@ -360,7 +360,8 @@ const updateCart = async (req, res) => {
     }
 
     const product = item.productId;
-    const variant = product.variants.find((v) => v.size === varSize);
+   // Force Number conversion on both sides to ensure the match works
+const variant = product.variants.find((v) => Number(v.size) === Number(varSize));
     const stock = variant?.stock ?? product.stock;
 
     if (stock < quantity) {
