@@ -1312,24 +1312,31 @@ footer {
         });
 
   document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-    btn.addEventListener('click', async function () {
-       
-        const productId = this.getAttribute('data-id'); 
+    btn.addEventListener('click', async function (event) {
+        // 1. Use currentTarget to ensure we get the button even if they click the <i> icon
+        const button = event.currentTarget; 
         
-        const card = this.closest('.wishlist-card');
+        // 2. Extract Data
+        const productId = button.getAttribute('data-id'); 
+        const card = button.closest('.wishlist-card');
         const select = card.querySelector('.variant-select');
         
-        const currentVariantSize = select ? select.value : this.getAttribute('data-variant-id');
+        // 3. Get the live variant size from the dropdown
+        const currentVariantSize = select ? select.value : button.getAttribute('data-variant-id');
 
-        console.log("DEBUG FRONTEND:", productId, currentVariantSize); // Add this to check your console
+        // Debugging
+        console.log("Adding Product:", productId, "with Size:", currentVariantSize);
 
         if (!productId || productId === 'undefined') {
-            Toast.fire({ icon: 'error', title: 'Product ID missing' });
+            Toast.fire({ icon: 'error', title: 'Product information is missing' });
             return;
         }
 
-        const actualButton = this.closest('.add-to-cart-btn') || this;
-await addToCartWithToastOnly(productId, currentVariantSize, actualButton);
+        // 4. Check if the button is already processing
+        if (button.disabled) return;
+
+        // 5. Call the function and pass the SPECIFIC button for the loading state
+        await addToCartWithToastOnly(productId, currentVariantSize, button);
     });
 });
     }
@@ -1359,37 +1366,38 @@ await addToCartWithToastOnly(productId, currentVariantSize, actualButton);
         }
     }
 
-    async function addToCartWithToastOnly(productId, variantSize, button) {
-        const original = button.innerHTML;
-        button.disabled = true;
-        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding...';
+   async function addToCartWithToastOnly(productId, variantSize, button) {
+    const originalContent = button.innerHTML;
+    button.disabled = true; // Prevent double clicks
+    button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding...';
 
-        try {
-            const res = await fetch('/cart/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId, variantSize: variantSize || undefined, quantity: 1 })
-            });
-            const data = await res.json();
+    try {
+        const res = await fetch('/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                productId, 
+                variantSize: Number(variantSize), // Double check type safety here
+                quantity: 1 
+            })
+        });
+        const data = await res.json();
 
-            if (data.success) {
-                Toast.fire({ icon: 'success', title: 'Added to cart!' });
-                removeCardAndUpdateUI(productId);
-                updateMoveAllButton();
-            } else {
-                Toast.fire({ icon: 'error', title: data.message || 'Failed to add' });
-            }
-        } catch (err) {
-            Toast.fire({ icon: 'error', title: 'Something went wrong' });
-        } finally {
-            try {
-                if (button && document.body.contains(button)) {
-                    button.disabled = false;
-                    button.innerHTML = original;
-                }
-            } catch (e) { }
+        if (data.success) {
+            Toast.fire({ icon: 'success', title: 'Added to cart!' });
+            removeCardAndUpdateUI(productId); // Remove from wishlist since it's now in cart
+        } else {
+            Toast.fire({ icon: 'error', title: data.message || 'Failed to add' });
+            button.disabled = false;
+            button.innerHTML = originalContent;
         }
+    } catch (err) {
+        Toast.fire({ icon: 'error', title: 'Connection error' });
+        button.disabled = false;
+        button.innerHTML = originalContent;
     }
+}
+    
 
     function removeCardAndUpdateUI(productId) {
         const card = document.querySelector(`.wishlist-card[data-product-id="${productId}"]`);
