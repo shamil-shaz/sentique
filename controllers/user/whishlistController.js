@@ -30,19 +30,26 @@ const userId = req.userId;
       .exec();
     const wishlistItems = wishlist ? wishlist.products : [];
 
-    const validItems = wishlistItems.filter((item) => {
+    const validItems = wishlistItems.map((item) => {
       const p = item.productId;
-      if (!p) return false;
-      const outOfStock = p.variants && p.variants.every((v) => v.stock <= 0);
-      const unavailable =
-        p.isBlocked ||
-        p.status !== "Available" ||
-        (p.category && p.category.isListed === false) ||
-        (p.brand && p.brand.isBlocked === true) ||
-        outOfStock;
+      if (!p) return null; // Remove only if product was deleted from DB
 
-      return true;
-    });
+      const outOfStock = p.variants && p.variants.every((v) => v.stock <= 0);
+      
+      // Determine if the user can actually click "Add to Cart" right now
+      const isCurrentlyBuyable = 
+        !p.isBlocked && 
+        p.status === "Available" && 
+        p.category?.isListed !== false && 
+        p.brand?.isBlocked !== true &&
+        !outOfStock;
+
+      // Convert to object and add our custom flag
+      return {
+        ...item.toObject(),
+        isCurrentlyBuyable
+      };
+    }).filter(item => item !== null);
 
     const totalItems = validItems.length;
 
@@ -193,44 +200,92 @@ const moveAllToCart = async (req, res) => {
 
     let skippedItems = 0;
 
-    for (let wishlistItem of wishlist.products) {
+    // for (let wishlistItem of wishlist.products) {
+    //   const product = wishlistItem.productId;
+    //   if (!product) continue;
+
+    //   if (
+    //     product.isBlocked ||
+    //     product.status !== "Available" ||
+    //     !product.variants ||
+    //     product.variants.length === 0 ||
+    //     product.variants.every((v) => v.stock <= 0)
+    //   ) {
+    //     skippedItems++;
+    //     continue;
+    //   }
+
+    //   let selectedVariant = null;
+    //   const productIdStr = String(product._id);
+
+    //   if (variantsMap[productIdStr]) {
+    //     const uiSize = variantsMap[productIdStr];
+    //     selectedVariant = product.variants.find(
+    //       (v) => String(v.size) === String(uiSize)
+    //     );
+    //   }
+
+    //   if (!selectedVariant && wishlistItem.variantSize) {
+    //     selectedVariant = product.variants.find(
+    //       (v) => String(v.size) === String(wishlistItem.variantSize)
+    //     );
+    //   }
+
+    //   if (!selectedVariant) {
+    //     selectedVariant = product.variants.reduce((min, v) => {
+    //       const price = v.salePrice || v.regularPrice;
+    //       return !min || price < (min.salePrice || min.regularPrice) ? v : min;
+    //     }, null);
+    //   }
+
+    //   if (!selectedVariant || selectedVariant.stock <= 0) {
+    //     skippedItems++;
+    //     continue;
+    //   }
+
+    //   const varSize = selectedVariant.size;
+    //   const price = selectedVariant.salePrice || selectedVariant.regularPrice;
+
+    //   const existingItem = cart.items.find(
+    //     (item) =>
+    //       item.productId.toString() === product._id.toString() &&
+    //       item.variantSize === varSize
+    //   );
+
+    //   if (existingItem) {
+    //     existingItem.quantity += 1;
+    //     existingItem.price = price;
+    //   } else {
+    //     cart.items.push({
+    //       productId: product._id,
+    //       variantSize: varSize,
+    //       quantity: 1,
+    //       price,
+    //     });
+    //   }
+    // }
+
+
+   for (let wishlistItem of wishlist.products) {
       const product = wishlistItem.productId;
       if (!product) continue;
 
-      if (
-        product.isBlocked ||
-        product.status !== "Available" ||
-        !product.variants ||
-        product.variants.length === 0 ||
-        product.variants.every((v) => v.stock <= 0)
-      ) {
+      // 1. Check if the product itself is blocked/unavailable
+      if (product.isBlocked || product.status !== "Available" || (product.category && product.category.isListed === false)) {
         skippedItems++;
         continue;
       }
 
-      let selectedVariant = null;
       const productIdStr = String(product._id);
+      // 2. Identify specifically what size the user is trying to add
+      const requestedSize = variantsMap[productIdStr] || wishlistItem.variantSize;
 
-      if (variantsMap[productIdStr]) {
-        const uiSize = variantsMap[productIdStr];
-        selectedVariant = product.variants.find(
-          (v) => String(v.size) === String(uiSize)
-        );
-      }
+      // 3. Find that specific variant
+      let selectedVariant = product.variants.find(
+        (v) => String(v.size) === String(requestedSize)
+      );
 
-      if (!selectedVariant && wishlistItem.variantSize) {
-        selectedVariant = product.variants.find(
-          (v) => String(v.size) === String(wishlistItem.variantSize)
-        );
-      }
-
-      if (!selectedVariant) {
-        selectedVariant = product.variants.reduce((min, v) => {
-          const price = v.salePrice || v.regularPrice;
-          return !min || price < (min.salePrice || min.regularPrice) ? v : min;
-        }, null);
-      }
-
+      // 4. STRICT CHECK: Only move if THIS SPECIFIC variant has stock
       if (!selectedVariant || selectedVariant.stock <= 0) {
         skippedItems++;
         continue;
@@ -239,6 +294,7 @@ const moveAllToCart = async (req, res) => {
       const varSize = selectedVariant.size;
       const price = selectedVariant.salePrice || selectedVariant.regularPrice;
 
+      // 5. Add to Cart...
       const existingItem = cart.items.find(
         (item) =>
           item.productId.toString() === product._id.toString() &&
@@ -260,23 +316,18 @@ const moveAllToCart = async (req, res) => {
 
     await cart.save();
 
-    const movedIds = wishlist.products
+   const movedIds = wishlist.products
       .filter((item) => {
         const p = item.productId;
-        if (!p) return false;
+        if (!p || p.isBlocked || p.status !== "Available") return false;
 
-        const outOfStock = p.variants && p.variants.every((v) => v.stock <= 0);
-        const unavailable =
-          p.isBlocked ||
-          p.status !== "Available" ||
-          (p.category && p.category.isListed === false) ||
-          (p.brand && p.brand.isBlocked === true) ||
-          outOfStock;
-
-        return !unavailable;
+        // ONLY remove from wishlist if the variant the user chose was actually buyable
+        const requestedSize = variantsMap[String(p._id)] || item.variantSize;
+        const selectedVariant = p.variants.find(v => String(v.size) === String(requestedSize));
+        
+        return selectedVariant && selectedVariant.stock > 0;
       })
       .map((item) => item.productId._id);
-
     await Wishlist.updateOne(
       { userId },
       { $pull: { products: { productId: { $in: movedIds } } } }

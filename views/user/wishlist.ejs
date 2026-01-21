@@ -1258,45 +1258,37 @@ footer {
 
     function attachEventListeners() {
         document.querySelectorAll('.variant-select').forEach(select => {
-            select.addEventListener('change', function () {
-                const card = this.closest('.wishlist-card');
-                const button = card.querySelector('.add-to-cart-btn');
-                const variants = JSON.parse(this.dataset.variants || '[]');
-                const selected = variants.find(v => String(v.size) === String(this.value));
+           select.addEventListener('change', function () {
+    const card = this.closest('.wishlist-card');
+    const button = card.querySelector('.add-to-cart-btn');
+    const variants = JSON.parse(this.dataset.variants || '[]');
+    const selected = variants.find(v => String(v.size) === String(this.value));
 
-                card.querySelector('.image-overlay')?.remove();
-                card.querySelector('.image-stock-warning')?.remove();
-                card.querySelector('.stock-warning')?.remove();
+    // Clear previous warnings
+    card.querySelector('.image-overlay')?.remove();
+    card.querySelector('.image-stock-warning')?.remove();
 
-                if (!selected || selected.stock <= 0) {
-                    button.disabled = true;
-                    button.classList.add('disabled');
-                    button.innerHTML = '<i class="fa fa-ban"></i> Variant Out of Stock';
+    if (!selected || selected.stock <= 0) {
+        button.disabled = true;
+        button.classList.add('disabled');
+        button.innerHTML = '<i class="fa fa-ban"></i> Variant Out of Stock';
+        
+        // Add the visual "Out of Stock" overlay
+        card.querySelector('.image-wrap').insertAdjacentHTML(
+            'beforeend',
+            `<div class="image-overlay"></div><div class="image-stock-warning">VARIANT OUT OF STOCK</div>`
+        );
+    } else {
+        // ENABLE logic: If the user picks a good size, this specific button works!
+        button.disabled = false;
+        button.classList.remove('disabled');
+        button.innerHTML = '<i class="fa fa-shopping-cart"></i> Add to Cart';
+        button.setAttribute('data-variant-id', this.value);
+    }
 
-                    card.querySelector('.image-wrap').insertAdjacentHTML(
-                        'beforeend',
-                        `<div class="image-overlay"></div>
-                         <div class="image-stock-warning">VARIANT OUT OF STOCK</div>`
-                    );
-                } else {
-                    button.disabled = false;
-                    button.classList.remove('disabled');
-                    button.innerHTML = '<i class="fa fa-shopping-cart"></i> Add to Cart';
-                    button.setAttribute('data-variant-id', this.value);
-                }
-
-                if (variants.every(v => v.stock <= 0)) {
-                    card.querySelector('.image-wrap').insertAdjacentHTML(
-                        'beforeend',
-                        `<div class="image-overlay"></div>
-                         <div class="image-stock-warning">OUT OF STOCK</div>`
-                    );
-                    button.disabled = true;
-                    button.classList.add('disabled');
-                }
-
-                updateMoveAllButton();
-            });
+   
+    updateMoveAllButton(); 
+});
         });
 
         document.querySelectorAll('.remove-wishlist-btn').forEach(btn => {
@@ -1322,10 +1314,10 @@ footer {
         document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const productId = this.dataset.id;
-                const variantSize = this.dataset.variantId || this.getAttribute('data-variant-id') || '';
-
-                const card = this.closest('.wishlist-card');
-                const select = card ? card.querySelector('.variant-select') : null;
+          
+const card = this.closest('.wishlist-card');
+const select = card.querySelector('.variant-select');
+const variantSize = select ? select.value : (this.dataset.variantId || '');
                 if (select && !variantSize) {
                     Toast.fire({ icon: 'warning', title: 'Please select a size' });
                     return;
@@ -1483,25 +1475,25 @@ footer {
     }
 
     function updateMoveAllButton() {
-        const cards = document.querySelectorAll('.wishlist-card');
-        let disable = false;
+    const cards = document.querySelectorAll('.wishlist-card');
+    const moveBtn = document.querySelector('.move-all-btn');
+    if (!moveBtn) return;
 
-        cards.forEach(card => {
-            const btn = card.querySelector('.add-to-cart-btn');
+    let shouldDisableMoveAll = false;
 
-            if (!btn) {
-                disable = true;
-                return;
-            }
+    cards.forEach(card => {
+        const btn = card.querySelector('.add-to-cart-btn');
+        const select = card.querySelector('.variant-select');
+        
+        // If the current button is disabled (because of selected size or blocking)
+        // then we must disable the "Move All" button
+        if (!btn || btn.disabled || btn.classList.contains('disabled')) {
+            shouldDisableMoveAll = true;
+        }
+    });
 
-            if (btn.disabled || btn.getAttribute('data-unavailable') === '1' || btn.getAttribute('data-unavailable') === 'true') {
-                disable = true;
-            }
-        });
-
-        const moveBtn = document.querySelector('.move-all-btn');
-        if (moveBtn) moveBtn.disabled = disable;
-    }
+    moveBtn.disabled = shouldDisableMoveAll;
+}
 
         </script>
 
