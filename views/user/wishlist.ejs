@@ -1311,21 +1311,26 @@ footer {
             });
         });
 
-        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-            btn.addEventListener('click', async function () {
-                const productId = this.dataset.id;
-          
-const card = this.closest('.wishlist-card');
-const select = card.querySelector('.variant-select');
-const variantSize = select ? select.value : (this.dataset.variantId || '');
-                if (select && !variantSize) {
-                    Toast.fire({ icon: 'warning', title: 'Please select a size' });
-                    return;
-                }
+       document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.addEventListener('click', async function () {
+        const productId = this.dataset.id;
+        
+        // Find the specific card this button belongs to
+        const card = this.closest('.wishlist-card');
+        const select = card.querySelector('.variant-select');
+        
+        // Grab the CURRENT value from the dropdown, not the old button attribute
+        const currentVariantSize = select ? select.value : '';
 
-                await addToCartWithToastOnly(productId, variantSize || null, this);
-            });
-        });
+        if (!currentVariantSize) {
+            Toast.fire({ icon: 'warning', title: 'Please select a size' });
+            return;
+        }
+
+        // Send currentVariantSize to the backend
+        await addToCartWithToastOnly(productId, currentVariantSize, this);
+    });
+});
     }
 
     async function removeFromWishlistWithSuccessPopup(productId) {

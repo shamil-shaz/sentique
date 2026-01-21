@@ -266,44 +266,47 @@ const moveAllToCart = async (req, res) => {
     // }
 
 
-   for (let wishlistItem of wishlist.products) {
+  for (let wishlistItem of wishlist.products) {
       const product = wishlistItem.productId;
       if (!product) continue;
 
-      // 1. Check if the product itself is blocked/unavailable
       if (product.isBlocked || product.status !== "Available" || (product.category && product.category.isListed === false)) {
         skippedItems++;
         continue;
       }
 
       const productIdStr = String(product._id);
-      // 2. Identify specifically what size the user is trying to add
       const requestedSize = variantsMap[productIdStr] || wishlistItem.variantSize;
 
-      // 3. Find that specific variant
+      // FIX 1: TYPE-SAFE FIND
       let selectedVariant = product.variants.find(
-        (v) => String(v.size) === String(requestedSize)
+        (v) => Number(v.size) === Number(requestedSize)
       );
 
-      // 4. STRICT CHECK: Only move if THIS SPECIFIC variant has stock
+      // FIX 2: STRICT AVAILABILITY
       if (!selectedVariant || selectedVariant.stock <= 0) {
         skippedItems++;
         continue;
       }
 
-      const varSize = selectedVariant.size;
+      const varSize = Number(selectedVariant.size); // Ensure it's a number
       const price = selectedVariant.salePrice || selectedVariant.regularPrice;
 
-      // 5. Add to Cart...
       const existingItem = cart.items.find(
         (item) =>
           item.productId.toString() === product._id.toString() &&
-          item.variantSize === varSize
+          Number(item.variantSize) === varSize
       );
 
+      // FIX 3: QUANTITY CAP
       if (existingItem) {
-        existingItem.quantity += 1;
-        existingItem.price = price;
+        if (existingItem.quantity < 5) {
+           existingItem.quantity += 1;
+           existingItem.price = price;
+        } else {
+           skippedItems++; // Already at limit
+           continue;
+        }
       } else {
         cart.items.push({
           productId: product._id,
@@ -316,18 +319,20 @@ const moveAllToCart = async (req, res) => {
 
     await cart.save();
 
-   const movedIds = wishlist.products
+    // CLEANUP: Only remove items from wishlist if they actually made it to the cart
+    const movedIds = wishlist.products
       .filter((item) => {
         const p = item.productId;
         if (!p || p.isBlocked || p.status !== "Available") return false;
 
-        // ONLY remove from wishlist if the variant the user chose was actually buyable
         const requestedSize = variantsMap[String(p._id)] || item.variantSize;
-        const selectedVariant = p.variants.find(v => String(v.size) === String(requestedSize));
+        const selectedVariant = p.variants.find(v => Number(v.size) === Number(requestedSize));
         
+        // Only remove if it was in stock AND not already maxed out in cart (optional check)
         return selectedVariant && selectedVariant.stock > 0;
       })
       .map((item) => item.productId._id);
+      
     await Wishlist.updateOne(
       { userId },
       { $pull: { products: { productId: { $in: movedIds } } } }

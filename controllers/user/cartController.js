@@ -120,7 +120,10 @@ const getCartPage = async (req, res) => {
       blockedProducts,
     };
 
-    res.render("cart", responseData);
+    res.render("cart", {
+      ...responseData,
+      user: req.user || req.session.user || null 
+    });
   } catch (err) {
     console.error("Cart page error:", err);
     res.redirect("/pageNotFound");
@@ -170,9 +173,9 @@ const addToCart = async (req, res) => {
         .json({ success: false, message: "Product not found" });
     }
 
-    const variant = product.variants.find(
-      (v) => v.size === Number(variantSize)
-    );
+   const variant = product.variants.find(
+    (v) => Number(v.size) === Number(variantSize)
+);
     if (!variant) {
       return res
         .status(404)
@@ -513,7 +516,7 @@ const getCartCount = async (req, res) => {
 
     const count = cart?.items?.filter((i) => i.productId != null).length || 0;
 
-    return res.json({ count, success: true });
+    res.status(200).json({ success: true, count });
   } catch (err) {
     console.error("[Cart Count ERROR]:", err.message);
     return res.json({ count: 0, error: err.message });
