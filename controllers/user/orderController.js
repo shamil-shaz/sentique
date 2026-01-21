@@ -9,9 +9,13 @@ const Coupon = require("../../models/couponSchema");
 
 const getOrderSuccess = async (req, res) => {
   try {
-    const user = req.session.user;
+
+
+    const user = req.user || req.session.user;
+      const userId = req.userId;
+
     console.log("Session user in getOrderSuccess:", user);
-    const userId = user?._id || user?.id;
+  
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       console.log("Redirecting to /login due to invalid user or userId");
       return res.redirect("/login");
@@ -45,6 +49,7 @@ const getOrderSuccess = async (req, res) => {
         items: [],
         deliveryAddress: "N/A",
         success: req.flash("success"),
+        user: req.user || req.session.user || null
       });
     }
     const orderDate = new Date(latestOrder.createdOn);
@@ -110,6 +115,7 @@ const getOrderSuccess = async (req, res) => {
       paymentStatus: latestOrder.paymentStatus,
       status: latestOrder.status,
       success: req.flash("success"),
+      user: req.user || req.session.user || null
     });
   } catch (error) {
     console.error(
@@ -123,8 +129,8 @@ const getOrderSuccess = async (req, res) => {
 
 const cancelAllOrder = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+   const userId = req.userId; 
+const user = req.user || req.session.user;
     const { orderId } = req.params;
     const { reason, details } = req.body;
 
@@ -240,8 +246,8 @@ const cancelAllOrder = async (req, res) => {
 
 const getOrderDetails = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+    const userId = req.userId; 
+    const user = req.user || req.session.user;
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.redirect("/login");
     }
@@ -546,10 +552,11 @@ const getOrderDetails = async (req, res) => {
         isReturnEligible && latestOrder.paymentStatus === "Completed",
       isShippedOrOut,
       hasAnyRejectedReturn,
-      activeStatuses: itemStatuses.filter(
+     activeStatuses: itemStatuses.filter(
         (s) => s !== "Cancelled" && s !== "Returned" && s !== "Return Request"
       ),
       success: req.flash("success"),
+      user: req.user || req.session.user || null 
     });
   } catch (error) {
     console.error("Error fetching order details:", error);
@@ -559,8 +566,8 @@ const getOrderDetails = async (req, res) => {
 
 const returnAllOrder = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+    const userId = req.userId; 
+    const user = req.user || req.session.user;
     const { orderId } = req.params;
     const { reason, details } = req.body;
     console.log("Return entire order request:", { orderId, reason, details });
@@ -644,8 +651,8 @@ const returnAllOrder = async (req, res) => {
 
 const cancelReturnSingleOrder = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+    const userId = req.userId; 
+    const user = req.user || req.session.user;
     const { orderId, itemIndex, variantSize } = req.params;
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, error: "Unauthorized" });
@@ -701,8 +708,8 @@ const cancelReturnSingleOrder = async (req, res) => {
 
 const cancelReturnAllOrder = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+   const userId = req.userId; 
+    const user = req.user || req.session.user;
     const { orderId } = req.params;
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, error: "Unauthorized" });
@@ -1025,11 +1032,12 @@ const distributeDiscountProportionally = (items, totalDiscount) => {
 
 const checkCancellationImpact = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
-    const { orderId, itemIndex, variantSize } = req.params;
+   const userId = req.userId; 
+    const user = req.user || req.session.user;
+   const { orderId, itemIndex, variantSize } = req.params;
 
-    if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+   
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, error: "Unauthorized" });
     }
 
@@ -1145,8 +1153,8 @@ const checkCancellationImpact = async (req, res) => {
 
 const cancelSingleOrderWithCouponCheck = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+    const userId = req.userId; 
+    const user = req.user || req.session.user;
     const { orderId, itemIndex, variantSize } = req.params;
     const { reason, details } = req.body;
 
@@ -1377,8 +1385,8 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
 
 const returnSingleOrder = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+    const userId = req.userId; 
+    const user = req.user || req.session.user;
     const { orderId, itemIndex, variantSize } = req.params;
     const { reason, details } = req.body;
 

@@ -32,12 +32,12 @@ function getUserId(req) {
     userId = null;
   }
 
-  return userId;
+  return req.userId;
 }
 
 const getReferralStats = async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const userId = req.userId;
 
     if (!userId) {
       return res.status(401).json({
@@ -119,7 +119,7 @@ const getReferralStats = async (req, res) => {
 
 const getReferralDetails = async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const userId = req.userId;
 
     if (!userId) {
       return res.status(401).json({
@@ -231,7 +231,7 @@ const getReferralDetails = async (req, res) => {
 
 const getReferredUsers = async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const userId = req.userId;
 
     if (!userId) {
       return res.status(401).json({
@@ -328,7 +328,7 @@ const getReferralLeaderboard = async (req, res) => {
 
 const applyReferralCode = async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const userId = req.userId;
     const { referralCode } = req.body;
 
     if (!userId || !referralCode) {

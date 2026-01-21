@@ -8,13 +8,13 @@ const SHIPPING_CHARGE = 49;
 
 const generateInvoice = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+    const userId = req.userId;
+    const user = req.user || req.session.user;
     const { orderId } = req.params;
 
-    if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(401).json({ success: false, error: "Unauthorized" });
-    }
+   if (!userId) {
+  return res.status(401).json({ success: false, error: "Unauthorized" });
+}
 
     const order = await Order.findOne({ orderId, user: userId })
       .populate("orderItems.product")

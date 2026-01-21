@@ -21,7 +21,7 @@ const getCartPage = async (req, res) => {
         outOfStockCount: 0,
         blockedCount: 0,
         blockedProducts: [],
-        user: req.user || req.session.user || null
+        user: req.user || req.session.user || null,
       });
     }
 
@@ -327,7 +327,7 @@ const removeFromCart = async (req, res) => {
 
 const updateCart = async (req, res) => {
   try {
-const userId = req.userId;
+    const userId = req.userId;
     const { productId, variantSize, quantity } = req.body;
 
     if (!userId) {
@@ -393,7 +393,7 @@ const userId = req.userId;
 
 const checkoutBlockedItems = async (req, res) => {
   try {
-const userId = req.userId;
+    const userId = req.userId;
     if (!userId) {
       return res
         .status(401)
@@ -463,7 +463,7 @@ const userId = req.userId;
 
 const checkCartQuantity = async (req, res) => {
   try {
-const userId = req.userId;
+    const userId = req.userId;
     const { productId } = req.body;
 
     if (!userId) {
@@ -506,7 +506,6 @@ const getCartCount = async (req, res) => {
     const userId = req.userId;
 
     if (!userId) {
-      
       return res.json({ count: 0 });
     }
 
@@ -589,7 +588,7 @@ const checkProductStock = async (req, res) => {
 
 const validateCheckoutItems = async (req, res) => {
   try {
-const userId = req.userId;
+    const userId = req.userId;
     if (!userId) {
       return res
         .status(401)

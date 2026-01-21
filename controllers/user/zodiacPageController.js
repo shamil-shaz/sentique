@@ -31,7 +31,13 @@ const loadZodiacPage = async (req, res) => {
 
     products = await attachRatingAndBuyers(products);
 
-    res.render("zodiac", { products, categories, search: "", isZodiac: true });
+    res.render("zodiac", { 
+    products, 
+    categories, 
+    search: "", 
+    isZodiac: true,
+    user: req.user || req.session.user || null 
+});
   } catch (error) {
     console.error("Zodiac page error:", error);
     res.status(500).send("Server error");

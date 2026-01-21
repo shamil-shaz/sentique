@@ -12,8 +12,8 @@ const Review = require("../../models/reviewSchema");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "shamilmuhammed689@gmail.com",
-    pass: "pkmqvoomanpruiav",
+    user: process.env.NODEMAILER_EMAIL, 
+    pass: process.env.NODEMAILER_PASSWORD,
   },
 });
 
@@ -27,7 +27,7 @@ const pageNotFound = async (req, res) => {
 
 const loadSignup = async (req, res) => {
   try {
-    if (!req.user && !req.session?.user)
+    if (!req.userId)
 {
       return res.render("signup", { message: "" });
     } else {
@@ -308,6 +308,12 @@ const verifyOtp = async (req, res) => {
             message: "Signup successful, but session could not be established." 
           });
         }
+        req.session.user = {
+          id: newUser._id,
+          _id: newUser._id,
+          name: newUser.name,
+          email: newUser.email
+        };
         
         req.session.userOtp = null;
         req.session.userData = null;
@@ -439,7 +445,7 @@ const resendOtp = async (req, res) => {
 
 const loadLogin = async (req, res) => {
   try {
-    if (!req.user && !req.session?.user)
+    if (!req.userId)
 {
       return res.render("login", { message: "" });
     } else {
@@ -497,6 +503,13 @@ const login = async (req, res) => {
     console.error("Passport login error:", err);
     return res.status(500).json({ success: false, message: "Login failed" });
   }
+  req.session.user = {
+    id: findUser._id,
+    _id: findUser._id,
+    name: findUser.name,
+    email: findUser.email,
+    image: findUser.image
+  };
 
   findUser.lastLogin = new Date();
   await findUser.save();
@@ -524,7 +537,7 @@ const logout = async (req, res) => {
     try {
         req.logout((err) => {
             req.session.destroy((err) => {
-                res.clearCookie('userSession', { domain: '.sentique.site' });
+               res.clearCookie('userSession');
                 res.redirect("/login");
             });
         });

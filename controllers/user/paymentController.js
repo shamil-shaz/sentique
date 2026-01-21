@@ -18,7 +18,7 @@ const placeOrder = async (req, res) => {
   try {
     console.log(" placeOrder - Validating checkout data");
 
-    const userId = req.session.user.id;
+   const userId = req.userId;
     const { addressId, couponCode, paymentMethod, notes } = req.body;
 
     console.log(" User ID:", userId);
@@ -562,7 +562,7 @@ const handlePaymentFailure = async (req, res) => {
   try {
     console.log(" handlePaymentFailure");
 
-    const userId = req.session.user.id;
+   const userId = req.userId;
     const { razorpay_order_id, error_description, error_code } = req.body;
     const checkoutData = req.session.checkoutData;
 
@@ -719,11 +719,11 @@ const handlePaymentFailure = async (req, res) => {
 
 const checkAuth = async (req, res) => {
   try {
-    const isAuthenticated = !!(req.session && req.session.user);
+    const isAuthenticated = !!(req.userId);
     return res.status(200).json({
       success: true,
       isAuthenticated,
-      user: isAuthenticated ? req.session.user : null,
+      user: isAuthenticated ? (req.user || req.session.user) : null,
     });
   } catch (error) {
     return res.status(500).json({
@@ -737,7 +737,7 @@ const retryPaymentForFailedOrder = async (req, res) => {
   try {
     console.log(" retryPaymentForFailedOrder - Starting retry");
 
-    const userId = req.session.user.id;
+    const userId = req.userId;
     const { orderId } = req.body;
 
     let failedOrder = null;
@@ -814,7 +814,7 @@ const retryPaymentForFailedOrder = async (req, res) => {
 
 const getOrderList = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
     if (!userId) return res.redirect("/login");
 
     const page = parseInt(req.query.page) || 1;
@@ -890,8 +890,8 @@ const getOrderList = async (req, res) => {
 
     res.render("orderList", {
       orders,
-      user: req.session.user,
-      customerName: req.session.user?.name || "Customer",
+      user: req.user || req.session.user || null,
+      customerName: (req.user?.name || req.session.user?.name) || "Customer",
       currentPage: page,
       totalPages,
       itemStats: {},
@@ -965,7 +965,7 @@ const getOrderFailure = async (req, res) => {
 const getPaymentFailureDetails = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
 
     console.log("🔍 getPaymentFailureDetails");
     console.log("   orderId param:", orderId);
@@ -1063,7 +1063,7 @@ const getPaymentFailureDetails = async (req, res) => {
 
 const createRazorpayOrder = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
     let { amount, currency = "INR", orderId: retryOrderId } = req.body || {};
 
     console.log(" createRazorpayOrder - entered", {
@@ -1166,7 +1166,7 @@ const verifyRazorpayPayment = async (req, res) => {
       razorpay_signature,
       orderId,
     } = req.body;
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
 
     console.log(" verifyRazorpayPayment");
     console.log("   Razorpay Order:", razorpay_order_id);
@@ -1368,7 +1368,7 @@ const verifyRazorpayPayment = async (req, res) => {
     }
 
     const newOrder = new Order({
-      user: req.session.user.id,
+      user: req.userId,
       orderItems: orderItemsWithDiscount,
       totalPrice: checkoutData.totalAmount,
       discount: checkoutData.discountAmount,
@@ -1447,7 +1447,7 @@ const verifyRazorpayPayment = async (req, res) => {
         await Coupon.findByIdAndUpdate(checkoutData.appliedCouponId, {
           $push: {
             appliedUsers: {
-              userId: req.session.user.id,
+              userId: req.userId,
               orderId: savedOrder._id,
               appliedDate: new Date(),
             },
@@ -1458,7 +1458,7 @@ const verifyRazorpayPayment = async (req, res) => {
       }
     }
 
-    await Cart.findOneAndUpdate({ userId: req.session.user.id }, { items: [] });
+    await Cart.findOneAndUpdate({ userId: req.userId }, { items: [] });
     delete req.session.checkoutData;
     await new Promise((r) => req.session.save(r));
 

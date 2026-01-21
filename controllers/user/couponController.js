@@ -38,7 +38,7 @@ const getAvailableCouponsJSON = async (req, res) => {
 
     const totalPages = Math.ceil(totalCoupons / limit);
 
-    const userId = req.session.user?._id || req.session.user?.id;  
+   const userId = req.userId; 
 
     const coupons = await Coupon.find({
       isListed: true,
@@ -120,8 +120,8 @@ const getAvailableCouponsHTML = async (req, res) => {
     
     const totalPages = Math.ceil(totalCoupons / limit);
     
-    const userId = req.session.user?._id || req.session.user?.id;
-    
+const userId = req.userId;
+
     const coupons = await Coupon.find({
       isListed: true,
       expireDate: { $gte: today }
@@ -191,13 +191,14 @@ const getAvailableCouponsHTML = async (req, res) => {
       user = req.session.user || null;
     }
 
+
     res.render('coupons', {
       coupons: formattedCoupons,
       currentPage: page,
       totalPages: totalPages,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1,
-      user: user,  
+      hasPrevPage: page > 1, 
+      user: req.user || req.session.user || null,
       couponsJSON: JSON.stringify(formattedCoupons)
     });
     
@@ -221,7 +222,7 @@ const getCouponDetails = async (req, res) => {
       });
     }
 
-    const userId = req.session.user?._id || req.session.user?.id;  
+   const userId = req.userId;
 
     const coupon = await Coupon.findById(couponId)
       .populate('appliedUsers.userId', 'email name')
@@ -293,7 +294,7 @@ const applyCouponAtCheckout = async (req, res) => {
     console.log('Request body:', req.body);
     
     const { couponCode, cartTotal, cartItems } = req.body;
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
 
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Please login first' });
@@ -464,7 +465,7 @@ const applyCouponAtCheckout = async (req, res) => {
 const recordCouponUsage = async (req, res) => {
   try {
     const { couponId, orderId } = req.body;
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
 
     console.log(' RECORD COUPON USAGE ');
     console.log('Coupon ID:', couponId);
@@ -532,7 +533,7 @@ const searchCoupons = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const userId = req.session.user?._id || req.session.user?.id;  
+    const userId = req.userId;
 
     const coupons = await Coupon.find({
       isListed: true,
@@ -605,7 +606,7 @@ const validateCouponCode = async (req, res) => {
       });
     }
 
-    const userId = req.session.user?._id || req.session.user?.id;  
+   const userId = req.userId;
 
     const coupon = await Coupon.findOne({
       couponCode: code.toUpperCase(),

@@ -11,7 +11,7 @@ const getCheckoutPage = async (req, res) => {
     console.log("Session:", !!req.session);
     console.log("User:", !!req.session?.user);
 
-    const userId = req.session?.user?._id || req.session?.user?.id;
+    const userId = req.userId;
     console.log("User ID:", userId);
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -308,7 +308,7 @@ const validateAddressInput = (data) => {
 
 const getAddressForEdit = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
     const addressId = req.params.id;
     if (
       !mongoose.Types.ObjectId.isValid(userId) ||
@@ -355,7 +355,7 @@ const getAddressForEdit = async (req, res) => {
 
 const deleteAddress = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
     const addressId = req.params.id;
     if (
       !mongoose.Types.ObjectId.isValid(userId) ||
@@ -384,7 +384,7 @@ const deleteAddress = async (req, res) => {
 
 const addAddress = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+    const userId = req.userId;
     const {
       addressType,
       name,
@@ -465,7 +465,7 @@ const addAddress = async (req, res) => {
 
 const editAddress = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+   const userId = req.userId;
     const addressId = req.params.id;
     const {
       addressType,

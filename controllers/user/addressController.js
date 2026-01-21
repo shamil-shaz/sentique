@@ -3,7 +3,7 @@ const User = require("../../models/userSchema");
 
 const getAddresses = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
+    const userId = req.userId;
     if (!userId) {
       req.flash("error", "Please log in");
       return res.redirect("/login");
@@ -30,7 +30,7 @@ const getAddresses = async (req, res) => {
 
 const getAddressesJSON = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
+    const userId = req.userId;
     if (!userId) {
       return res.status(401).json({ success: false, message: "Please log in" });
     }
@@ -49,7 +49,7 @@ const getAddressesJSON = async (req, res) => {
 
 const getEditAddress = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
+    const userId = req.userId;
     const addressId = req.params.id;
 
     if (!userId) return res.redirect("/login");
@@ -71,7 +71,7 @@ const getEditAddress = async (req, res) => {
 
 const deleteAddress = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
+    const userId = req.userId;
     const { id } = req.params;
 
     if (!userId)
@@ -282,7 +282,7 @@ const validateAddressInput = (data) => {
 
 const addAddress = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
+    const userId = req.userId;
     console.log("AddAddress - UserID:", userId);
     console.log("AddAddress - Request Body:", req.body);
 
@@ -385,7 +385,7 @@ const addAddress = async (req, res) => {
 
 const editAddress = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
+    const userId = req.userId;
     const {
       id,
       addressType,

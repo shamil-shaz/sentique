@@ -18,10 +18,10 @@ const generateShortReceipt = () => {
 
 const getWalletPage = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userId = user?._id || user?.id;
+    
+    const userId = req.userId;
 
-    if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       console.log("Invalid or missing user ID:", userId);
       return res.redirect("/login");
     }
@@ -102,6 +102,7 @@ const getWalletPage = async (req, res) => {
       totalPages,
       totalTransactions,
       razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+      user: req.user || req.session.user || null
     });
   } catch (error) {
     console.error("Error fetching wallet page:", error);
@@ -111,7 +112,7 @@ const getWalletPage = async (req, res) => {
 
 const getWalletData = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -160,7 +161,7 @@ const getWalletData = async (req, res) => {
 
 const getPaginatedTransactions = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
     const page = parseInt(req.query.page) || 1;
     const filter = req.query.filter || "all";
     const limit = 8;
@@ -228,7 +229,7 @@ const getPaginatedTransactions = async (req, res) => {
 
 const createAddMoneyOrder = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
     const { amount } = req.body;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -274,7 +275,7 @@ const createAddMoneyOrder = async (req, res) => {
 
 const verifyAddMoneyPayment = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
     const {
       razorpay_order_id,
       razorpay_payment_id,
@@ -334,7 +335,7 @@ const verifyAddMoneyPayment = async (req, res) => {
 
 const recordFailedPayment = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
     const { amount, orderId, paymentId, errorCode, errorDescription } =
       req.body;
 
@@ -378,7 +379,7 @@ const addTestTransaction = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
     const { type, amount, description, productName, orderId, reason } =
       req.body;
 
