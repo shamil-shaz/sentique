@@ -453,6 +453,8 @@
     .story-title { font-size: 2.5rem; }
 }
   </style>
+
+
 </head>
 <body class="dark-mode"> <canvas id="bgCanvas"></canvas>
 
@@ -468,25 +470,23 @@
     
   </nav>
 
-  <div class="icons-section">
+ <div class="icons-section">
     <button class="theme-btn" id="themeToggle"><i class="fas fa-sun"></i></button>
 
-    <% if (!user) { %>
-      <a href="/login" style="color:var(--gold); font-weight:600; font-size:0.9rem;">Login</a>
+    <% if (!locals.user) { %> <a href="/login" style="color:var(--gold); font-weight:600; font-size:0.9rem;">Login</a>
     <% } else { %>
       <div class="user-icon" id="userIcon">
         <i class="fas fa-user"></i>
       </div>
       <div class="dropdown" id="userDropdown">
         <div style="padding:15px; color:var(--gold); font-weight:600; border-bottom:1px solid var(--border-color); text-align:center;">
-            Hello, <%= user.name %>
-        </div>
+            Hello, <%= locals.user.name %> </div>
         <a href="/profile"><i class="fas fa-id-card"></i> Profile</a>
         <a href="/profile/order-list"><i class="fas fa-box"></i> Orders</a>
         <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
       </div>
     <% } %>
-  </div>
+</div>
 </header>
 
 <section class="hero">

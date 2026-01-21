@@ -39,7 +39,7 @@ async function attachReviewStats(products) {
 
 const loadLandingPage = async (req, res) => {
   try {
-    const user = req.session.user || null;
+    const user = req.user || req.session.user || null;
     res.render("landingPage", { user });
   } catch (error) {
     console.error("Landing page error:", error);
@@ -98,9 +98,11 @@ const loadHomepage = async (req, res) => {
     await attachReviewStats(newArrivals);
     await attachReviewStats(bestSelling);
 
-    let userData = null;
-    if (sessionUser?.id) {
-      userData = await User.findById(sessionUser.id)
+  let userData = null;
+    const currentUserId = req.user?._id || req.session.user?.id;
+
+    if (currentUserId) {
+      userData = await User.findById(currentUserId)
         .select("name email phone")
         .lean();
     }
