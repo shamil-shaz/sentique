@@ -486,31 +486,124 @@ const addReview = async (req, res) => {
   }
 };
 
+// const loadProductDetails = async (req, res) => {
+//   try {
+//     const productId = req.query.id || req.params.id;
+
+//     if (!productId) {
+//       return res.redirect("/shopPage");
+//     }
+
+//     const product = await Product.findOne({
+//       _id: productId,
+//       isBlocked: false,
+//     })
+//       .populate({
+//         path: "brand",
+//         select: "brandName brandImage",
+//       })
+//       .populate({
+//         path: "category",
+//         select: "name categoryImage",
+//       })
+//       .lean();
+
+//     if (!product) {
+//       return res.redirect("/shopPage");
+//     }
+
+//     const relatedProducts = await Product.find({
+//       category: product.category._id,
+//       _id: { $ne: product._id },
+//       isBlocked: false,
+//       status: "Available",
+//     })
+//       .populate({
+//         path: "brand",
+//         select: "brandName",
+//       })
+//       .limit(4)
+//       .lean();
+
+//    const reviews = (await Review.find({ productId: product._id })
+//   .populate({
+//     path: "userId",
+//     select: "name email",
+//   })
+//   .sort({ createdAt: -1 })
+//   .lean()) || [];
+// const validReviews = reviews.filter(r => r.userId);
+
+//     let averageRating = 0;
+//     const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+//   if (validReviews.length > 0) {
+//   const totalRating = validReviews.reduce((sum, r) => sum + r.rating, 0);
+//   averageRating = (totalRating / validReviews.length).toFixed(1);
+
+//   validReviews.forEach(review => {
+//     ratingDistribution[review.rating]++;
+//   });
+// }
+
+
+//     let userHasReviewed = false;
+//     let userReview = null;
+
+//     if (req.user?._id || req.session?.user?.id) {
+//       const userId = req.user?._id || req.session.user?.id;
+
+// userReview = validReviews.find((r) => {
+//   const uid = r.userId?._id || r.userId;
+//   return uid?.toString() === userId.toString();
+// });
+
+
+
+//       userHasReviewed = !!userReview;
+//     }
+
+//     const ratingPercentage = {};
+//     Object.keys(ratingDistribution).forEach((star) => {
+//     ratingPercentage[star] =
+//   validReviews.length > 0
+//     ? Math.round((ratingDistribution[star] / validReviews.length) * 100)
+//     : 0;
+
+//     });
+
+//     res.render("productDetails", {
+//       product,
+//       relatedProducts,
+//       reviews: validReviews,
+//       averageRating: parseFloat(averageRating),
+//       totalReviews: validReviews.length,
+//       ratingDistribution,
+//       ratingPercentage,
+//       userHasReviewed,
+//       userReview,
+//       user: req.user || req.session.user || null,
+//     });
+//   } catch (error) {
+//     console.error("Error loading product details:", error);
+//     res.redirect("/shopPage");
+//   }
+// };
+
 const loadProductDetails = async (req, res) => {
   try {
     const productId = req.query.id || req.params.id;
-
-    if (!productId) {
-      return res.redirect("/shopPage");
-    }
+    if (!productId) return res.redirect("/shopPage");
 
     const product = await Product.findOne({
       _id: productId,
       isBlocked: false,
     })
-      .populate({
-        path: "brand",
-        select: "brandName brandImage",
-      })
-      .populate({
-        path: "category",
-        select: "name categoryImage",
-      })
+      .populate("brand", "brandName brandImage")
+      .populate("category", "name categoryImage")
       .lean();
 
-    if (!product) {
-      return res.redirect("/shopPage");
-    }
+    if (!product) return res.redirect("/shopPage");
 
     const relatedProducts = await Product.find({
       category: product.category._id,
@@ -518,58 +611,46 @@ const loadProductDetails = async (req, res) => {
       isBlocked: false,
       status: "Available",
     })
-      .populate({
-        path: "brand",
-        select: "brandName",
-      })
+      .populate("brand", "brandName")
       .limit(4)
       .lean();
 
-   const reviews = (await Review.find({ productId: product._id })
-  .populate({
-    path: "userId",
-    select: "name email",
-  })
-  .sort({ createdAt: -1 })
-  .lean()) || [];
-const validReviews = reviews.filter(r => r.userId);
+    let reviews = await Review.find({ productId: product._id })
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const validReviews = reviews.filter(r => r && r.userId && r.userId.name);
 
     let averageRating = 0;
-    const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    const ratingDistribution = { 5:0, 4:0, 3:0, 2:0, 1:0 };
 
-  if (validReviews.length > 0) {
-  const totalRating = validReviews.reduce((sum, r) => sum + r.rating, 0);
-  averageRating = (totalRating / validReviews.length).toFixed(1);
+    if (validReviews.length > 0) {
+      const totalRating = validReviews.reduce((sum, r) => sum + r.rating, 0);
+      averageRating = (totalRating / validReviews.length).toFixed(1);
 
-  validReviews.forEach(review => {
-    ratingDistribution[review.rating]++;
-  });
-}
-
-
-    let userHasReviewed = false;
-    let userReview = null;
-
-    if (req.user?._id || req.session?.user?.id) {
-      const userId = req.user?._id || req.session.user?.id;
-
-     userReview = validReviews.find((r) => {
-  const uid = r.userId?._id || r.userId;
-  return uid?.toString() === userId.toString();
-});
-
-
-      userHasReviewed = !!userReview;
+      validReviews.forEach(r => ratingDistribution[r.rating]++);
     }
 
     const ratingPercentage = {};
-    Object.keys(ratingDistribution).forEach((star) => {
-    ratingPercentage[star] =
-  validReviews.length > 0
-    ? Math.round((ratingDistribution[star] / validReviews.length) * 100)
-    : 0;
-
+    Object.keys(ratingDistribution).forEach(star => {
+      ratingPercentage[star] =
+        validReviews.length > 0
+          ? Math.round((ratingDistribution[star] / validReviews.length) * 100)
+          : 0;
     });
+
+    let userHasReviewed = false;
+    let userReview = null;
+    const userId = req.user?._id || req.session.user?.id;
+
+    if (userId) {
+      userReview = validReviews.find(r => {
+        const uid = r.userId?._id || r.userId;
+        return uid?.toString() === userId.toString();
+      });
+      userHasReviewed = !!userReview;
+    }
 
     res.render("productDetails", {
       product,
@@ -583,11 +664,14 @@ const validReviews = reviews.filter(r => r.userId);
       userReview,
       user: req.user || req.session.user || null,
     });
+
   } catch (error) {
     console.error("Error loading product details:", error);
     res.redirect("/shopPage");
   }
 };
+
+
 
 const getProductRating = async (req, res) => {
   try {
