@@ -98,20 +98,17 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
-  async (req, res, next) => {
-
+  async (req, res) => {
+    
     if (!req.user.refferalCode) {
       const referralCode = await userController.generateUniqueReferralCode(req.user.name);
       req.user.refferalCode = referralCode;
       await req.user.save();
     }
-    req.login(req.user, err => {
-      if (err) return next(err);
 
-      console.log("Google authenticated → session user:", req.user);
-
-      res.redirect("/");
-    });
+  
+    console.log("Google Auth Success for:", req.user.email);
+    res.redirect("/");
   }
 );
 

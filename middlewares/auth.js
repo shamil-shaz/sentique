@@ -23,32 +23,60 @@ const clearAdminSession = (req) => {
   });
 };
 
+// const userAuth = async (req, res, next) => {
+//   try {
+//     const sessionUser = req.session.user;
+//     const passportUser = req.user;
+
+//     if (!sessionUser && !passportUser) {
+//       return res.redirect('/login');
+//     }
+
+//     const userId = passportUser?._id || sessionUser.id;
+
+//     const user = await User.findById(userId);
+//     if (!user || user.isBlocked) {
+//       if (passportUser) req.logout(() => {});
+//       if (sessionUser) await clearUserSession(req);
+//       return res.redirect('/login?error=blocked');
+//     }
+
+//     res.locals.user = user;
+//     next();
+//   } catch (error) {
+//     console.error("Error in userAuth middleware:", error);
+//     return res.status(500).send("Internal Server Error");
+//   }
+// };
+
+
+
 const userAuth = async (req, res, next) => {
   try {
-    const sessionUser = req.session.user;
-    const passportUser = req.user;
+    
+    const userId = req.user?._id || req.session?.user?.id || req.session?.user?._id;
 
-    if (!sessionUser && !passportUser) {
+    if (!userId) {
       return res.redirect('/login');
     }
 
-    const userId = passportUser?._id || sessionUser.id;
-
     const user = await User.findById(userId);
+    
     if (!user || user.isBlocked) {
-      if (passportUser) req.logout(() => {});
-      if (sessionUser) await clearUserSession(req);
+      
+      if (req.user) req.logout(() => {});
+      if (req.session.user) delete req.session.user;
+      
       return res.redirect('/login?error=blocked');
     }
 
     res.locals.user = user;
     next();
   } catch (error) {
-    console.error("Error in userAuth middleware:", error);
-    return res.status(500).send("Internal Server Error");
+    console.error("Auth Middleware Error:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
-
 
 const adminAuth = async (req, res, next) => {
   try {
