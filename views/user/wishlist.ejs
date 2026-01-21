@@ -1194,11 +1194,11 @@ footer {
                             <i class="fa fa-ban"></i> <%= blockMessage %>
                         </button>
                         <% } else { %>
-                        <button class="add-to-cart-btn"
-                            data-id="<%= product._id %>"
-                            data-variant-id="<%= selectedSize || '' %>">
-                            <i class="fa fa-shopping-cart"></i> Add to Cart
-                        </button>
+                    <button class="add-to-cart-btn" 
+        data-id="<%= product._id %>" 
+        data-variant-id="<%= selectedSize %>">
+    <i class="fa fa-shopping-cart"></i> Add to Cart
+</button>
                         <% } %>
                     </div>
 
@@ -1311,31 +1311,32 @@ footer {
             });
         });
 
-  document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+ document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', async function (event) {
-        // 1. Use currentTarget to ensure we get the button even if they click the <i> icon
+        // 1. Use event.currentTarget to always grab the <button> element
+        // even if the user clicks the <i> icon inside it.
         const button = event.currentTarget; 
         
-        // 2. Extract Data
+        // 2. Extract the ID using getAttribute (the most reliable way)
         const productId = button.getAttribute('data-id'); 
+        
+        // 3. Find the card and the dropdown for that specific product
         const card = button.closest('.wishlist-card');
         const select = card.querySelector('.variant-select');
         
-        // 3. Get the live variant size from the dropdown
+        // 4. Get the live value from the dropdown
         const currentVariantSize = select ? select.value : button.getAttribute('data-variant-id');
 
-        // Debugging
-        console.log("Adding Product:", productId, "with Size:", currentVariantSize);
+        // DEBUG: Check your browser console (F12) to see these values
+        console.log("Button Clicked - Product ID:", productId, "Variant Size:", currentVariantSize);
 
-        if (!productId || productId === 'undefined') {
+        // 5. Check if we actually have a valid ID
+        if (!productId || productId === 'undefined' || productId === 'null') {
             Toast.fire({ icon: 'error', title: 'Product information is missing' });
             return;
         }
 
-        // 4. Check if the button is already processing
-        if (button.disabled) return;
-
-        // 5. Call the function and pass the SPECIFIC button for the loading state
+        // 6. Call the add function
         await addToCartWithToastOnly(productId, currentVariantSize, button);
     });
 });
