@@ -152,7 +152,7 @@ const adminRouter = require("./routes/adminRouter");
       res.locals.success_msg = req.flash("success") || [];
       res.locals.error_msg = req.flash("error") || [];
       res.locals.user = req.user || req.session.user || null;
-
+      req.userId = req.user?._id || req.session?.user?._id || req.session?.user?.id || null;
       next();
     });
 

@@ -6,7 +6,8 @@ const mongoose = require("mongoose");
 
 const loadWishlist = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+
+const userId = req.userId;
     if (!userId) {
       console.log("User not logged in, redirecting...");
       return res.redirect("/login");
@@ -55,6 +56,7 @@ const loadWishlist = async (req, res) => {
       totalItems,
       totalPages,
       currentPage: page,
+      user: req.user || req.session.user || null
     });
   } catch (err) {
     console.error("Load wishlist error:", err.message, err.stack);
@@ -64,7 +66,7 @@ const loadWishlist = async (req, res) => {
 
 const addToWishlist = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+   const userId = req.userId;
     const { productId } = req.body;
     
 
@@ -118,7 +120,7 @@ const addToWishlist = async (req, res) => {
 
 const removeFromWishlist = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+   const userId = req.userId;
     const productId = req.params.id;
 
     console.log("Remove from wishlist request:", { userId, productId });
@@ -166,7 +168,7 @@ const removeFromWishlist = async (req, res) => {
 
 const moveAllToCart = async (req, res) => {
   try {
-    const userId = req.session.user?.id || req.session.user?._id;
+   const userId = req.userId;
     console.log("Move all to cart request for userId:", userId);
 
     if (!userId) {
@@ -294,7 +296,7 @@ const moveAllToCart = async (req, res) => {
 
 const getWishlistCount = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user?.id;
+    const userId = req.userId;
 
     if (!userId) {
       console.log("[Wishlist Count] No user ID found");
@@ -314,7 +316,7 @@ const getWishlistCount = async (req, res) => {
 };
 
 const updateVariant = async (req, res) => {
-  const userId = req.session.user._id;
+ const userId = req.userId;
   const { productId, variantSize } = req.body;
 
   await Wishlist.updateOne(
