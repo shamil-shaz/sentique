@@ -55,10 +55,13 @@ const getOrderSuccess = async (req, res) => {
       day: "2-digit",
       month: "short",
       year: "numeric",
+      timeZone: "Asia/Kolkata"
     });
     const formattedTime = orderDate.toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Kolkata"
     });
     const deliveryDate = new Date(orderDate);
     deliveryDate.setDate(deliveryDate.getDate() + 5);
@@ -304,6 +307,7 @@ const getOrderDetails = async (req, res) => {
       const isReturnRejected = item.returnRejected === true;
       const isCancelled = itemStatus === "Cancelled";
 
+        
       const tracking = {
         placedDate: item.tracking?.placedDate || null,
         placedTime: item.tracking?.placedTime || null,
@@ -761,7 +765,8 @@ const updateItemStatus = async (
   );
   if (!item) throw new Error("Item not found");
   const now = new Date();
-  const formatDateTime = (date) => ({
+ const formatDateTime = (date) => {
+  return {
     date: date.toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
@@ -771,10 +776,11 @@ const updateItemStatus = async (
     time: date.toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true,
+      hour12: true, 
       timeZone: "Asia/Kolkata",
-    }),
-  });
+    })
+  };
+};
 
   if (
     ["Placed", "Confirmed", "Processing", "Shipped", "OutForDelivery"].includes(
