@@ -146,7 +146,7 @@ const loadForgotPageOtp = async (req, res) => {
     if (!req.session.forgotOtp || !req.session.forgotEmail) {
       return res.redirect("/forgot-password");
     }
-    res.render("forgotpassword-otp", {
+    res.render("forgotPassword-otp", {
       message: "",
       user: req.user || req.session.user || null,
     });
