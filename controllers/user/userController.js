@@ -527,18 +527,43 @@ const login = async (req, res) => {
   }
 };
 
+// const logout = async (req, res) => {
+//   try {
+//     req.logout((err) => {
+//       req.session.destroy((err) => {
+//         res.clearCookie("userSession");
+//         console.log("check1")
+//         return res.redirect("/login");
+//       });
+//     });
+//   } catch (error) {
+//     console.log("Logout error:", error);
+//     res.redirect("/pageNotFound");
+//   }
+// };
+
+
+
 const logout = async (req, res) => {
-  try {
-    req.logout((err) => {
-      req.session.destroy((err) => {
-        res.clearCookie("userSession");
+    try {
+        // 1. Passport logout
+        req.logout((err) => {
+            if (err) return res.redirect("/pageNotFound");
+
+            // 2. Destroy session
+            req.session.destroy((err) => {
+                // Clear the cookie immediately
+                res.clearCookie("userSession");
+                
+                // 3. Now redirect. The updated middleware in app.js 
+                // will now handle the 'undefined' session safely.
+                return res.redirect("/login");
+            });
+        });
+    } catch (error) {
+        console.error("Logout error:", error);
         res.redirect("/login");
-      });
-    });
-  } catch (error) {
-    console.log("Logout error:", error);
-    res.redirect("/pageNotFound");
-  }
+    }
 };
 
 module.exports = {

@@ -23,9 +23,14 @@ const adminRouter = require("./routes/adminRouter");
       const isHttp = req.protocol === "http";
       const isProxyHttps = req.headers["x-forwarded-proto"] === "https";
 
-      if (isHttp && !isProxyHttps) {
-        return res.redirect(301, "https://" + req.headers.host + req.url);
-      }
+      const isLocalhost = req.hostname === "localhost" || req.hostname === "127.0.0.1";
+
+      if (isLocalhost) {
+    return next();
+  }
+    if (isHttp && !isProxyHttps) {
+    return res.redirect(302, "https://" + req.headers.host + req.url);
+  }
       next();
     });
 
@@ -78,7 +83,7 @@ const adminRouter = require("./routes/adminRouter");
     });
 
     console.log("Session store initialized successfully");
-
+const isProduction = process.env.NODE_ENV === "production";
     // --------------- USER SESSION ---------------
 
     app.use(
@@ -91,10 +96,10 @@ const adminRouter = require("./routes/adminRouter");
         store: sessionStore,
         cookie: {
           maxAge: 1000 * 60 * 60 * 24 * 7,
-          domain: ".sentique.site",
+          domain: isProduction ? ".sentique.site" : undefined,
           httpOnly: true,
           sameSite: "lax",
-          secure: true,
+          secure: isProduction,
         },
       })
     );
@@ -110,10 +115,10 @@ const adminRouter = require("./routes/adminRouter");
         store: sessionStore,
         cookie: {
           maxAge: 7 * 24 * 60 * 60 * 1000,
-          domain: ".sentique.site",
+          domain: isProduction ? ".sentique.site" : undefined,
           httpOnly: true,
-          sameSite: "none",
-          secure: true,
+          sameSite: isProduction ? "none" : "lax", 
+          secure: isProduction,
         },
       })
     );
@@ -152,31 +157,30 @@ const adminRouter = require("./routes/adminRouter");
       res.locals.success_msg = req.flash("success") || [];
       res.locals.error_msg = req.flash("error") || [];
       res.locals.user = req.user || req.session.user || null;
-      req.userId =
-        req.user?._id ||
-        req.session?.user?._id ||
-        req.session?.user?.id ||
-        null;
+      req.userId = req.user?._id || req.session?.user?._id || req.session?.user?.id || null;
       next();
     });
 
-    app.use((req, res, next) => {
-      if (req.session) {
+   
+app.use((req, res, next) => {
+    if (req.session) {
         const oldRedirect = res.redirect;
         res.redirect = function (...args) {
-          if (req.session.save) {
-            req.session.save(() => {
-              oldRedirect.apply(this, args);
-            });
-          } else {
-            oldRedirect.apply(this, args);
-          }
+            
+            if (req.session && typeof req.session.save === 'function') {
+                req.session.save(() => {
+                    oldRedirect.apply(this, args);
+                });
+            } else {
+             
+                oldRedirect.apply(this, args);
+            }
         };
-      }
-      next();
-    });
+    }
+    next();
+});
 
-    app.use("/", userRouter);
+app.use("/", userRouter);
     app.use("/admin", adminRouter);
 
     app.use((req, res, next) => {
