@@ -18,7 +18,7 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
-  /* 🔥 FIX HEADER + SIDEBAR */
+ 
   .admin-content-wrapper {
     margin-left: 260px;
     padding-top: 80px;
@@ -198,10 +198,11 @@
     <header class="chat-header">
       <div class="header-left">
         <a href="/admin/contact" class="back-btn">←</a>
-        <div class="avatar-circle"><%= user?.name ? user.name.charAt(0).toUpperCase() : "U" %></div>
+        <div class="avatar-circle"><%= user?.name ?
+          user.name.charAt(0).toUpperCase() : "U" %></div>
 
         <div class="user-meta">
-         <h4><%= user?.name || "Unknown User" %></h4>
+          <h4><%= user?.name || "Unknown User" %></h4>
 
           <div class="status-indicator">Active</div>
         </div>
@@ -212,40 +213,43 @@
     <!-- CHAT BODY -->
     <main class="chat-body" id="chatBody">
       <% messages.forEach(msg => { %>
-        <div class="msg-group <%= msg.sender === 'admin' ? 'admin' : 'user' %>">
-          <div class="message">
-            <% 
-              const orderMatch = msg.message.match(/Order ID:\s*([A-Za-z0-9-]+)/);
-              if (orderMatch) {
-                const orderId = orderMatch[1];
-            %>
-              <%- msg.message.replace(
-                orderMatch[0],
-                `<a href="/admin/orders?orderId=${orderId}" class="order-link">Order ID: ${orderId}</a>`
-              ) %>
-            <% } else { %>
-              <%= msg.message %>
-            <% } %>
-          </div>
-          <span class="time-stamp">
-            <%= new Date(msg.createdAt).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) %>
-          </span>
+      <div class="msg-group <%= msg.sender === 'admin' ? 'admin' : 'user' %>">
+        <div class="message">
+          <%
+          const orderMatch = msg.message.match(/Order ID:\s*([A-Za-z0-9-]+)/);
+          if (orderMatch) {
+          const orderId = orderMatch[1];
+          %>
+          <%- msg.message.replace(
+          orderMatch[0],
+          `<a href="/admin/orders?orderId=${orderId}" class="order-link">Order
+            ID: ${orderId}</a>`
+          ) %>
+          <% } else { %>
+          <%= msg.message %>
+          <% } %>
         </div>
+        <span class="time-stamp">
+          <%= new Date(msg.createdAt).toLocaleTimeString([], { hour:'2-digit',
+          minute:'2-digit' }) %>
+        </span>
+      </div>
       <% }) %>
     </main>
 
-<footer class="chat-footer">
+    <footer class="chat-footer">
 
-  <% if (canSend) { %>
-    <form action="/admin/contact/<%= user._id %>/send" method="POST">
+      <% if (canSend) { %>
+      <form action="/admin/contact/<%= user._id %>/send" method="POST">
 
-      <div class="input-wrapper">
-        <textarea name="message" placeholder="Write a message..." rows="1" required></textarea>
-        <button type="submit" class="send-btn">Send</button>
-      </div>
-    </form>
-  <% } else { %>
-    <div class="read-only-warning" style="
+        <div class="input-wrapper">
+          <textarea name="message" placeholder="Write a message..." rows="1"
+            required></textarea>
+          <button type="submit" class="send-btn">Send</button>
+        </div>
+      </form>
+      <% } else { %>
+      <div class="read-only-warning" style="
       padding:12px 16px;
       border-radius:10px;
       background:#fef3c7;
@@ -253,12 +257,11 @@
       font-size:14px;
       font-weight:600;
       text-align:center;">
-      User deleted or inactive — chat is read-only
-    </div>
-  <% } %>
+        User deleted or inactive — chat is read-only
+      </div>
+      <% } %>
 
-</footer>
-
+    </footer>
 
   </div>
 </div>

@@ -152,28 +152,31 @@ const adminRouter = require("./routes/adminRouter");
       res.locals.success_msg = req.flash("success") || [];
       res.locals.error_msg = req.flash("error") || [];
       res.locals.user = req.user || req.session.user || null;
-      req.userId = req.user?._id || req.session?.user?._id || req.session?.user?.id || null;
+      req.userId =
+        req.user?._id ||
+        req.session?.user?._id ||
+        req.session?.user?.id ||
+        null;
       next();
     });
 
-   // Force session to save before proceeding to routes
-app.use((req, res, next) => {
-    if (req.session) {
+    app.use((req, res, next) => {
+      if (req.session) {
         const oldRedirect = res.redirect;
         res.redirect = function (...args) {
-            if (req.session.save) {
-                req.session.save(() => {
-                    oldRedirect.apply(this, args);
-                });
-            } else {
-                oldRedirect.apply(this, args);
-            }
+          if (req.session.save) {
+            req.session.save(() => {
+              oldRedirect.apply(this, args);
+            });
+          } else {
+            oldRedirect.apply(this, args);
+          }
         };
-    }
-    next();
-});
+      }
+      next();
+    });
 
-app.use("/", userRouter);
+    app.use("/", userRouter);
     app.use("/admin", adminRouter);
 
     app.use((req, res, next) => {

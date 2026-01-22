@@ -98,7 +98,7 @@ const loadHomepage = async (req, res) => {
     await attachReviewStats(newArrivals);
     await attachReviewStats(bestSelling);
 
-  let userData = null;
+    let userData = null;
     const currentUserId = req.userId;
 
     if (currentUserId) {
@@ -332,7 +332,7 @@ const loadShopingPage = async (req, res) => {
       sort,
       search,
       priceRange,
-      user: req.user || req.session.user || null
+      user: req.user || req.session.user || null,
     });
   } catch (error) {
     console.error("Error in loadShopingPage:", error);
@@ -489,7 +489,6 @@ const addReview = async (req, res) => {
   }
 };
 
-
 const loadProductDetails = async (req, res) => {
   try {
     const productId = req.query.id || req.params.id;
@@ -505,35 +504,35 @@ const loadProductDetails = async (req, res) => {
 
     if (!product) return res.redirect("/shopPage");
 
-  const relatedProducts = await Product.find({
-  category: product.category._id,
-  _id: { $ne: product._id },
-  isBlocked: false,
-  "variants.0": { $exists: true } 
-})
-  .populate("brand", "brandName")
-  .limit(4)
-  .lean();
+    const relatedProducts = await Product.find({
+      category: product.category._id,
+      _id: { $ne: product._id },
+      isBlocked: false,
+      "variants.0": { $exists: true },
+    })
+      .populate("brand", "brandName")
+      .limit(4)
+      .lean();
 
     let reviews = await Review.find({ productId: product._id })
       .populate("userId", "name email")
       .sort({ createdAt: -1 })
       .lean();
 
-    const validReviews = reviews.filter(r => r && r.userId && r.userId.name);
+    const validReviews = reviews.filter((r) => r && r.userId && r.userId.name);
 
     let averageRating = 0;
-    const ratingDistribution = { 5:0, 4:0, 3:0, 2:0, 1:0 };
+    const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
     if (validReviews.length > 0) {
       const totalRating = validReviews.reduce((sum, r) => sum + r.rating, 0);
       averageRating = (totalRating / validReviews.length).toFixed(1);
 
-      validReviews.forEach(r => ratingDistribution[r.rating]++);
+      validReviews.forEach((r) => ratingDistribution[r.rating]++);
     }
 
     const ratingPercentage = {};
-    Object.keys(ratingDistribution).forEach(star => {
+    Object.keys(ratingDistribution).forEach((star) => {
       ratingPercentage[star] =
         validReviews.length > 0
           ? Math.round((ratingDistribution[star] / validReviews.length) * 100)
@@ -545,7 +544,7 @@ const loadProductDetails = async (req, res) => {
     const userId = req.userId;
 
     if (userId) {
-      userReview = validReviews.find(r => {
+      userReview = validReviews.find((r) => {
         const uid = r.userId?._id || r.userId;
         return uid?.toString() === userId.toString();
       });
@@ -564,14 +563,11 @@ const loadProductDetails = async (req, res) => {
       userReview,
       user: req.user || req.session.user || null,
     });
-
   } catch (error) {
     console.error("Error loading product details:", error);
     res.redirect("/shopPage");
   }
 };
-
-
 
 const getProductRating = async (req, res) => {
   try {
@@ -589,24 +585,22 @@ const getProductRating = async (req, res) => {
     let averageRating = 0;
     const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
- const validReviews = reviews.filter(r => r.userId);
+    const validReviews = reviews.filter((r) => r.userId);
 
-if (validReviews.length > 0) {
-  const totalRating = validReviews.reduce((sum, r) => sum + r.rating, 0);
-  averageRating = (totalRating / validReviews.length).toFixed(1);
+    if (validReviews.length > 0) {
+      const totalRating = validReviews.reduce((sum, r) => sum + r.rating, 0);
+      averageRating = (totalRating / validReviews.length).toFixed(1);
 
-  validReviews.forEach((review) => {
-    ratingDistribution[review.rating]++;
-  });
-}
-
+      validReviews.forEach((review) => {
+        ratingDistribution[review.rating]++;
+      });
+    }
 
     const ratingPercentage = {};
     Object.keys(ratingDistribution).forEach((star) => {
       ratingPercentage[star] =
-       validReviews.length > 0
-    ? Math.round((ratingDistribution[star] / validReviews.length) * 100)
-
+        validReviews.length > 0
+          ? Math.round((ratingDistribution[star] / validReviews.length) * 100)
           : 0;
     });
 

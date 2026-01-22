@@ -1,27 +1,25 @@
-
 const ContactMessage = require("../../models/contactSchema");
-const Order = require("../../models/orderSchema"); 
+const Order = require("../../models/orderSchema");
 
 const getContactPage = async (req, res) => {
   try {
     const userId = req.userId;
     if (!userId) return res.redirect("/login");
 
-    const messages = await ContactMessage
-      .find({ userId })
-      .sort({ createdAt: 1 });
-  
+    const messages = await ContactMessage.find({ userId }).sort({
+      createdAt: 1,
+    });
+
     const orders = await Order.find({ user: userId })
       .select("orderId status createdOn")
       .sort({ createdOn: -1 })
       .limit(8);
 
-    res.render("contact", { 
-      messages, 
-      orders, 
-      user: req.user || req.session.user || null 
+    res.render("contact", {
+      messages,
+      orders,
+      user: req.user || req.session.user || null,
     });
-    
   } catch (error) {
     console.error("Contact Page Error:", error);
     res.status(500).send("Server Error");
@@ -30,7 +28,7 @@ const getContactPage = async (req, res) => {
 
 const sendMessage = async (req, res) => {
   try {
-   const userId = req.userId;
+    const userId = req.userId;
     const { message, issueType } = req.body;
 
     const newMessage = await ContactMessage.create({
@@ -47,7 +45,7 @@ const sendMessage = async (req, res) => {
   }
 };
 
-module.exports = { 
-  getContactPage, 
-  sendMessage
- };
+module.exports = {
+  getContactPage,
+  sendMessage,
+};

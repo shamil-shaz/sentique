@@ -1,6 +1,9 @@
 <%- include('../../views/partials/user/header') %>
-<link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap"
+  rel="stylesheet">
+<link
+  href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap"
+  rel="stylesheet">
 
 <style>
   :root {
@@ -43,9 +46,9 @@
     --shadow-medium: rgba(0, 0, 0, 0.2);
     --success-color: #22c55e;
     --primary-blue: #3b82f6;
-    --secondary-gray: #e2c055; /* Light golden for view order button in dark mode */
+    --secondary-gray: #e2c055; 
     --discount-green: #10b981;
-    --total-gradient-start: #1a1a1a; /* Dark background for total row box */
+    --total-gradient-start: #1a1a1a; 
     --total-gradient-end: #2a2a2a;
     --coupon-bg: #1a1a1a;
     --coupon-border: #10b981;
@@ -92,7 +95,7 @@
   }
 
   body.dark-mode .circle {
-    background: rgba(255, 255, 255, 0.05); /* Subtle adjustment for dark mode */
+    background: rgba(255, 255, 255, 0.05); 
   }
 
   .circle-1 {
@@ -169,7 +172,7 @@
   }
 
   body.dark-mode .order-status-graphic img {
-    filter: brightness(1.2) contrast(1.1); /* Slight enhancement for dark mode visibility */
+    filter: brightness(1.2) contrast(1.1); 
   }
 
   .order-status-title {
@@ -268,7 +271,7 @@
   }
 
   body.dark-mode .order-item-image {
-    filter: brightness(1.1); /* Slight brightness for dark mode */
+    filter: brightness(1.1); 
   }
 
   .order-item-details {
@@ -384,7 +387,7 @@
     font-size: 1.05rem;
   }
 
-  /* Dark mode specific: Amount only gold, box dark */
+ 
   body.dark-mode .price-row.total-row {
     background: linear-gradient(135deg, var(--total-gradient-start) 0%, var(--total-gradient-end) 100%);
   }
@@ -432,7 +435,7 @@
   }
 
   body.dark-mode .payment-btn-secondary:hover {
-    background: #b89440; /* Darker golden hover for dark mode */
+    background: #b89440; 
   }
 
   .payment-btn-primary {
@@ -452,7 +455,7 @@
     transition: color 0.3s ease;
   }
 
-  /* Enhanced Responsiveness */
+ 
   @media (max-width: 768px) {
     .payment-success-wrapper {
       padding: 10px 0;
@@ -604,25 +607,28 @@
   <div class="payment-container">
     <div class="payment-success-card">
       <div class="order-status-graphic">
-        <img src="/photos/product_img/delevery_boy-removebg-preview.png" alt="Delivery" />
+        <img src="/photos/product_img/delevery_boy-removebg-preview.png"
+          alt="Delivery" />
       </div>
       <h2 class="order-status-title">Order Status</h2>
       <div class="order-status-subtitle">Your package is on the way</div>
-      
+
       <div class="order-items-box">
         <% items.forEach((item) => { %>
-          <div class="order-item-row">
-            <img src="<%= item.productId && item.productId.images && item.productId.images[0] && item.productId.images[0].length > 2
+        <div class="order-item-row">
+          <img
+            src="<%= item.productId && item.productId.images && item.productId.images[0] && item.productId.images[0].length > 2
                 ? (item.productId.images[0].startsWith('http')
                     ? item.productId.images[0]
                     : `/uploads/product-images/${item.productId.images[0]}`)
                 : 'https://via.placeholder.com/40x40?text=No+Image' %>"
-                alt="<%= item.productName || 'Unknown Product' %>"
-                class="order-item-image"
-                loading="lazy" />
-            <span class="order-item-details"><%= item.productName %> (<%= item.variantSize %>) x <%= item.quantity %></span>
-            <span><%= item.total %></span>
-          </div>
+            alt="<%= item.productName || 'Unknown Product' %>"
+            class="order-item-image"
+            loading="lazy" />
+          <span class="order-item-details"><%= item.productName %> (<%=
+            item.variantSize %>) x <%= item.quantity %></span>
+          <span><%= item.total %></span>
+        </div>
         <% }); %>
       </div>
 
@@ -648,17 +654,20 @@
           <span class="os-value"><%= deliveryDate %></span>
         </div>
         <% if (couponApplied && couponCode) { %>
-          <div class="os-row coupon-row" style="background: var(--coupon-bg); padding: 10px; border-radius: 6px; border-left: 3px solid var(--coupon-border);">
-            <span class="os-label">Coupon Code Applied</span>
-            <span class="os-value" style="color: var(--discount-green); font-weight: 600;"><%= couponCode %></span>
-          </div>
+        <div class="os-row coupon-row"
+          style="background: var(--coupon-bg); padding: 10px; border-radius: 6px; border-left: 3px solid var(--coupon-border);">
+          <span class="os-label">Coupon Code Applied</span>
+          <span class="os-value"
+            style="color: var(--discount-green); font-weight: 600;"><%=
+            couponCode %></span>
+        </div>
         <% } %>
       </div>
 
       <!-- Price Breakdown Section -->
       <div class="price-breakdown">
         <div class="price-breakdown-title">Price Breakdown</div>
-        
+
         <div class="price-row subtotal-row">
           <span class="price-label">Subtotal</span>
           <span class="price-value"><%= subtotal %></span>
@@ -666,7 +675,9 @@
 
         <div class="price-row discount-row">
           <span class="price-label">Discount</span>
-          <span class="price-value <%= discount === '₹0' ? 'text-muted' : '' %>"><%= discount %></span>
+          <span
+            class="price-value <%= discount === '₹0' ? 'text-muted' : '' %>"><%=
+            discount %></span>
         </div>
 
         <div class="price-row shipping-row">
@@ -681,10 +692,13 @@
       </div>
 
       <div class="payment-action-buttons">
-        <button class="payment-btn payment-btn-secondary" onclick="viewOrder()">View Order</button>
-        <button class="payment-btn payment-btn-primary" onclick="continueShopping()">Continue Shopping</button>
+        <button class="payment-btn payment-btn-secondary"
+          onclick="viewOrder()">View Order</button>
+        <button class="payment-btn payment-btn-primary"
+          onclick="continueShopping()">Continue Shopping</button>
       </div>
-      <div class="order-status-footer">Your order is confirmed and in transit.</div>
+      <div class="order-status-footer">Your order is confirmed and in
+        transit.</div>
     </div>
   </div>
 </div>
@@ -702,16 +716,16 @@
   document.addEventListener('DOMContentLoaded', function () {
     createPaymentConfetti();
     
-    // Theme Sync Logic (Matches Header)
+   
     const body = document.body;
     
-    // Load Theme from LocalStorage
+   
     const savedTheme = localStorage.getItem('sentique-theme');
     if (savedTheme === 'dark') {
       body.classList.add('dark-mode');
     }
     
-    // Listen to storage events for cross-tab/page sync
+   
     window.addEventListener('storage', function(e) {
       if (e.key === 'sentique-theme') {
         if (e.newValue === 'dark') {

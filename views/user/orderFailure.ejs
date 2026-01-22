@@ -1,11 +1,16 @@
-  <!DOCTYPE html>
-  <html>
+ <!DOCTYPE html>
+<html>
   <head>
-  <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap"
+      rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap"
+      rel="stylesheet">
+    <script
+      src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    
+
     <style>
       body {
         background: #f9f9fa;
@@ -398,85 +403,101 @@
     </style>
   </head>
   <body>
-  <div class="payment-failure-wrapper">
-    <div class="payment-container">
-      <div class="payment-failure-card">
-        <div style="display:flex;flex-direction:column;align-items:center;">
-          <div class="error-icon">✕</div>
-          <h2 style="margin-top:12px;font-family:'Poppins';font-size:1.6rem;">Payment Failed</h2>
-          <div style="color:#6b7280;margin-bottom:16px;">Your payment could not be processed</div>
-        </div>
-
-        <div class="error-reason" style="background:#fef2f2;border-left:4px solid #ef4444;border-radius:8px;padding:12px;margin-bottom:16px;">
-          <div style="font-weight:600;color:#991b1b;margin-bottom:4px;">⚠ Error Type</div>
-          <div id="errorReasonText" style="color:#7f1d1d;">Transaction declined by your bank</div>
-        </div>
-
-        <div class="order-details-box">
-          <div style="font-weight:600;margin-bottom:12px;text-transform:uppercase;">Transaction Details</div>
-
-          <div class="detail-row">
-            <span class="detail-label">Order ID</span>
-            <span class="detail-value" id="orderIdValue">N/A</span>
+    <div class="payment-failure-wrapper">
+      <div class="payment-container">
+        <div class="payment-failure-card">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="error-icon">✕</div>
+            <h2
+              style="margin-top:12px;font-family:'Poppins';font-size:1.6rem;">Payment
+              Failed</h2>
+            <div style="color:#6b7280;margin-bottom:16px;">Your payment could
+              not be processed</div>
           </div>
 
-          <div class="detail-row">
-            <span class="detail-label">Transaction ID</span>
-            <span class="detail-value" id="transactionIdValue">N/A</span>
+          <div class="error-reason"
+            style="background:#fef2f2;border-left:4px solid #ef4444;border-radius:8px;padding:12px;margin-bottom:16px;">
+            <div style="font-weight:600;color:#991b1b;margin-bottom:4px;">⚠
+              Error Type</div>
+            <div id="errorReasonText" style="color:#7f1d1d;">Transaction
+              declined by your bank</div>
           </div>
 
-          <div class="detail-row">
-            <span class="detail-label">Date & Time</span>
-            <span class="detail-value" id="dateTimeValue">Loading...</span>
+          <div class="order-details-box">
+            <div
+              style="font-weight:600;margin-bottom:12px;text-transform:uppercase;">Transaction
+              Details</div>
+
+            <div class="detail-row">
+              <span class="detail-label">Order ID</span>
+              <span class="detail-value" id="orderIdValue">N/A</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Transaction ID</span>
+              <span class="detail-value" id="transactionIdValue">N/A</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Date & Time</span>
+              <span class="detail-value" id="dateTimeValue">Loading...</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Payment Method</span>
+              <span class="detail-value" id="paymentMethodValue">Online
+                Payment</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Attempted Amount</span>
+              <span class="detail-value" id="amountValue">₹0</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Status</span>
+              <span class="detail-value"
+                style="color:#dc2626;font-weight:600;">Failed</span>
+            </div>
           </div>
 
-          <div class="detail-row">
-            <span class="detail-label">Payment Method</span>
-            <span class="detail-value" id="paymentMethodValue">Online Payment</span>
+          <div style="margin-bottom:18px;">
+            <div style="font-weight:600;color:#1e40af;margin-bottom:8px;">💡 How
+              to Fix This</div>
+            <ul style="margin:0;padding-left:18px;color:#1e40af;">
+              <li>Verify your card details (number, expiry, CVV)</li>
+              <li>Check if you have sufficient balance</li>
+              <li>Try another payment method</li>
+              <li>Contact your bank for restrictions</li>
+              <li>Clear browser cache and try again</li>
+            </ul>
           </div>
 
-          <div class="detail-row">
-            <span class="detail-label">Attempted Amount</span>
-            <span class="detail-value" id="amountValue">₹0</span>
+          <div class="payment-action-buttons">
+            <button class="payment-btn payment-btn-tertiary"
+              onclick="continueShopping()" id="continueShoppingBtn">Continue
+              Shopping</button>
+            <button class="payment-btn payment-btn-primary"
+              onclick="retryPayment()" id="retryPaymentBtn">Retry
+              Payment</button>
           </div>
 
-          <div class="detail-row">
-            <span class="detail-label">Status</span>
-            <span class="detail-value" style="color:#dc2626;font-weight:600;">Failed</span>
+          <div
+            style="margin-top:14px;text-align:center;color:#6b7280;font-size:0.9rem;">
+            Need help? <a href="/support"
+              style="color:#3b82f6;font-weight:600;">Contact Support</a>
           </div>
-        </div>
-
-        <div style="margin-bottom:18px;">
-          <div style="font-weight:600;color:#1e40af;margin-bottom:8px;">💡 How to Fix This</div>
-          <ul style="margin:0;padding-left:18px;color:#1e40af;">
-            <li>Verify your card details (number, expiry, CVV)</li>
-            <li>Check if you have sufficient balance</li>
-            <li>Try another payment method</li>
-            <li>Contact your bank for restrictions</li>
-            <li>Clear browser cache and try again</li>
-          </ul>
-        </div>
-
-        <div class="payment-action-buttons">
-          <button class="payment-btn payment-btn-tertiary" onclick="continueShopping()" id="continueShoppingBtn">Continue Shopping</button>
-          <button class="payment-btn payment-btn-primary" onclick="retryPayment()" id="retryPaymentBtn">Retry Payment</button>
-        </div>
-
-        <div style="margin-top:14px;text-align:center;color:#6b7280;font-size:0.9rem;">
-          Need help? <a href="/support" style="color:#3b82f6;font-weight:600;">Contact Support</a>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Inject server-side order object safely (controller must pass `order`) -->
-  <script>
-    // serverOrder: prefer server-rendered values when available
+    <script>
+   
     const serverOrder = <%- JSON.stringify(order || {}) %>;
   </script>
 
-  <script>
-    // Helper to read URL params
+    <script>
+    
     function getQueryParam(param) {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -486,7 +507,7 @@
       }
     }
 
-    // Format fallback for amount text (ensures it has ₹ prefix)
+   
     function normalizeAmountText(txt) {
       if (!txt) return '₹0';
       txt = String(txt).trim();
@@ -494,17 +515,17 @@
       return txt;
     }
 
-    // Populate DOM using serverOrder first, then URL query params
+    
     document.addEventListener('DOMContentLoaded', function () {
       try {
-        // Query values (if present)
+       
         const qError = getQueryParam('errorReason');
         const qTransaction = getQueryParam('transactionId') || getQueryParam('transaction_id') || '';
         const qPaymentMethod = getQueryParam('paymentMethod') || getQueryParam('payment_method') || '';
         const qAmount = getQueryParam('amount');
         const qOrderId = getQueryParam('orderId');
 
-        // Prefer serverOrder values (if object has keys), else use query params
+       
         const orderId = serverOrder.orderId || qOrderId || 'N/A';
         const transactionId = serverOrder.transactionId || qTransaction || 'N/A';
         const paymentMethod = serverOrder.paymentMethod || qPaymentMethod || 'Online Payment';
@@ -512,7 +533,7 @@
         const amount = serverOrder.amount || (qAmount ? decodeURIComponent(qAmount) : null) || '₹0';
         const dateTime = serverOrder.dateTime || new Date().toLocaleString('en-IN');
 
-        // Set DOM
+       
         document.getElementById('orderIdValue').textContent = orderId;
         document.getElementById('transactionIdValue').textContent = transactionId;
         document.getElementById('paymentMethodValue').textContent = paymentMethod;
@@ -526,7 +547,7 @@
       }
     });
 
-    // Continue shopping
+  
     function continueShopping() {
       const btn = document.getElementById('continueShoppingBtn');
       btn.disabled = true;
@@ -614,7 +635,7 @@
           description: 'Payment Retry',
           order_id: createJson.orderId,
           handler: async (response) => {
-            console.log('✅ Razorpay success handler', response);
+            console.log(' Razorpay success handler', response);
             await verifyRazorpayPayment(response.razorpay_order_id, response.razorpay_payment_id, response.razorpay_signature, orderId);
           },
           theme: { color:'#22c55e' },
@@ -629,7 +650,7 @@
 
         // Handle failed event — record and redirect with amount & reason
         rzp.on('payment.failed', async (response) => {
-          console.error('❌ Razorpay payment.failed', response.error);
+          console.error(' Razorpay payment.failed', response.error);
           try {
             const failResp = await fetch('/payment/payment-failure', {
               method:'POST',
@@ -662,7 +683,7 @@
 
       } catch (err) {
         Swal.close();
-        console.error('❌ handleRazorpayPaymentRetry error', err);
+        console.error(' handleRazorpayPaymentRetry error', err);
         Swal.fire({ icon:'error', title:'Error', text: err.message || 'Failed to initiate retry payment', confirmButtonColor:'#ef4444' });
         document.getElementById('retryPaymentBtn').disabled = false;
         document.getElementById('retryPaymentBtn').textContent = 'Retry Payment';
@@ -687,11 +708,11 @@
           .then(() => window.location.href = `/orderSuccess?orderId=${json.orderId}`);
       } catch (err) {
         Swal.close();
-        console.error('❌ verifyRazorpayPayment error', err);
+        console.error(' verifyRazorpayPayment error', err);
         Swal.fire({ icon:'error', title:'Verification Failed', text: err.message || 'Could not verify payment', confirmButtonColor:'#ef4444' })
           .then(() => window.location.href = `/orders`);
       }
     }
   </script>
-</body>
-  </html>
+  </body>
+</html>

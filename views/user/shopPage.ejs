@@ -464,7 +464,7 @@
 }
 
 .rating i {
-  color: #facc15; /* gold */
+  color: #facc15; 
 }
 
 .rating .empty {
@@ -493,7 +493,7 @@
 @media (max-width: 768px) {
   .shop-search-bar {
     position: relative;
-    z-index: 10; /* LOWER than mobile menu */
+    z-index: 10; 
   }
 }
 
@@ -512,11 +512,11 @@
 @media (max-width: 768px) {
   .mobile-nav {
     position: fixed;
-    top: 60px;            /* height of header */
+    top: 60px;         
     left: 0;
     width: 100%;
     background: var(--bg-nav);
-    z-index: 3000;        /* HIGHER than search & filters */
+    z-index: 3000;        
   }
 }
 
@@ -719,7 +719,6 @@
                     <% } %>
                   </div>
 
-                  <!-- ⭐ PRODUCT RATING -->
                   <div class="rating">
                     <%
                     let rating = product.averageRating || 0;

@@ -22,7 +22,7 @@
   .admin-content-wrapper {
     transition: margin-left 0.3s ease;
     min-height: 100vh;
-    padding-top: 70px; /* Header height */
+    padding-top: 70px; 
   }
 
   /* Desktop View */
@@ -98,7 +98,7 @@
   .search-icon { left: 16px; }
   .clear-icon { right: 16px; cursor: pointer; display: none; padding: 5px; }
 
-  /* --- INBOX CARD & ROWS --- */
+
   .inbox-card {
     background: var(--white);
     border-radius: 16px;
@@ -138,7 +138,7 @@
 
   .user-details {
     flex-grow: 1;
-    min-width: 0; /* Important for text truncation */
+    min-width: 0; 
   }
 
   .user-details h4 {
@@ -221,7 +221,7 @@
     }
 
     .view-btn {
-        display: none; /* Hide text button on mobile to save space */
+        display: none; 
     }
 
     .admin-content-wrapper {
@@ -232,7 +232,7 @@
 
 <div class="admin-content-wrapper">
   <div class="inbox-container">
-    
+
     <div class="page-title-area">
       <div>
         <h2>Customer Support</h2>
@@ -252,39 +252,39 @@
         id="searchInput"
         class="search-input"
         placeholder="Search by name or email..."
-        onkeyup="filterUsers()"
-      />
+        onkeyup="filterUsers()" />
       <span id="clearSearch" class="clear-icon" onclick="clearSearch()">✕</span>
     </div>
 
     <div class="inbox-card" id="userList">
       <% if (users && users.length > 0) { %>
-        <% users.forEach(user => { %>
-          <a href="/admin/contact/<%= user._id %>" class="user-row <%= user.unreadCount > 0 ? 'unread' : '' %>">
-            
-            <div class="avatar">
-              <%= user?.name ? user.name.charAt(0).toUpperCase() : "U" %>
-            </div>
+      <% users.forEach(user => { %>
+      <a href="/admin/contact/<%= user._id %>"
+        class="user-row <%= user.unreadCount > 0 ? 'unread' : '' %>">
 
-            <div class="user-details">
-              <h4><%= user?.name || "Unknown User" %></h4>
-              <p><%= user?.email || "No Email" %></p>
-            </div>
-
-            <div class="action-area">
-              <% if (user.unreadCount > 0) { %>
-                <span class="unread-badge"><%= user.unreadCount %></span>
-              <% } %>
-              <span class="view-btn">Open Chat</span>
-            </div>
-          </a>
-        <% }) %>
-      <% } else { %>
-        <div class="empty-state">
-          <div style="font-size: 40px; margin-bottom: 15px;">📨</div>
-          <h3>No messages yet</h3>
-          <p>When users contact you, they appear here.</p>
+        <div class="avatar">
+          <%= user?.name ? user.name.charAt(0).toUpperCase() : "U" %>
         </div>
+
+        <div class="user-details">
+          <h4><%= user?.name || "Unknown User" %></h4>
+          <p><%= user?.email || "No Email" %></p>
+        </div>
+
+        <div class="action-area">
+          <% if (user.unreadCount > 0) { %>
+          <span class="unread-badge"><%= user.unreadCount %></span>
+          <% } %>
+          <span class="view-btn">Open Chat</span>
+        </div>
+      </a>
+      <% }) %>
+      <% } else { %>
+      <div class="empty-state">
+        <div style="font-size: 40px; margin-bottom: 15px;">📨</div>
+        <h3>No messages yet</h3>
+        <p>When users contact you, they appear here.</p>
+      </div>
       <% } %>
     </div>
 
@@ -302,7 +302,7 @@
     clearIcon.style.display = filter ? "block" : "none";
 
     rows.forEach(row => {
-      // Search in both name and email
+      
       const name = row.querySelector("h4").innerText.toLowerCase();
       const email = row.querySelector("p").innerText.toLowerCase();
       

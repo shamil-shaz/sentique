@@ -6,8 +6,7 @@ const mongoose = require("mongoose");
 
 const loadWishlist = async (req, res) => {
   try {
-
-const userId = req.userId;
+    const userId = req.userId;
     if (!userId) {
       console.log("User not logged in, redirecting...");
       return res.redirect("/login");
@@ -30,40 +29,38 @@ const userId = req.userId;
       .exec();
     const wishlistItems = wishlist ? wishlist.products : [];
 
-    const validItems = wishlistItems.map((item) => {
-      const p = item.productId;
-      if (!p) return null; // Remove only if product was deleted from DB
+    const validItems = wishlistItems
+      .map((item) => {
+        const p = item.productId;
+        if (!p) return null;
 
-      const outOfStock = p.variants && p.variants.every((v) => v.stock <= 0);
-      
-      // Determine if the user can actually click "Add to Cart" right now
-      const isCurrentlyBuyable = 
-        !p.isBlocked && 
-        p.status === "Available" && 
-        p.category?.isListed !== false && 
-        p.brand?.isBlocked !== true &&
-        !outOfStock;
+        const outOfStock = p.variants && p.variants.every((v) => v.stock <= 0);
 
-      // Convert to object and add our custom flag
-      return {
-        ...item.toObject(),
-        isCurrentlyBuyable
-      };
-    }).filter(item => item !== null);
+        const isCurrentlyBuyable =
+          !p.isBlocked &&
+          p.status === "Available" &&
+          p.category?.isListed !== false &&
+          p.brand?.isBlocked !== true &&
+          !outOfStock;
+
+        return {
+          ...item.toObject(),
+          isCurrentlyBuyable,
+        };
+      })
+      .filter((item) => item !== null);
 
     const totalItems = validItems.length;
 
     const totalPages = Math.ceil(totalItems / limit);
     const paginatedItems = validItems.slice(skip, skip + limit);
 
-
-
     res.render("wishlist", {
       wishlistItems: paginatedItems,
       totalItems,
       totalPages,
       currentPage: page,
-      user: req.user || req.session.user || null
+      user: req.user || req.session.user || null,
     });
   } catch (err) {
     console.error("Load wishlist error:", err.message, err.stack);
@@ -73,9 +70,8 @@ const userId = req.userId;
 
 const addToWishlist = async (req, res) => {
   try {
-   const userId = req.userId;
+    const userId = req.userId;
     const { productId } = req.body;
-    
 
     if (!userId) {
       console.log("No userId in session");
@@ -127,7 +123,7 @@ const addToWishlist = async (req, res) => {
 
 const removeFromWishlist = async (req, res) => {
   try {
-   const userId = req.userId;
+    const userId = req.userId;
     const productId = req.params.id;
 
     console.log("Remove from wishlist request:", { userId, productId });
@@ -175,7 +171,7 @@ const removeFromWishlist = async (req, res) => {
 
 const moveAllToCart = async (req, res) => {
   try {
-   const userId = req.userId;
+    const userId = req.userId;
     console.log("Move all to cart request for userId:", userId);
 
     if (!userId) {
@@ -200,96 +196,33 @@ const moveAllToCart = async (req, res) => {
 
     let skippedItems = 0;
 
-    // for (let wishlistItem of wishlist.products) {
-    //   const product = wishlistItem.productId;
-    //   if (!product) continue;
-
-    //   if (
-    //     product.isBlocked ||
-    //     product.status !== "Available" ||
-    //     !product.variants ||
-    //     product.variants.length === 0 ||
-    //     product.variants.every((v) => v.stock <= 0)
-    //   ) {
-    //     skippedItems++;
-    //     continue;
-    //   }
-
-    //   let selectedVariant = null;
-    //   const productIdStr = String(product._id);
-
-    //   if (variantsMap[productIdStr]) {
-    //     const uiSize = variantsMap[productIdStr];
-    //     selectedVariant = product.variants.find(
-    //       (v) => String(v.size) === String(uiSize)
-    //     );
-    //   }
-
-    //   if (!selectedVariant && wishlistItem.variantSize) {
-    //     selectedVariant = product.variants.find(
-    //       (v) => String(v.size) === String(wishlistItem.variantSize)
-    //     );
-    //   }
-
-    //   if (!selectedVariant) {
-    //     selectedVariant = product.variants.reduce((min, v) => {
-    //       const price = v.salePrice || v.regularPrice;
-    //       return !min || price < (min.salePrice || min.regularPrice) ? v : min;
-    //     }, null);
-    //   }
-
-    //   if (!selectedVariant || selectedVariant.stock <= 0) {
-    //     skippedItems++;
-    //     continue;
-    //   }
-
-    //   const varSize = selectedVariant.size;
-    //   const price = selectedVariant.salePrice || selectedVariant.regularPrice;
-
-    //   const existingItem = cart.items.find(
-    //     (item) =>
-    //       item.productId.toString() === product._id.toString() &&
-    //       item.variantSize === varSize
-    //   );
-
-    //   if (existingItem) {
-    //     existingItem.quantity += 1;
-    //     existingItem.price = price;
-    //   } else {
-    //     cart.items.push({
-    //       productId: product._id,
-    //       variantSize: varSize,
-    //       quantity: 1,
-    //       price,
-    //     });
-    //   }
-    // }
-
-
-  for (let wishlistItem of wishlist.products) {
+    for (let wishlistItem of wishlist.products) {
       const product = wishlistItem.productId;
       if (!product) continue;
 
-      if (product.isBlocked || product.status !== "Available" || (product.category && product.category.isListed === false)) {
+      if (
+        product.isBlocked ||
+        product.status !== "Available" ||
+        (product.category && product.category.isListed === false)
+      ) {
         skippedItems++;
         continue;
       }
 
       const productIdStr = String(product._id);
-      const requestedSize = variantsMap[productIdStr] || wishlistItem.variantSize;
+      const requestedSize =
+        variantsMap[productIdStr] || wishlistItem.variantSize;
 
-      // FIX 1: TYPE-SAFE FIND
       let selectedVariant = product.variants.find(
         (v) => Number(v.size) === Number(requestedSize)
       );
 
-      // FIX 2: STRICT AVAILABILITY
       if (!selectedVariant || selectedVariant.stock <= 0) {
         skippedItems++;
         continue;
       }
 
-      const varSize = Number(selectedVariant.size); // Ensure it's a number
+      const varSize = Number(selectedVariant.size);
       const price = selectedVariant.salePrice || selectedVariant.regularPrice;
 
       const existingItem = cart.items.find(
@@ -298,14 +231,13 @@ const moveAllToCart = async (req, res) => {
           Number(item.variantSize) === varSize
       );
 
-      // FIX 3: QUANTITY CAP
       if (existingItem) {
         if (existingItem.quantity < 5) {
-           existingItem.quantity += 1;
-           existingItem.price = price;
+          existingItem.quantity += 1;
+          existingItem.price = price;
         } else {
-           skippedItems++; // Already at limit
-           continue;
+          skippedItems++;
+          continue;
         }
       } else {
         cart.items.push({
@@ -319,20 +251,20 @@ const moveAllToCart = async (req, res) => {
 
     await cart.save();
 
-    // CLEANUP: Only remove items from wishlist if they actually made it to the cart
     const movedIds = wishlist.products
       .filter((item) => {
         const p = item.productId;
         if (!p || p.isBlocked || p.status !== "Available") return false;
 
         const requestedSize = variantsMap[String(p._id)] || item.variantSize;
-        const selectedVariant = p.variants.find(v => Number(v.size) === Number(requestedSize));
-        
-        // Only remove if it was in stock AND not already maxed out in cart (optional check)
+        const selectedVariant = p.variants.find(
+          (v) => Number(v.size) === Number(requestedSize)
+        );
+
         return selectedVariant && selectedVariant.stock > 0;
       })
       .map((item) => item.productId._id);
-      
+
     await Wishlist.updateOne(
       { userId },
       { $pull: { products: { productId: { $in: movedIds } } } }
@@ -372,7 +304,7 @@ const getWishlistCount = async (req, res) => {
 };
 
 const updateVariant = async (req, res) => {
- const userId = req.userId;
+  const userId = req.userId;
   const { productId, variantSize } = req.body;
 
   await Wishlist.updateOne(

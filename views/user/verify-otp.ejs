@@ -1,14 +1,14 @@
-<!-- FRONTEND - Updated OTP Verification Page -->
+
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OTP Verification</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OTP Verification</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <style>
+    <style>
     * {
       margin: 0;
       padding: 0;
@@ -133,31 +133,35 @@
       }
     }
   </style>
-</head>
-<body>
+  </head>
+  <body>
 
-  <form id="otpForm" onsubmit="return validateOTPForm(event)">
-    <div class="otp-box">
-      <h2>Enter the OTP</h2>
-      <p>The OTP has been sent to your registered email</p>
+    <form id="otpForm" onsubmit="return validateOTPForm(event)">
+      <div class="otp-box">
+        <h2>Enter the OTP</h2>
+        <p>The OTP has been sent to your registered email</p>
 
-      <input type="text" id="otpInput" placeholder="Enter the OTP" name="otp" required />
-      <div class="error-message" id="errorMessage">Please enter a valid 4 or 6 digit OTP.</div>
+        <input type="text" id="otpInput" placeholder="Enter the OTP" name="otp"
+          required />
+        <div class="error-message" id="errorMessage">Please enter a valid 4 or 6
+          digit OTP.</div>
 
-      <div class="countdown" id="countdown">0 : 57 seconds remaining</div>
+        <div class="countdown" id="countdown">0 : 57 seconds remaining</div>
 
-      <div class="btn-group">
-        <button type="button" id="resendBtn" class="btn resend" onclick="resendOTP()" disabled>
-          Resend OTP
-        </button>
-        <button type="submit" id="verifyBtn" class="btn verify">Verify</button>
+        <div class="btn-group">
+          <button type="button" id="resendBtn" class="btn resend"
+            onclick="resendOTP()" disabled>
+            Resend OTP
+          </button>
+          <button type="submit" id="verifyBtn"
+            class="btn verify">Verify</button>
+        </div>
+
+        <a href="/login" class="back-login">Back to Login</a>
       </div>
+    </form>
 
-      <a href="/login" class="back-login">Back to Login</a>
-    </div>
-  </form>
-
-  <script>
+    <script>
     let seconds = 57;
     const countdownEl = document.getElementById('countdown');
     const resendBtn = document.getElementById("resendBtn");
@@ -342,5 +346,5 @@
     }
   </script>
 
-</body>
+  </body>
 </html>

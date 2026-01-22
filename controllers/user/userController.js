@@ -8,11 +8,10 @@ const Wallet = require("../../models/walletSchema");
 const mongoose = require("mongoose");
 const Review = require("../../models/reviewSchema");
 
-
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.NODEMAILER_EMAIL, 
+    user: process.env.NODEMAILER_EMAIL,
     pass: process.env.NODEMAILER_PASSWORD,
   },
 });
@@ -27,8 +26,7 @@ const pageNotFound = async (req, res) => {
 
 const loadSignup = async (req, res) => {
   try {
-    if (!req.userId)
-{
+    if (!req.userId) {
       return res.render("signup", { message: "" });
     } else {
       res.redirect("/");
@@ -300,26 +298,29 @@ const verifyOtp = async (req, res) => {
         );
       }
 
-    req.login(newUser, (err) => {
+      req.login(newUser, (err) => {
         if (err) {
           console.error("Error during req.login after signup:", err);
-          return res.status(500).json({ 
-            success: false, 
-            message: "Signup successful, but session could not be established." 
+          return res.status(500).json({
+            success: false,
+            message: "Signup successful, but session could not be established.",
           });
         }
         req.session.user = {
           id: newUser._id,
           _id: newUser._id,
           name: newUser.name,
-          email: newUser.email
+          email: newUser.email,
         };
-        
+
         req.session.userOtp = null;
         req.session.userData = null;
         req.session.otpExpirationTime = null;
 
-        console.log("User logged in via Passport after OTP verification:", newUser.email);
+        console.log(
+          "User logged in via Passport after OTP verification:",
+          newUser.email
+        );
 
         return res.status(200).json({
           success: true,
@@ -369,7 +370,7 @@ const sendOtp = async (req, res) => {
     req.session.userData = { email, fullName, phone, password };
     req.session.userOtp = otp;
 
-    req.session.otpExpirationTime = Date.now() + 60000; // 1 minute
+    req.session.otpExpirationTime = Date.now() + 60000; 
 
     const emailSent = await sendVerificationEmail(email, otp);
 
@@ -413,7 +414,7 @@ const resendOtp = async (req, res) => {
     const otp = generateOtp();
 
     req.session.userOtp = otp;
-    req.session.otpExpirationTime = Date.now() + 60000; // 1 minute
+    req.session.otpExpirationTime = Date.now() + 60000; 
 
     const emailSent = await sendVerificationEmail(userData.email, otp);
 
@@ -445,8 +446,7 @@ const resendOtp = async (req, res) => {
 
 const loadLogin = async (req, res) => {
   try {
-    if (!req.userId)
-{
+    if (!req.userId) {
       return res.render("login", { message: "" });
     } else {
       res.redirect("/");
@@ -474,21 +474,17 @@ const login = async (req, res) => {
     }
 
     if (findUser.isBlocked) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Your account is blocked. Contact support.",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Your account is blocked. Contact support.",
+      });
     }
 
     if (!findUser.password) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "This account uses Google login only",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "This account uses Google login only",
+      });
     }
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
@@ -498,56 +494,52 @@ const login = async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
 
- req.login(findUser, async (err) => {
-  if (err) {
-    console.error("Passport login error:", err);
-    return res.status(500).json({ success: false, message: "Login failed" });
-  }
-  req.session.user = {
-    id: findUser._id,
-    _id: findUser._id,
-    name: findUser.name,
-    email: findUser.email,
-    image: findUser.image
-  };
+    req.login(findUser, async (err) => {
+      if (err) {
+        console.error("Passport login error:", err);
+        return res
+          .status(500)
+          .json({ success: false, message: "Login failed" });
+      }
+      req.session.user = {
+        id: findUser._id,
+        _id: findUser._id,
+        name: findUser.name,
+        email: findUser.email,
+        image: findUser.image,
+      };
 
-  findUser.lastLogin = new Date();
-  await findUser.save();
+      findUser.lastLogin = new Date();
+      await findUser.save();
 
-  return res.json({
-    success: true,
-    message: "Login successful",
-    redirectUrl: "/",
-  });
-});
-
-   
+      return res.json({
+        success: true,
+        message: "Login successful",
+        redirectUrl: "/",
+      });
+    });
   } catch (error) {
     console.error("Login error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Something went wrong. Please try again later.",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    });
   }
 };
 
 const logout = async (req, res) => {
-    try {
-        req.logout((err) => {
-            req.session.destroy((err) => {
-               res.clearCookie('userSession');
-                res.redirect("/login");
-            });
-        });
-    } catch (error) {
-        console.log("Logout error:", error);
-        res.redirect("/pageNotFound");
-    }
+  try {
+    req.logout((err) => {
+      req.session.destroy((err) => {
+        res.clearCookie("userSession");
+        res.redirect("/login");
+      });
+    });
+  } catch (error) {
+    console.log("Logout error:", error);
+    res.redirect("/pageNotFound");
+  }
 };
-
-
 
 module.exports = {
   pageNotFound,
@@ -563,5 +555,4 @@ module.exports = {
   sendOtp,
   ensureUserHasReferralCode,
   generateUniqueReferralCode,
-  
 };

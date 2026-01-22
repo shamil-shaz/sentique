@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Wallet | Premium Dashboard</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Wallet | Premium Dashboard</title>
 
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <style>
-    /* =========================================
-       1. VARIABLES & THEME
-       ========================================= */
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet">
+
+    <style>
+
     :root {
       --font-main: 'Plus Jakarta Sans', sans-serif;
-
-      /* Gold Theme */
+      
       --gold-primary: #e5c14a;
       --gold-gradient: linear-gradient(135deg, #e5c14a 0%, #f0d978 100%);
       --gold-glow: rgba(229, 193, 74, 0.3);
@@ -51,9 +51,7 @@
       --row-hover: #1f1f1f;
     }
 
-    /* =========================================
-       2. RESET & LAYOUT
-       ========================================= */
+   
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body {
@@ -70,7 +68,7 @@
       padding: 30px 20px;
     }
 
-    /* Use main-content class to match sidebar expectations */
+   
     .main-content {
       display: grid;
       grid-template-columns: 280px 1fr;
@@ -164,7 +162,7 @@
     }
     .filter-btn.active { background: var(--bg-card); color: var(--text-main); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-    /* TABLE STYLING */
+    
     .table-wrapper { width: 100%; }
     table { width: 100%; border-collapse: collapse; }
     
@@ -208,8 +206,7 @@
         margin-bottom: 0;
       }
 
-      /* Order Elements Logic */
-      /* 1. Description (Top Left) */
+      
       td:nth-child(3) { 
         width: 60%; 
         order: 1; 
@@ -242,7 +239,7 @@
         text-align: right; 
       }
 
-      /* Hide Serial No & Type Badge on mobile to prevent misalignment */
+    
       td:nth-child(1), td:nth-child(2) { display: none; }
     }
 
@@ -315,105 +312,123 @@
       .btn-gold { width: 100%; justify-content: center; }
     }
   </style>
-</head>
+  </head>
 
-<body>
-  <%- include('../../views/partials/user/header') %>
+  <body>
+    <%- include('../../views/partials/user/header') %>
 
-  <div class="wallet-container">
-    
-    <!-- Use main-content class that sidebar expects -->
-    <div class="main-content">
-      
-      <!-- Your sidebar partial (includes its own toggle button and script) -->
-      <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'wallet' }) %>
+    <div class="wallet-container">
 
-      <!-- MAIN CONTENT -->
-      <div class="content-section">
-        
-        <div class="page-header">
-          <div class="header-text">
-            <div class="breadcrumb">Home / Wallet</div>
-            <h1>My Wallet</h1>
+      <!-- Use main-content class that sidebar expects -->
+      <div class="main-content">
+
+        <!-- Your sidebar partial (includes its own toggle button and script) -->
+        <%- include("../partials/user/profile-sidebar.ejs", { user: user,
+        activePage: 'wallet' }) %>
+
+        <!-- MAIN CONTENT -->
+        <div class="content-section">
+
+          <div class="page-header">
+            <div class="header-text">
+              <div class="breadcrumb">Home / Wallet</div>
+              <h1>My Wallet</h1>
+            </div>
+            <button class="btn-gold" onclick="openAddMoneyModal()">+ Add
+              Money</button>
           </div>
-          <button class="btn-gold" onclick="openAddMoneyModal()">+ Add Money</button>
-        </div>
 
-        <div class="stats-grid">
-          <div class="stat-card dark">
-            <div class="stat-label">Available Balance</div>
-            <div class="stat-value" id="walletBalance">₹0.00</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Total Credits</div>
-            <div class="stat-value" style="color:#16a34a" id="totalCredits">₹0.00</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Total Debits</div>
-            <div class="stat-value" style="color:#dc2626" id="totalDebits">₹0.00</div>
-          </div>
-        </div>
-
-        <div class="transactions-box">
-          <div class="box-header">
-            <h2 style="font-size:18px; font-weight:700;">Transactions</h2>
-            <div class="filter-group">
-              <button class="filter-btn active" onclick="filterTransactions('all', event)">All</button>
-              <button class="filter-btn" onclick="filterTransactions('credit', event)">In</button>
-              <button class="filter-btn" onclick="filterTransactions('debit', event)">Out</button>
+          <div class="stats-grid">
+            <div class="stat-card dark">
+              <div class="stat-label">Available Balance</div>
+              <div class="stat-value" id="walletBalance">₹0.00</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Credits</div>
+              <div class="stat-value" style="color:#16a34a"
+                id="totalCredits">₹0.00</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Debits</div>
+              <div class="stat-value" style="color:#dc2626"
+                id="totalDebits">₹0.00</div>
             </div>
           </div>
 
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width: 50px;">#</th>
-                  <th style="width: 80px;">Type</th>
-                  <th>Description</th>
-                  <th style="width: 150px;">Date</th>
-                  <th style="width: 120px;">Amount</th>
-                  <th style="width: 100px;">Status</th>
-                </tr>
-              </thead>
-              <tbody id="transactionBody">
-                <tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted)">Loading...</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <div class="transactions-box">
+            <div class="box-header">
+              <h2 style="font-size:18px; font-weight:700;">Transactions</h2>
+              <div class="filter-group">
+                <button class="filter-btn active"
+                  onclick="filterTransactions('all', event)">All</button>
+                <button class="filter-btn"
+                  onclick="filterTransactions('credit', event)">In</button>
+                <button class="filter-btn"
+                  onclick="filterTransactions('debit', event)">Out</button>
+              </div>
+            </div>
 
-          <div class="pagination" id="paginationContainer"></div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">#</th>
+                    <th style="width: 80px;">Type</th>
+                    <th>Description</th>
+                    <th style="width: 150px;">Date</th>
+                    <th style="width: 120px;">Amount</th>
+                    <th style="width: 100px;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionBody">
+                  <tr><td colspan="6"
+                      style="text-align:center; padding:30px; color:var(--text-muted)">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination" id="paginationContainer"></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="addMoneyModal" class="modal">
-    <div class="modal-content">
-      <h3 style="font-size:18px; font-weight:800; margin-bottom:5px">Add Funds</h3>
-      <p style="font-size:12px; color:var(--text-muted)">Secured by Razorpay</p>
-      
-      <input type="number" id="amountInput" placeholder="₹ Enter Amount" />
-      
-      <div class="quick-chips">
-        <button class="chip" onclick="setQuickAmount(100, event)">₹100</button>
-        <button class="chip" onclick="setQuickAmount(500, event)">₹500</button>
-        <button class="chip" onclick="setQuickAmount(1000, event)">₹1000</button>
-        <button class="chip" onclick="setQuickAmount(2000, event)">₹2000</button>
-        <button class="chip" onclick="setQuickAmount(5000, event)">₹5000</button>
-        <button class="chip" onclick="setQuickAmount(10000, event)">₹10k</button>
-      </div>
-      
-      <div class="modal-btns">
-        <button class="btn-full btn-close" onclick="closeAddMoneyModal()">Cancel</button>
-        <button class="btn-full btn-pay" onclick="proceedToPayment()">Pay Now</button>
+    <div id="addMoneyModal" class="modal">
+      <div class="modal-content">
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:5px">Add
+          Funds</h3>
+        <p style="font-size:12px; color:var(--text-muted)">Secured by
+          Razorpay</p>
+
+        <input type="number" id="amountInput" placeholder="₹ Enter Amount" />
+
+        <div class="quick-chips">
+          <button class="chip"
+            onclick="setQuickAmount(100, event)">₹100</button>
+          <button class="chip"
+            onclick="setQuickAmount(500, event)">₹500</button>
+          <button class="chip"
+            onclick="setQuickAmount(1000, event)">₹1000</button>
+          <button class="chip"
+            onclick="setQuickAmount(2000, event)">₹2000</button>
+          <button class="chip"
+            onclick="setQuickAmount(5000, event)">₹5000</button>
+          <button class="chip"
+            onclick="setQuickAmount(10000, event)">₹10k</button>
+        </div>
+
+        <div class="modal-btns">
+          <button class="btn-full btn-close"
+            onclick="closeAddMoneyModal()">Cancel</button>
+          <button class="btn-full btn-pay" onclick="proceedToPayment()">Pay
+            Now</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <%- include('../../views/partials/user/footer') %>
+    <%- include('../../views/partials/user/footer') %>
 
-  <script>
+    <script>
     let currentPage = 1, totalPages = 1, currentFilter = "all";
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -542,5 +557,5 @@
     }
     window.onclick = e => { if(e.target.id === 'addMoneyModal') closeAddMoneyModal(); }
   </script>
-</body>
+  </body>
 </html>

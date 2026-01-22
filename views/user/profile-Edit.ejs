@@ -11,11 +11,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-    /* =========================
-       1. CSS VARIABLES (THEMING)
-       ========================= */
+ 
     :root {
-        /* --- LIGHT MODE (Clean Professional) --- */
+        /* --- LIGHT MODE  --- */
         --bg-body: #f3f4f6;
         --bg-card: #ffffff;
         --bg-input: #f9fafb;
@@ -28,15 +26,15 @@
         --shadow-card: 0 10px 30px rgba(0,0,0,0.08);
         --shadow-input: 0 0 0 4px rgba(0, 0, 0, 0.05);
         
-        /* === UPDATED ACCENTS (Black/Dark Gray instead of Violet) === */
-        --accent-gradient: linear-gradient(135deg, #374151 0%, #111827 100%); /* Charcoal to Black */
-        --accent-solid: #111827; /* Deep Black */
-        --btn-text: #ffffff; /* White text on Black button */
+        
+        --accent-gradient: linear-gradient(135deg, #374151 0%, #111827 100%); 
+        --accent-solid: #111827; 
+        --btn-text: #ffffff; 
     }
 
-    /* --- DARK MODE (Luxury Gold) --- */
+    
     body.dark-mode {
-        /* Gold Definition */
+       
         --gold-gradient: linear-gradient(135deg, #e5c14a 0%, #f0d978 100%);
         --gold-solid: #e5c14a;
 
@@ -50,21 +48,18 @@
         
         --border-color: #333333;
         
-        /* Luxury Shadow */
+       
         --shadow-card: 
             0 10px 40px rgba(0, 0, 0, 0.8),
             0 0 20px rgba(229, 193, 74, 0.1);
         --shadow-input: 0 0 0 4px rgba(229, 193, 74, 0.15);
         
-        /* Accents (Gold Override) */
+       
         --accent-gradient: linear-gradient(135deg, #e5c14a 0%, #f0d978 100%);
         --accent-solid: #f0d978;
-        --btn-text: #000000; /* Black text on Gold button */
+        --btn-text: #000000; 
     }
-
-    /* =========================
-       2. GLOBAL RESET
-       ========================= */
+  
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -219,12 +214,12 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         transition: all 0.3s;
         border: 3px solid var(--bg-card);
-        color: #ffffff; /* Icon always white on dark button */
+        color: #ffffff; 
         font-size: 18px;
     }
     
     body.dark-mode .camera-icon {
-        color: #000000; /* Black icon on Gold button */
+        color: #000000; 
     }
 
     .camera-icon:hover { transform: scale(1.1); }
@@ -403,7 +398,7 @@
         border-radius: 50%;
         display: block;
         stroke-width: 3;
-        stroke: #4ade80; /* Keep Green for success */
+        stroke: #4ade80; 
         stroke-miterlimit: 10;
         margin: 0 auto 20px;
         box-shadow: inset 0px 0px 0px #4ade80;

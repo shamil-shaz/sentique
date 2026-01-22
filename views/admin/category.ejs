@@ -71,7 +71,7 @@
       padding: 10px 20px;
       border-radius: 8px;
       font-weight: 600;
-      white-space: nowrap; /* Keeps text on one line */
+      white-space: nowrap; 
       transition: all 0.3s ease;
       box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
     }
@@ -104,22 +104,19 @@
     /* --- TABLE FIXES FOR SCROLLING --- */
     .table-responsive {
       border-radius: 8px;
-      /* IMPORTANT: overflow-x: auto enables horizontal scrolling */
       overflow-x: auto; 
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+      -webkit-overflow-scrolling: touch; 
       border: 1px solid #e5e7eb;
     }
     
     .table {
       margin-bottom: 0;
       vertical-align: middle;
-      /* Optional: Force minimum width to ensure layout looks good before scrolling triggers */
       min-width: 800px; 
     }
     
     .table th, .table td {
       padding: 1rem;
-      /* IMPORTANT: Prevents text from wrapping and breaking layout on small screens */
       white-space: nowrap; 
     }
 
@@ -422,7 +419,7 @@
 
     <script>
 
-    /* ================= IMAGE PREVIEW LOGIC ================= */
+    
 const imageInput = document.getElementById('categoryImage');
 const imagePreview = document.getElementById('imagePreview');
 const previewContainer = document.getElementById('previewContainer');
@@ -436,15 +433,15 @@ imageInput?.addEventListener('change', function() {
     const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
       Swal.fire("Error", "Please select a valid image (JPG, PNG, WEBP)", "error");
-      this.value = ""; // Clear the selection
+      this.value = ""; 
       return;
     }
 
     const reader = new FileReader();
     reader.onload = function(e) {
       imagePreview.src = e.target.result;
-      previewContainer.style.display = 'block'; // Show preview
-      dropZone.style.display = 'none';         // Hide upload box
+      previewContainer.style.display = 'block'; 
+      dropZone.style.display = 'none';         
     }
     reader.readAsDataURL(file);
   }
@@ -459,9 +456,9 @@ function removeImage(event) {
   const previewContainer = document.getElementById('previewContainer');
   const dropZone = document.getElementById('dropZone');
   
-  imageInput.value = ""; // Clear file from input
+  imageInput.value = ""; 
   previewContainer.style.display = 'none';
-  dropZone.style.display = 'block'; // Show upload box again
+  dropZone.style.display = 'block'; 
 }
 /* ================= OPEN / CLOSE ADD CATEGORY MODAL ================= */
 function openModal() {

@@ -1,8 +1,11 @@
 <%- include("../partials/user/header.ejs") %>
 
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
 /* ========================================
    COMPLETE RESPONSIVE CSS FOR WISHLIST
@@ -1004,39 +1007,41 @@ footer {
             let hasOutOfStock = false;
 
             if (wishlistItems && wishlistItems.length > 0) {
-                hasUnlisted = wishlistItems.some(item => {
-                    const p = item.productId;
-                    if (!p) return false;
-                    const outOfStock = Array.isArray(p.variants) && p.variants.length > 0
-                        ? p.variants.every(v => v.stock <= 0)
-                        : (p.stock !== undefined && p.stock <= 0);
-                    return (
-                        p.isBlocked ||
-                        p.status !== 'Available' ||
-                        (p.category && p.category.isListed === false) ||
-                        (p.brand && p.brand.isBlocked === true) ||
-                        outOfStock
-                    );
-                });
+            hasUnlisted = wishlistItems.some(item => {
+            const p = item.productId;
+            if (!p) return false;
+            const outOfStock = Array.isArray(p.variants) && p.variants.length >
+            0
+            ? p.variants.every(v => v.stock <= 0)
+            : (p.stock !== undefined && p.stock <= 0);
+            return (
+            p.isBlocked ||
+            p.status !== 'Available' ||
+            (p.category && p.category.isListed === false) ||
+            (p.brand && p.brand.isBlocked === true) ||
+            outOfStock
+            );
+            });
 
-                hasOutOfStock = wishlistItems.some(item => {
-                    const p = item.productId;
-                    if (!p) return false;
-                    const selected = Array.isArray(p.variants) && p.variants.length > 0
-                        ? p.variants.find(v => v.size === item.variantSize)
-                        : null;
-                    const allOut = Array.isArray(p.variants) && p.variants.length > 0
-                        ? p.variants.every(v => v.stock <= 0)
-                        : (p.stock !== undefined && p.stock <= 0);
-                    return allOut || (selected && selected.stock <= 0);
-                });
+            hasOutOfStock = wishlistItems.some(item => {
+            const p = item.productId;
+            if (!p) return false;
+            const selected = Array.isArray(p.variants) && p.variants.length > 0
+            ? p.variants.find(v => v.size === item.variantSize)
+            : null;
+            const allOut = Array.isArray(p.variants) && p.variants.length > 0
+            ? p.variants.every(v => v.stock <= 0)
+            : (p.stock !== undefined && p.stock <= 0);
+            return allOut || (selected && selected.stock <= 0);
+            });
             }
             %>
 
             <button class="move-all-btn"
                 onclick="moveAllToBag()"
                 <%=(hasUnlisted || hasOutOfStock) ? 'disabled' : '' %>
-                title="<%= (hasUnlisted || hasOutOfStock) ? 'Some items are unavailable or out of stock' : '' %>">
+                title="<%= (hasUnlisted || hasOutOfStock) ?
+                'Some items are unavailable or out of stock' : '' %>">
                 <i class="fa fa-shopping-cart"></i> Move All to Cart
             </button>
         </div>
@@ -1047,7 +1052,8 @@ footer {
             <div class="empty-wishlist">
                 <div class="empty-icon"><i class="fa fa-heart"></i></div>
                 <h3>Your Wishlist is Empty</h3>
-                <p>Save your favorite items here and never lose track of them!</p>
+                <p>Save your favorite items here and never lose track of
+                    them!</p>
                 <a href="/shopPage" class="browse-btn">
                     <i class="fa fa-search"></i> Start Shopping
                 </a>
@@ -1061,15 +1067,19 @@ footer {
             <% if (product) { %>
 
             <%
-            const isProductBlocked = product.isBlocked || product.status !== 'Available';
-            const isCategoryBlocked = product.category && product.category.isListed === false;
-            const isBrandBlocked = product.brand && product.brand.isBlocked === true;
+            const isProductBlocked = product.isBlocked || product.status !==
+            'Available';
+            const isCategoryBlocked = product.category &&
+            product.category.isListed === false;
+            const isBrandBlocked = product.brand && product.brand.isBlocked ===
+            true;
 
             const allOut = product.variants && product.variants.length > 0
-                ? product.variants.every(v => v.stock <= 0)
-                : (product.stock !== undefined && product.stock <= 0);
+            ? product.variants.every(v => v.stock <= 0)
+            : (product.stock !== undefined && product.stock <= 0);
 
-            const isUnavailable = isProductBlocked || isCategoryBlocked || isBrandBlocked;
+            const isUnavailable = isProductBlocked || isCategoryBlocked ||
+            isBrandBlocked;
 
             let blockMessage = "UNAVAILABLE";
             if (allOut) blockMessage = "OUT OF STOCK";
@@ -1082,29 +1092,32 @@ footer {
             let regularPriceOfCheapest = 0;
 
             if (product.variants && product.variants.length > 0) {
-                product.variants.forEach(v => {
-                    const price = (v.salePrice && v.salePrice > 0) ? v.salePrice : v.regularPrice;
-                    if (price < lowestSalePrice) {
-                        lowestSalePrice = price;
-                        regularPriceOfCheapest = v.regularPrice;
-                        cheapestVariant = v;
-                    }
-                });
+            product.variants.forEach(v => {
+            const price = (v.salePrice && v.salePrice > 0) ? v.salePrice :
+            v.regularPrice;
+            if (price < lowestSalePrice) {
+            lowestSalePrice = price;
+            regularPriceOfCheapest = v.regularPrice;
+            cheapestVariant = v;
+            }
+            });
             }
 
             if (!cheapestVariant) {
-                lowestSalePrice = product.salePrice || product.price || 0;
-                regularPriceOfCheapest = product.price || 0;
+            lowestSalePrice = product.salePrice || product.price || 0;
+            regularPriceOfCheapest = product.price || 0;
             }
 
             const defaultSize = cheapestVariant ? cheapestVariant.size : '';
             const selectedSize = item.variantSize || defaultSize;
 
-            const selectedVariant = (product.variants || []).find(v => v.size === selectedSize);
+            const selectedVariant = (product.variants || []).find(v => v.size
+            === selectedSize);
             const selectedOut = selectedVariant && selectedVariant.stock <= 0;
-            const allOutVariants = (product.variants && product.variants.length > 0)
-                ? product.variants.every(v => v.stock <= 0)
-                : (product.stock !== undefined && product.stock <= 0);
+            const allOutVariants = (product.variants && product.variants.length
+            > 0)
+            ? product.variants.every(v => v.stock <= 0)
+            : (product.stock !== undefined && product.stock <= 0);
             %>
 
             <article class="wishlist-card"
@@ -1179,27 +1192,30 @@ footer {
                         </div>
                     </div>
 
-                 <div class="product-actions">
-    <% if (allOutVariants) { %>
-    <button class="add-to-cart-btn disabled" disabled data-id="<%= product._id %>">
-        <i class="fa fa-ban"></i> Out of Stock
-    </button>
-    <% } else if (selectedOut) { %>
-    <button class="add-to-cart-btn disabled" disabled data-id="<%= product._id %>">
-        <i class="fa fa-ban"></i> Variant Out of Stock
-    </button>
-    <% } else if (isUnavailable) { %>
-    <button class="add-to-cart-btn disabled" disabled data-id="<%= product._id %>" data-unavailable="1">
-        <i class="fa fa-ban"></i> <%= blockMessage %>
-    </button>
-    <% } else { %>
-    <button class="add-to-cart-btn" 
-        data-id="<%= product._id %>" 
-        data-variant-id="<%= selectedSize %>">
-        <i class="fa fa-shopping-cart"></i> Add to Cart
-    </button>
-    <% } %>
-</div>
+                    <div class="product-actions">
+                        <% if (allOutVariants) { %>
+                        <button class="add-to-cart-btn disabled" disabled
+                            data-id="<%= product._id %>">
+                            <i class="fa fa-ban"></i> Out of Stock
+                        </button>
+                        <% } else if (selectedOut) { %>
+                        <button class="add-to-cart-btn disabled" disabled
+                            data-id="<%= product._id %>">
+                            <i class="fa fa-ban"></i> Variant Out of Stock
+                        </button>
+                        <% } else if (isUnavailable) { %>
+                        <button class="add-to-cart-btn disabled" disabled
+                            data-id="<%= product._id %>" data-unavailable="1">
+                            <i class="fa fa-ban"></i> <%= blockMessage %>
+                        </button>
+                        <% } else { %>
+                        <button class="add-to-cart-btn"
+                            data-id="<%= product._id %>"
+                            data-variant-id="<%= selectedSize %>">
+                            <i class="fa fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <% } %>
+                    </div>
 
                 </div>
             </article>
@@ -1237,7 +1253,7 @@ footer {
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-      <script>
+        <script>
     const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -1256,7 +1272,7 @@ footer {
     });
 
     function attachEventListeners() {
-        // 1. Dropdown Change Listener
+        
         document.querySelectorAll('.variant-select').forEach(select => {
             select.addEventListener('change', function () {
                 const card = this.closest('.wishlist-card');
@@ -1285,7 +1301,7 @@ footer {
             });
         });
 
-        // 2. Remove Button Listener
+        
         document.querySelectorAll('.remove-wishlist-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const productId = this.dataset.id;
@@ -1304,17 +1320,17 @@ footer {
             });
         });
 
-      // 3. Add to Cart Button Listener
+    
 document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', async function (event) {
-        // Use event.currentTarget to be 100% sure we get the button element
+        
         const button = event.currentTarget; 
         const productId = button.getAttribute('data-id'); 
         
         const card = button.closest('.wishlist-card');
         const select = card.querySelector('.variant-select');
         
-        // Grab the size from the dropdown if it exists, otherwise the data attribute
+     
         const currentVariantSize = select ? select.value : button.getAttribute('data-variant-id');
 
         console.log("DEBUG FRONTEND:", productId, currentVariantSize);
@@ -1324,7 +1340,7 @@ document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
             return;
         }
 
-        // Pass the correct button element to the helper function
+       
         await addToCartWithToastOnly(productId, currentVariantSize, button);
     });
 });
@@ -1395,7 +1411,7 @@ document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     async function moveAllToBag() {
     const variantsMap = {};
     document.querySelectorAll('.variant-select').forEach(s => {
-        // Force the value to a Number so the backend find() method matches correctly
+        
         variantsMap[s.dataset.productId] = Number(s.value);
     });
 
@@ -1408,7 +1424,7 @@ document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
         const data = await res.json();
         if (data.success) {
             Toast.fire({ icon: 'success', title: 'All items moved to cart!' });
-            // Redirect slightly faster for a snappier feel
+            
             setTimeout(() => location.href = '/cart', 800);
         } else {
             Toast.fire({ icon: 'error', title: data.message || 'Some items could not be moved' });

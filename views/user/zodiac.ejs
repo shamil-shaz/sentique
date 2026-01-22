@@ -1150,7 +1150,7 @@ h1, h2, h3, h4, h5, h6, .brand-title {
     
     function getPrice(p) {
       if(p.variants && p.variants.length > 0) {
-        // Logic must match backend logic for consistency
+       
         const cheapest = p.variants.reduce((min, curr) => {
             const minP = min.salePrice || min.regularPrice || Infinity;
             const currP = curr.salePrice || curr.regularPrice || Infinity;
@@ -1170,7 +1170,7 @@ h1, h2, h3, h4, h5, h6, .brand-title {
         return;
       }
       
-      // Client-side sort fallback (optional, since backend handles it)
+      
       const sortVal = filterForm.querySelector('input[name="sort"]:checked')?.value;
       if(sortVal === 'price-low') products.sort((a,b) => getPrice(a) - getPrice(b));
       if(sortVal === 'price-high') products.sort((a,b) => getPrice(b) - getPrice(a));

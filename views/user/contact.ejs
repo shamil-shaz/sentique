@@ -31,7 +31,7 @@ body.dark-mode {
 .contact-wrapper{
   width:100%;
   max-width:600px;
-  height:calc(100vh - 80px);   /* header space */
+  height:calc(100vh - 80px);  
   margin:0 auto;
   background:var(--wrapper-bg);
   border:1px solid var(--border);
@@ -342,7 +342,7 @@ function showOrders() {
   scrollBottom();
 }
 
-/* ✅ MAKE THIS GLOBAL */
+
 window.selectOrder = async function(orderId, status) {
   document.getElementById("orderList")?.remove();
 

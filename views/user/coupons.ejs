@@ -1,9 +1,7 @@
 <%- include('../../views/partials/user/header') %>
 
 <style>
-    /* =========================================
-       1. THEME VARIABLES (Distinct Light vs Dark)
-       ========================================= */
+   
     :root {
         /* --- Light Mode (Fresh & Clean) --- */
         --bg-page: #f9fafb;
@@ -13,11 +11,11 @@
         --border-color: #e5e7eb;
         
         /* Accents */
-        --accent-primary: #059669; /* Emerald Green */
+        --accent-primary: #059669; 
         --accent-glow: rgba(5, 150, 105, 0.2);
         --btn-text: #ffffff;
         
-        /* Premium Card Specifics (Light) */
+     
         --prem-bg: linear-gradient(135deg, #1f2937 0%, #000000 100%);
         --prem-border: #d4a574;
         --prem-text: #d4a574;
@@ -25,18 +23,18 @@
 
     /* --- Dark Mode (Golden Luxury) --- */
     body.dark-mode {
-        --bg-page: #121212; /* Matches your header */
+        --bg-page: #121212; 
         --bg-card: #1e1e1e;
         --text-head: #f3f4f6;
         --text-body: #9ca3af;
         --border-color: #333333;
         
         /* Accents */
-        --accent-primary: #f5d863; /* Gold */
+        --accent-primary: #f5d863; 
         --accent-glow: rgba(212, 165, 116, 0.2);
         --btn-text: #121212;
         
-        /* Premium Card Specifics (Dark) */
+       
         --prem-bg: linear-gradient(135deg, #000000 0%, #2c1810 100%);
         --prem-border: #fcd34d;
         --prem-text: #fcd34d;
@@ -280,11 +278,12 @@
 
 <div class="coupon-page-wrapper">
     <div class="sidebar-section">
-        <%- include('../partials/user/profile-sidebar.ejs', { user: user, activePage: 'coupons' }) %>
+        <%- include('../partials/user/profile-sidebar.ejs', { user: user,
+        activePage: 'coupons' }) %>
     </div>
 
     <div class="content-section">
-        
+
         <div class="page-title-box">
             <h1>Your Exclusive Rewards</h1>
             <p>Discover savings tailored just for you.</p>
@@ -293,22 +292,26 @@
         <div class="controls-row">
             <div class="search-wrap">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Search for coupons...">
+                <input type="text" id="searchInput"
+                    placeholder="Search for coupons...">
             </div>
             <div class="filter-wrap">
                 <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="percentage">% Off</button>
+                <button class="filter-btn" data-filter="percentage">%
+                    Off</button>
                 <button class="filter-btn" data-filter="flat">Flat ₹</button>
             </div>
         </div>
 
         <div id="couponsGrid" class="coupons-grid">
             <div style="padding: 40px; text-align: center; grid-column: 1/-1;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--accent-primary);"></i>
+                <i class="fas fa-spinner fa-spin"
+                    style="font-size: 2rem; color: var(--accent-primary);"></i>
             </div>
         </div>
-        
-        <div id="pagination" style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;"></div>
+
+        <div id="pagination"
+            style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;"></div>
     </div>
 </div>
 
@@ -319,7 +322,8 @@
             <button class="close-modal" onclick="closeModal()">&times;</button>
         </div>
 
-        <p id="mDesc" style="color: var(--text-body); margin-bottom: 20px; line-height: 1.6;">
+        <p id="mDesc"
+            style="color: var(--text-body); margin-bottom: 20px; line-height: 1.6;">
             Detailed description of the coupon goes here.
         </p>
 
@@ -451,10 +455,10 @@
 
     function getStatus(c) {
         const now = new Date();
-        // Handle variable names: check both expireDate and expiryDate
+        
         const expiry = c.expireDate || c.expiryDate;
         
-        if (!expiry) return 'active'; // No expiry set = Active
+        if (!expiry) return 'active'; 
 
         const expDate = new Date(expiry);
         

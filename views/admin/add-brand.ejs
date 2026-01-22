@@ -78,7 +78,7 @@
 
     <form id="brandForm" enctype="multipart/form-data">
 
-      <!-- ✅ BRAND NAME -->
+     
       <div class="form-group">
         <label for="brandName">Brand Name</label>
         <input 
@@ -90,7 +90,7 @@
         <div id="brandNameError" class="error-message"></div>
       </div>
 
-      <!-- ✅ LOGO UPLOAD -->
+     
       <div class="form-group">
         <label for="brandLogo">Logo Upload</label>
         <input 
@@ -100,7 +100,7 @@
         />
         <div id="brandLogoError" class="error-message"></div>
 
-        <!-- ✅ IMAGE PREVIEW -->
+      
         <img
           id="logoPreview"
           style="display:none; margin-top:10px; width:120px; border-radius:8px;"
@@ -127,7 +127,7 @@
 
   const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
 
-  // 🔹 IMAGE PREVIEW + TYPE VALIDATION
+  
   brandLogo.addEventListener("change", () => {
     brandLogoError.style.display = "none";
 
@@ -150,7 +150,7 @@
     reader.readAsDataURL(file);
   });
 
-  // 🔹 FORM SUBMIT VALIDATION
+  
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 

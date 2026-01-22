@@ -22,7 +22,6 @@ const zodiacPageController = require("../controllers/user/zodiacPageController.j
 
 const multer = require("multer");
 
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "public/uploads/");
@@ -34,7 +33,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-
 
 
 router.get('/pageNotFound', userController.pageNotFound);
@@ -56,51 +54,11 @@ router.post('/reset-password', profileController.resetPassword);
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 
-// router.get("/auth/google/callback", checkBlockedUser, (req, res, next) => {
-//   passport.authenticate("google", async (err, user, info) => {
-//     if (err) {
-//       console.error("Google login error:", err);
-//       return res.render("signup", { errorMessage: "Something went wrong. Please try again." });
-//     }
-
-//     if (!user) {
-//       console.log("Google login blocked or failed:", info?.message);
-//       return res.redirect("/signup?googleError=" + encodeURIComponent(info?.message || "Google login failed."));
-//     }
-
-//     try {
-      
-      
-//       if (!user.refferalCode) {
-//         const referralCode = await userController.generateUniqueReferralCode(user.name);
-//         user.refferalCode = referralCode;
-//         await user.save();
-//         console.log(`Generated referral code for Google user: ${referralCode}`);
-//       }
-
-//       req.session.user = {
-//         id: user._id.toString(),
-//         name: user.name,
-//         email: user.email,
-//         role: "user",
-//       };
-
-//         console.log("Google user logged in with referral code:", user.refferalCode);
-//       return res.redirect("/");
-//     } catch (err) {
-//       console.error("Session creation error:", err);
-//       return res.render("signup", { errorMessage: "Login failed. Please try again." });
-//     }
-//   })(req, res, next);
-// });
-
-
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   async (req, res) => {
     try {
-      // 1. Handle Referral Logic
       if (!req.user.refferalCode) {
         const referralCode = await userController.generateUniqueReferralCode(req.user.name);
         req.user.refferalCode = referralCode;
@@ -108,8 +66,7 @@ router.get(
       }
 
       console.log("Google Auth Success for:", req.user.email);
-
-      // 2. FORCE SESSION SAVE BEFORE REDIRECT
+    
       req.session.save((err) => {
         if (err) {
           console.error("Session save error:", err);
@@ -124,7 +81,6 @@ router.get(
     }
   }
 );
-
 
 router.get('/auth/google/failure', (req, res) => {
   res.redirect('/signup?error=google');
@@ -159,7 +115,6 @@ router.post("/update-profile", userAuth, upload.single("image"), profileControll
 router.get("/profile/address", userAuth, addressController.getAddresses);
 router.post("/addresses/add", userAuth, addressController.addAddress);
 router.get('/addresses/edit-address/:id', userAuth, addressController.getEditAddress);
-//router.get('/profile/order-list',userAuth,paymentController.getOrderList)
 router.get('/profile/privacy-security', userAuth, profileController.getSecurityPage);
 router.get("/addresses/list", userAuth, addressController.getAddressesJSON);
 
@@ -255,7 +210,6 @@ router.get("/profile/referral/details", userAuth, referralController.getReferral
 router.get("/profile/referral/referred-users", userAuth, referralController.getReferredUsers);
 router.post("/profile/referral/apply", userAuth, referralController.applyReferralCode);
 router.get("/profile/referral/leaderboard", referralController.getReferralLeaderboard);
-
 
 
 /////-------------contact-----------

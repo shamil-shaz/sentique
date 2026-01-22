@@ -9,13 +9,11 @@ const Coupon = require("../../models/couponSchema");
 
 const getOrderSuccess = async (req, res) => {
   try {
-
-
     const user = req.user || req.session.user;
-      const userId = req.userId;
+    const userId = req.userId;
 
     console.log("Session user in getOrderSuccess:", user);
-  
+
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       console.log("Redirecting to /login due to invalid user or userId");
       return res.redirect("/login");
@@ -49,7 +47,7 @@ const getOrderSuccess = async (req, res) => {
         items: [],
         deliveryAddress: "N/A",
         success: req.flash("success"),
-        user: req.user || req.session.user || null
+        user: req.user || req.session.user || null,
       });
     }
     const orderDate = new Date(latestOrder.createdOn);
@@ -115,7 +113,7 @@ const getOrderSuccess = async (req, res) => {
       paymentStatus: latestOrder.paymentStatus,
       status: latestOrder.status,
       success: req.flash("success"),
-      user: req.user || req.session.user || null
+      user: req.user || req.session.user || null,
     });
   } catch (error) {
     console.error(
@@ -129,8 +127,8 @@ const getOrderSuccess = async (req, res) => {
 
 const cancelAllOrder = async (req, res) => {
   try {
-   const userId = req.userId; 
-const user = req.user || req.session.user;
+    const userId = req.userId;
+    const user = req.user || req.session.user;
     const { orderId } = req.params;
     const { reason, details } = req.body;
 
@@ -246,7 +244,7 @@ const user = req.user || req.session.user;
 
 const getOrderDetails = async (req, res) => {
   try {
-    const userId = req.userId; 
+    const userId = req.userId;
     const user = req.user || req.session.user;
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.redirect("/login");
@@ -552,11 +550,11 @@ const getOrderDetails = async (req, res) => {
         isReturnEligible && latestOrder.paymentStatus === "Completed",
       isShippedOrOut,
       hasAnyRejectedReturn,
-     activeStatuses: itemStatuses.filter(
+      activeStatuses: itemStatuses.filter(
         (s) => s !== "Cancelled" && s !== "Returned" && s !== "Return Request"
       ),
       success: req.flash("success"),
-      user: req.user || req.session.user || null 
+      user: req.user || req.session.user || null,
     });
   } catch (error) {
     console.error("Error fetching order details:", error);
@@ -566,7 +564,7 @@ const getOrderDetails = async (req, res) => {
 
 const returnAllOrder = async (req, res) => {
   try {
-    const userId = req.userId; 
+    const userId = req.userId;
     const user = req.user || req.session.user;
     const { orderId } = req.params;
     const { reason, details } = req.body;
@@ -651,7 +649,7 @@ const returnAllOrder = async (req, res) => {
 
 const cancelReturnSingleOrder = async (req, res) => {
   try {
-    const userId = req.userId; 
+    const userId = req.userId;
     const user = req.user || req.session.user;
     const { orderId, itemIndex, variantSize } = req.params;
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -708,7 +706,7 @@ const cancelReturnSingleOrder = async (req, res) => {
 
 const cancelReturnAllOrder = async (req, res) => {
   try {
-   const userId = req.userId; 
+    const userId = req.userId;
     const user = req.user || req.session.user;
     const { orderId } = req.params;
     if (!user || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -768,39 +766,47 @@ const updateItemStatus = async (
       day: "2-digit",
       month: "short",
       year: "numeric",
+      timeZone: "Asia/Kolkata",
     }),
     time: date.toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
+      timeZone: "Asia/Kolkata",
     }),
   });
- // Dynamic Estimated Delivery based on status
-if (["Placed", "Confirmed", "Processing", "Shipped", "OutForDelivery"].includes(newStatus)) {
 
-  let daysToAdd = 7; // default for Placed/Confirmed
+  if (
+    ["Placed", "Confirmed", "Processing", "Shipped", "OutForDelivery"].includes(
+      newStatus
+    )
+  ) {
+    let daysToAdd = 7;
 
-  switch (newStatus) {
-    case "Processing":
-      daysToAdd = 5;
-      break;
-    case "Shipped":
-      daysToAdd = 3;
-      break;
-    case "OutForDelivery":
-      daysToAdd = 1;
-      break;
+    switch (newStatus) {
+      case "Processing":
+        daysToAdd = 5;
+        break;
+      case "Shipped":
+        daysToAdd = 3;
+        break;
+      case "OutForDelivery":
+        daysToAdd = 1;
+        break;
+    }
+
+    const estimated = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+    item.tracking.estimatedDeliveryDate = estimated.toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone: "Asia/Kolkata",
+      }
+    );
   }
-
-  const estimated = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-
-  item.tracking.estimatedDeliveryDate = estimated.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 
   const statusTimestamps = [
     { status: "Placed", dateField: "placedDate", timeField: "placedTime" },
@@ -890,35 +896,48 @@ if (["Placed", "Confirmed", "Processing", "Shipped", "OutForDelivery"].includes(
       item.tracking.outForDeliveryLocation =
         outForDeliveryLocation || "Local Hub ABC";
       break;
-  case "Delivered": {
-  const formatted = formatDateTime(now);
+    case "Delivered": {
+      const formatted = formatDateTime(now);
 
-  if (!item.tracking.deliveredDate) {
-    item.tracking.deliveredDate = formatted.date;
-    item.tracking.deliveredTime = formatted.time;
-  }
+      if (!item.tracking.deliveredDate) {
+        item.tracking.deliveredDate = formatted.date;
+        item.tracking.deliveredTime = formatted.time;
+      }
 
- 
-  const backfillStages = [
-    { key: "OutForDelivery", dateField: "outForDeliveryDate", timeField: "outForDeliveryTime" },
-    { key: "Shipped", dateField: "shippedDate", timeField: "shippedTime" },
-    { key: "Processing", dateField: "processingDate", timeField: "processingTime" },
-    { key: "Confirmed", dateField: "confirmedDate", timeField: "confirmedTime" },
-    { key: "Placed", dateField: "placedDate", timeField: "placedTime" },
-  ];
+      const backfillStages = [
+        {
+          key: "OutForDelivery",
+          dateField: "outForDeliveryDate",
+          timeField: "outForDeliveryTime",
+        },
+        { key: "Shipped", dateField: "shippedDate", timeField: "shippedTime" },
+        {
+          key: "Processing",
+          dateField: "processingDate",
+          timeField: "processingTime",
+        },
+        {
+          key: "Confirmed",
+          dateField: "confirmedDate",
+          timeField: "confirmedTime",
+        },
+        { key: "Placed", dateField: "placedDate", timeField: "placedTime" },
+      ];
 
-  backfillStages.forEach(({ key, dateField, timeField }, index) => {
-    const simulated = new Date(now.getTime() - ((index + 1) * 2 * 60 * 60 * 1000)); // subtract 2 hours per step
-    const f = formatDateTime(simulated);
-    if (!item.tracking[dateField]) {
-      item.tracking[dateField] = f.date;
-      item.tracking[timeField] = f.time;
+      backfillStages.forEach(({ key, dateField, timeField }, index) => {
+        const simulated = new Date(
+          now.getTime() - (index + 1) * 2 * 60 * 60 * 1000
+        ); 
+        const f = formatDateTime(simulated);
+        if (!item.tracking[dateField]) {
+          item.tracking[dateField] = f.date;
+          item.tracking[timeField] = f.time;
+        }
+      });
+
+      item.tracking.estimatedDeliveryDate = null;
+      break;
     }
-  });
-
-  item.tracking.estimatedDeliveryDate = null;
-  break;
-}
 
     case "Cancelled":
       item.cancelledAt = now;
@@ -1032,11 +1051,10 @@ const distributeDiscountProportionally = (items, totalDiscount) => {
 
 const checkCancellationImpact = async (req, res) => {
   try {
-   const userId = req.userId; 
+    const userId = req.userId;
     const user = req.user || req.session.user;
-   const { orderId, itemIndex, variantSize } = req.params;
+    const { orderId, itemIndex, variantSize } = req.params;
 
-   
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({ success: false, error: "Unauthorized" });
     }
@@ -1153,7 +1171,7 @@ const checkCancellationImpact = async (req, res) => {
 
 const cancelSingleOrderWithCouponCheck = async (req, res) => {
   try {
-    const userId = req.userId; 
+    const userId = req.userId;
     const user = req.user || req.session.user;
     const { orderId, itemIndex, variantSize } = req.params;
     const { reason, details } = req.body;
@@ -1385,7 +1403,7 @@ const cancelSingleOrderWithCouponCheck = async (req, res) => {
 
 const returnSingleOrder = async (req, res) => {
   try {
-    const userId = req.userId; 
+    const userId = req.userId;
     const user = req.user || req.session.user;
     const { orderId, itemIndex, variantSize } = req.params;
     const { reason, details } = req.body;

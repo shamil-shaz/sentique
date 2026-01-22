@@ -1,4 +1,4 @@
-<!-- FRONTEND - Profile OTP Verification Page (Updated) -->
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -169,13 +169,16 @@
       <h2>Verify OTP</h2>
       <p id="description">A verification code has been sent to your email</p>
 
-      <input type="text" id="otpInput" placeholder="Enter the OTP" name="otp" required />
-      <div class="error-message" id="errorMessage">Please enter a valid 4 or 6 digit OTP.</div>
+      <input type="text" id="otpInput" placeholder="Enter the OTP" name="otp"
+        required />
+      <div class="error-message" id="errorMessage">Please enter a valid 4 or 6
+        digit OTP.</div>
 
       <div class="countdown" id="countdown">2 : 00 minutes remaining</div>
 
       <div class="btn-group">
-        <button type="button" id="resendBtn" class="btn resend" onclick="resendOTP()" disabled>
+        <button type="button" id="resendBtn" class="btn resend"
+          onclick="resendOTP()" disabled>
           Resend OTP
         </button>
         <button type="submit" id="verifyBtn" class="btn verify">Verify</button>
@@ -192,7 +195,7 @@
     const verifyBtn = document.getElementById("verifyBtn");
     const description = document.getElementById("description");
 
-    // Dynamic variables passed from backend
+    
     const type = "<%= type %>";
     const token = "<%= token %>";
     const expiryTime = <%= expiryTime %>;
@@ -200,21 +203,21 @@
     let timer;
     let otpExpired = false;
 
-    // Calculate initial countdown
+    
     function getTimeRemaining() {
       const now = Date.now();
       const remaining = Math.max(0, expiryTime - now);
       return Math.ceil(remaining / 1000);
     }
 
-    // Format time for display
+  
     function formatTime(seconds) {
       const minutes = Math.floor(seconds / 60);
       const secs = seconds % 60;
       return `${minutes} : ${secs < 10 ? '0' + secs : secs}`;
     }
 
-    // Start countdown timer
+   
     function startTimer() {
       resendBtn.disabled = true;
       verifyBtn.disabled = false;
@@ -234,7 +237,7 @@
           resendBtn.disabled = false;
           otpExpired = true;
         } else if (remaining <= 30) {
-          // Show warning when less than 30 seconds
+         
           countdownEl.textContent = formatTime(remaining) + " (expiring soon)";
           countdownEl.classList.add('warning');
         } else {
@@ -243,12 +246,12 @@
         }
       }, 1000);
 
-      // Initial display
+    
       let remaining = getTimeRemaining();
       countdownEl.textContent = formatTime(remaining) + " remaining";
     }
 
-    // Update description based on type
+   
     function updateDescription() {
       if (type === "change-email") {
         description.textContent = "A verification code has been sent to your new email";
@@ -260,11 +263,11 @@
     updateDescription();
     startTimer();
 
-    // OTP submission
+    
     function validateOTPForm(event) {
       event.preventDefault();
 
-      // Check if OTP is expired
+     
       if (otpExpired) {
         Swal.fire({
           icon: 'error',
@@ -312,7 +315,7 @@
               window.location.href = response.redirectUrl || "/profile";
             });
           } else {
-            // Check if error is about expired OTP
+            
             if (response.message.toLowerCase().includes('expired')) {
               Swal.fire({
                 icon: 'error',
@@ -349,8 +352,7 @@
       return false;
     }
 
-    // Resend OTP
-   // RESEND OTP FUNCTION - Fixed Version
+    
 
 function resendOTP() {
   console.log("Resend OTP clicked");
@@ -383,7 +385,7 @@ function resendOTP() {
       Swal.close();
 
       if (data.success) {
-        // Update expiryTime with the new value
+      
         if (data.expiryTime) {
           window.expiryTime = data.expiryTime;
           console.log("Updated expiryTime:", new Date(window.expiryTime));
@@ -423,10 +425,10 @@ function resendOTP() {
     });
 }
 
-// Also update the timer to use window.expiryTime if it exists
+
 function getTimeRemaining() {
   const now = Date.now();
-  // Use window.expiryTime if it was updated, otherwise use expiryTime
+ 
   const expiry = window.expiryTime || expiryTime;
   const remaining = Math.max(0, expiry - now);
   return Math.ceil(remaining / 1000);

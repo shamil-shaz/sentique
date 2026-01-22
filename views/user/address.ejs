@@ -2,7 +2,9 @@
 
 <head>
     <title>Address Book - Sentique</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
@@ -347,148 +349,170 @@
 
 <body>
 
-<div class="main-content">
-    <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'address' }) %>
+    <div class="main-content">
+        <%- include("../partials/user/profile-sidebar.ejs", { user: user,
+        activePage: 'address' }) %>
 
-    <div class="address-content">
-        <div class="section-header">
-            <div class="header-left">
-                <h1>📍 Address Book</h1>
-                <p>Manage your shipping locations</p>
+        <div class="address-content">
+            <div class="section-header">
+                <div class="header-left">
+                    <h1>📍 Address Book</h1>
+                    <p>Manage your shipping locations</p>
+                </div>
+                <button class="add-address-btn" onclick="openModal()">
+                    <span>➕</span> Add New Address
+                </button>
             </div>
-            <button class="add-address-btn" onclick="openModal()">
-                <span>➕</span> Add New Address
-            </button>
-        </div>
 
-        <div class="addresses-grid" id="addressesGrid"></div>
+            <div class="addresses-grid" id="addressesGrid"></div>
+        </div>
     </div>
-</div>
 
-<div class="modal" id="addressModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Add New Address</h2>
-            <button class="close-btn" onclick="closeModal()">✕</button>
-        </div>
-
-        <form id="addressForm" onsubmit="saveAddress(event)">
-            <div class="form-group">
-                <label class="form-label">Label As *</label>
-                <select class="form-select" name="addressType" id="type" required>
-                    <option value="" disabled selected>Select Type</option>
-                    <option value="Home">🏠 Home</option>
-                    <option value="Work">🏢 Work</option>
-                    <option value="Other">📦 Other</option>
-                </select>
-                <div class="error-text" id="typeError"></div>
+    <div class="modal" id="addressModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Address</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
 
-            <div class="form-row">
+            <form id="addressForm" onsubmit="saveAddress(event)">
                 <div class="form-group">
-                    <label class="form-label">Full Name *</label>
-                    <input type="text" class="form-input" name="name" id="name" placeholder="Receiver's Name" required>
-                    <div class="error-text" id="nameError"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Phone Number *</label>
-                    <input type="tel" class="form-input" name="phone" id="phone" placeholder="10-digit Mobile" required maxlength="10">
-                    <div class="error-text" id="phoneError"></div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">House / Building *</label>
-                    <input type="text" class="form-input" name="houseName" id="houseName" required>
-                    <div class="error-text" id="houseError"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Building Number</label>
-                    <input type="text" class="form-input" name="buildingNumber" id="buildingNumber" placeholder="Optional">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Landmark *</label>
-                <input type="text" class="form-input" name="landmark" id="landmark" required>
-                <div class="error-text" id="landmarkError"></div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">PIN Code *</label>
-                    <input type="text" class="form-input" name="pincode" id="zip" placeholder="6 Digits" required maxlength="6">
-                    <div id="zipLoader" style="display:none; font-size:11px; color:var(--accent-color);">Fetching location...</div>
-                    <div class="error-text" id="zipError"></div>
-                    <div class="success-text" id="zipSuccess"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Alt Phone</label>
-                    <input type="tel" class="form-input" name="altPhone" id="altPhone" maxlength="10">
-                    <div class="error-text" id="altPhoneError"></div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">City</label>
-                    <input type="text" class="form-input" name="city" id="city" readonly>
-                    <div class="error-text" id="cityError"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">State</label>
-                    <select class="form-select" name="state" id="state" required>
-                         <option value="" disabled selected>Auto-filled</option>
-                         <option value="Andhra Pradesh">Andhra Pradesh</option>
-                         <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                         <option value="Assam">Assam</option>
-                         <option value="Bihar">Bihar</option>
-                         <option value="Chhattisgarh">Chhattisgarh</option>
-                         <option value="Goa">Goa</option>
-                         <option value="Gujarat">Gujarat</option>
-                         <option value="Haryana">Haryana</option>
-                         <option value="Himachal Pradesh">Himachal Pradesh</option>
-                         <option value="Jharkhand">Jharkhand</option>
-                         <option value="Karnataka">Karnataka</option>
-                         <option value="Kerala">Kerala</option>
-                         <option value="Madhya Pradesh">Madhya Pradesh</option>
-                         <option value="Maharashtra">Maharashtra</option>
-                         <option value="Manipur">Manipur</option>
-                         <option value="Meghalaya">Meghalaya</option>
-                         <option value="Mizoram">Mizoram</option>
-                         <option value="Nagaland">Nagaland</option>
-                         <option value="Odisha">Odisha</option>
-                         <option value="Punjab">Punjab</option>
-                         <option value="Rajasthan">Rajasthan</option>
-                         <option value="Sikkim">Sikkim</option>
-                         <option value="Tamil Nadu">Tamil Nadu</option>
-                         <option value="Telangana">Telangana</option>
-                         <option value="Tripura">Tripura</option>
-                         <option value="Uttar Pradesh">Uttar Pradesh</option>
-                         <option value="Uttarakhand">Uttarakhand</option>
-                         <option value="West Bengal">West Bengal</option>
+                    <label class="form-label">Label As *</label>
+                    <select class="form-select" name="addressType" id="type"
+                        required>
+                        <option value disabled selected>Select Type</option>
+                        <option value="Home">🏠 Home</option>
+                        <option value="Work">🏢 Work</option>
+                        <option value="Other">📦 Other</option>
                     </select>
-                    <div class="error-text" id="stateError"></div>
+                    <div class="error-text" id="typeError"></div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="setDefault" name="isDefault">
-                    <label for="setDefault">Set as default address</label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-input" name="name"
+                            id="name" placeholder="Receiver's Name" required>
+                        <div class="error-text" id="nameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-input" name="phone"
+                            id="phone" placeholder="10-digit Mobile" required
+                            maxlength="10">
+                        <div class="error-text" id="phoneError"></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="modal-actions">
-                <button type="button" class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="modal-btn btn-submit" id="submitBtn">Save Address</button>
-            </div>
-        </form>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">House / Building *</label>
+                        <input type="text" class="form-input" name="houseName"
+                            id="houseName" required>
+                        <div class="error-text" id="houseError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Building Number</label>
+                        <input type="text" class="form-input"
+                            name="buildingNumber" id="buildingNumber"
+                            placeholder="Optional">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Landmark *</label>
+                    <input type="text" class="form-input" name="landmark"
+                        id="landmark" required>
+                    <div class="error-text" id="landmarkError"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">PIN Code *</label>
+                        <input type="text" class="form-input" name="pincode"
+                            id="zip" placeholder="6 Digits" required
+                            maxlength="6">
+                        <div id="zipLoader"
+                            style="display:none; font-size:11px; color:var(--accent-color);">Fetching
+                            location...</div>
+                        <div class="error-text" id="zipError"></div>
+                        <div class="success-text" id="zipSuccess"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Alt Phone</label>
+                        <input type="tel" class="form-input" name="altPhone"
+                            id="altPhone" maxlength="10">
+                        <div class="error-text" id="altPhoneError"></div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-input" name="city"
+                            id="city" readonly>
+                        <div class="error-text" id="cityError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <select class="form-select" name="state" id="state"
+                            required>
+                            <option value disabled selected>Auto-filled</option>
+                            <option value="Andhra Pradesh">Andhra
+                                Pradesh</option>
+                            <option value="Arunachal Pradesh">Arunachal
+                                Pradesh</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Chhattisgarh">Chhattisgarh</option>
+                            <option value="Goa">Goa</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Himachal Pradesh">Himachal
+                                Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Madhya Pradesh">Madhya
+                                Pradesh</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Sikkim">Sikkim</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Uttarakhand">Uttarakhand</option>
+                            <option value="West Bengal">West Bengal</option>
+                        </select>
+                        <div class="error-text" id="stateError"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="setDefault" name="isDefault">
+                        <label for="setDefault">Set as default address</label>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn btn-cancel"
+                        onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="modal-btn btn-submit"
+                        id="submitBtn">Save Address</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
+    <script>
     const errors = {
         name: document.getElementById('nameError'),
         phone: document.getElementById('phoneError'),
@@ -702,4 +726,4 @@
     document.addEventListener('DOMContentLoaded', fetchAddresses);
 </script>
 
-<%- include("../partials/user/footer.ejs") %>
+    <%- include("../partials/user/footer.ejs") %>

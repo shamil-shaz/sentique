@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sentique – Luxury Zodiac Perfumes</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentique – Luxury Zodiac Perfumes</title>
 
-  <style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
     /* =========================================
        1. THEME ENGINE & VARIABLES
        ========================================= */
     :root {
-        /* --- Light Mode (Porcelain & Gold) --- */
+        
         --bg-body: #fdfbf7;
         --bg-glass: rgba(255, 255, 255, 0.85);
         --bg-card: rgba(255, 255, 255, 0.8);
@@ -23,7 +26,7 @@
         --gold: #d4af37;
         --gold-gradient: linear-gradient(135deg, #b8860b 0%, #e2c055 50%, #d4af37 100%);
         --shadow-card: 0 10px 30px rgba(212, 175, 55, 0.15);
-        /* Subtle Aurora Background for Light Mode */
+        
         --aurora-bg: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1), transparent 60%);
     }
 
@@ -38,7 +41,7 @@
         --gold: #e2c055;
         --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f3e5ab 50%, #b8860b 100%);
         --shadow-card: 0 10px 40px rgba(0,0,0,0.6);
-        /* Deep Void Gradient for Dark Mode */
+       
         --aurora-bg: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05), transparent 70%);
     }
 
@@ -156,7 +159,7 @@
       text-align: center;
       padding: 140px 20px 100px;
       position: relative;
-      /* Remove standard background to see canvas */
+      
       background: transparent; 
     }
 
@@ -169,7 +172,7 @@
       -webkit-text-fill-color: transparent;
       opacity: 0; animation: slideUp 1s forwards 0.2s;
       margin-bottom: 10px;
-      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4)); /* Glow Text */
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4)); 
     }
     
     .hero-sub {
@@ -454,108 +457,117 @@
 }
   </style>
 
+  </head>
+  <body class="dark-mode"> <canvas id="bgCanvas"></canvas>
 
-</head>
-<body class="dark-mode"> <canvas id="bgCanvas"></canvas>
+    <header>
+      <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
 
-<header>
-  <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
-  
-  <a href="#" class="logo"><img src="/photos/zodiac perfume/brand logo.png" alt="Sentique Logo" id="logoImg"></a>
+      <a href="#" class="logo"><img src="/photos/zodiac perfume/brand logo.png"
+          alt="Sentique Logo" id="logoImg"></a>
 
-  <nav class="nav-links" id="navLinks">
-    <a href="/home">Home</a>
-    <a href="/shopPage">Collections</a>
-    <a href="/zodiac">Zodiac Series</a>
-    
-  </nav>
+      <nav class="nav-links" id="navLinks">
+        <a href="/home">Home</a>
+        <a href="/shopPage">Collections</a>
+        <a href="/zodiac">Zodiac Series</a>
 
- <div class="icons-section">
-    <button class="theme-btn" id="themeToggle"><i class="fas fa-sun"></i></button>
+      </nav>
 
-    <% if (!locals.user) { %> <a href="/login" style="color:var(--gold); font-weight:600; font-size:0.9rem;">Login</a>
-    <% } else { %>
-      <div class="user-icon" id="userIcon">
-        <i class="fas fa-user"></i>
-      </div>
-      <div class="dropdown" id="userDropdown">
-        <div style="padding:15px; color:var(--gold); font-weight:600; border-bottom:1px solid var(--border-color); text-align:center;">
+      <div class="icons-section">
+        <button class="theme-btn" id="themeToggle"><i
+            class="fas fa-sun"></i></button>
+
+        <% if (!locals.user) { %> <a href="/login"
+          style="color:var(--gold); font-weight:600; font-size:0.9rem;">Login</a>
+        <% } else { %>
+        <div class="user-icon" id="userIcon">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="dropdown" id="userDropdown">
+          <div
+            style="padding:15px; color:var(--gold); font-weight:600; border-bottom:1px solid var(--border-color); text-align:center;">
             Hello, <%= locals.user.name %> </div>
-        <a href="/profile"><i class="fas fa-id-card"></i> Profile</a>
-        <a href="/profile/order-list"><i class="fas fa-box"></i> Orders</a>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          <a href="/profile"><i class="fas fa-id-card"></i> Profile</a>
+          <a href="/profile/order-list"><i class="fas fa-box"></i> Orders</a>
+          <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+        <% } %>
       </div>
-    <% } %>
-</div>
-</header>
+    </header>
 
-<section class="hero">
-  <h1>SENTIQUE</h1>
-  <p class="hero-sub">Where the Stars Align with Your Scent</p>
-  
-  <div class="hero-products">
-    <img src="/photos/zodiac perfume/landing-img-2.png" alt="Perfume Left">
-      <img src="/photos/landing-images/landing image-3.png" alt="Perfume Center" >
-    <img src="/photos/zodiac perfume/landing-1.png" alt="Perfume Right">
-  
-    
-  </div>
-</section>
-<section class="story-section reveal">
-  <div class="story-image">
-    <img src="/photos/zodiac perfume/story line image.png" alt="Sentique Craftsmanship">
-  </div>
-  
-  <div class="story-content">
-    <span class="story-badge">Our Heritage</span>
-    <h2 class="story-title">Crafting Your <br><span>Identity</span></h2>
-    <p class="story-text">
-        Sentique was created with one belief — a fragrance should feel <strong>personal</strong>. Every scent we offer is carefully chosen or crafted to reflect emotion, character, and identity.
-    </p>
-    <p class="story-text">
-        From luxury-inspired perfumes to our own zodiac-based creations, each fragrance is made using first-quality ingredients and blended with care. At Sentique, we don’t just sell perfumes — <strong>we help you wear your signature.</strong>
-    </p>
-  </div>
-</section>
+    <section class="hero">
+      <h1>SENTIQUE</h1>
+      <p class="hero-sub">Where the Stars Align with Your Scent</p>
 
-<section class="section reveal">
-  <h2 class="section-title">Exclusive <span>Collection</span></h2>
-  <p class="section-desc">Crafted with passion and aligned with the zodiac, Sentique perfumes embody the essence of your star sign. Discover the scent that speaks to your soul.</p>
-  
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="/photos/landing-images/landing-img-3.png" alt="Neonitre">
-      <h3>Neonitre</h3>
-      <p>Bold, timeless, and unapologetically you.</p>
-    </div>
-      
-    
-    <div class="product-card">
-      <img src="/photos/landing-images/landing-image-4.png" alt="Libuos">
-      <h3>Libuos</h3>
-      <p>A mystical scent of luxury and mystery.</p>
-    </div>
-    
-    <div class="product-card">
-      <img src="/photos/landing-images/landing-img-1.png" alt="Lovet">
-      <h3>Lovet</h3>
-      <p>Romantic notes interwoven with pure elegance.</p>
-    </div>
-    
-  
-  </div>
-</section>
+      <div class="hero-products">
+        <img src="/photos/zodiac perfume/landing-img-2.png" alt="Perfume Left">
+        <img src="/photos/landing-images/landing image-3.png"
+          alt="Perfume Center">
+        <img src="/photos/zodiac perfume/landing-1.png" alt="Perfume Right">
 
-<section class="cta reveal">
-  <h2>Your Zodiac. Your Scent. Your Signature.</h2>
-  <a class="btn-large" href="/home">Enter The World of Sentique</a>
-</section>
+      </div>
+    </section>
+    <section class="story-section reveal">
+      <div class="story-image">
+        <img src="/photos/zodiac perfume/story line image.png"
+          alt="Sentique Craftsmanship">
+      </div>
 
-<footer>
-  <p>&copy; 2025 Sentique – Scent Your Signature. All Rights Reserved.</p>
-</footer>
+      <div class="story-content">
+        <span class="story-badge">Our Heritage</span>
+        <h2 class="story-title">Crafting Your <br><span>Identity</span></h2>
+        <p class="story-text">
+          Sentique was created with one belief — a fragrance should feel
+          <strong>personal</strong>. Every scent we offer is carefully chosen or
+          crafted to reflect emotion, character, and identity.
+        </p>
+        <p class="story-text">
+          From luxury-inspired perfumes to our own zodiac-based creations, each
+          fragrance is made using first-quality ingredients and blended with
+          care. At Sentique, we don’t just sell perfumes — <strong>we help you
+            wear your signature.</strong>
+        </p>
+      </div>
+    </section>
 
-<script>
+    <section class="section reveal">
+      <h2 class="section-title">Exclusive <span>Collection</span></h2>
+      <p class="section-desc">Crafted with passion and aligned with the zodiac,
+        Sentique perfumes embody the essence of your star sign. Discover the
+        scent that speaks to your soul.</p>
+
+      <div class="product-grid">
+        <div class="product-card">
+          <img src="/photos/landing-images/landing-img-3.png" alt="Neonitre">
+          <h3>Neonitre</h3>
+          <p>Bold, timeless, and unapologetically you.</p>
+        </div>
+
+        <div class="product-card">
+          <img src="/photos/landing-images/landing-image-4.png" alt="Libuos">
+          <h3>Libuos</h3>
+          <p>A mystical scent of luxury and mystery.</p>
+        </div>
+
+        <div class="product-card">
+          <img src="/photos/landing-images/landing-img-1.png" alt="Lovet">
+          <h3>Lovet</h3>
+          <p>Romantic notes interwoven with pure elegance.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="cta reveal">
+      <h2>Your Zodiac. Your Scent. Your Signature.</h2>
+      <a class="btn-large" href="/home">Enter The World of Sentique</a>
+    </section>
+
+    <footer>
+      <p>&copy; 2025 Sentique – Scent Your Signature. All Rights Reserved.</p>
+    </footer>
+
+    <script>
   // --- Canvas Particle Animation ---
   const canvas = document.getElementById('bgCanvas');
   const ctx = canvas.getContext('2d');
@@ -575,9 +587,9 @@
       constructor() {
           this.x = Math.random() * canvas.width;
           this.y = Math.random() * canvas.height;
-          this.size = Math.random() * 2 + 0.1; // Small size for elegance
-          this.speedY = Math.random() * 0.3 - 0.15; // Slow floating vertical
-          this.speedX = Math.random() * 0.3 - 0.15; // Slow floating horizontal
+          this.size = Math.random() * 2 + 0.1; 
+          this.speedY = Math.random() * 0.3 - 0.15; 
+          this.speedX = Math.random() * 0.3 - 0.15; 
           this.opacity = Math.random() * 0.5 + 0.1;
       }
       update() {
@@ -599,7 +611,7 @@
 
   function initParticles() {
       particlesArray = [];
-      const particleCount = 120; // Number of stars/dust
+      const particleCount = 120; 
       for (let i = 0; i < particleCount; i++) {
           particlesArray.push(new Particle());
       }
@@ -609,7 +621,7 @@
   function animateParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const isDark = document.body.classList.contains('dark-mode');
-      const pColor = isDark ? 'rgba(212, 175, 55, 1)' : 'rgba(184, 134, 11, 1)'; // Gold vs Dark Gold
+      const pColor = isDark ? 'rgba(212, 175, 55, 1)' : 'rgba(184, 134, 11, 1)'; 
       
       for (let i = 0; i < particlesArray.length; i++) {
           particlesArray[i].update();
@@ -686,5 +698,5 @@
   });
 </script>
 
-</body>
+  </body>
 </html>

@@ -18,7 +18,6 @@ const generateShortReceipt = () => {
 
 const getWalletPage = async (req, res) => {
   try {
-    
     const userId = req.userId;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -102,7 +101,7 @@ const getWalletPage = async (req, res) => {
       totalPages,
       totalTransactions,
       razorpayKeyId: process.env.RAZORPAY_KEY_ID,
-      user: req.user || req.session.user || null
+      user: req.user || req.session.user || null,
     });
   } catch (error) {
     console.error("Error fetching wallet page:", error);

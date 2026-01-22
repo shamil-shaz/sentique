@@ -8,11 +8,9 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <style>
-        /* =========================================
-           1. THEME VARIABLES
-           ========================================= */
+       
         :root {
-            /* --- Light Mode (Clean Boxy Look) --- */
+            /* --- Light Mode  --- */
             --bg-body: #f8f9fa;
             --bg-card: #ffffff;
             --bg-input: #ffffff;
@@ -49,7 +47,7 @@
             --border-color: #333333;
             
             /* Accents */
-            --primary: #e2c055; /* YOUR SPECIFIC GOLD COLOR */
+            --primary: #e2c055; 
             --gradient-main: linear-gradient(135deg, #e2c055 0%, #b8962e 100%);
             --focus-glow: rgba(226, 192, 85, 0.2);
             
@@ -67,9 +65,7 @@
             --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
         }
 
-        /* =========================================
-           2. GLOBAL STYLES
-           ========================================= */
+     
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -240,9 +236,7 @@
         }
         .error-message.show { display: block; }
 
-        /* Buttons & Animations */
-        
-        /* 1. Define the Shine Keyframes */
+       
         @keyframes shine {
             0% { left: -100%; }
             20% { left: 100%; }
@@ -287,8 +281,8 @@
             transition: all 0.3s ease;
             font-size: 14px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            position: relative; /* For the shine absolute positioning */
-            overflow: hidden;   /* Keep shine inside button */
+            position: relative; 
+            overflow: hidden;  
         }
         
         body.dark-mode .update-btn { color: #121212; }
@@ -405,8 +399,8 @@
             font-weight: 600;
             margin-top: 12px;
             transition: 0.3s;
-            position: relative; /* For shine */
-            overflow: hidden;   /* For shine */
+            position: relative; 
+            overflow: hidden;   
         }
         
         body.dark-mode .alert-info a { color: #121212; }
@@ -910,18 +904,18 @@ body.dark-mode .toggle-password:hover {
         // --- PASSWORD VISIBILITY TOGGLE LOGIC ---
 document.querySelectorAll('.toggle-password').forEach(button => {
     button.addEventListener('click', function() {
-        // Find the input relative to the clicked eye icon
+        
         const input = this.parentElement.querySelector('input');
         
-        // Toggle the type attribute
+        
         const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
         input.setAttribute('type', type);
         
-        // Toggle the eye icon class (font-awesome)
+        
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
         
-        // Optional: brief focus back to input for better UX
+        
         input.focus();
     });
 });

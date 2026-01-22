@@ -288,22 +288,26 @@ body.dark-mode .limit-warning {
 
           <div class="price-wrap">
             <span class="current-price" id="currentPrice">
-             <%
-const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
-%>
+              <%
+              const firstAvailableVariant = product.variants.find(v => v.stock >
+              0) || product.variants[0];
+              %>
 
-<span class="current-price" id="currentPrice">
-  ₹<%= firstAvailableVariant.salePrice.toFixed(2) %>
-</span>
+              <span class="current-price" id="currentPrice">
+                ₹<%= firstAvailableVariant.salePrice.toFixed(2) %>
+              </span>
 
-<% if(firstAvailableVariant.regularPrice > firstAvailableVariant.salePrice) { %>
-<span class="old-price" id="regularPrice">
-  ₹<%= firstAvailableVariant.regularPrice.toFixed(2) %>
-</span>
-<span class="discount-tag" id="discountTag">
-  <%= Math.round(((firstAvailableVariant.regularPrice - firstAvailableVariant.salePrice) / firstAvailableVariant.regularPrice) * 100) %>% OFF
-</span>
-<% } %>
+              <% if(firstAvailableVariant.regularPrice >
+              firstAvailableVariant.salePrice) { %>
+              <span class="old-price" id="regularPrice">
+                ₹<%= firstAvailableVariant.regularPrice.toFixed(2) %>
+              </span>
+              <span class="discount-tag" id="discountTag">
+                <%= Math.round(((firstAvailableVariant.regularPrice -
+                firstAvailableVariant.salePrice) /
+                firstAvailableVariant.regularPrice) * 100) %>% OFF
+              </span>
+              <% } %>
 
             </span>
             <% if(product.variants[0]?.regularPrice >
@@ -321,23 +325,23 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
           <p class="description"><%= product.description %></p>
 
           <div style="margin-bottom: 25px;">
-           <label class="option-title">Select Volume</label>
-<div class="options-grid">
-<% product.variants.forEach((variant, i) => { %>
+            <label class="option-title">Select Volume</label>
+            <div class="options-grid">
+              <% product.variants.forEach((variant, i) => { %>
 
-  <button
-    class="size-btn <%= i === 0 ? 'active' : '' %>"
-    data-size="<%= variant.size %>"
-    data-sale="<%= variant.salePrice %>"
-    data-regular="<%= variant.regularPrice %>"
-    data-stock="<%= variant.stock %>"
-    <%= variant.stock === 0 ? 'disabled' : '' %>
-    onclick="selectVariant(this)">
-    <%= variant.size %> ML
-  </button>
+              <button
+                class="size-btn <%= i === 0 ? 'active' : '' %>"
+                data-size="<%= variant.size %>"
+                data-sale="<%= variant.salePrice %>"
+                data-regular="<%= variant.regularPrice %>"
+                data-stock="<%= variant.stock %>"
+                <%=variant.stock === 0 ? 'disabled' : '' %>
+                onclick="selectVariant(this)">
+                <%= variant.size %> ML
+              </button>
 
-<% }) %>
-</div>
+              <% }) %>
+            </div>
 
             <div id="stockDisplay" class="stock-text"></div>
           </div>
@@ -450,10 +454,10 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
             <div class="review-item">
               <div class="rev-head">
                 <div>
-<span class="rev-name">
-  <%= (review.userId && review.userId.name) ? review.userId.name : "Customer" %>
-</span>
-
+                  <span class="rev-name">
+                    <%= (review.userId && review.userId.name) ?
+                    review.userId.name : "Customer" %>
+                  </span>
 
                   <span class="rev-date"><%= new
                     Date(review.createdAt).toLocaleDateString() %></span>
@@ -476,33 +480,36 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
 
       <h2 class="section-head">You May Also Like</h2>
       <div class="related-grid">
-       <% if(relatedProducts && relatedProducts.length > 0) { %>
-    <% relatedProducts.forEach(prod => { 
-        // 1. Skip if product data is missing or has no variants array
+        <% if(relatedProducts && relatedProducts.length > 0) { %>
+        <% relatedProducts.forEach(prod => {
+
         if (!prod || !prod.variants || prod.variants.length === 0) return;
 
-        // 2. Safely find the variant
-        const bestVariant = prod.variants.find(v => v.stock > 0) || prod.variants[0];
-        
-        // 3. CRITICAL: If no variant found at all, skip this product card to prevent crash
+        const bestVariant = prod.variants.find(v => v.stock > 0) ||
+        prod.variants[0];
+
         if (!bestVariant) return;
 
         const relSale = bestVariant.salePrice || 0;
         const relReg = bestVariant.regularPrice || 0;
 
         const hasDiscount = relReg > relSale && relSale > 0;
-        const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg) * 100) : 0;
-    %>
+        const discount = hasDiscount ? Math.round(((relReg - relSale) / relReg)
+        * 100) : 0;
+        %>
         <a href="/productDetails?id=<%= prod._id %>" class="mini-card">
           <div class="mc-img-box">
             <% if(hasDiscount) { %>
             <div class="mc-discount-badge"><%= discount %>% OFF</div>
             <% } %>
-            <img src="<%= prod.images && prod.images[0] ? prod.images[0] : '/images/placeholder.jpg' %>" class="mc-img" alt="<%= prod.productName %>">
+            <img
+              src="<%= prod.images && prod.images[0] ? prod.images[0] : '/images/placeholder.jpg' %>"
+              class="mc-img" alt="<%= prod.productName %>">
           </div>
           <div class="mc-details">
             <div class="mc-brand">
-                <%= (prod.brand && prod.brand.brandName) ? prod.brand.brandName : 'SENTIQUE' %>
+              <%= (prod.brand && prod.brand.brandName) ? prod.brand.brandName :
+              'SENTIQUE' %>
             </div>
             <div class="mc-name"><%= prod.productName %></div>
             <div class="mc-price-wrap">
@@ -513,8 +520,8 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
             </div>
           </div>
         </a>
-    <% }) %>
-<% } %>                                        
+        <% }) %>
+        <% } %>
       </div>
     </div>
 
@@ -540,7 +547,7 @@ const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product
       
       currentVariant = { size, sale, regular, stock };
       
-      // Update price display
+      
       document.getElementById('currentPrice').textContent = `₹${sale.toFixed(2)}`;
       
       const priceWrap = document.querySelector('.price-wrap');
@@ -584,24 +591,24 @@ updateQuantityButtonStates();
     const data = await response.json();
     cartItemQuantity = data.quantity || 0;
 
-    updateQuantityButtonStates(); // <= only here!
+    updateQuantityButtonStates(); 
 
   } catch (error) {
     console.error('Error checking cart:', error);
     cartItemQuantity = 0;
-    updateQuantityButtonStates(); // <= still update UI
+    updateQuantityButtonStates(); 
   }
 }
 
 
-    // Images
+  
     function changeImage(thumb, src) {
       document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
       thumb.classList.add('active');
       document.getElementById('mainImage').src = src;
     }
 
-    // Zoom
+    
     const zoomBox = document.getElementById('zoomBox');
     const mainImage = document.getElementById('mainImage');
     let isZoomed = false;
@@ -642,20 +649,20 @@ updateQuantityButtonStates();
 
   const maxAllowed = Math.min(5, currentVariant.stock) - cartItemQuantity;
 
-  // Show limit msg
+ 
   if (maxAllowed <= 0) {
     maxLimitMsg.style.display = 'block';
   } else {
     maxLimitMsg.style.display = 'none';
   }
 
-  // disable minus
+ 
   qtyBtns[0].disabled = currentValue <= 1;
 
-  // disable plus
+ 
   qtyBtns[1].disabled = currentValue >= maxAllowed || maxAllowed <= 0;
 
-  // disable add to cart
+  
   addToCartBtn.disabled = maxAllowed <= 0 || currentVariant.stock === 0;
 }
 
@@ -673,13 +680,13 @@ updateQuantityButtonStates();
   // CLIENT-SIDE LIMIT CHECK (before backend)
   if (cartItemQuantity >= 5) {
     showToast('warning', `Maximum 5 items allowed. You already have 5 in cart.`);
-    return; // <-- stop here
+    return; 
   }
 
   if (totalQuantity > 5) {
     const remaining = 5 - cartItemQuantity;
     showToast('warning', `You can add only ${remaining} more.`);
-    return; // <-- stop here
+    return; 
   }
 
   try {

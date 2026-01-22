@@ -1,7 +1,9 @@
 <%- include("../partials/user/header.ejs") %>
 
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
@@ -263,7 +265,8 @@
 
 <body>
     <div class="main-content">
-        <%- include("../partials/user/profile-sidebar.ejs", { user: user, activePage: 'address' }) %>
+        <%- include("../partials/user/profile-sidebar.ejs", { user: user,
+        activePage: 'address' }) %>
 
         <div class="edit-content">
             <div class="page-header">
@@ -271,7 +274,8 @@
                     <h1>Edit Address</h1>
                     <p>Update your address details</p>
                 </div>
-                <a href="/profile/address" class="back-btn">Back to Addresses</a>
+                <a href="/profile/address" class="back-btn">Back to
+                    Addresses</a>
             </div>
 
             <div class="edit-form-container">
@@ -281,15 +285,20 @@
                 </div>
 
                 <form id="editAddressForm" onsubmit="updateAddress(event)">
-                    <input type="hidden" id="addressId" value="<%= address._id %>">
+                    <input type="hidden" id="addressId"
+                        value="<%= address._id %>">
 
                     <div class="form-group">
                         <label class="form-label">Address Type *</label>
-                        <select class="form-select" name="addressType" id="type" required>
-                            <option value="" disabled>Select address type</option>
-                            <option value="Home" <%= address.addressType === 'Home' ? 'selected' : '' %>>Home</option>
-                            <option value="Work" <%= address.addressType === 'Work' ? 'selected' : '' %>>Work</option>
-                            <option value="Other" <%= address.addressType === 'Other' ? 'selected' : '' %>>Other</option>
+                        <select class="form-select" name="addressType" id="type"
+                            required>
+                            <option value disabled>Select address type</option>
+                            <option value="Home" <%=address.addressType ===
+                                'Home' ? 'selected' : '' %>>Home</option>
+                            <option value="Work" <%=address.addressType ===
+                                'Work' ? 'selected' : '' %>>Work</option>
+                            <option value="Other" <%=address.addressType ===
+                                'Other' ? 'selected' : '' %>>Other</option>
                         </select>
                         <div class="error-text" id="typeError"></div>
                     </div>
@@ -297,85 +306,166 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Full Name *</label>
-                            <input type="text" class="form-input" name="name" id="name" value="<%= address.name %>" placeholder="Enter full name" required>
-                            <div class="small-text">Letters and spaces only, 3-50 characters</div>
+                            <input type="text" class="form-input" name="name"
+                                id="name" value="<%= address.name %>"
+                                placeholder="Enter full name" required>
+                            <div class="small-text">Letters and spaces only,
+                                3-50 characters</div>
                             <div class="error-text" id="nameError"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Phone Number *</label>
-                            <input type="tel" class="form-input" name="phone" id="phone" value="<%= address.phone %>" placeholder="10 digit number" required maxlength="10">
+                            <input type="tel" class="form-input" name="phone"
+                                id="phone" value="<%= address.phone %>"
+                                placeholder="10 digit number" required
+                                maxlength="10">
                             <div class="error-text" id="phoneError"></div>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">House/Building Name *</label>
-                            <input type="text" class="form-input" name="houseName" id="houseName" value="<%= address.houseName %>" placeholder="Enter house/building name" required>
+                            <label class="form-label">House/Building Name
+                                *</label>
+                            <input type="text" class="form-input"
+                                name="houseName" id="houseName"
+                                value="<%= address.houseName %>"
+                                placeholder="Enter house/building name"
+                                required>
                             <div class="error-text" id="houseError"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Building Number</label>
-                            <input type="text" class="form-input" name="buildingNumber" id="buildingNumber" value="<%= address.buildingNumber || '' %>" placeholder="Optional">
+                            <input type="text" class="form-input"
+                                name="buildingNumber" id="buildingNumber"
+                                value="<%= address.buildingNumber || '' %>"
+                                placeholder="Optional">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Landmark *</label>
-                        <textarea class="form-textarea" name="landmark" id="landmark" placeholder="Nearby landmark or reference" required><%= address.landmark %></textarea>
+                        <textarea class="form-textarea" name="landmark"
+                            id="landmark"
+                            placeholder="Nearby landmark or reference"
+                            required><%= address.landmark %></textarea>
                         <div class="error-text" id="landmarkError"></div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Alternative Number</label>
-                            <input type="tel" class="form-input" name="altPhone" id="altPhone" value="<%= address.altPhone || '' %>" placeholder="10 digit number (optional)" maxlength="10">
+                            <input type="tel" class="form-input" name="altPhone"
+                                id="altPhone"
+                                value="<%= address.altPhone || '' %>"
+                                placeholder="10 digit number (optional)"
+                                maxlength="10">
                             <div class="error-text" id="altPhoneError"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nationality *</label>
-                            <input type="text" class="form-input" name="nationality" id="nationality" value="Indian" readonly style="background-color: var(--bg-body); cursor: not-allowed;">
+                            <input type="text" class="form-input"
+                                name="nationality" id="nationality"
+                                value="Indian" readonly
+                                style="background-color: var(--bg-body); cursor: not-allowed;">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">City *</label>
-                            <input type="text" class="form-input" name="city" id="city" value="<%= address.city %>" placeholder="Enter city" required>
+                            <input type="text" class="form-input" name="city"
+                                id="city" value="<%= address.city %>"
+                                placeholder="Enter city" required>
                             <div class="error-text" id="cityError"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">State *</label>
-                            <select class="form-select" name="state" id="state" required>
-                                <option value="" disabled>Select state</option>
-                                <option value="Andhra Pradesh" <%= address.state === 'Andhra Pradesh' ? 'selected' : '' %>>Andhra Pradesh</option>
-                                <option value="Arunachal Pradesh" <%= address.state === 'Arunachal Pradesh' ? 'selected' : '' %>>Arunachal Pradesh</option>
-                                <option value="Assam" <%= address.state === 'Assam' ? 'selected' : '' %>>Assam</option>
-                                <option value="Bihar" <%= address.state === 'Bihar' ? 'selected' : '' %>>Bihar</option>
-                                <option value="Chhattisgarh" <%= address.state === 'Chhattisgarh' ? 'selected' : '' %>>Chhattisgarh</option>
-                                <option value="Goa" <%= address.state === 'Goa' ? 'selected' : '' %>>Goa</option>
-                                <option value="Gujarat" <%= address.state === 'Gujarat' ? 'selected' : '' %>>Gujarat</option>
-                                <option value="Haryana" <%= address.state === 'Haryana' ? 'selected' : '' %>>Haryana</option>
-                                <option value="Himachal Pradesh" <%= address.state === 'Himachal Pradesh' ? 'selected' : '' %>>Himachal Pradesh</option>
-                                <option value="Jharkhand" <%= address.state === 'Jharkhand' ? 'selected' : '' %>>Jharkhand</option>
-                                <option value="Karnataka" <%= address.state === 'Karnataka' ? 'selected' : '' %>>Karnataka</option>
-                                <option value="Kerala" <%= address.state === 'Kerala' ? 'selected' : '' %>>Kerala</option>
-                                <option value="Madhya Pradesh" <%= address.state === 'Madhya Pradesh' ? 'selected' : '' %>>Madhya Pradesh</option>
-                                <option value="Maharashtra" <%= address.state === 'Maharashtra' ? 'selected' : '' %>>Maharashtra</option>
-                                <option value="Manipur" <%= address.state === 'Manipur' ? 'selected' : '' %>>Manipur</option>
-                                <option value="Meghalaya" <%= address.state === 'Meghalaya' ? 'selected' : '' %>>Meghalaya</option>
-                                <option value="Mizoram" <%= address.state === 'Mizoram' ? 'selected' : '' %>>Mizoram</option>
-                                <option value="Nagaland" <%= address.state === 'Nagaland' ? 'selected' : '' %>>Nagaland</option>
-                                <option value="Odisha" <%= address.state === 'Odisha' ? 'selected' : '' %>>Odisha</option>
-                                <option value="Punjab" <%= address.state === 'Punjab' ? 'selected' : '' %>>Punjab</option>
-                                <option value="Rajasthan" <%= address.state === 'Rajasthan' ? 'selected' : '' %>>Rajasthan</option>
-                                <option value="Sikkim" <%= address.state === 'Sikkim' ? 'selected' : '' %>>Sikkim</option>
-                                <option value="Tamil Nadu" <%= address.state === 'Tamil Nadu' ? 'selected' : '' %>>Tamil Nadu</option>
-                                <option value="Telangana" <%= address.state === 'Telangana' ? 'selected' : '' %>>Telangana</option>
-                                <option value="Tripura" <%= address.state === 'Tripura' ? 'selected' : '' %>>Tripura</option>
-                                <option value="Uttar Pradesh" <%= address.state === 'Uttar Pradesh' ? 'selected' : '' %>>Uttar Pradesh</option>
-                                <option value="Uttarakhand" <%= address.state === 'Uttarakhand' ? 'selected' : '' %>>Uttarakhand</option>
-                                <option value="West Bengal" <%= address.state === 'West Bengal' ? 'selected' : '' %>>West Bengal</option>
+                            <select class="form-select" name="state" id="state"
+                                required>
+                                <option value disabled>Select state</option>
+                                <option value="Andhra Pradesh" <%=address.state
+                                    === 'Andhra Pradesh' ? 'selected' : ''
+                                    %>>Andhra Pradesh</option>
+                                <option value="Arunachal Pradesh"
+                                    <%=address.state === 'Arunachal Pradesh' ?
+                                    'selected' : '' %>>Arunachal
+                                    Pradesh</option>
+                                <option value="Assam" <%=address.state ===
+                                    'Assam' ? 'selected' : '' %>>Assam</option>
+                                <option value="Bihar" <%=address.state ===
+                                    'Bihar' ? 'selected' : '' %>>Bihar</option>
+                                <option value="Chhattisgarh" <%=address.state
+                                    === 'Chhattisgarh' ? 'selected' : ''
+                                    %>>Chhattisgarh</option>
+                                <option value="Goa" <%=address.state === 'Goa' ?
+                                    'selected' : '' %>>Goa</option>
+                                <option value="Gujarat" <%=address.state ===
+                                    'Gujarat' ? 'selected' : ''
+                                    %>>Gujarat</option>
+                                <option value="Haryana" <%=address.state ===
+                                    'Haryana' ? 'selected' : ''
+                                    %>>Haryana</option>
+                                <option value="Himachal Pradesh"
+                                    <%=address.state === 'Himachal Pradesh' ?
+                                    'selected' : '' %>>Himachal Pradesh</option>
+                                <option value="Jharkhand" <%=address.state ===
+                                    'Jharkhand' ? 'selected' : ''
+                                    %>>Jharkhand</option>
+                                <option value="Karnataka" <%=address.state ===
+                                    'Karnataka' ? 'selected' : ''
+                                    %>>Karnataka</option>
+                                <option value="Kerala" <%=address.state ===
+                                    'Kerala' ? 'selected' : ''
+                                    %>>Kerala</option>
+                                <option value="Madhya Pradesh" <%=address.state
+                                    === 'Madhya Pradesh' ? 'selected' : ''
+                                    %>>Madhya Pradesh</option>
+                                <option value="Maharashtra" <%=address.state ===
+                                    'Maharashtra' ? 'selected' : ''
+                                    %>>Maharashtra</option>
+                                <option value="Manipur" <%=address.state ===
+                                    'Manipur' ? 'selected' : ''
+                                    %>>Manipur</option>
+                                <option value="Meghalaya" <%=address.state ===
+                                    'Meghalaya' ? 'selected' : ''
+                                    %>>Meghalaya</option>
+                                <option value="Mizoram" <%=address.state ===
+                                    'Mizoram' ? 'selected' : ''
+                                    %>>Mizoram</option>
+                                <option value="Nagaland" <%=address.state ===
+                                    'Nagaland' ? 'selected' : ''
+                                    %>>Nagaland</option>
+                                <option value="Odisha" <%=address.state ===
+                                    'Odisha' ? 'selected' : ''
+                                    %>>Odisha</option>
+                                <option value="Punjab" <%=address.state ===
+                                    'Punjab' ? 'selected' : ''
+                                    %>>Punjab</option>
+                                <option value="Rajasthan" <%=address.state ===
+                                    'Rajasthan' ? 'selected' : ''
+                                    %>>Rajasthan</option>
+                                <option value="Sikkim" <%=address.state ===
+                                    'Sikkim' ? 'selected' : ''
+                                    %>>Sikkim</option>
+                                <option value="Tamil Nadu" <%=address.state ===
+                                    'Tamil Nadu' ? 'selected' : '' %>>Tamil
+                                    Nadu</option>
+                                <option value="Telangana" <%=address.state ===
+                                    'Telangana' ? 'selected' : ''
+                                    %>>Telangana</option>
+                                <option value="Tripura" <%=address.state ===
+                                    'Tripura' ? 'selected' : ''
+                                    %>>Tripura</option>
+                                <option value="Uttar Pradesh" <%=address.state
+                                    === 'Uttar Pradesh' ? 'selected' : ''
+                                    %>>Uttar Pradesh</option>
+                                <option value="Uttarakhand" <%=address.state ===
+                                    'Uttarakhand' ? 'selected' : ''
+                                    %>>Uttarakhand</option>
+                                <option value="West Bengal" <%=address.state ===
+                                    'West Bengal' ? 'selected' : '' %>>West
+                                    Bengal</option>
                             </select>
                             <div class="error-text" id="stateError"></div>
                         </div>
@@ -383,21 +473,29 @@
 
                     <div class="form-group">
                         <label class="form-label">PIN Code *</label>
-                        <input type="text" class="form-input" name="pincode" id="zip" value="<%= address.pincode %>" placeholder="6 Digits" required maxlength="6">
-                        <div class="small-text">6 digits (not 123456, 654321, or 111111)</div>
+                        <input type="text" class="form-input" name="pincode"
+                            id="zip" value="<%= address.pincode %>"
+                            placeholder="6 Digits" required maxlength="6">
+                        <div class="small-text">6 digits (not 123456, 654321, or
+                            111111)</div>
                         <div class="error-text" id="zipError"></div>
                     </div>
 
                     <div class="form-group">
                         <div class="checkbox-group">
-                            <input type="checkbox" id="setDefault" name="isDefault" <%= address.isDefault ? 'checked' : '' %>>
-                            <label for="setDefault">Set as default address</label>
+                            <input type="checkbox" id="setDefault"
+                                name="isDefault" <%=address.isDefault ?
+                                'checked' : '' %>>
+                            <label for="setDefault">Set as default
+                                address</label>
                         </div>
                     </div>
 
                     <div class="form-actions">
-                        <a href="/profile/address" class="form-btn btn-cancel">Cancel</a>
-                        <button type="submit" class="form-btn btn-submit" id="submitBtn">Update Address</button>
+                        <a href="/profile/address"
+                            class="form-btn btn-cancel">Cancel</a>
+                        <button type="submit" class="form-btn btn-submit"
+                            id="submitBtn">Update Address</button>
                     </div>
                 </form>
             </div>
@@ -610,4 +708,4 @@
         }
     </script>
 
-<%- include("../partials/user/footer.ejs") %>
+    <%- include("../partials/user/footer.ejs") %>

@@ -1,15 +1,15 @@
 <%- include("../partials/user/header.ejs") %>
 <head>
   <title>My Account - <%= user.name %></title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
+
   <style>
-    /* =========================
-       1. CSS VARIABLES (THEMING)
-       ========================= */
+   
     :root {
-      /* --- LIGHT MODE (High Contrast Clean) --- */
+      /* --- LIGHT MODE  --- */
       --bg-body: #f3f4f6;
       --bg-card: #ffffff;
       --bg-input: #ffffff;
@@ -22,23 +22,23 @@
       --border-color: #cbd5e1;
       --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0,0,0,0.05);
       
-      /* Accents */
+      
       --accent-color: #667eea; 
       --menu-hover: #f1f5f9;
       --menu-active-bg: linear-gradient(135deg, #183043 0%, #10262c 100%);
       --menu-active-text: #ffffff;
 
-      /* Buttons */
+      
       --btn-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       
-      /* Referral Section */
+      
       --referral-bg: #F8FAFC;
       --referral-border: 1px solid #cbd5e1; 
       --referral-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
       --referral-title-color: #111827;
       --referral-desc-color: #4b5563;
       
-      /* Stats & Code */
+     
       --stat-bg: #FFFFFF;
       --stat-border: 1px solid #e2e8f0;
       --stat-label-color: #64748b;
@@ -69,7 +69,7 @@
           0 0 15px rgba(229, 193, 74, 0.15),   
           inset 0 0 0 1px rgba(229, 193, 74, 0.2);
       
-      /* Accents */
+      
       --accent-color: #f0d978;
       --menu-hover: #1f1f1f;
       --menu-active-bg: var(--gold-gradient);
@@ -93,10 +93,7 @@
       --code-box-bg: #121212;
       --code-box-border: 1px solid #333;
     }
-
-    /* =========================
-       2. GLOBAL RESET & BASE
-       ========================= */
+   
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -148,7 +145,7 @@
        ========================= */
     .main-content {
       display: grid;
-      grid-template-columns: 280px 1fr; /* Sidebar | Content */
+      grid-template-columns: 280px 1fr; 
       gap: 2rem;
       align-items: start;
     }
@@ -184,7 +181,7 @@
        4. MOBILE TOGGLE BUTTON
        ========================= */
     .sidebar-toggle-btn {
-        display: none; /* Hidden on Desktop */
+        display: none; 
         width: 100%;
         padding: 15px 20px;
         background: var(--bg-card);
@@ -275,9 +272,7 @@
     .status-pending { color: #f59e0b; font-weight: 600; }
     .reward-amount { font-weight: 700; color: var(--accent-color); }
 
-    /* =========================
-       7. RESPONSIVE & MOBILE SIDEBAR LOGIC
-       ========================= */
+    
     
     /* Tablet */
     @media (max-width: 1024px) {
@@ -287,11 +282,11 @@
 
     /* Mobile & Tablet Portrait (< 768px) */
     @media (max-width: 868px) {
-      /* Switch to Single Column Stack */
+     
       .main-content {
         display: flex;
         flex-direction: column;
-        gap: 0; /* Remove gap because button is now separate */
+        gap: 0; 
       }
 
       /* Show the Toggle Button */
@@ -332,16 +327,21 @@
 <body>
   <section class="profile-section">
     <div class="container">
-      
+
       <% if (success_msg && success_msg.length > 0) { %>
-        <div class="alert alert-success" style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><%= success_msg %></div>
+      <div class="alert alert-success"
+        style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><%=
+        success_msg %></div>
       <% } %>
       <% if (error_msg && error_msg.length > 0) { %>
-        <div class="alert alert-error" style="background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><%= error_msg %></div>
+      <div class="alert alert-error"
+        style="background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><%=
+        error_msg %></div>
       <% } %>
 
       <div class="breadcrumb">
-        <a href="/">Home</a> / <a href="/profile">My Account</a> / <span>Profile</span>
+        <a href="/">Home</a> / <a href="/profile">My Account</a> /
+        <span>Profile</span>
       </div>
 
       <div class="welcome-header">
@@ -349,10 +349,10 @@
       </div>
 
       <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
-          <span style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:20px;">☰</span> Menu
-          </span>
-          <span id="toggle-icon" style="font-size:12px;">▼</span>
+        <span style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:20px;">☰</span> Menu
+        </span>
+        <span id="toggle-icon" style="font-size:12px;">▼</span>
       </button>
 
       <div class="main-content">
@@ -360,9 +360,9 @@
           <div class="profile-avatar-container">
             <div class="profile-avatar">
               <% if (user.image) { %>
-                <img src="<%= user.image %>" alt="Profile Picture">
+              <img src="<%= user.image %>" alt="Profile Picture">
               <% } else { %>
-                <span style="font-size: 2rem; color: #fff;">👤</span>
+              <span style="font-size: 2rem; color: #fff;">👤</span>
               <% } %>
             </div>
             <div class="profile-name"><%= user.name %></div>
@@ -370,26 +370,32 @@
 
           <div class="menu-section">
             <div class="menu-title">Account</div>
-            <a href="/profile" class="menu-item active"><span>👤</span> My Profile</a>
-            <a href="/profile/address" class="menu-item"><span>📍</span> Address Book</a>
+            <a href="/profile" class="menu-item active"><span>👤</span> My
+              Profile</a>
+            <a href="/profile/address" class="menu-item"><span>📍</span> Address
+              Book</a>
           </div>
 
           <div class="menu-section">
             <div class="menu-title">Shopping</div>
-            <a href="/profile/order-list" class="menu-item"><span>📦</span> My Orders</a>
-            <a href="/wishlist" class="menu-item"><span>❤️</span> My Wishlist</a>
+            <a href="/profile/order-list" class="menu-item"><span>📦</span> My
+              Orders</a>
+            <a href="/wishlist" class="menu-item"><span>❤️</span> My
+              Wishlist</a>
             <a href="/cart" class="menu-item"><span>🛒</span> Shopping Cart</a>
           </div>
 
           <div class="menu-section">
             <div class="menu-title">Payments</div>
-            <a href="/profile/wallet" class="menu-item"><span>💳</span> Wallet</a>
+            <a href="/profile/wallet" class="menu-item"><span>💳</span>
+              Wallet</a>
             <a href="/coupons" class="menu-item"><span>🎟️</span> Coupons</a>
           </div>
 
           <div class="menu-section">
             <div class="menu-title">Security</div>
-            <a href="/profile/privacy-security" class="menu-item"><span>🔒</span> Privacy & Security</a>
+            <a href="/profile/privacy-security"
+              class="menu-item"><span>🔒</span> Privacy & Security</a>
           </div>
         </aside>
 
@@ -402,15 +408,18 @@
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">Full Name</label>
-                <input type="text" class="form-input" value="<%= user.name %>" disabled>
+                <input type="text" class="form-input" value="<%= user.name %>"
+                  disabled>
               </div>
               <div class="form-group">
                 <label class="form-label">Phone</label>
-                <input type="tel" class="form-input" value="<%= user.phone || '' %>" disabled>
+                <input type="tel" class="form-input"
+                  value="<%= user.phone || '' %>" disabled>
               </div>
               <div class="form-group full-width" style="grid-column: 1 / -1;">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-input" value="<%= user.email %>" disabled>
+                <input type="email" class="form-input" value="<%= user.email %>"
+                  disabled>
               </div>
             </div>
 
@@ -422,7 +431,8 @@
               <div class="referral-header">
                 <h2 class="referral-title">🎁 Invite & Earn</h2>
                 <p class="referral-description">
-                  Share your referral code! Friends get ₹50 on their first order > ₹1000, and you get ₹100.
+                  Share your referral code! Friends get ₹50 on their first order
+                  > ₹1000, and you get ₹100.
                 </p>
               </div>
 
@@ -453,40 +463,44 @@
                 <div class="referral-code-box">
                   <div class="code-label">Your Unique Code</div>
                   <% if (user && user.refferalCode) { %>
-                    <div class="code-display-wrapper">
-                      <input type="text" class="code-input" id="referralCode" value="<%= user.refferalCode %>" readonly>
-                      <button type="button" class="copy-btn" onclick="copyReferralCode()">
-                        <span>📋</span> Copy
-                      </button>
-                    </div>
-                    <div class="share-buttons">
-                      <button type="button" class="share-btn share-whatsapp" onclick="shareViaWhatsApp('<%= user.refferalCode %>')">
-                        <span>💬</span> Share on WhatsApp
-                      </button>
-                    </div>
+                  <div class="code-display-wrapper">
+                    <input type="text" class="code-input" id="referralCode"
+                      value="<%= user.refferalCode %>" readonly>
+                    <button type="button" class="copy-btn"
+                      onclick="copyReferralCode()">
+                      <span>📋</span> Copy
+                    </button>
+                  </div>
+                  <div class="share-buttons">
+                    <button type="button" class="share-btn share-whatsapp"
+                      onclick="shareViaWhatsApp('<%= user.refferalCode %>')">
+                      <span>💬</span> Share on WhatsApp
+                    </button>
+                  </div>
                   <% } %>
                 </div>
               </div>
             </div>
 
             <div class="referral-details-section">
-                <h3 class="referral-details-title">Referral History</h3>
-                <div class="referral-table-wrapper">
-                    <table class="referral-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Reward</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="referralTableBody">
-                            <tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-secondary);">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+              <h3 class="referral-details-title">Referral History</h3>
+              <div class="referral-table-wrapper">
+                <table class="referral-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Reward</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="referralTableBody">
+                    <tr><td colspan="5"
+                        style="text-align:center; padding:20px; color:var(--text-secondary);">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
           </div>
@@ -503,9 +517,9 @@
         sidebar.classList.toggle('show');
         
         if (sidebar.classList.contains('show')) {
-            icon.innerHTML = '&#9650;'; // Up Arrow
+            icon.innerHTML = '&#9650;'; 
         } else {
-            icon.innerHTML = '&#9660;'; // Down Arrow
+            icon.innerHTML = '&#9660;'; 
         }
     }
 

@@ -15,11 +15,9 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
-/* =========================================
-   1. THEME CONFIGURATION (VARIABLES)
-   ========================================= */
+
 :root {
-  /* --- LIGHT MODE (Default) --- */
+ 
   --bg-body: #ffffff;
   --bg-card: #ffffff;
   --bg-section: #f9fafb;
@@ -51,25 +49,25 @@
 }
 
 body.dark-mode {
-  /* --- DARK MODE (Hybrid: Black BG, Green Text, Gold Buttons) --- */
   
-  /* Backgrounds */
-  --bg-body: #0a0a0a;       /* Deep Black */
-  --bg-card: #171717;       /* Rich Charcoal */
-  --bg-section: #121212;    /* Dark Section */
-  --bg-input: #0f0f0f;      /* Input BG */
-  --bg-hover: #262626;      /* Hover */
+  
+
+  --bg-body: #0a0a0a;       
+  --bg-card: #171717;       
+  --bg-section: #121212;    
+  --bg-input: #0f0f0f;     
+  --bg-hover: #262626;      
   
   /* Text */
-  --text-primary: #ededed;  /* Soft White */
-  --text-secondary: #a3a3a3;/* Silver Grey */
-  --text-muted: #737373;    /* Dark Grey */
+  --text-primary: #ededed;  
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;    
   
-  /* KEEPING GREEN FOR TEXT/PRICES AS REQUESTED */
+ 
   --text-label: #22c55e;    
   --accent-color: #22c55e;  
   --accent-hover: #16a34a; 
-  --accent-light: rgba(34, 197, 94, 0.15); /* Green Tint */
+  --accent-light: rgba(34, 197, 94, 0.15); 
   
   /* Borders */
   --border-color: #2e2e2e;
@@ -88,9 +86,7 @@ body.dark-mode {
   --scrollbar-thumb: #2e2e2e;
 }
 
-/* =========================================
-   2. GOLD OVERRIDES (BUTTONS & ICONS ONLY)
-   ========================================= */
+
 
 /* Force Buttons to be GOLD Gradient in Dark Mode */
 body.dark-mode .place-order-btn,
@@ -100,7 +96,7 @@ body.dark-mode .btn-submit,
 body.dark-mode .use-btn,
 body.dark-mode .action-button {
     background: linear-gradient(135deg, #d4af37 0%, #e2c055 100%);
-    color: #000000 !important; /* Black text on Gold */
+    color: #000000 !important;
     font-weight: 700;
     box-shadow: 0 4px 15px rgba(226, 192, 85, 0.15);
     border: none;
@@ -126,8 +122,7 @@ body.dark-mode .section-header svg {
     stroke: #e2c055 !important;
 }
 
-/* Note: Price, Total, "Free", and Selection Borders remain GREEN 
-   because they use var(--accent-color) which we set to Green above. */
+
 
 /* =========================================
    3. MAIN LAYOUT STYLES
@@ -1749,7 +1744,7 @@ body.dark-mode .action-message span { color: #f87171; }
     <h2>Payment Method</h2>
   </div>
   <div class="section-body">
-    <!-- Card Payment Option -->
+  
    
 
     <!-- Online Payment Option (Razorpay) -->
@@ -2423,9 +2418,7 @@ body.dark-mode .action-message span { color: #f87171; }
     return errors;
   };
 
-  // ============================================
-  // SAVE ADDRESS
-  // ============================================
+  
 
   async function saveAddress(e) {
     e.preventDefault();
@@ -2524,10 +2517,6 @@ body.dark-mode .action-message span { color: #f87171; }
     }
   }
 
-  // ============================================
-  // REAL-TIME FIELD VALIDATION (BLUR EVENTS)
-  // ============================================
-
   document.getElementById('name')?.addEventListener('blur', (e) => {
     const name = e.target.value.trim();
     clearErrorMessage('name');
@@ -2605,9 +2594,7 @@ body.dark-mode .action-message span { color: #f87171; }
     }
   });
 
-  // ============================================
-  // INPUT FILTERING
-  // ============================================
+  
 
   document.getElementById('phone')?.addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
@@ -2738,13 +2725,13 @@ body.dark-mode .action-message span { color: #f87171; }
 
   document.querySelectorAll('.address-option').forEach(option => {
     option.addEventListener('click', e => {
-      // Don't select if clicking on edit/delete buttons
+      
       if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn')) return;
       
-      // Remove selected from all
+   
       document.querySelectorAll('.address-option').forEach(opt => opt.classList.remove('selected'));
       
-      // Add selected to clicked option
+     
       option.classList.add('selected');
       
       console.log('✅ Address selected:', option.getAttribute('data-address'));
@@ -2975,7 +2962,7 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
 
     if (!selectedAddressId) throw new Error('Please select a delivery address');
 
-    // 1. Check Auth
+  
     const authCheck = await fetch('/payment/check-auth', { method: 'GET', credentials: 'include' });
     const authData = await authCheck.json();
     if (!authData.isAuthenticated) {
@@ -2983,7 +2970,7 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
       return;
     }
 
-    // 2. Place Order (Backend validation & session storage)
+    
     console.log('🛒 [STEP 2] Placing order...');
     const placeOrderResponse = await fetch('/order/place', {
       method: 'POST',
@@ -3039,7 +3026,7 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
       theme: { color: '#22c55e' },
 
       modal: {
-        // ✅ FIX IS HERE: Wait for backend response to get orderId
+        
         ondismiss: async () => {
           console.log('⚠️ User closed payment modal');
           Swal.fire({ 
@@ -3050,7 +3037,7 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
           });
           
           try {
-            // Tell backend payment was cancelled (This creates the failed order doc)
+            
             const res = await fetch('/payment/payment-failure', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -3065,11 +3052,11 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
             const data = await res.json();
             Swal.close();
 
-            // ✅ CRITICAL FIX: Redirect using the orderId returned by backend
+           
             if (data.success && data.orderId) {
                window.location.href = `/orderFailure?orderId=${data.orderId}`;
             } else {
-               // Fallback if something goes wrong
+               
                console.error("No orderId returned");
                window.location.href = `/orderFailure?error=PaymentCancelled`;
             }
@@ -3083,7 +3070,7 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
 
     const rzp = new Razorpay(options);
     
-    // Handle Bank Failures
+    
     rzp.on('payment.failed', async (response) => {
       await handlePaymentFailure(response.error);
     });
@@ -3095,9 +3082,9 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
     Swal.fire({ icon: 'error', title: 'Error', text: err.message });
   }
 }
-  // Helper function to verify payment
+  
  async function verifyRazorpayPayment(razorpayOrderId, razorpayPaymentId, razorpaySignature, addressId, couponCode = '') {
-  console.log('✅ Verifying payment with signature');
+  console.log(' Verifying payment with signature');
 
   Swal.fire({
     title: 'Verifying Payment...',
@@ -3159,7 +3146,7 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
     Swal.close();
     
     const amountText = document.getElementById('totalAmount')?.textContent || '₹0';
-    // ✅ FIXED: Only go to orderFailure on actual failure
+   
     window.location.href = `/orderFailure?transactionId=N/A&errorReason=${encodeURIComponent(err.message)}&paymentMethod=Card&amount=${encodeURIComponent(amountText)}&orderId=N/A`;
   }
 }
@@ -3167,7 +3154,7 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
 
 
   async function handleCODPayment(addressId, couponCode = '') {
-  // Check if order amount exceeds ₹2000
+
   const amountText = document.getElementById('totalAmount')?.textContent || '0';
   const totalAmount = parseFloat(amountText.replace(/[₹$,]/g, ''));
 
@@ -3376,7 +3363,7 @@ async function handleRazorpayPayment(addressId, couponCode = '') {
   // ============================================
 
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Coupon script loaded');
+    console.log(' Coupon script loaded');
 
     function initPrices() {
       const priceRows = document.querySelectorAll('.price-row');
@@ -3447,7 +3434,7 @@ function updateDisplay() {
       const removeBtnContainer = document.getElementById('removeCouponContainer');
 
       if (priceState.appliedCoupon) {
-        // Coupon is applied
+       
         if (couponInput) couponInput.style.display = 'none';
         if (applyBtn) applyBtn.style.display = 'none';
         
@@ -3704,12 +3691,12 @@ function updateDisplay() {
   }
 
   listElem.innerHTML = couponModalData.coupons.map(coupon => {
-    // Determine discount display
+    
     const discountDisplay = coupon.discountType === 'percentage' 
       ? `${coupon.discountValue}%` 
       : `₹${coupon.discountValue}`;
     
-    // Determine if button should be disabled
+    
     const isDisabled = coupon.status !== 'active' || coupon.userHasUsed;
     const buttonText = coupon.userHasUsed ? 'Already Used' : (coupon.status !== 'active' ? 'Not Available' : '✓ USE');
 
@@ -3794,7 +3781,7 @@ function updateDisplay() {
   if (couponInput) {
     couponInput.value = code;
     
-    // Trigger apply button click
+    
     const applyBtn = document.getElementById('applyBtn');
     if (applyBtn) {
       setTimeout(() => applyBtn.click(), 100);
@@ -3830,7 +3817,7 @@ function updateDisplay() {
 
  // Initialize modal on page load
  document.addEventListener('DOMContentLoaded', function() {
-  // Close modal on backdrop click
+  
   const modal = document.getElementById('couponModal');
   if (modal) {
     modal.addEventListener('click', (e) => {
@@ -3839,8 +3826,7 @@ function updateDisplay() {
       }
     });
   }
-
-  // Update view coupon link to open modal instead of redirect
+ 
   const viewCouponLink = document.querySelector('.coupon-view-link a');
   if (viewCouponLink) {
     viewCouponLink.addEventListener('click', (e) => {
@@ -3851,7 +3837,7 @@ function updateDisplay() {
  });
 
 
- // Frontend Payment Flow - Update your checkout.html/checkout.js
+
 
 // ======================== CHECKOUT PAGE FLOW ========================
 
@@ -3873,7 +3859,6 @@ async function handleCheckoutSubmit() {
       return;
     }
 
-    // ✅ STEP 1: Send checkout data to server (validates and stores in session)
     const checkoutResponse = await fetch('/order/place', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -3892,7 +3877,7 @@ async function handleCheckoutSubmit() {
     }
 
     const checkoutData = await checkoutResponse.json();
-    console.log('✅ Checkout validated:', checkoutData);
+    console.log(' Checkout validated:', checkoutData);
 
     // Proceed based on payment method
     if (paymentMethod === 'razorpay') {
@@ -3906,7 +3891,7 @@ async function handleCheckoutSubmit() {
     }
 
   } catch (error) {
-    console.error('❌ Checkout error:', error);
+    console.error(' Checkout error:', error);
     Swal.fire('Error', error.message, 'error');
   }
 }
@@ -3929,7 +3914,7 @@ async function initiateRazorpayPayment() {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}) // ok — server will use session.checkoutData
+      body: JSON.stringify({}) 
     });
 
     if (!resp.ok) {
@@ -3947,13 +3932,13 @@ async function initiateRazorpayPayment() {
     openRazorpayModal(orderData);
 
   } catch (error) {
-    console.error('❌ Error initiating payment:', error);
+    console.error(' Error initiating payment:', error);
     Swal.fire('Error', error.message || 'Failed to initiate payment', 'error');
   }
 }
 
 function openRazorpayModal(orderData) {
-  console.log('🎯 Opening Razorpay modal');
+  console.log(' Opening Razorpay modal');
 
   const options = {
     key: orderData.keyId,
@@ -3965,7 +3950,7 @@ function openRazorpayModal(orderData) {
     
     // Success Handler
     handler: async (response) => {
-      console.log('✅ Payment successful! Verifying...');
+      console.log(' Payment successful! Verifying...');
       await verifyPayment(
         response.razorpay_order_id,
         response.razorpay_payment_id,
@@ -3976,9 +3961,9 @@ function openRazorpayModal(orderData) {
     theme: { color: '#22c55e' },
 
     modal: {
-      // ✅ FIX IS HERE: Handle User Closing the Popup
+      
       ondismiss: async () => {
-        console.log('⚠️ User closed payment modal');
+        console.log('⚠ User closed payment modal');
         
         // 1. Show loading while we save the failed order
         Swal.fire({
@@ -4006,11 +3991,11 @@ function openRazorpayModal(orderData) {
           
           Swal.close();
 
-          // 3. ✅ REDIRECT USING THE ORDER ID FROM BACKEND
+        
           if (data.success && data.orderId) {
              window.location.href = `/orderFailure?orderId=${data.orderId}`;
           } else {
-             // Fallback only if backend didn't return an ID
+            
              console.error("No orderId returned from failure endpoint");
              window.location.href = `/orderFailure?error=PaymentCancelled`;
           }
@@ -4027,7 +4012,7 @@ function openRazorpayModal(orderData) {
 
   // Handle Bank Declines / Network Failures
   rzp.on('payment.failed', async (response) => {
-    console.log('❌ Payment failed event:', response.error);
+    console.log(' Payment failed event:', response.error);
     await handlePaymentFailure(response.error);
   });
 
@@ -4037,7 +4022,7 @@ function openRazorpayModal(orderData) {
 // ======================== VERIFY PAYMENT ========================
 
 async function verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignature) {
-  console.log('🔐 Step 3: Verifying payment');
+  console.log(' Step 3: Verifying payment');
 
   Swal.fire({
     title: 'Verifying Payment...',
@@ -4047,7 +4032,7 @@ async function verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignatu
   });
 
   try {
-    // ✅ STEP 3: Verify payment and create order in database
+   
     const verifyResponse = await fetch('/payment/verify-razorpay-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -4060,10 +4045,10 @@ async function verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignatu
     });
 
     const verifyData = await verifyResponse.json();
-    console.log('📥 Verification response:', verifyData);
+   
 
     if (verifyData.success) {
-      console.log('✅ Payment verified successfully!');
+      console.log(' Payment verified successfully!');
       Swal.fire({
         icon: 'success',
         title: 'Payment Successful!',
@@ -4072,7 +4057,7 @@ async function verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignatu
         confirmButtonColor: '#22c55e',
         allowOutsideClick: false
       }).then(() => {
-        // ✅ Redirect to order success
+        
         window.location.href = `/orderSuccess?orderId=${verifyData.orderId}`;
       });
     } else {
@@ -4080,7 +4065,7 @@ async function verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignatu
     }
 
   } catch (error) {
-    console.error('❌ Verification error:', error);
+    console.error(' Verification error:', error);
     Swal.fire({
       icon: 'error',
       title: 'Verification Failed',
@@ -4093,7 +4078,7 @@ async function verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignatu
 // ======================== HANDLE PAYMENT FAILURE ========================
 
 async function handlePaymentFailure(error) {
-  console.log('❌ Step 4: Handling payment failure');
+  console.log(' Step 4: Handling payment failure');
 
   try {
     // Record failure in database
@@ -4109,7 +4094,7 @@ async function handlePaymentFailure(error) {
     });
 
     const failureData = await failureResponse.json();
-    console.log('✅ Failure recorded. Order ID:', failureData.orderId);
+    console.log(' Failure recorded. Order ID:', failureData.orderId);
 
     // Show failure page
     window.location.href = `/orderFailure?orderId=${failureData.orderId}&error=${error.code}`;
@@ -4176,7 +4161,7 @@ async function loadOrders() {
 // ======================== RETRY FAILED ORDER PAYMENT ========================
 
 async function retryFailedOrder(orderId) {
-  console.log('🔄 Retrying payment for order:', orderId);
+  console.log(' Retrying payment for order:', orderId);
 
   try {
     Swal.fire({
@@ -4195,15 +4180,15 @@ async function retryFailedOrder(orderId) {
     });
 
     const retryData = await retryResponse.json();
-    console.log('✅ Order prepared for retry');
+    
 
     Swal.close();
     
-    // Initiate payment again
+    
     await initiateRazorpayPayment();
 
   } catch (error) {
-    console.error('❌ Retry error:', error);
+    console.error(' Retry error:', error);
     Swal.fire('Error', error.message, 'error');
   }
 }
@@ -4211,17 +4196,12 @@ async function retryFailedOrder(orderId) {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Check if dark mode is saved in localStorage
+    
     const savedTheme = localStorage.getItem('sentique-theme');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-mode');
     }
-
-    // 2. Listen for dark mode changes from header
-    // (When user toggles theme in header, body class changes)
-    // This will automatically apply to checkout page too
-    
-    // Optional: Force dark mode on page load if header set it
+  
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {

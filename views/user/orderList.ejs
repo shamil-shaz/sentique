@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Orders - <%= customerName %></title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>My Orders - <%= customerName %></title>
 
-    <style>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet">
+
+        <style>
         /* ================= VARIABLES ================= */
         :root {
             --bg-body: #FAF9F6;
@@ -112,10 +115,10 @@
             background: #F3F4F6; color: #374151; 
         }
 
-        .status-placed { background: #DBEAFE; color: #1E40AF; }         /* Blue */
-        .status-processing { background: #FFEDD5; color: #C2410C; }    /* Orange */
-        .status-delivered { background: #D1FAE5; color: #047857; }     /* Green */
-        .status-cancelled { background: #FEE2E2; color: #B91C1C; }     /* Red */
+        .status-placed { background: #DBEAFE; color: #1E40AF; }         
+        .status-processing { background: #FFEDD5; color: #C2410C; }    
+        .status-delivered { background: #D1FAE5; color: #047857; }     
+        .status-cancelled { background: #FEE2E2; color: #B91C1C; }     
         .status-payment-failed { background: var(--alert-bg); color: var(--alert-text); border: 1px solid var(--alert-border); }
 
         /* Footer */
@@ -150,13 +153,13 @@
             .filter-dropdown, .clear-filters { width: 100%; text-align: center; }
         }
 
-        /* ✅ MOBILE IMAGE FIX */
+      
         @media (max-width: 480px) {
             .order-header { flex-direction: column; align-items: flex-start; gap: 12px; }
             
             .product-item { 
                 display: grid; 
-                grid-template-columns: 60px 1fr; /* Image takes 60px, text takes rest */
+                grid-template-columns: 60px 1fr; 
                 gap: 12px; 
                 padding: 12px; 
                 align-items: start;
@@ -184,157 +187,206 @@
             .retry-payment-btn { width: 100%; }
         }
     </style>
-</head>
+    </head>
 
-<body>
-    <%- include('../../views/partials/user/header') %>
-   
-    <div class="container">
-        <div class="page-header">
-            <div class="breadcrumb">
-                <a href="/">Home</a> <span>/</span> <a href="/account">Account</a> <span>/</span> <span>Orders</span>
-            </div>
-            <h1 class="page-title">My Orders</h1>
-            <div class="welcome-text">Welcome back, <span><%= customerName %></span></div>
-        </div>
+    <body>
+        <%- include('../../views/partials/user/header') %>
 
-        <div class="controls-wrapper">
-            <form action="" method="GET" class="controls-bar" id="filterForm">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" name="search" id="searchInput" placeholder="Search orders..." value="<%= currentSearch || '' %>" onkeyup="clientSideSearch()">
+        <div class="container">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="/">Home</a> <span>/</span> <a
+                        href="/account">Account</a> <span>/</span>
+                    <span>Orders</span>
                 </div>
-                
-                <select name="status" class="filter-dropdown" onchange="this.form.submit()">
-                    <option value="" <%= currentStatus === '' ? 'selected' : '' %>>All Statuses</option>
-                    <option value="Placed" <%= currentStatus === 'Placed' ? 'selected' : '' %>>Placed</option>
-                    <option value="Processing" <%= currentStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
-                    <option value="Delivered" <%= currentStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                    <option value="Cancelled" <%= currentStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                    <option value="Payment Failed" <%= currentStatus === 'Payment Failed' ? 'selected' : '' %>>Payment Failed</option>
-                </select>
+                <h1 class="page-title">My Orders</h1>
+                <div class="welcome-text">Welcome back, <span><%= customerName
+                        %></span></div>
+            </div>
 
-                <select name="time" class="filter-dropdown" onchange="this.form.submit()">
-                    <option value="" <%= currentTime === '' ? 'selected' : '' %>>All Time</option>
-                    <option value="last30days" <%= currentTime === 'last30days' ? 'selected' : '' %>>Last 30 Days</option>
-                    <option value="last6months" <%= currentTime === 'last6months' ? 'selected' : '' %>>Last 6 Months</option>
-                </select>
+            <div class="controls-wrapper">
+                <form action method="GET" class="controls-bar" id="filterForm">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" name="search" id="searchInput"
+                            placeholder="Search orders..."
+                            value="<%= currentSearch || '' %>"
+                            onkeyup="clientSideSearch()">
+                    </div>
 
-                <button type="button" class="clear-filters" onclick="window.location.href=window.location.pathname">Clear</button>
-            </form>
-        </div>
-        
-        <div id="filterCountMsg" class="filter-msg"></div>
+                    <select name="status" class="filter-dropdown"
+                        onchange="this.form.submit()">
+                        <option value <%=currentStatus === '' ? 'selected' : ''
+                            %>>All Statuses</option>
+                        <option value="Placed" <%=currentStatus === 'Placed' ?
+                            'selected' : '' %>>Placed</option>
+                        <option value="Processing" <%=currentStatus ===
+                            'Processing' ? 'selected' : ''
+                            %>>Processing</option>
+                        <option value="Delivered" <%=currentStatus ===
+                            'Delivered' ? 'selected' : '' %>>Delivered</option>
+                        <option value="Cancelled" <%=currentStatus ===
+                            'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        <option value="Payment Failed" <%=currentStatus ===
+                            'Payment Failed' ? 'selected' : '' %>>Payment
+                            Failed</option>
+                    </select>
 
-     
+                    <select name="time" class="filter-dropdown"
+                        onchange="this.form.submit()">
+                        <option value <%=currentTime === '' ? 'selected' : ''
+                            %>>All Time</option>
+                        <option value="last30days" <%=currentTime ===
+                            'last30days' ? 'selected' : '' %>>Last 30
+                            Days</option>
+                        <option value="last6months" <%=currentTime ===
+                            'last6months' ? 'selected' : '' %>>Last 6
+                            Months</option>
+                    </select>
 
-        <div class="orders-layout">
-            <%- include('../partials/user/profile-sidebar.ejs', { user: user, activePage: 'orders' }) %>
+                    <button type="button" class="clear-filters"
+                        onclick="window.location.href=window.location.pathname">Clear</button>
+                </form>
+            </div>
 
-            <div class="orders-list">
-                <% if (orders && orders.length > 0) { %>
+            <div id="filterCountMsg" class="filter-msg"></div>
+
+            <div class="orders-layout">
+                <%- include('../partials/user/profile-sidebar.ejs', { user:
+                user, activePage: 'orders' }) %>
+
+                <div class="orders-list">
+                    <% if (orders && orders.length > 0) { %>
                     <% orders.forEach(order => { %>
-                        <div class="order-card" 
-                             data-order-id="<%= order.orderId.toLowerCase() %>" 
-                             data-product-names="<%= order.orderItems.map(i => i.productName.toLowerCase()).join(' ') %>">
-                            
-                            <div class="order-header">
-                                <div>
-                                    <span class="order-info-label">Placed On</span>
-                                    <div class="order-info-value">
-                                        <%= new Date(order.createdOn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
-                                    </div>
-                                </div>
-                                <div>
-                                    <span class="order-info-label">Order ID</span>
-                                    <div class="order-info-value order-id">#<%= order.orderId %></div>
-                                </div>
-                                <div>
-                                    <% if (order.status === 'Payment Failed') { %>
-                                        <button onclick="retryFailedPayment('<%= order.orderId %>')" class="retry-payment-btn">Retry</button>
-                                    <% } else { %>
-                                        <a href="/orderDetails/<%= order.orderId %>" class="view-details-btn">View Details →</a>
-                                    <% } %>
+                    <div class="order-card"
+                        data-order-id="<%= order.orderId.toLowerCase() %>"
+                        data-product-names="<%= order.orderItems.map(i => i.productName.toLowerCase()).join(' ') %>">
+
+                        <div class="order-header">
+                            <div>
+                                <span class="order-info-label">Placed On</span>
+                                <div class="order-info-value">
+                                    <%= new
+                                    Date(order.createdOn).toLocaleDateString('en-IN',
+                                    { day: 'numeric', month: 'short', year:
+                                    'numeric' }) %>
                                 </div>
                             </div>
-
-                            <% if (order.status === 'Payment Failed') { %>
-                                <div class="payment-failed-alert">
-                                    ⚠️ Payment Failed: <%= order.paymentFailureReason || 'Transaction incomplete.' %>
-                                </div>
-                            <% } %>
-
-                            <div class="order-products">
-                                <% order.orderItems.forEach(item => { %>
-                                    <div class="product-item">
-                                        <img src="<%= item.productImage %>" alt="Product" class="product-image">
-                                        
-                                        <div class="product-details">
-                                            <div class="product-name"><%= item.productName %></div>
-                                            <div class="product-meta">
-                                                <% if (item.variantSize) { %>Size: <%= item.variantSize %> | <% } %>
-                                                Qty: <%= item.quantity %>
-                                            </div>
-                                        </div>
-
-                                        <div class="product-status-block" style="text-align:right">
-                                            <div class="product-price">₹<%= item.price.toLocaleString() %></div>
-                                            <span class="status-badge status-<%= item.displayStatus.toLowerCase().replace(/\s+/g, '-') %>">
-                                                <%= item.displayStatus %>
-                                            </span>
-                                        </div>
-                                    </div>
-                                <% }); %>
+                            <div>
+                                <span class="order-info-label">Order ID</span>
+                                <div class="order-info-value order-id">#<%=
+                                    order.orderId %></div>
                             </div>
-
-                            <div class="order-footer">
-                                <span class="order-info-label">Total Amount</span>
-                                <span class="total-amount">₹<%= (order.dynamicTotal || 0).toLocaleString() %></span>
+                            <div>
+                                <% if (order.status === 'Payment Failed') { %>
+                                <button
+                                    onclick="retryFailedPayment('<%= order.orderId %>')"
+                                    class="retry-payment-btn">Retry</button>
+                                <% } else { %>
+                                <a href="/orderDetails/<%= order.orderId %>"
+                                    class="view-details-btn">View Details →</a>
+                                <% } %>
                             </div>
                         </div>
-                    <% }); %>
-                <% } else { %>
-                    <div class="empty-state">
-                        <h3 style="font-size:20px; font-weight:700;">No Orders Found</h3>
-                        <p style="color:var(--text-secondary);">Try adjusting your filters.</p>
-                        <button onclick="window.location.href=window.location.pathname" class="retry-payment-btn" style="background:var(--text-main); display:inline-block; margin-top:10px;">Clear Filters</button>
-                    </div>
-                <% } %>
-            </div>
-        </div>
 
-        <% if (totalPages > 1) { %>
+                        <% if (order.status === 'Payment Failed') { %>
+                        <div class="payment-failed-alert">
+                            ⚠️ Payment Failed: <%= order.paymentFailureReason ||
+                            'Transaction incomplete.' %>
+                        </div>
+                        <% } %>
+
+                        <div class="order-products">
+                            <% order.orderItems.forEach(item => { %>
+                            <div class="product-item">
+                                <img src="<%= item.productImage %>"
+                                    alt="Product" class="product-image">
+
+                                <div class="product-details">
+                                    <div class="product-name"><%=
+                                        item.productName %></div>
+                                    <div class="product-meta">
+                                        <% if (item.variantSize) { %>Size: <%=
+                                        item.variantSize %> | <% } %>
+                                        Qty: <%= item.quantity %>
+                                    </div>
+                                </div>
+
+                                <div class="product-status-block"
+                                    style="text-align:right">
+                                    <div class="product-price">₹<%=
+                                        item.price.toLocaleString() %></div>
+                                    <span
+                                        class="status-badge status-<%= item.displayStatus.toLowerCase().replace(/\s+/g, '-') %>">
+                                        <%= item.displayStatus %>
+                                    </span>
+                                </div>
+                            </div>
+                            <% }); %>
+                        </div>
+
+                        <div class="order-footer">
+                            <span class="order-info-label">Total Amount</span>
+                            <span class="total-amount">₹<%= (order.dynamicTotal
+                                || 0).toLocaleString() %></span>
+                        </div>
+                    </div>
+                    <% }); %>
+                    <% } else { %>
+                    <div class="empty-state">
+                        <h3 style="font-size:20px; font-weight:700;">No Orders
+                            Found</h3>
+                        <p style="color:var(--text-secondary);">Try adjusting
+                            your filters.</p>
+                        <button
+                            onclick="window.location.href=window.location.pathname"
+                            class="retry-payment-btn"
+                            style="background:var(--text-main); display:inline-block; margin-top:10px;">Clear
+                            Filters</button>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <% if (totalPages > 1) { %>
             <div class="pagination-container" id="paginationContainer">
                 <div class="pagination">
                     <% if (currentPage > 1) { %>
-                        <a href="?page=<%= currentPage - 1 %>&status=<%= currentStatus %>&time=<%= currentTime %>" class="pagination-btn">‹</a>
+                    <a
+                        href="?page=<%= currentPage - 1 %>&status=<%= currentStatus %>&time=<%= currentTime %>"
+                        class="pagination-btn">‹</a>
                     <% } else { %>
-                        <span class="pagination-btn disabled">‹</span>
+                    <span class="pagination-btn disabled">‹</span>
                     <% } %>
 
                     <% for (let i = 1; i <= totalPages; i++) { %>
-                        <% if (i === currentPage) { %>
-                            <span class="pagination-btn active"><%= i %></span>
-                        <% } else { %>
-                            <a href="?page=<%= i %>&status=<%= currentStatus %>&time=<%= currentTime %>" class="pagination-btn"><%= i %></a>
-                        <% } %>
+                    <% if (i === currentPage) { %>
+                    <span class="pagination-btn active"><%= i %></span>
+                    <% } else { %>
+                    <a
+                        href="?page=<%= i %>&status=<%= currentStatus %>&time=<%= currentTime %>"
+                        class="pagination-btn"><%= i %></a>
+                    <% } %>
                     <% } %>
 
                     <% if (currentPage < totalPages) { %>
-                        <a href="?page=<%= currentPage + 1 %>&status=<%= currentStatus %>&time=<%= currentTime %>" class="pagination-btn">›</a>
+                    <a
+                        href="?page=<%= currentPage + 1 %>&status=<%= currentStatus %>&time=<%= currentTime %>"
+                        class="pagination-btn">›</a>
                     <% } else { %>
-                        <span class="pagination-btn disabled">›</span>
+                    <span class="pagination-btn disabled">›</span>
                     <% } %>
                 </div>
             </div>
-        <% } %>
-    </div>
+            <% } %>
+        </div>
 
-    <%- include('../../views/partials/user/footer') %>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <%- include('../../views/partials/user/footer') %>
+        <script
+            src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-    <script>
+        <script>
         function toggleProfileSidebar() {
             const profileSidebar = document.querySelector('.profile-sidebar');
             profileSidebar.classList.toggle('active');
@@ -439,5 +491,5 @@
             else Swal.fire("Verification Failed", data.message, "error");
         }
     </script>
-</body>
+    </body>
 </html>

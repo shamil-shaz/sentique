@@ -81,8 +81,8 @@ const securePassword = async (password) => {
 
 const loadForgotPassword = async (req, res) => {
   try {
-    res.render("forgot-Password", { 
-        user: req.user || req.session.user || null 
+    res.render("forgot-password", {
+      user: req.user || req.session.user || null,
     });
   } catch (error) {
     res.redirect("/pageNotFound");
@@ -105,7 +105,7 @@ const handleForgotPassword = async (req, res) => {
     const otp = generateOtp();
     req.session.forgotOtp = otp;
     req.session.forgotEmail = email;
-    req.session.forgotOtpTime = Date.now(); 
+    req.session.forgotOtpTime = Date.now();
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -146,9 +146,9 @@ const loadForgotPageOtp = async (req, res) => {
     if (!req.session.forgotOtp || !req.session.forgotEmail) {
       return res.redirect("/forgot-password");
     }
-    res.render("forgotPassword-otp", { 
-        message: "", 
-        user: req.user || req.session.user || null 
+    res.render("forgotpassword-otp", {
+      message: "",
+      user: req.user || req.session.user || null,
     });
   } catch (err) {
     console.error("Error loading forgotPassword-otp:", err);
@@ -269,8 +269,8 @@ const sendForgotPasswordOtp = async (req, res) => {
 
 const loadResetPasswordPage = async (req, res) => {
   try {
-    res.render("reset-password", { 
-        user: req.user || req.session.user || null 
+    res.render("reset-password", {
+      user: req.user || req.session.user || null,
     });
   } catch (error) {
     res.redirect("/pageNotFound");
@@ -313,12 +313,11 @@ const resetPassword = async (req, res) => {
 
 const userProfile = async (req, res) => {
   try {
-    const userId = req.userId; 
-if (!userId) return res.redirect("/login");
+    const userId = req.userId;
+    if (!userId) return res.redirect("/login");
 
-const userData = await User.findById(userId);
-res.render("profile", { user: req.user || req.session.user || userData });
-
+    const userData = await User.findById(userId);
+    res.render("profile", { user: req.user || req.session.user || userData });
   } catch (err) {
     console.error(err);
     res.redirect("/pageNotFound");
@@ -500,25 +499,21 @@ const verifyOtp = async (req, res) => {
     console.log("OTP verified successfully");
 
     try {
-
-
-    if (type === "change-email") {
+      if (type === "change-email") {
         await User.findByIdAndUpdate(req.userId, { email: otpData.newEmail });
-        
+
         if (req.user) req.user.email = otpData.newEmail;
         if (req.session.user) req.session.user.email = otpData.newEmail;
-        
+
         console.log("Email updated successfully");
-
-
-      }else if (type === "change-password") {
-    const hashed = await bcrypt.hash(otpData.newPassword, 10);
-    await User.findByIdAndUpdate(req.userId, { 
-        password: hashed,
-    });
+      } else if (type === "change-password") {
+        const hashed = await bcrypt.hash(otpData.newPassword, 10);
+        await User.findByIdAndUpdate(req.userId, {
+          password: hashed,
+        });
         console.log("Password updated successfully");
       }
-delete req.session.otpData;
+      delete req.session.otpData;
 
       req.session.save((err) => {
         if (err) console.error("Session save error:", err);
@@ -528,7 +523,6 @@ delete req.session.otpData;
           message: "Update successful",
         });
       });
-
     } catch (updateError) {
       console.error("Error updating user:", updateError);
       return res.json({
@@ -722,20 +716,18 @@ const updateProfile = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-   if (req.user) {
-    
-    Object.assign(req.user, updatedUser.toObject()); 
-} else {
-    
-    req.session.user = {
-      id: updatedUser._id,
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      phone: updatedUser.phone,
-      image: updatedUser.image,
-    };
-}
+    if (req.user) {
+      Object.assign(req.user, updatedUser.toObject());
+    } else {
+      req.session.user = {
+        id: updatedUser._id,
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        image: updatedUser.image,
+      };
+    }
 
     await req.session.save();
 
@@ -754,7 +746,7 @@ const updateProfile = async (req, res) => {
 
 const getSecurityPage = async (req, res) => {
   try {
-const userId = req.userId;
+    const userId = req.userId;
     if (!userId) {
       return res.redirect("/login");
     }
@@ -765,10 +757,10 @@ const userId = req.userId;
       return res.redirect("/pageNotFound");
     }
 
-   res.render("security", { 
-    user: req.user || req.session.user || user, 
-    activePage: "security" 
-});
+    res.render("security", {
+      user: req.user || req.session.user || user,
+      activePage: "security",
+    });
   } catch (error) {
     console.error("Security page error:", error);
     res.redirect("/pageNotFound");

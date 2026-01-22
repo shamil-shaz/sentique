@@ -52,9 +52,9 @@ const getCartPage = async (req, res) => {
         blockReason = `Brand "${product.brand?.brandName}" has been temporarily blocked by admin`;
       }
 
-     const variant = product.variants?.find(
-  (v) => Number(v.size) === Number(item.variantSize)
-);
+      const variant = product.variants?.find(
+        (v) => Number(v.size) === Number(item.variantSize)
+      );
       const variantStock = variant ? variant.stock : 0;
       const productStock = product.stock || 0;
       const actualStock =
@@ -122,7 +122,7 @@ const getCartPage = async (req, res) => {
 
     res.render("cart", {
       ...responseData,
-      user: req.user || req.session.user || null 
+      user: req.user || req.session.user || null,
     });
   } catch (err) {
     console.error("Cart page error:", err);
@@ -134,9 +134,11 @@ const addToCart = async (req, res) => {
   try {
     const userId = req.userId;
     const { productId, variantSize, quantity } = req.body;
-if (!productId) {
-    return res.status(400).json({ success: false, message: "Product ID is required" });
-}
+    if (!productId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required" });
+    }
 
     console.log("Add to cart request:", {
       userId,
@@ -176,9 +178,9 @@ if (!productId) {
         .json({ success: false, message: "Product not found" });
     }
 
-   const variant = product.variants.find(
-    (v) => Number(v.size) === Number(variantSize)
-);
+    const variant = product.variants.find(
+      (v) => Number(v.size) === Number(variantSize)
+    );
     if (!variant) {
       return res
         .status(404)
@@ -204,7 +206,7 @@ if (!productId) {
     const existingItem = cart.items.find(
       (item) =>
         item.productId.toString() === productId &&
-        Number(item.variantSize) === Number(variantSize) 
+        Number(item.variantSize) === Number(variantSize)
     );
 
     if (existingItem) {
@@ -300,13 +302,13 @@ const removeFromCart = async (req, res) => {
     }
 
     const initialLength = cart.items.length;
-   cart.items = cart.items.filter(
-  (item) =>
-    !(
-      item.productId.toString() === productId &&
-      Number(item.variantSize) === Number(variantSize)
-    )
-);
+    cart.items = cart.items.filter(
+      (item) =>
+        !(
+          item.productId.toString() === productId &&
+          Number(item.variantSize) === Number(variantSize)
+        )
+    );
 
     if (cart.items.length === initialLength) {
       console.log("Item not found in cart:", { productId, variantSize });
@@ -363,8 +365,10 @@ const updateCart = async (req, res) => {
     }
 
     const product = item.productId;
-   // Force Number conversion on both sides to ensure the match works
-const variant = product.variants.find((v) => Number(v.size) === Number(varSize));
+
+    const variant = product.variants.find(
+      (v) => Number(v.size) === Number(varSize)
+    );
     const stock = variant?.stock ?? product.stock;
 
     if (stock < quantity) {

@@ -1,19 +1,17 @@
 <%- include('../../views/partials/user/header') %>
 
 <style>
-    /* =========================================
-       1. THEME VARIABLES (Premium Retail)
-       ========================================= */
+  
     :root {
-        /* Light Mode (Day) */
+       
         --bg-body: #ffffff;
-        --bg-surface: #f8f9fa;       /* Light grey for containers */
+        --bg-surface: #f8f9fa;      
         --text-main: #121212;
         --text-muted: #666666;
         --border-color: #e5e5e5;
         --hover-bg: #f0f0f0;
         
-        --brand-gold: #d4af37;       /* Standard Gold */
+        --brand-gold: #d4af37;       
         --brand-gold-hover: #b5952f;
         --btn-text: #ffffff;
         
@@ -23,26 +21,23 @@
     }
 
     body.dark-mode {
-        /* Dark Mode (Night) */
-        --bg-body: #0a0a0a;          /* Deep Black */
-        --bg-surface: #171717;       /* Rich Charcoal for cards */
-        --text-main: #ededed;        /* Soft White */
-        --text-muted: #a3a3a3;       /* Silver Grey */
-        --border-color: #2e2e2e;     /* Subtle dark border */
-        --hover-bg: #262626;         /* Slightly lighter hover */
+       
+        --bg-body: #0a0a0a;         
+        --bg-surface: #171717;       
+        --text-main: #ededed;       
+        --text-muted: #a3a3a3;       
+        --border-color: #2e2e2e;    
+        --hover-bg: #262626;         
         
-        --brand-gold: #e2c055;       /* Brighter Gold for dark mode visibility */
+        --brand-gold: #e2c055;       
         --brand-gold-hover: #d4af37;
-        --btn-text: #000000;         /* Black text on Gold button */
+        --btn-text: #000000;       
         
-        --danger: #ff6b6b;           /* Softer Red for dark mode */
+        --danger: #ff6b6b;           
         --shadow: 0 4px 20px rgba(0,0,0,0.4);
         --input-bg: #0f0f0f;
     }
 
-    /* =========================================
-       2. GLOBAL & LAYOUT
-       ========================================= */
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -78,15 +73,13 @@
         align-items: start;
     }
 
-    /* =========================================
-       3. CART ITEMS SECTION
-       ========================================= */
+
     .cart-items-section {
         background: var(--bg-surface);
         border-radius: 16px;
         box-shadow: var(--shadow);
         border: 1px solid var(--border-color);
-        overflow: hidden; /* Keeps children inside radius */
+        overflow: hidden; 
     }
 
     .cart-item {
@@ -101,13 +94,13 @@
 
     .cart-item:last-child { border-bottom: none; }
     
-    /* Unavailable States */
+   
     .cart-item.unavailable-item, 
     .cart-item.out-of-stock-qty-issue {
-        background-color: rgba(220, 53, 69, 0.08); /* Subtle red tint */
+        background-color: rgba(220, 53, 69, 0.08); 
     }
 
-    /* Images */
+    
     .product-image-wrapper {
         width: 120px;
         height: 120px;
@@ -140,15 +133,15 @@
     .variant-info { color: var(--text-muted); font-size: 0.9rem; }
     .variant-info strong { color: var(--text-main); }
 
-    /* Stock Status */
+    
     .stock-info { font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
     .stock-info i { font-size: 1rem; }
     
-    .stock-info { color: #2ecc71; } /* Green */
-    .stock-info.low-stock { color: #f1c40f; } /* Yellow */
-    .stock-info.unavailable { color: var(--danger); } /* Red */
+    .stock-info { color: #2ecc71; } 
+    .stock-info.low-stock { color: #f1c40f; } 
+    .stock-info.unavailable { color: var(--danger); } 
 
-    /* Price */
+   
     .price-info { display: flex; align-items: center; gap: 12px; margin-top: 5px; }
     
     .current-price {
@@ -162,10 +155,7 @@
         color: var(--text-muted);
         text-decoration: line-through;
     }
-
-    /* =========================================
-       4. QUANTITY CONTROLS
-       ========================================= */
+    
     .quantity-control {
         display: flex; align-items: center; gap: 0;
         margin-top: 15px;
@@ -197,13 +187,11 @@
         font-size: 1rem;
         -moz-appearance: textfield;
     }
-    /* Hide spinners */
+   
     .quantity-control input::-webkit-outer-spin-button,
     .quantity-control input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-    /* =========================================
-       5. SUMMARY & ACTIONS
-       ========================================= */
+   
     .item-actions {
         display: flex; flex-direction: column;
         align-items: flex-end; justify-content: space-between;
@@ -212,7 +200,7 @@
 
     .item-total {
         font-size: 1.3rem; font-weight: 700;
-        color: var(--brand-gold); /* Gold highlight for totals */
+        color: var(--brand-gold); 
     }
 
     .action-buttons { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
@@ -231,9 +219,7 @@
     .wishlist-button { color: var(--brand-gold); }
     .wishlist-button:hover { text-decoration: underline; }
 
-    /* =========================================
-       6. CART SIDEBAR (SUMMARY)
-       ========================================= */
+    
     .cart-summary {
         background: var(--bg-surface);
         border-radius: 16px;
@@ -265,7 +251,7 @@
     
     .summary-row:last-of-type .summary-value { color: var(--brand-gold); }
 
-    /* CHECKOUT BUTTON (Gold Theme) */
+    
     .checkout-button {
         width: 100%;
         padding: 16px;
@@ -278,7 +264,7 @@
         margin-top: 25px;
         transition: all 0.3s ease;
         text-transform: uppercase; letter-spacing: 1px;
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); /* Gold Glow */
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); 
     }
 
     .checkout-button:hover:not(:disabled) {
@@ -288,7 +274,7 @@
     }
     .checkout-button:disabled { background-color: var(--border-color); color: var(--text-muted); box-shadow: none; cursor: not-allowed; }
 
-    /* Notices */
+    
     .unavailable-notice, .blocked-notice {
         padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;
     }
@@ -298,7 +284,7 @@
     .blocked-notice strong { color: var(--danger); }
     .blocked-notice i { color: var(--danger); }
 
-    /* Empty State */
+    
     .empty-state {
         text-align: center; padding: 80px 20px;
         background: var(--bg-surface);
@@ -587,7 +573,7 @@
 <script>
   const MAX_QTY_PER_ORDER = 5;
 
-  // Real-time stock validation
+  
   async function validateAllCartStock() {
     const cartItems = document.querySelectorAll('.cart-item');
     let hasStockIssues = false;
@@ -597,7 +583,7 @@
     for (const item of cartItems) {
 
       if (item.getAttribute('data-blocked') === 'true') {
-    // Reset any existing stock warning messages if the item became blocked
+    
     const stockMessage = item.querySelector('[data-stock-message]');
     if (stockMessage) stockMessage.style.display = 'none';
     item.classList.remove('out-of-stock-qty-issue');
@@ -887,7 +873,7 @@
   }
 
   async function proceedToCheckout() {
-  // First check frontend unavailable items
+  
   const unavailableItems = document.querySelectorAll('.cart-item[data-unavailable="true"]');
   
   if (unavailableItems.length > 0) {
@@ -920,8 +906,7 @@
     });
     return;
   }
-
-  // Validate with server
+ 
   try {
     Swal.fire({
       title: 'Validating...',
@@ -958,8 +943,7 @@
       });
       return;
     }
-
-    // All valid, proceed
+  
     window.location.href = '/checkout';
 
   } catch (error) {
@@ -972,7 +956,6 @@
     });
   }
 }
-
 
   document.addEventListener('DOMContentLoaded', () => {
     const unavailableItems = document.querySelectorAll('.cart-item[data-unavailable="true"]');
