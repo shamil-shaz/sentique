@@ -23,21 +23,23 @@ const adminRouter = require("./routes/adminRouter");
       const isHttp = req.protocol === "http";
       const isProxyHttps = req.headers["x-forwarded-proto"] === "https";
 
-      const isLocalhost = req.hostname === "localhost" || req.hostname === "127.0.0.1";
+      const isLocalhost =
+        req.hostname === "localhost" || req.hostname === "127.0.0.1";
 
       if (isLocalhost) {
-    return next();
-  }
-    if (isHttp && !isProxyHttps) {
-    return res.redirect(302, "https://" + req.headers.host + req.url);
-  }
+        return next();
+      }
+      if (isHttp && !isProxyHttps) {
+        return res.redirect(302, "https://" + req.headers.host + req.url);
+      }
       next();
     });
 
     // ------- CORS ----------
+
     app.use(
       cors({
-        origin: ["https://sentique.site", "http://localhost:5173"],
+        origin: ["https://sentique.site"],
         credentials: true,
         exposedHeaders: ["Set-Cookie"],
         methods: ["GET", "POST", "PUT", "DELETE"],
@@ -73,6 +75,7 @@ const adminRouter = require("./routes/adminRouter");
     ]);
 
     // --------------- SESSION STORE ---------------
+
     const sessionStore = MongoStore.create({
       mongoUrl: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/sentique",
       ttl: 7 * 24 * 60 * 60,
@@ -83,7 +86,8 @@ const adminRouter = require("./routes/adminRouter");
     });
 
     console.log("Session store initialized successfully");
-const isProduction = process.env.NODE_ENV === "production";
+    const isProduction = process.env.NODE_ENV === "production";
+
     // --------------- USER SESSION ---------------
 
     app.use(
@@ -117,7 +121,7 @@ const isProduction = process.env.NODE_ENV === "production";
           maxAge: 7 * 24 * 60 * 60 * 1000,
           domain: isProduction ? ".sentique.site" : undefined,
           httpOnly: true,
-          sameSite: isProduction ? "none" : "lax", 
+          sameSite: isProduction ? "none" : "lax",
           secure: isProduction,
         },
       })
@@ -157,30 +161,31 @@ const isProduction = process.env.NODE_ENV === "production";
       res.locals.success_msg = req.flash("success") || [];
       res.locals.error_msg = req.flash("error") || [];
       res.locals.user = req.user || req.session.user || null;
-      req.userId = req.user?._id || req.session?.user?._id || req.session?.user?.id || null;
+      req.userId =
+        req.user?._id ||
+        req.session?.user?._id ||
+        req.session?.user?.id ||
+        null;
       next();
     });
 
-   
-app.use((req, res, next) => {
-    if (req.session) {
+    app.use((req, res, next) => {
+      if (req.session) {
         const oldRedirect = res.redirect;
         res.redirect = function (...args) {
-            
-            if (req.session && typeof req.session.save === 'function') {
-                req.session.save(() => {
-                    oldRedirect.apply(this, args);
-                });
-            } else {
-             
-                oldRedirect.apply(this, args);
-            }
+          if (req.session && typeof req.session.save === "function") {
+            req.session.save(() => {
+              oldRedirect.apply(this, args);
+            });
+          } else {
+            oldRedirect.apply(this, args);
+          }
         };
-    }
-    next();
-});
+      }
+      next();
+    });
 
-app.use("/", userRouter);
+    app.use("/", userRouter);
     app.use("/admin", adminRouter);
 
     app.use((req, res, next) => {
